@@ -31,7 +31,7 @@ export default function Contracts({ contracts }: ContractsProps) {
 
   return (
     <div className="w-full space-y-6">
-      <h4 className="font-semibold text-xl">Contracts</h4>
+      <h4 className="font-normal text-xl">Contracts</h4>
       <ul className="space-y-2 pl-6">
         {loadedContracts.map((contract, index) => {
           const chain = CHAIN_INFO[contract.chainId]
@@ -52,7 +52,7 @@ export default function Contracts({ contracts }: ContractsProps) {
       </ul>
       {loadedContracts.length >= contracts.length ? null : (
         <button
-          className="flex items-center space-x-2 text-secondary-foreground font-medium text-sm"
+          className="flex items-center space-x-2 text-secondary-foreground font-normal text-sm"
           onClick={() => {
             setLoadedContracts(
               contracts.slice(0, loadedContracts.length + loadMoreCount),

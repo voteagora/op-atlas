@@ -78,7 +78,7 @@ const ProposalBadge = ({ type }: ProposalBadgeProps) => {
     >
       <div
         className={
-          "w-[30px] h-[16px] text-xs font-medium leading-none text-center rounded-full flex items-center justify-center"
+          "w-[30px] h-[16px] text-xs font-normal leading-none text-center rounded-full flex items-center justify-center"
         }
       >
         {type.toString().charAt(0).toUpperCase() + type.toString().slice(1)}
@@ -143,7 +143,7 @@ const ProposalStatusBadge = ({ type }: ProposalStatusBadgeProps) => {
       className={`status-badge h-[24px] px-2 py-1 rounded-full flex items-center justify-center gap-1 ${badgeConfig.classes}`}
     >
       {badgeConfig.icon}
-      <div className="text-xs font-medium leading-none">{badgeConfig.text}</div>
+      <div className="text-xs font-normal leading-none">{badgeConfig.text}</div>
     </div>
   )
 }

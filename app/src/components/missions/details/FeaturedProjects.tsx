@@ -58,7 +58,7 @@ export function FeaturedProjects() {
 
   return (
     <div className="w-full flex flex-col gap-6" style={{ maxWidth: "100vw" }}>
-      <h2 className="text-xl font-semibold">Featured projects</h2>
+      <h2 className="text-xl font-normal">Featured projects</h2>
       <div
         className=""
         style={{ maxWidth: "calc(100vw - 48px)", overflowX: "clip" }}
@@ -88,7 +88,7 @@ export function FeaturedProjects() {
                 >
                   <div className="flex-1 flex flex-col justify-between">
                     <div className="flex flex-col gap-4">
-                      <h4 className="text-xl font-semibold group-hover:underline">
+                      <h4 className="text-xl font-normal group-hover:underline">
                         {project.name}
                       </h4>
                       <p className="text-secondary-foreground text-base max-w-[440px] line-clamp-4">
@@ -105,7 +105,7 @@ export function FeaturedProjects() {
                           className="w-5 h-5 rounded-full"
                         />
                       )}
-                      <span className="text-red-700 text-base font-medium">
+                      <span className="text-red-700 text-base font-normal">
                         {project.rewardAmount}
                       </span>
                     </div>

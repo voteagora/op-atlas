@@ -79,7 +79,7 @@ export const Sidebar = ({
         <Link className="w-full" href="/round/results?rounds=7,8">
           <Button
             variant="outline"
-            className="text-sm font-medium text-foreground justify-center mt-1 w-full"
+            className="text-sm font-normal text-foreground justify-center mt-1 w-full"
           >
             View recipients
           </Button>
@@ -95,7 +95,7 @@ export const Sidebar = ({
             src="/assets/images/sunnies-group.png"
           />
         </div>
-        <p className="text-sm font-medium text-text-default text-center">
+        <p className="text-sm font-normal text-text-default text-center">
           60,815,042 OP
         </p>
         <p className="text-sm font-normal text-secondary-foreground text-center">

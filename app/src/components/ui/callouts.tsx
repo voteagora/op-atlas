@@ -6,7 +6,7 @@ export const YouAreNotAdminCallout = () => {
   return (
     <div className="flex flex-row gap-2 items-center w-full text-red-600 bg-red-200 px-3 py-2 rounded-lg">
       <InformationFill className="w-5 h-5" fill="#B80018" />
-      <div className="font-medium text-sm">
+      <div className="font-normal text-sm">
         You are not an admin of this project and cannot claim this grant.
       </div>
     </div>
@@ -17,7 +17,7 @@ export const CantClaimCallout = ({ projectId }: { projectId: string }) => {
   return (
     <div className="flex flex-row gap-2 items-center w-full text-red-600 bg-red-200 px-3 py-2.5 rounded-lg">
       <InformationFill className="w-5 h-5" fill="#B80018" />
-      <div className="font-medium text-sm">
+      <div className="font-normal text-sm">
         You can&apos;t claim your tokens until you&apos;ve completed KYC for
         your{" "}
         <Link
@@ -36,7 +36,7 @@ export const UnclaimedRewardsCallout = () => {
   return (
     <div className="flex flex-row gap-2 items-center w-full text-callout-foreground bg-callout px-3 py-2.5 rounded-lg">
       <InformationFill className="w-5 h-5" fill="#0E4CAF" />
-      <div className="font-medium text-sm">
+      <div className="font-normal text-sm">
         A link to claim this grant has been sent to your email.
       </div>
     </div>
@@ -47,7 +47,7 @@ export const ScheduleClaimCallout = () => {
   return (
     <div className="flex flex-row gap-2 items-center w-full text-callout-foreground bg-callout px-3 py-2.5 rounded-lg">
       <InformationFill className="w-5 h-5" fill="#0E4CAF" />
-      <div className="font-medium text-sm">
+      <div className="font-normal text-sm">
         Optimism only releases tokens to Superfluid after the 7th and 22nd day
         of the month. Check in later to claim your tokens.
       </div>

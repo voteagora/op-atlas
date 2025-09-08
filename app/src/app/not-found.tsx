@@ -12,7 +12,7 @@ export default function NotFound() {
         height={160}
       />
 
-      <h4 className="text-black font-semibold">
+      <h4 className="text-black font-normal">
         The page you&apos;re looking for doesn&apos;t exist.
       </h4>
 

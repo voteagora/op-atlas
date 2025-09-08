@@ -139,7 +139,7 @@ export default async function Page({ params }: PageProps) {
           {!enrolledInMission && !onchainBuilderMetrics && (
             <div className="w-full h-[208px] space-y-6 rounded-xl border flex flex-col justify-center items-center p-6">
               <div className="text-center">
-                <p className="font-semibold text-base text-foreground">
+                <p className="font-normal text-base text-foreground">
                   More details about this project are coming soon
                 </p>
                 <p className="font-normal text-base text-secondary-foreground">
@@ -166,7 +166,7 @@ export default async function Page({ params }: PageProps) {
           {enrolledInMission && (
             <>
               <div className="w-full space-y-6">
-                <h4 className="font-semibold text-xl">Missions</h4>
+                <h4 className="font-normal text-xl">Missions</h4>
                 <ul className="space-y-12">
                   {enrolledInOnchainBuilders && (
                     <li>
@@ -203,7 +203,7 @@ export default async function Page({ params }: PageProps) {
               {enrolledInMission && (
                 <div className="w-full space-y-6">
                   <div className="flex items-center space-x-2 group">
-                    <h4 className="font-semibold text-xl">
+                    <h4 className="font-normal text-xl">
                       Get ready for Superchain interop
                     </h4>
                   </div>

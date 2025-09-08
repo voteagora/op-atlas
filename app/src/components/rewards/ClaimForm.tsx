@@ -123,7 +123,7 @@ function ClaimFormAddress({
         <AccordionTrigger className="justify-between">
           <div
             className={cn(
-              "flex items-center gap-1 flex-1 text-sm font-medium",
+              "flex items-center gap-1 flex-1 text-sm font-normal",
               addressError && "text-red-600",
             )}
           >
@@ -163,7 +163,7 @@ function ClaimFormAddress({
               )}
             </div>
             {addressError && (
-              <div className="text-red-600 text-sm font-medium">
+              <div className="text-red-600 text-sm font-normal">
                 {addressError}
               </div>
             )}
@@ -278,7 +278,7 @@ function ClaimFormEligibility({
     >
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between">
-          <div className="flex items-center gap-1 flex-1 text-sm font-medium">
+          <div className="flex items-center gap-1 flex-1 text-sm font-normal">
             Step 2. Submit the grant eligibility form
           </div>
           {!!reward.claim?.grantEligibilityUpdatedAt && <Completed />}
@@ -314,7 +314,7 @@ function ClaimFormEligibility({
                   Forgot something?{" "}
                   <ExternalLink
                     href={formLink!}
-                    className="text-foreground font-medium"
+                    className="text-foreground font-normal"
                   >
                     Resubmit form
                   </ExternalLink>
@@ -345,7 +345,7 @@ function ClaimFormKYC({
     >
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between">
-          <div className="flex items-center gap-1 flex-1 text-sm font-medium">
+          <div className="flex items-center gap-1 flex-1 text-sm font-normal">
             Step 3. Complete KYC
           </div>
           {(reward.claim?.status === "cleared" ||
@@ -355,7 +355,7 @@ function ClaimFormKYC({
           <div className="flex flex-col gap-6">
             <div className="text-secondary-foreground text-sm space-y-4">
               <p className="text-sm">
-                <span className="text-foreground font-medium">
+                <span className="text-foreground font-normal">
                   Each person or business identified in the grant eligibility
                   form must verify their identity:
                 </span>
@@ -413,7 +413,7 @@ function ClaimFormKYC({
             Need help?{" "}
             <ExternalLink
               href="https://share.hsforms.com/1PNoDrBhtR2CHm3HwbB577Aqoshb"
-              className="text-foreground font-medium"
+              className="text-foreground font-normal"
             >
               Contact support
             </ExternalLink>
@@ -455,7 +455,7 @@ function ClaimFormSuperfluid({
     >
       <AccordionItem value="item-1">
         <AccordionTrigger className="justify-between">
-          <div className="flex items-center gap-1 flex-1 text-sm font-medium">
+          <div className="flex items-center gap-1 flex-1 text-sm font-normal">
             Step 4. Receive your grant
           </div>
           {reward.claim?.status === "claimed" && <Completed />}

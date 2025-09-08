@@ -33,7 +33,7 @@ export function NoRewardsCallout({
           />
 
           <div>
-            <p className="font-bold">
+            <p className="font-normal">
               {"You didn't receive rewards in Retro Funding: " + roundName}
             </p>
             <p>
@@ -74,7 +74,7 @@ export function RewardsCallout({
           />
 
           <div>
-            <p className="font-bold">
+            <p className="font-normal">
               {"Congratulations! You received rewards in Retro Funding: " +
                 roundName}
             </p>
@@ -88,7 +88,7 @@ export function RewardsCallout({
         </div>
       }
       rightAlignedContent={
-        <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
+        <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-normal">
           <ChevronRight width={16} height={16} />
         </div>
       }
@@ -113,7 +113,7 @@ export function GovCandidateCallout() {
             alt="Vial"
           />
           <div className="flex flex-col mt-1">
-            <p className="text-blue-800 font-bold">
+            <p className="text-blue-800 font-normal">
               Are you a governance candidate?
             </p>
             <p className="text-blue-800">
@@ -151,7 +151,7 @@ export function BadgeholderCallout() {
         height={48}
       />
       <div className="ml-4 mr-5 flex-1">
-        <p className="font-medium">
+        <p className="font-normal">
           Calling all badgeholders! Confirm your citizenship for Governance
           Season 6
         </p>
@@ -178,7 +178,7 @@ export function DeveloperCallout() {
         height={48}
       />
       <div className="ml-4 mr-5 flex-1">
-        <p className="font-medium">
+        <p className="font-normal">
           Calling all developers! We need your vote in Retro Funding 5: OP Stack
         </p>
         <div>Apply to vote by July 31.</div>
@@ -208,7 +208,7 @@ export function SurveyCallout({ projectId }: { projectId?: string }) {
         height={48}
       />
       <div className="ml-4 mr-5 flex-1">
-        <p className="font-medium">Make Retro Funding better!</p>
+        <p className="font-normal">Make Retro Funding better!</p>
         <div>Help us improve future rounds by taking a 4 minute survey.</div>
       </div>
       <ArrowUpRight size={20} />
@@ -231,7 +231,7 @@ export function FundingRoundAnnouncementCallout() {
         height={48}
       />
       <div className="ml-4 mr-5 flex-1">
-        <p className="font-medium">
+        <p className="font-normal">
           Now taking applications for Round 6: Governance
         </p>
         <div>Apply by Oct 14th.</div>
@@ -257,7 +257,7 @@ export function ApplicationSubmittedCallout() {
         height={48}
       />
       <div className="ml-4 mr-5 flex-1">
-        <p className="font-medium">
+        <p className="font-normal">
           Your application was submitted to Retro Funding 6: Governance
         </p>
         <div>

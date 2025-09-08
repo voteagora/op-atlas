@@ -81,7 +81,7 @@ export default function RoleApplication({
       return (
         <div className="flex flex-col gap-4">
           <div className="border-t border-border-secondary"></div>
-          <div className="font-medium">About this role</div>
+          <div className="font-normal">About this role</div>
           <div className="text-secondary-foreground">
             <ReactMarkdown
               components={{
@@ -133,7 +133,7 @@ export default function RoleApplication({
 
   return (
     <div className={cn("flex flex-col gap-4 w-full", className)}>
-      <h2 className="text-xl font-medium">Governance</h2>
+      <h2 className="text-xl font-normal">Governance</h2>
 
       <div className="flex flex-col gap-6 border border-border-secondary rounded-lg p-6">
         <div className="flex flex-row gap-5">

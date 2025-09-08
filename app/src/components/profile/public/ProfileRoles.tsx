@@ -16,14 +16,14 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
 
   return (
     <div className="flex flex-col space-y-3 w-full">
-      <h2 className="text-xl font-medium">Roles</h2>
+      <h2 className="text-xl font-normal">Roles</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 justify-between">
         {filteredAttestations.map((attestation) => (
           <div
             key={attestation.id}
             className="rounded-xl border border-gray-200 p-6 bg-background group/card"
           >
-            <div className="text-md font-medium flex items-start gap-x-1">
+            <div className="text-md font-normal flex items-start gap-x-1">
               <span>{attestation.name}</span>{" "}
               <span className="relative group pt-1">
                 <CheckIconRed />

@@ -46,17 +46,17 @@ const Markdown = ({ description }: ProposalContentProps) => (
           )
         },
         h1: ({ children }) => (
-          <h1 className="text-2xl font-bold mb-2 mt-4 text-text-default">
+          <h1 className="text-2xl font-normal mb-2 mt-4 text-text-default">
             {children}
           </h1>
         ),
         h2: ({ children }) => (
-          <h2 className="text-xl font-semibold mb-2 mt-3 text-text-default">
+          <h2 className="text-xl font-normal mb-2 mt-3 text-text-default">
             {children}
           </h2>
         ),
         h3: ({ children }) => (
-          <h3 className="text-lg font-medium mb-1 mt-2 text-text-default">
+          <h3 className="text-lg font-normal mb-1 mt-2 text-text-default">
             {children}
           </h3>
         ),

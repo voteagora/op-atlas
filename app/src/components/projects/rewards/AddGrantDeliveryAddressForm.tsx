@@ -99,7 +99,7 @@ export default function AddGrantDeliveryAddressForm({
     <div className="p-6 border rounded-xl space-y-6 w-full">
       {!allTeamMembersVerified && (
         <div className="flex justify-between items-center">
-          <h4 className="font-semibold text-base">Add an address</h4>
+          <h4 className="font-normal text-base">Add an address</h4>
           <Button
             variant="secondary"
             size="sm"
@@ -160,7 +160,7 @@ export default function AddGrantDeliveryAddressForm({
                       </span>
                     </button>
                     {processCompleted && (
-                      <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
+                      <div className="px-2 py-1 bg-success text-success-foreground font-normal text-xs rounded-full flex space-x-1 items-center">
                         <CheckIcon size={12} />
                         <span>
                           Valid until {getValidUntil(kycTeam.createdAt)}
@@ -271,7 +271,7 @@ export default function AddGrantDeliveryAddressForm({
 
                   {Boolean(teamMembers?.length) && (
                     <div className="space-y-1.5">
-                      <span className="font-medium text-sm">Persons</span>
+                      <span className="font-normal text-sm">Persons</span>
                       {teamMembers?.map((teamMember, i) => (
                         <KYCEntryContainer
                           key={teamMember.id}
@@ -284,7 +284,7 @@ export default function AddGrantDeliveryAddressForm({
                   )}
                   {Boolean(entities?.length) && (
                     <div className="space-y-1.5">
-                      <span className="font-medium text-sm">Entities</span>
+                      <span className="font-normal text-sm">Entities</span>
                       {entities?.map((entity) => (
                         <KYCEntryContainer
                           key={entity.id}
@@ -355,7 +355,7 @@ function AccordionTitleContainer({
   text: string
 }) {
   return (
-    <div className="font-medium text-sm flex items-center space-x-2">
+    <div className="font-normal text-sm flex items-center space-x-2">
       {i && (
         <span className={cn([{ "w-3.5": typeof i === "number" }])}>{i}</span>
       )}
@@ -380,7 +380,7 @@ function KYCEntryContainer({
       ) : (
         <Loader2 size={14} className="animate-spin" />
       )}
-      <span className="font-medium text-sm">{name}</span>
+      <span className="font-normal text-sm">{name}</span>
       <span className="text-muted-foreground text-sm">{email}</span>
     </div>
   )

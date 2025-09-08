@@ -104,7 +104,7 @@ export const PublishForm = ({
 
         {project.snapshots.length > 0 ? (
           <div className="flex flex-col gap-2">
-            <p className="text-sm  font-medium text-foreground">Published</p>
+            <p className="text-sm  font-normal text-foreground">Published</p>
             {project.snapshots
               .slice()
               .sort((a, b) => {
@@ -125,7 +125,7 @@ export const PublishForm = ({
             variant="destructive"
             disabled={!canPublish || isPublishing}
             onClick={onPublish}
-            className="w-fit text-sm font-medium"
+            className="w-fit text-sm font-normal"
           >
             Publish
           </Button>
@@ -144,13 +144,13 @@ export const PublishForm = ({
 
         <hr className="mt-6" />
         <p className="text-base font-normal text-text-secondary ">
-          <span className="text-base font-semibold">You’re not done yet!</span>{" "}
+          <span className="text-base font-normal">You’re not done yet!</span>{" "}
           To be included in any round of Retro Funding, you must also submit a
           round-specific application.{" "}
         </p>
         <Button
           variant="secondary"
-          className="w-fit text-sm font-medium text-foreground"
+          className="w-fit text-sm font-normal text-foreground"
         >
           <Link href="/missions">View Retro Funding Rounds</Link>
         </Button>

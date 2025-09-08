@@ -31,7 +31,7 @@ const NavItem: React.FC<NavItemProps> = ({ label, targetRef }) => {
   return (
     <button
       onClick={handleClick}
-      className="justify-center text-[#636779] hover:underline text-sm font-medium leading-tight transition-colors"
+      className="justify-center text-[#636779] hover:underline text-sm font-normal leading-tight transition-colors"
     >
       {label}
     </button>
@@ -215,7 +215,7 @@ export default function Mission() {
                 <SessionRoundApplicationStatusCard />
                 {mission?.pageName === "audit-grants" && (
                   <div className="py-2.5 hidden md:block">
-                    <p className="text-secondary-foreground text-sm text-center font-medium leading-tight">
+                    <p className="text-secondary-foreground text-sm text-center font-normal leading-tight">
                       Are you an ASP?{" "}
                       <ExternalLink
                         className="text-primary underline font-normal"
@@ -230,7 +230,7 @@ export default function Mission() {
             )}
             {visibleSections.length > 0 && (
               <div className="hidden md:block">
-                <p className="font-medium text-sm mb-6 mt-6">Contents</p>
+                <p className="font-normal text-sm mb-6 mt-6">Contents</p>
                 <nav className="self-stretch px-6 border-l border-tertiary inline-flex flex-col justify-start items-start gap-3">
                   {visibleSections.map((section) => (
                     <NavItem

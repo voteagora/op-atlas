@@ -77,7 +77,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
     if (addresses.length > 0) {
       return (
         <div className="flex flex-col gap-2">
-          <div className="font-medium text-sm text-foreground">
+          <div className="font-normal text-sm text-foreground">
             Your verified addresses
           </div>
 

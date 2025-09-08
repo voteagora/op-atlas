@@ -66,7 +66,7 @@ export default function CompletedGrantDeliveryForm({
       {organizationId && (
         <div className="space-y-2">
           <div className="w-full flex justify-between items-center">
-            <span className="font-medium text-sm">Projects</span>
+            <span className="font-normal text-sm">Projects</span>
             {hasActiveStream ? (
               <div
                 className="flex items-center space-x-1 cursor-default"
@@ -118,7 +118,7 @@ export default function CompletedGrantDeliveryForm({
         items={[
           {
             title: (
-              <div className="font-medium text-secondary-foreground text-sm">
+              <div className="font-normal text-secondary-foreground text-sm">
                 Show Details
               </div>
             ),
@@ -126,7 +126,7 @@ export default function CompletedGrantDeliveryForm({
               <div className="space-y-6 mb-6">
                 {Boolean(teamMembers?.length) && (
                   <div className="space-y-1.5">
-                    <span className="font-medium text-sm text-foreground">
+                    <span className="font-normal text-sm text-foreground">
                       Verified persons
                     </span>
                     <ul className="space-y-1.5">
@@ -143,7 +143,7 @@ export default function CompletedGrantDeliveryForm({
                 )}
                 {Boolean(entities?.length) && (
                   <div className="space-y-1.5">
-                    <span className="font-medium text-sm text-foreground">
+                    <span className="font-normal text-sm text-foreground">
                       Verified entities
                     </span>
                     <ul className="space-y-1.5">
@@ -182,7 +182,7 @@ function VerifiedTeamMemberContainer({
       <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
         <User size={16} fill="#0F111A" />
       </div>
-      <span className="font-medium text-sm">{name}</span>
+      <span className="font-normal text-sm">{name}</span>
       <span className="text-muted-foreground text-sm">{email}</span>
     </div>
   )
@@ -198,7 +198,7 @@ function VerifiedEntityContainer({
   return (
     <div className="input-container space-x-2">
       {businessName && (
-        <span className="font-medium text-sm">{businessName}</span>
+        <span className="font-normal text-sm">{businessName}</span>
       )}
       <span className="text-muted-foreground text-sm">{email}</span>
     </div>

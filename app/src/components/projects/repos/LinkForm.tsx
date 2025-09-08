@@ -80,7 +80,7 @@ export const LinkForm = ({
         onClick={() => setIsRepoFormExpanded(!isFormExpanded)}
         variant="ghost"
         type="button"
-        className="!p-0 text-sm font-medium text-secondary-foreground"
+        className="!p-0 text-sm font-normal text-secondary-foreground"
       >
         {isFormExpanded ? "Hide additional inputs" : "Show additional inputs"}{" "}
         {isFormExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

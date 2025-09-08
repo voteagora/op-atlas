@@ -192,7 +192,7 @@ export const UserForm = ({
             if (requirement === "github") {
               return (
                 <div key={index} className="flex flex-col gap-6">
-                  <div className="text-xl font-semibold">
+                  <div className="text-xl font-normal">
                     Connect your GitHub account to show your code contributions
                     to the Optimism Collective
                   </div>
@@ -239,7 +239,7 @@ export const UserForm = ({
     <div className="flex flex-col gap-12 w-full text-foreground">
       {renderRequiredModules()}
       <div className="flex flex-col gap-6">
-        <div className="text-xl font-semibold">
+        <div className="text-xl font-normal">
           Confirm the following and link to any relevant projects
         </div>
         <div className="text-foreground">

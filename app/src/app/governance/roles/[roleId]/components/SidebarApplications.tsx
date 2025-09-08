@@ -16,7 +16,7 @@ export default function SidebarApplications({
 }) {
   return (
     <div className="w-full flex flex-col gap-6 border border-border-secondary rounded-lg p-6">
-      <div className="text-secondary-foreground text-sm font-semibold">
+      <div className="text-secondary-foreground text-sm font-normal">
         {applications.length} candidate{applications.length > 1 ? "s" : ""} so
         far
       </div>

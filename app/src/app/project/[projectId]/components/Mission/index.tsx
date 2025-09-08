@@ -42,13 +42,13 @@ function MissionContainer({
               <div className="flex items-center space-x-2">
                 <Link
                   href={getMissionLink(type)}
-                  className="font-semibold text-base text-foreground"
+                  className="font-normal text-base text-foreground"
                 >
                   {type === "on-chain"
                     ? "Retro Funding: Onchain Builders"
                     : "Retro Funding: Dev Tooling"}
                 </Link>
-                <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-medium">
+                <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-normal">
                   In Progress
                 </span>
               </div>

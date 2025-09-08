@@ -40,7 +40,7 @@ export function CategoryDefinitions() {
     <div className="flex flex-col gap-4 py-4 text-secondary-foreground">
       {DEFINITIONS.map((def) => (
         <div key={def.category}>
-          <span className="font-medium">{def.category}: </span>
+          <span className="font-normal">{def.category}: </span>
           <span>{def.value}</span>
         </div>
       ))}

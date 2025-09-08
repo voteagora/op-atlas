@@ -79,7 +79,7 @@ export function HowItWorks() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-semibold">How it works</h2>
+      <h2 className="text-xl font-normal">How it works</h2>
       <div
         className="w-full"
         style={{ maxWidth: "calc(100vw - 48px)", overflowX: "clip" }}
@@ -101,7 +101,7 @@ export function HowItWorks() {
                     <h1 className="text-callout-foreground text-4xl font-extrabold">
                       {step.number}
                     </h1>
-                    <p className="text-base font-medium">{step.title}</p>
+                    <p className="text-base font-normal">{step.title}</p>
                     {step.description && (
                       <p className="text-secondary-foreground text-base">
                         {step.description}

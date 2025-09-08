@@ -24,7 +24,7 @@ const RenderStats = ({
       <div className="inline-flex justify-center items-center gap-2">
         <NumberTicker
           value={title}
-          className="justify-start text-text-foreground text-2xl font-semibold"
+          className="justify-start text-text-foreground text-2xl font-normal"
         />
       </div>
       <div className="inline-flex justify-center items-center gap-1.5">

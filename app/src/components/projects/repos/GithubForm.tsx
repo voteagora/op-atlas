@@ -91,7 +91,7 @@ export const GithubForm = ({
                     <div className="relative">
                       {isVerified ? (
                         <>
-                          <div className="flex gap-2 h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 items-center">
+                          <div className="flex gap-2 h-10 w-full rounded-md border border-input bg-background text-foreground px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-normal placeholder:text-muted-foreground focus-visible:outline-none  focus-visible:ring-0 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 items-center">
                             <div className="flex items-center justify-center w-6 h-6">
                               <Check width={20} height={20} />
                             </div>
@@ -123,7 +123,7 @@ export const GithubForm = ({
                                   className="w-3 h-3"
                                 />
 
-                                <p className="text-xs font-medium">NPM</p>
+                                <p className="text-xs font-normal">NPM</p>
                               </div>
                             )}
                             {isCrate && (
@@ -133,7 +133,7 @@ export const GithubForm = ({
                                   alt="rust"
                                   className="w-3 h-3"
                                 />
-                                <p className="text-xs font-medium">Crate</p>
+                                <p className="text-xs font-normal">Crate</p>
                               </div>
                             )}
 
@@ -144,7 +144,7 @@ export const GithubForm = ({
                                   alt="oss"
                                   className="w-3 h-3"
                                 />
-                                <p className="text-xs font-medium">
+                                <p className="text-xs font-normal">
                                   Open source
                                 </p>
                               </div>
@@ -153,7 +153,7 @@ export const GithubForm = ({
                             {containsContracts && (
                               <div className="flex items-center gap-1 h-6 py-1 px-2 bg-secondary rounded-full">
                                 <Check size={12} />
-                                <p className="text-xs font-medium">
+                                <p className="text-xs font-normal">
                                   Contains contracts
                                 </p>
                               </div>
@@ -220,7 +220,7 @@ export const GithubForm = ({
                 )}
               />
 
-              <p className="text-sm font-medium">
+              <p className="text-sm font-normal">
                 This repo contains contract code
               </p>
             </div>
@@ -266,7 +266,7 @@ export const GithubForm = ({
         onClick={() => setIsRepoFormExpanded(!isFormExpanded)}
         variant="ghost"
         type="button"
-        className="!p-0 text-sm font-medium text-secondary-foreground"
+        className="!p-0 text-sm font-normal text-secondary-foreground"
       >
         {isFormExpanded ? "Hide additional inputs" : "Show additional inputs"}{" "}
         {isFormExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

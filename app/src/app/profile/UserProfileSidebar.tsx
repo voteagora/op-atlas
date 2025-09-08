@@ -34,7 +34,7 @@ export function UserProfileSidebar({
         isLoading={dashboardLoading}
         onClick={handleGoBack}
         variant="ghost"
-        className="text-sm font-medium text-secondary-foreground !p-0 justify-start"
+        className="text-sm font-normal text-secondary-foreground !p-0 justify-start"
       >
         Your profile
         <Image
@@ -46,7 +46,7 @@ export function UserProfileSidebar({
         />
       </Button>
       <div>
-        <div className="py-1.5 border-b border-border text-sm font-semibold text-foreground">
+        <div className="py-1.5 border-b border-border text-sm font-normal text-foreground">
           Settings
         </div>
         <div className="flex flex-col gap-0.5 text-secondary-foreground text-sm">
@@ -104,7 +104,7 @@ export function UserProfileSidebar({
         </div>
       </div>
       <div>
-        <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
+        <div className="py-2.5 border-b border-border text-sm font-normal text-foreground">
           Organizations
         </div>
         <ul className="text-sm space-y-1.5 py-3.5">
@@ -120,7 +120,7 @@ export function UserProfileSidebar({
                   href={`/profile/organizations/${organization.id}`}
                   className={cn([
                     "text-secondary-foreground font-normal space-x-2",
-                    { "text-foreground font-medium": isLinkActive },
+                    { "text-foreground font-normal": isLinkActive },
                   ])}
                 >
                   <span
@@ -138,7 +138,7 @@ export function UserProfileSidebar({
                   className={cn([
                     "text-secondary-foreground font-normal space-x-2 pl-4",
                     {
-                      "text-foreground font-medium": isGrantAddressActive,
+                      "text-foreground font-normal": isGrantAddressActive,
                     },
                   ])}
                 >

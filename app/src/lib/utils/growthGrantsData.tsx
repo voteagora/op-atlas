@@ -57,7 +57,7 @@ export const growthGrantsData: MissionData = {
               </li>
             </ul>
             <p className="mt-6 text-secondary-foreground">
-              <span className="font-medium text-foreground">
+              <span className="font-normal text-foreground">
                 Why this metric?
               </span>{" "}
               <ExternalLink
@@ -99,7 +99,7 @@ export const growthGrantsData: MissionData = {
               </li>
             </ul>
             <p className="mt-6 text-secondary-foreground">
-              <span className="font-medium text-foreground">
+              <span className="font-normal text-foreground">
                 Why this metric?
               </span>{" "}
               The total fees spent on interoperable transactions maps to usage

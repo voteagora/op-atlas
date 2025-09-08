@@ -41,7 +41,7 @@ const ApplicationProjectImpactForm = ({
   return (
     <div className="flex flex-col gap-y-12">
       <div className="flex flex-col gap-y-6">
-        <h4 className="text-xl font-semibold">
+        <h4 className="text-xl font-normal">
           Choose projects and add impact statements
         </h4>
         <p className="text-secondary-foreground">

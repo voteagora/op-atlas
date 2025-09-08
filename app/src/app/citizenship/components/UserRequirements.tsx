@@ -45,7 +45,7 @@ export const UserRequirements = ({
       return (
         <ConditionRow isMet={true}>
           You&apos;ve added email in Atlas:{" "}
-          <span className="font-semibold">{email.email}</span> |{" "}
+          <span className="font-normal">{email.email}</span> |{" "}
           <button
             type="button"
             className={LINK_STYLE}
@@ -79,7 +79,7 @@ export const UserRequirements = ({
       return (
         <ConditionRow isMet={true}>
           You&apos;ve added a governance address in Atlas:{" "}
-          <span className="font-semibold">
+          <span className="font-normal">
             {truncateAddress(govAddress.address as string)}
           </span>{" "}
           |{" "}
@@ -136,7 +136,7 @@ export const UserRequirements = ({
       return (
         <ConditionRow isMet={true}>
           You&apos;ve connected your GitHub account in Atlas:{" "}
-          <span className="font-semibold">@{user?.github}</span> |{" "}
+          <span className="font-normal">@{user?.github}</span> |{" "}
           <button
             type="button"
             className={LINK_STYLE}
@@ -222,7 +222,7 @@ export const UserRequirements = ({
           </Link>{" "}
           found, and your score is {Number(passport?.score).toFixed(2)}
           {"! "}
-          <span className="font-semibold">
+          <span className="font-normal">
             {truncateAddress(passport?.address as string)}
           </span>
         </ConditionRow>
@@ -358,9 +358,9 @@ export const UserRequirements = ({
   const renderEligibility = () => {
     return (
       <div className="flex flex-col gap-6">
-        <div className="font-semibold text-xl">Eligibility</div>
+        <div className="font-normal text-xl">Eligibility</div>
         <div>
-          <div className="font-semibold">Onchain activity</div>
+          <div className="font-normal">Onchain activity</div>
           <div>
             One of your verified addresses must meet these criteria.{" "}
             <Link href="/profile/verified-addresses" className={LINK_STYLE}>
@@ -386,15 +386,15 @@ export const UserRequirements = ({
     <div className="flex flex-col gap-6">
       {renderEligibility()}
 
-      <div className="font-semibold text-xl text-foreground">Requirements</div>
-      <div className="font-semibold text-foreground">Atlas Profile</div>
+      <div className="font-normal text-xl text-foreground">Requirements</div>
+      <div className="font-normal text-foreground">Atlas Profile</div>
       <div className="text-secondary-foreground">
         {renderGithub()}
         {renderEmail()}
         {renderAddress()}
       </div>
       <div className="text-secondary-foreground">
-        <div className="font-semibold text-foreground">Proof of personhood</div>
+        <div className="font-normal text-foreground">Proof of personhood</div>
         <div className="text-secondary-foreground">
           Complete at least one of these options.
         </div>

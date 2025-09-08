@@ -42,7 +42,7 @@ const RenderSuperChainInfo = (props: DialogProps<object>) => {
             <div className="self-stretch flex flex-col justify-start items-center gap-2">
               <div
                 className={cn(
-                  "self-stretch text-center justify-center text-[#0f111a] text-xl font-semibold leading-7",
+                  "self-stretch text-center justify-center text-[#0f111a] text-xl font-normal leading-7",
                 )}
               >
                 19 chains are eligible for rewards with more coming soon
@@ -59,7 +59,7 @@ const RenderSuperChainInfo = (props: DialogProps<object>) => {
               href="https://www.superchain.eco/chains"
               className="self-stretch px-6 py-2.5 bg-[#ff0420] rounded-md inline-flex justify-center items-center gap-2"
             >
-              <div className="justify-start text-[#fbfcfe] text-base font-medium leading-normal">
+              <div className="justify-start text-[#fbfcfe] text-base font-normal leading-normal">
                 View the Superchain Index
               </div>
             </ExternalLink>
@@ -74,7 +74,7 @@ const RenderSuperChainInfo = (props: DialogProps<object>) => {
                 }
               }}
             >
-              <div className="justify-start text-[#0F111A] text-base font-medium leading-normal">
+              <div className="justify-start text-[#0F111A] text-base font-normal leading-normal">
                 Close
               </div>
             </div>
@@ -168,7 +168,7 @@ const ChainIcon = ({
           <Tooltip.Content
             side="bottom"
             sideOffset={10}
-            className="bg-background shadow-lg border border-border px-3 py-1.5 text-sm rounded-md text-foreground font-medium"
+            className="bg-background shadow-lg border border-border px-3 py-1.5 text-sm rounded-md text-foreground font-normal"
           >
             {chain.name}
             <Tooltip.Arrow className="fill-border" />

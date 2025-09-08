@@ -178,7 +178,7 @@ export const Account = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger className="focus:outline-none focus:opacity-80">
-          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-medium">
+          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-secondary h-10 px-4 py-2 gap-x-2.5 text-sm font-normal">
             <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
 
             <span className="hidden sm:inline">{username}</span>

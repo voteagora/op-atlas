@@ -11,7 +11,7 @@ export const BlueBadge = ({
 }) => {
   return (
     <Badge
-      className={`text-xs font-medium text-blue-800 border-0 ${"bg-callout"} flex gap-1`}
+      className={`text-xs font-normal text-blue-800 border-0 ${"bg-callout"} flex gap-1`}
       variant={"outline"}
     >
       {showIcon && <Loader2 width={12} height={12} />}

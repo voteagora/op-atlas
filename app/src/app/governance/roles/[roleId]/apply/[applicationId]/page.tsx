@@ -72,16 +72,16 @@ export default async function Page({ params }: PageProps) {
         ) : (
           <UserAvatar imageUrl={org?.avatarUrl} />
         )}
-        <div className="text-2xl font-semibold text-center">
+        <div className="text-2xl font-normal text-center">
           {"You're a candidate!"}
         </div>
         <div className="text-lg text-center">
           Your self-nomination for{" "}
-          <span className="font-semibold">{role.title}</span> was received.
+          <span className="font-normal">{role.title}</span> was received.
         </div>
-        <div className="text-lg font-semibold text-center">Next Steps</div>
+        <div className="text-lg font-normal text-center">Next Steps</div>
         <div className="flex flex-col gap-3 text-center items-center">
-          <div className="font-semibold text-center">Comment on the forum</div>
+          <div className="font-normal text-center">Comment on the forum</div>
           <div className="text-center text-muted-foreground">{forumText}</div>
           <CopyForumTextButton
             forumText={forumText}
@@ -90,13 +90,13 @@ export default async function Page({ params }: PageProps) {
           <div className="text-sm text-muted-foreground">{role.link}</div>
         </div>
         <div className="flex flex-col gap-1 text-center">
-          <div className="font-semibold">Respond to questions</div>
+          <div className="font-normal">Respond to questions</div>
           <div className="text-center text-muted-foreground">
             Keep an eye on the forum for questions from voters.
           </div>
         </div>
         <div className="flex flex-col gap-1 text-center">
-          <div className="font-semibold">Voting happens soon</div>
+          <div className="font-normal">Voting happens soon</div>
           <div className="text-center text-muted-foreground">
             {voteSchedule}
           </div>

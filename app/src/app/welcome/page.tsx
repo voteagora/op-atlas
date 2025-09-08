@@ -117,7 +117,7 @@ function WelcomeCard({ card }: { card: keyof typeof CARD_DETAILS }) {
           height={150}
         />
         <div className="flex flex-col gap-3">
-          <div className="text-lg font-semibold">
+          <div className="text-lg font-normal">
             {CARD_DETAILS[card].title}
           </div>
           <div className="text-lg">{CARD_DETAILS[card].description}</div>

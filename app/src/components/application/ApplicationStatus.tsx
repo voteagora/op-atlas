@@ -22,7 +22,7 @@ export const ApplicationStatus = ({
           alt="Submitted"
         />
         <div className="flex flex-col text-success-foreground max-w-md">
-          <p className="font-medium text-sm">
+          <p className="font-normal text-sm">
             Your application was submitted on{" "}
             {format(application.createdAt, "MMM d, h:mm a")}
             <br /> You can resubmit with additional projects until Oct 14th at
@@ -31,7 +31,7 @@ export const ApplicationStatus = ({
         </div>
       </div>
       <ExternalLink
-        className="text-sm text-success-foreground font-medium"
+        className="text-sm text-success-foreground font-normal"
         href={`${EAS_URL_PREFIX}${application.attestationId}`}
       >
         View attestation

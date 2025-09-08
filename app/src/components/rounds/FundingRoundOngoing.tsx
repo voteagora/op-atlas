@@ -49,7 +49,7 @@ export function FundingRoundOngoing({
         <div className="flex flex-col justify-between">
           <div>
             <div className="flex justify-between space-x-2">
-              <h2 className="text-base font-semibold text-text-default text-start">
+              <h2 className="text-base font-normal text-text-default text-start">
                 {fundingRound.name}
               </h2>
               {selectedBadge}

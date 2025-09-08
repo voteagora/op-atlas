@@ -117,7 +117,7 @@ const CardText = ({
 
   return (
     <div className="flex flex-col text-center gap-2 p-6">
-      <h4 className="text-md font-semibold">{cardText.title}</h4>
+      <h4 className="text-md font-normal">{cardText.title}</h4>
       {renderDescription()}
     </div>
   )

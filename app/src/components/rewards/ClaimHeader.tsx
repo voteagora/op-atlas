@@ -56,7 +56,7 @@ const ClaimHeader = ({
           width={48}
           className="h-12 w-12 object-center object-cover rounded-md"
         />
-        <p className="font-semibold">{reward.project.name}</p>
+        <p className="font-normal">{reward.project.name}</p>
         <div className="ml-auto flex items-center gap-2">
           <Image
             alt="op"
@@ -64,7 +64,7 @@ const ClaimHeader = ({
             height={24}
             width={24}
           />
-          <p className="font-semibold">
+          <p className="font-normal">
             {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
             {formatNumber(reward.amount)}
           </p>
@@ -73,7 +73,7 @@ const ClaimHeader = ({
 
       <p className="text-secondary-foreground text-center">
         You&apos;ve been rewarded in{" "}
-        <span className="font-medium">
+        <span className="font-normal">
           {reward.roundId === "4"
             ? "Retro Funding Round 4: Onchain Builders"
             : reward.roundId === "5"
@@ -88,14 +88,14 @@ const ClaimHeader = ({
       {session?.user && isUserAdmin ? (
         <div className="flex items-center gap-6">
           <p className="text-secondary-foreground text-sm">
-            Claim by <span className="font-medium">Aug 5, 2025</span>
+            Claim by <span className="font-normal">Aug 5, 2025</span>
           </p>
 
           <div className="w-px h-10 bg-border" />
 
           <div className="flex items-center gap-1">
             <p className="text-secondary-foreground text-sm">
-              Grant ID <span className="font-medium">{reward.id}</span>
+              Grant ID <span className="font-normal">{reward.id}</span>
             </p>
 
             <Button
@@ -115,7 +115,7 @@ const ClaimHeader = ({
               <Button
                 variant="link"
                 onClick={editEmail}
-                className="font-medium text-secondary-foreground m-0 ml-1 p-0 h-fit"
+                className="font-normal text-secondary-foreground m-0 ml-1 p-0 h-fit"
               >
                 {session.user.email || "Add your email"}
               </Button>
@@ -150,7 +150,7 @@ const ClaimHeader = ({
                     />
                     <AvatarFallback>{user.name?.[0]}</AvatarFallback>
                   </Avatar>
-                  <p className="text-secondary-foreground text-sm font-medium">
+                  <p className="text-secondary-foreground text-sm font-normal">
                     {user.name}
                   </p>
                 </div>

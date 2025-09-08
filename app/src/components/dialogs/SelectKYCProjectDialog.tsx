@@ -115,7 +115,7 @@ export default function SelectKYCProjectDialog({
     return (
       <Dialog open>
         <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
-          <DialogTitle className="text-center leading-7 font-semibold text-xl">
+          <DialogTitle className="text-center leading-7 font-normal text-xl">
             Choose the projects that will use this grant delivery address
           </DialogTitle>
           <div className="space-y-6 z-50 w-full h-full">
@@ -136,7 +136,7 @@ export default function SelectKYCProjectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         {availableProjects?.length !== 0 && (
-          <DialogTitle className="text-center leading-7 font-semibold text-xl">
+          <DialogTitle className="text-center leading-7 font-normal text-xl">
             Choose the projects that will use this grant delivery address
           </DialogTitle>
         )}

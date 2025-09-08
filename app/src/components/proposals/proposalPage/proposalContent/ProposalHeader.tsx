@@ -6,7 +6,7 @@ interface ProposalTitleProps {
 
 const ProposalTitle = ({ title }: ProposalTitleProps) => (
   <div className="gap-2 flex-col items-start">
-    <h1 className="font-semibold text-xl sm:text-2xl md:text-3xl lg:text-[36px] leading-tight lg:leading-[44px] tracking-normal text-text-default font-riforma break-words word-break overflow-wrap-anywhere">
+    <h1 className="font-normal text-xl sm:text-2xl md:text-3xl lg:text-[36px] leading-tight lg:leading-[44px] tracking-normal text-text-default font-riforma break-words word-break overflow-wrap-anywhere">
       {title}
     </h1>
   </div>

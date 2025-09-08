@@ -23,7 +23,7 @@ export default function IncreaseYourImpact({
         alt="Shinning Icon"
       />
       <div className="space-y-3 text-center z-50">
-        <h4 className="font-semibold text-xl text-contrast-foreground">
+        <h4 className="font-normal text-xl text-contrast-foreground">
           {isOnchainBuilder && "Make your application interopable"}
           {isDevTooling &&
             "Support developers in building interopable applications"}

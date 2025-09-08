@@ -58,7 +58,7 @@ export function CompleteProfileCallout({
               {isComplete ? "👏" : "👋"}
             </div>
             <div className="flex flex-col items-start">
-              <div className="text-base font-semibold">
+              <div className="text-base font-normal">
                 {isComplete
                   ? "Profile complete!"
                   : "Complete your Optimist Profile"}
@@ -80,7 +80,7 @@ export function CompleteProfileCallout({
         <AccordionContent>
           <ProfileSteps user={user} />
           <button
-            className="flex space-x-2 px-8 py-4 text-xs font-medium text-secondary-foreground"
+            className="flex space-x-2 px-8 py-4 text-xs font-normal text-secondary-foreground"
             onClick={onDismiss}
           >
             <X size={14} />{" "}
@@ -141,7 +141,7 @@ function AddYourEmailStep({ user }: { user: UserWithEmails }) {
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
             <div className="flex gap-2 items-center">
-              <div className="font-medium">Add your email</div>
+              <div className="font-normal">Add your email</div>
               <Badge
                 text="Required"
                 textClassName="text-red-600"
@@ -171,7 +171,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
         )}
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex flex-col gap-[2px]">
-            <div className="font-medium flex items-center gap-2">
+            <div className="font-normal flex items-center gap-2">
               Connect your GitHub <Badge text="Public" />
             </div>
             <div className="text-secondary-foreground">
@@ -194,7 +194,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-[2px]">
-              <div className="font-medium">Add verified addresses</div>
+              <div className="font-normal">Add verified addresses</div>
               <div className="text-secondary-foreground">
                 Display your attestations, ENS, and more.
                 <ul className="list-disc pl-4 mt-2 text-sm text-secondary-foreground">
@@ -221,7 +221,7 @@ function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
 
           {user.addresses.length >= 1 && (
             <div className="flex flex-col gap-2">
-              <div className="text-sm text-foreground font-medium">
+              <div className="text-sm text-foreground font-normal">
                 Your verified addresses
               </div>
               <div className="flex flex-col gap-1.5">
@@ -259,7 +259,7 @@ function SetPrimaryAddress({ user }: { user: UserWithAddresses }) {
         )}
         <div className="flex flex-col gap-4 flex-1">
           <div className="flex flex-col gap-[2px]">
-            <div className="font-medium">Set your governance address</div>
+            <div className="font-normal">Set your governance address</div>
             <div className="text-secondary-foreground">
               Choose one of your governance address to receive attestations from
               Optimism (including the voting badge for Citizens and Guest

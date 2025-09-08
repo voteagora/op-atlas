@@ -16,7 +16,7 @@ export default function ClaimRewardsDialog(props: DialogProps<object>) {
           height={64}
         />
         <div className="space-y-2">
-          <h4 className="font-semibold text-xl text-text-default">
+          <h4 className="font-normal text-xl text-text-default">
             We’re still working on that
           </h4>
           <p className="text-secondary-foreground text-base font-normal">

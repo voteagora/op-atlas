@@ -17,7 +17,7 @@ export function LearnMore({ links }: LearnMoreProps) {
 
   return (
     <div className="w-full flex flex-col gap-6">
-      <h2 className="text-xl font-semibold">Learn more</h2>
+      <h2 className="text-xl font-normal">Learn more</h2>
       <div className="flex flex-col gap-2">
         {links.map((link, index) => (
           <div key={index} className="w-full flex flex-col gap-1.5">

@@ -55,7 +55,7 @@ export function DeleteKYCTeamDialog({
       <DialogContent>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-0.5 text-center items-center">
-            <DialogTitle className="text-center text-xl font-semibold text-text-default">
+            <DialogTitle className="text-center text-xl font-normal text-text-default">
               {hasActiveStream
                 ? "Are you sure?"
                 : "Are you sure you want to delete this wallet and start the verification process over?"}

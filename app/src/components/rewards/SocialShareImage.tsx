@@ -54,7 +54,7 @@ export function SocialShareImage({ reward }: { reward: RewardWithProject }) {
               WebkitTextFillColor: "transparent",
               lineHeight: "45px",
             }}
-            className="text-[45px] font-semibold text-[#8D33DB] tracking-tighter"
+            className="text-[45px] font-normal text-[#8D33DB] tracking-tighter"
           >
             {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
             {formatNumber(reward.amount)} OP
@@ -64,7 +64,7 @@ export function SocialShareImage({ reward }: { reward: RewardWithProject }) {
 
       <div className="flex flex-col">
         <div
-          className="text-[18px] tracking-tighter font-semibold"
+          className="text-[18px] tracking-tighter font-normal"
           style={{
             backgroundImage: "linear-gradient(90deg, #8D33DB 0%, #523EFF 100%)",
             backgroundClip: "text",
@@ -74,7 +74,7 @@ export function SocialShareImage({ reward }: { reward: RewardWithProject }) {
           Retro Funding Round 4
         </div>
         <div
-          className="text-[24px] tracking-tighter font-semibold -mt-2"
+          className="text-[24px] tracking-tighter font-normal -mt-2"
           style={{
             backgroundImage: "linear-gradient(90deg, #8D33DB 0%, #523EFF 100%)",
             backgroundClip: "text",

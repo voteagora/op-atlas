@@ -32,7 +32,7 @@ const ApplicationHeader = ({
               alt="Submitted"
             />
             <div className="flex flex-col text-success-foreground">
-              <p className="font-medium text-sm">
+              <p className="font-normal text-sm">
                 You submitted this application on{" "}
                 {format(applications[0].createdAt, "MMMM d, h:mm a")}. You can
                 edit or resubmit with additional projects until Oct 14th at
