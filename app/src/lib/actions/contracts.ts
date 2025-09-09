@@ -16,7 +16,7 @@ import {
 } from "@/db/projects"
 import { getDeployedContractsServerParsed } from "@/lib/oso"
 
-import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
+import { clients, getTransaction, getTransactionTrace } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
@@ -177,14 +177,30 @@ export const verifyContract = async ({
       }
     }
 
-    const calls = (trace as any).calls as TraceCall[]
-    const creation = calls.find((call) => {
-      return (
-        call.type === "CREATE2" &&
-        call.to !== null &&
-        isAddressEqual(call.to, contractAddress)
-      )
-    })
+    // Recursively search for contract creation in the trace
+    const findContractCreation = (traceObj: any): any => {
+      // Check if this object itself is a CREATE/CREATE2 operation
+      if (
+        traceObj &&
+        (traceObj.type === "CREATE" || traceObj.type === "CREATE2") &&
+        traceObj.to &&
+        isAddressEqual(traceObj.to, contractAddress)
+      ) {
+        return traceObj
+      }
+
+      // Search in calls array if it exists
+      if (traceObj?.calls && Array.isArray(traceObj.calls)) {
+        for (const call of traceObj.calls) {
+          const found = findContractCreation(call)
+          if (found) return found
+        }
+      }
+
+      return null
+    }
+
+    const creation = findContractCreation(trace)
 
     if (!creation) {
       return {
