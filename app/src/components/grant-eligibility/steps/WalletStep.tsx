@@ -194,7 +194,7 @@ export default function WalletStep() {
             value={walletAddress}
             onChange={(e) => setWalletAddress(e.target.value)}
             disabled={isVerified}
-            className={`font-mono ${!isAddressValid && walletAddress ? "border-destructive" : ""}`}
+            className={`${!isAddressValid && walletAddress ? "border-destructive" : ""}`}
           />
           {walletAddress && !isAddressValid && (
             <p className="text-sm text-destructive">Please enter a valid Ethereum address</p>

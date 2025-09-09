@@ -236,7 +236,7 @@ export default function EntitiesStep() {
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
                 <label
                   htmlFor={`company-${index}`}

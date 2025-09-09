@@ -37,7 +37,7 @@ const IndividualStatus = ({
         <div className={"flex flex-row gap-2"}>
           <p>{name}</p>
           <p>{email}</p>
-          <p>{organization}</p>
+          {organization && <p>{organization}</p>}
         </div>
         {isUser && <div>You</div>}
       </div>
