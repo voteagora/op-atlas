@@ -1,9 +1,10 @@
 "use server"
 
 import mailchimp from "@mailchimp/mailchimp_transactional"
-import { KYCUser } from "@prisma/client"
+import { EmailNotificationType, KYCUser } from "@prisma/client"
 
 import { auth } from "@/auth"
+import { prisma } from "@/db/client"
 import { createPersonaInquiryLink } from "./persona"
 import { getUserProjectRole, getUserOrganizationRole } from "./utils"
 
@@ -76,6 +77,22 @@ export const sendTransactionEmail = async (
   }
 }
 
+async function trackEmailNotification(params: {
+  kycUserId: string
+  type: EmailNotificationType
+  emailTo: string
+  success: boolean
+  error?: string
+}): Promise<void> {
+  try {
+    await prisma.emailNotification.create({
+      data: params
+    })
+  } catch (error) {
+    console.error("Failed to track email notification:", error)
+  }
+}
+
 export const sendKYCStartedEmail = async (
   kycUser: KYCUser,
 ): Promise<EmailResponse> => {
@@ -111,6 +128,14 @@ export const sendKYCStartedEmail = async (
 
   const emailResult = await sendTransactionEmail(emailParams)
 
+  await trackEmailNotification({
+    kycUserId: kycUser.id,
+    type: "KYCB_STARTED",
+    emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error
+  })
+
   return emailResult
 }
 
@@ -144,6 +169,14 @@ export const sendKYBStartedEmail = async (
     to: kycUser.email,
     subject: "Retro Funding: Complete KYB to receive your rewards.",
     html,
+  })
+
+  await trackEmailNotification({
+    kycUserId: kycUser.id,
+    type: "KYCB_STARTED",
+    emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error
   })
 
   return emailResult
@@ -286,5 +319,162 @@ export const sendKYCReminderEmail = async (
     html,
   }
 
-  return await sendTransactionEmail(emailParams)
+  const emailResult = await sendTransactionEmail(emailParams)
+  
+  await trackEmailNotification({
+    kycUserId: kycUser.id,
+    type: "KYCB_REMINDER",
+    emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error
+  })
+  
+  return emailResult
+}
+
+export const sendKYBReminderEmail = async (
+  kycUser: KYCUser,
+): Promise<EmailResponse> => {
+  const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
+
+  if (!templateId) {
+    return {
+      success: false,
+      error: "Missing required Persona KYB template ID",
+    }
+  }
+
+  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+
+  if (!inquiryResult.success) {
+    return { success: false }
+  }
+
+  if (!inquiryResult.inquiryUrl) {
+    return { success: false }
+  }
+
+  const kycLink = inquiryResult.inquiryUrl
+
+  const html = getKYBEmailTemplate(kycUser, kycLink)
+
+  const emailParams = {
+    to: kycUser.email,
+    subject: "Reminder: Complete KYB to receive your rewards.",
+    html,
+  }
+
+  const emailResult = await sendTransactionEmail(emailParams)
+  
+  await trackEmailNotification({
+    kycUserId: kycUser.id,
+    type: "KYCB_REMINDER",
+    emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error
+  })
+  
+  return emailResult
+}
+
+export const sendKYCApprovedEmail = async (
+  kycUser: KYCUser,
+): Promise<EmailResponse> => {
+  const html = getKYCApprovedEmailTemplate(kycUser)
+
+  const emailParams = {
+    to: kycUser.email,
+    subject: "Your KYC verification is approved",
+    html,
+  }
+
+  const emailResult = await sendTransactionEmail(emailParams)
+  
+  await trackEmailNotification({
+    kycUserId: kycUser.id,
+    type: "KYCB_APPROVED",
+    emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error
+  })
+  
+  return emailResult
+}
+
+export const sendKYBApprovedEmail = async (
+  kycUser: KYCUser,
+): Promise<EmailResponse> => {
+  const html = getKYBApprovedEmailTemplate(kycUser)
+
+  const emailParams = {
+    to: kycUser.email,
+    subject: "Your KYB verification is approved",
+    html,
+  }
+
+  const emailResult = await sendTransactionEmail(emailParams)
+  
+  await trackEmailNotification({
+    kycUserId: kycUser.id,
+    type: "KYCB_APPROVED",
+    emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error
+  })
+  
+  return emailResult
+}
+
+function getKYCApprovedEmailTemplate(kycUser: KYCUser): string {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
+    </div>
+
+    <h1 style="color: #333; text-align: center; margin-top: 0;">Your KYC Verification is Approved! 🎉</h1>
+    <p>Hi ${kycUser.firstName},</p>
+    <p>Great news! Your KYC (Know Your Customer) verification has been successfully approved.</p>
+    <p><strong>What's next?</strong></p>
+    <ul>
+        <li>Your rewards are now eligible for distribution</li>
+        <li>You'll receive further instructions about reward claiming via email</li>
+        <li>You can check your status anytime in your Project/Org settings</li>
+    </ul>
+    <p>Thank you for completing the verification process. This helps us maintain the security and integrity of the Retro Funding program.</p>
+    <p>Stay Optimistic.</p>
+    <p>Best regards,<br>The OP Atlas Team</p>
+    <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
+    <div style="text-align: center;">
+        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+    </div>
+</div>
+    `
+}
+
+function getKYBApprovedEmailTemplate(kycUser: KYCUser): string {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
+    </div>
+
+    <h1 style="color: #333; text-align: center; margin-top: 0;">Your KYB Verification is Approved! 🎉</h1>
+    <p>Hi ${kycUser.firstName},</p>
+    <p>Great news! Your KYB (Know Your Business) verification for <strong>${kycUser.businessName}</strong> has been successfully approved.</p>
+    <p><strong>What's next?</strong></p>
+    <ul>
+        <li>Your organization's rewards are now eligible for distribution</li>
+        <li>You'll receive further instructions about reward claiming via email</li>
+        <li>You can check your status anytime in your Organization settings</li>
+    </ul>
+    <p>Thank you for completing the business verification process. This helps us maintain the security and integrity of the Retro Funding program.</p>
+    <p>Stay Optimistic.</p>
+    <p>Best regards,<br>The OP Atlas Team</p>
+    <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
+    <div style="text-align: center;">
+        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+    </div>
+</div>
+    `
 }

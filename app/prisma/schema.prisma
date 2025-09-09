@@ -482,21 +482,37 @@ model ContactEmailTags {
 }
 
 model KYCUser {
-  id            String         @id @default(uuid())
-  email         String
-  firstName     String
-  lastName      String
-  businessName  String?
-  status        KYCStatus      @default(PENDING)
-  expiry        DateTime
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  personaStatus PersonaStatus?
-  kycUserType   KYCUserType    @default(USER)
-  personaExpiry DateTime?
-  KYCUserTeams  KYCUserTeams[]
+  id                 String              @id @default(uuid())
+  email              String
+  firstName          String
+  lastName           String
+  businessName       String?
+  status             KYCStatus           @default(PENDING)
+  expiry             DateTime
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  personaStatus      PersonaStatus?
+  kycUserType        KYCUserType         @default(USER)
+  KYCUserTeams       KYCUserTeams[]
+  EmailNotifications EmailNotification[]
 
   @@index([email])
+}
+
+model EmailNotification {
+  id        String                @id @default(uuid())
+  kycUserId String
+  type      EmailNotificationType
+  sentAt    DateTime              @default(now())
+  emailTo   String                // Store the actual email used
+  success   Boolean               @default(true)
+  error     String?               // Store any error messages
+  
+  kycUser   KYCUser               @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
+  
+  @@index([kycUserId])
+  @@index([type])
+  @@index([sentAt])
 }
 
 model KYCTeam {
@@ -958,6 +974,12 @@ enum PersonaStatus {
   needs_review
   approved
   declined
+}
+
+enum EmailNotificationType {
+  KYCB_STARTED
+  KYCB_REMINDER
+  KYCB_APPROVED
 }
 
 enum GrantType {
