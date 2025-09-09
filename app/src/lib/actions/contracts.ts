@@ -163,80 +163,52 @@ export const verifyContract = async ({
     // No contractAddress on receipt. Try trace to locate CREATE/CREATE2 to target
     const trace = await getTransactionTrace(deploymentTxHash, chain)
     if (!trace) {
-      // Fallback: contract creation txs have `to === null`. If so, accept.
+      // Fallback: contract creation txs often have `to === null`. If so, accept.
       if (tx.to === null) {
-        // proceed without trace but ensure code exists at claimed address
-        const code = await clients[chain].getBytecode({
-          address: contractAddress,
-        })
-        if (!code || code === "0x") {
-          return { error: "Contract code not found at address" }
-        }
+        // proceed without trace
       } else {
-        // Additional fallback: Universal CREATE2 Factory without trace
-        const UNIVERSAL_CREATE2_FACTORY =
-          "0x4e59b44847b379578588920ca78fbf26c0b4956c"
-        if (
-          isAddressEqual(
-            tx.to,
-            getAddress(UNIVERSAL_CREATE2_FACTORY as Address),
-          ) &&
-          sentByDeployer &&
-          (tx.status as unknown as string) === "success"
-        ) {
-          // proceed without trace but ensure code exists at claimed address
-          const code = await clients[chain].getBytecode({
-            address: contractAddress,
-          })
-          if (!code || code === "0x") {
-            return { error: "Contract code not found at address" }
-          }
-        } else {
-          return { error: "Transaction trace not found" }
-        }
+        return { error: "Transaction trace not found" }
       }
     } else {
       const calls = (trace as any).calls as TraceCall[]
-      type Correlated = { created: boolean; createdWithDeployerPath: boolean }
-      const dfs = (
-        nodes: TraceCall[],
-        pathHasDeployer: boolean,
-      ): Correlated => {
-        let created = false
-        let createdWithDeployerPath = false
-        for (const node of nodes) {
-          const currentPathHasDeployer =
-            pathHasDeployer || isAddressEqual(node.from, deployerAddress)
 
-          const isCreation =
+      const findCreation = (nodes: TraceCall[]): boolean => {
+        for (const node of nodes) {
+          if (
             (node.type === "CREATE" || node.type === "CREATE2") &&
             node.to !== null &&
             isAddressEqual(node.to, contractAddress)
-
-          if (isCreation) {
-            created = true
-            if (currentPathHasDeployer || sentByDeployer) {
-              createdWithDeployerPath = true
-            }
+          ) {
+            return true
           }
-
           const nested: any = (node as any).calls
           if (Array.isArray(nested) && nested.length > 0) {
-            const res = dfs(nested as TraceCall[], currentPathHasDeployer)
-            created = created || res.created
-            createdWithDeployerPath =
-              createdWithDeployerPath || res.createdWithDeployerPath
+            if (findCreation(nested as TraceCall[])) return true
           }
         }
-        return { created, createdWithDeployerPath }
+        return false
       }
 
-      const { created, createdWithDeployerPath } = dfs(calls, sentByDeployer)
+      const findDeployerInvolvement = (nodes: TraceCall[]): boolean => {
+        for (const node of nodes) {
+          if (isAddressEqual(node.from, deployerAddress)) return true
+          const nested: any = (node as any).calls
+          if (Array.isArray(nested) && nested.length > 0) {
+            if (findDeployerInvolvement(nested as TraceCall[])) return true
+          }
+        }
+        return false
+      }
+
+      const created = findCreation(calls)
       if (!created) {
         return { error: "Contract creation not found in transaction" }
       }
-      if (!createdWithDeployerPath) {
-        return { error: "Deployer not involved in contract creation path" }
+
+      const involved = findDeployerInvolvement(calls)
+      // If the deployer didn't send the tx, ensure they were involved in the call graph
+      if (!sentByDeployer && !involved) {
+        return { error: "Deployer not involved in transaction" }
       }
     }
   }
