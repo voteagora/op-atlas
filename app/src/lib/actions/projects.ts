@@ -37,7 +37,7 @@ import {
 import { getUserById } from "@/db/users"
 
 import { createEntityAttestation } from "../eas/serverOnly"
-import { TeamRole } from "../types"
+import { ProjectWithDetails, TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import {
   verifyAdminStatus,
@@ -78,7 +78,14 @@ export const getAdminProjects = async (userId: string, roundId?: string) => {
   const filteredTeamProjects = teamProjects.filter(
     ({ id }) => !organizationProjectIds.includes(id),
   )
-  return [...filteredTeamProjects, ...organizationProjects]
+  // Only allow published (snapshotted) projects in application flows
+  const hasSnapshots = (p: ProjectWithDetails) =>
+    Array.isArray(p.snapshots) && p.snapshots.length > 0
+
+  const publishedTeamProjects = filteredTeamProjects.filter(hasSnapshots)
+  const publishedOrgProjects = organizationProjects.filter(hasSnapshots)
+
+  return [...publishedTeamProjects, ...publishedOrgProjects]
 }
 
 export const getApplications = async (userId: string) => {
