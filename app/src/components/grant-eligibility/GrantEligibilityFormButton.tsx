@@ -97,7 +97,6 @@ export default function GrantEligibilityFormButton({
   return (
     <Button
       variant={buttonVariant}
-      size="sm"
       onClick={handleButtonClick}
       disabled={isPending}
       className={buttonClassName}

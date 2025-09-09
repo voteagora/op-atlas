@@ -14,6 +14,7 @@ import {
 import { useGrantEligibilityForm } from "@/providers/GrantEligibilityFormProvider"
 import { updateGrantEligibilityForm } from "@/lib/actions/grantEligibility"
 import { GrantType } from "@prisma/client"
+import ExternalLink from "@/components/ExternalLink"
 
 const GRANT_OPTIONS = [
   { value: "RETRO_FUNDING", label: "Retro Funding" },
@@ -139,7 +140,6 @@ export default function GrantTypeStep() {
         <RadioGroup
           value={acknowledgeChoice}
           onValueChange={(value) => setAcknowledgeChoice(value as any)}
-          className="space-y-2"
         >
           <label htmlFor="understand" className="block cursor-pointer">
             <div
@@ -196,16 +196,18 @@ export default function GrantTypeStep() {
           Your own information and the information of each person you identify
           during this process is subject to the Optimism Foundation&#39;s Data
           Privacy Notice, which you can read{" "}
-          <a href="/todo" className="text-blue-600 hover:underline">
+          <ExternalLink
+            href="https://www.optimism.io/data-privacy-policy"
+            className="underline"
+          >
             here
-          </a>
+          </ExternalLink>
           .
         </p>
 
         <RadioGroup
           value={privacyChoice}
           onValueChange={(value) => setPrivacyChoice(value as any)}
-          className="space-y-2"
         >
           <label htmlFor="consent" className="block cursor-pointer">
             <div

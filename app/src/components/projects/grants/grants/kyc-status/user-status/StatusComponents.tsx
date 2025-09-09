@@ -5,6 +5,7 @@ import {
   ExtendedPersonaStatus,
   KYCUserStatusProps,
 } from "@/components/projects/types"
+import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 interface StatusIconProps {
@@ -34,15 +35,6 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
   }
 }
 
-const Badge = ({ text }: { text: string }) => {
-  return (
-    <div className="flex items-center justify-center rounded-full bg-backgroundSecondary gap-4 py-[2px] px-2 border max-h-5">
-      <p className="font-[Inter] font-medium text-[12px] leading-[16px] text-center tracking-[0%] text-text-secondary">
-        {text}
-      </p>
-    </div>
-  )
-}
 
 const StatusRow = ({
   user,
@@ -74,16 +66,15 @@ const StatusRow = ({
           </div>
           <div className="flex flex-row gap-2">
             {user.status === "APPROVED" && user.expiry && (
-              <Badge
-                // Convert expiration date to a human-readable format
-                text={`Verified until ${new Date(
+              <Badge variant="secondary">
+                {`Verified until ${new Date(
                   user.expiry,
                 ).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
                 })}`}
-              />
+              </Badge>
             )}
           </div>
         </div>
@@ -142,8 +133,8 @@ const EmailSendButton = ({
 
 const RowText = ({ values }: { values: string[] }) => (
   <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-text-foreground">
-    {values.join(", ")}
+    {values.filter(Boolean).join(", ")}
   </p>
 )
 
-export { Badge, StatusIcon, StatusRow }
+export { StatusIcon, StatusRow }

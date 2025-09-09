@@ -15,6 +15,7 @@ import StepIndicator from "./StepIndicator"
 import GrantEligibilitySuccess from "./GrantEligibilitySuccess"
 import { clearGrantEligibilityForm } from "@/lib/actions/grantEligibility"
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
+import { Button } from "@/components/ui/button"
 
 type FullGrantEligibilityForm = GrantEligibility & {
   project?: Project | null
@@ -103,12 +104,12 @@ export default function GrantEligibilityWizard({
     >
       <div className="min-h-screen">
         {/* Header */}
-        <div className="max-w-4xl mx-auto px-6 py-4 mb-8">
+        <div className="max-w-[712px] mx-auto px-6 py-4 mb-8">
           <h1 className="text-4xl font-semibold text-center">Grant Eligibility Form</h1>
         </div>
 
         {/* Step Indicator */}
-          <div className="max-w-4xl mx-auto px-6">
+          <div className="max-w-[712px] mx-auto px-6">
             <StepIndicator
               steps={STEP_TITLES}
               currentStep={currentStep}
@@ -123,7 +124,7 @@ export default function GrantEligibilityWizard({
           </div>
 
         {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="max-w-[712px] mx-auto px-6 py-8">
           {renderStep()}
           {/* Wizard Controls */}
           <div className="mt-12">
@@ -132,15 +133,16 @@ export default function GrantEligibilityWizard({
         </div>
 
         {/* Clear Form Button - Fixed Position */}
-        <button
+        <Button
           type="button"
           onClick={() => setShowClearConfirmation(true)}
-          className="fixed bottom-6 right-6 inline-flex items-center justify-center h-10 px-4 rounded-md bg-white text-black border border-gray-200 hover:bg-gray-50 transition-all"
+          variant="outline"
+          className="fixed bottom-6 right-6"
           aria-label="Clear form"
         >
           <RefreshCw className="mr-2 h-4 w-4" />
           Clear form
-        </button>
+        </Button>
 
         {/* Clear Form Confirmation Dialog */}
         <ConfirmationDialog
@@ -160,18 +162,12 @@ export default function GrantEligibilityWizard({
 
 function WizardControls({ currentStep }: { currentStep: number }) {
   const { goToPreviousStep, goToNextStep, stepControls } = useGrantEligibilityForm()
-  const [isProcessing, setIsProcessing] = useState(false)
 
   const handleNext = async () => {
-    setIsProcessing(true)
-    try {
-      if (stepControls.onNext) {
-        await stepControls.onNext()
-      } else {
-        goToNextStep()
-      }
-    } finally {
-      setIsProcessing(false)
+    if (stepControls.onNext) {
+      await stepControls.onNext()
+    } else {
+      goToNextStep()
     }
   }
 
@@ -179,25 +175,25 @@ function WizardControls({ currentStep }: { currentStep: number }) {
   const buttonLabel = stepControls.nextLabel || "Next"
 
   return (
-    <div className="flex justify-center gap-3 pt-6">
+    <div className="flex justify-center gap-2 pt-6">
       {currentStep > 1 && (
-        <button
+        <Button
           type="button"
           onClick={goToPreviousStep}
-          className="inline-flex items-center justify-center h-10 px-4 rounded-md border border-border bg-background text-foreground hover:bg-backgroundSecondary"
+          variant="outline"
         >
           Back
-        </button>
+        </Button>
       )}
-      <button
+      <Button
         type="button"
         onClick={handleNext}
         disabled={stepControls.enabled === false || isLoading}
-        className="inline-flex items-center justify-center h-10 px-4 rounded-md bg-destructive text-white disabled:bg-secondary disabled:text-secondary-foreground disabled:cursor-not-allowed transition-all"
+        variant="destructive"
       >
         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {buttonLabel}
-      </button>
+      </Button>
     </div>
   )
 }

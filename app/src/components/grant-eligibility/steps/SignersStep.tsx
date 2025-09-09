@@ -154,7 +154,7 @@ export default function SignersStep() {
             type="text"
             value={form.walletAddress || ""}
             readOnly
-            className="font-mono text-sm bg-secondary cursor-not-allowed"
+            className="text-sm bg-secondary cursor-not-allowed"
           />
         </div>
 
@@ -176,7 +176,7 @@ export default function SignersStep() {
               )}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
                 <label htmlFor={`first-name-${index}`} className="block text-sm font-medium mb-2">
                   First name<span className="text-destructive">*</span>
@@ -236,7 +236,6 @@ export default function SignersStep() {
         <Button
           type="button"
           variant="secondary"
-          size="sm"
           onClick={addSigner}
           className={`flex items-center gap-2 ${isSignerComplete(signers[signers.length - 1]) ? "text-secondary-foreground" : "text-gray-400"}`}
         >

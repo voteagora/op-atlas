@@ -169,7 +169,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
             type="text"
             value={form.walletAddress || ""}
             readOnly
-            className="font-mono text-sm cursor-not-allowed"
+            className="text-sm cursor-not-allowed"
           />
         </div>
 
@@ -213,13 +213,13 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
       </div>
 
       {/* Attestations Section */}
-      <div className="space-y-4 pt-6">
-        <h3 className="text-lg font-semibold mb-8">
+      <div className="space-y-4 pt-6 text-secondary-foreground">
+        <p className="text-base mb-8">
           By submitting this form and selecting the below, you represent and
           warrant on behalf of yourself and your team or organization...
-        </h3>
+        </p>
 
-        <div className="space-y-6 text-secondary-foreground">
+        <div className="space-y-6">
           <div className="flex items-start gap-3">
             <Checkbox
               id="info-complete"
@@ -234,7 +234,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
             />
             <label
               htmlFor="info-complete"
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base font-normal leading-tight cursor-pointer"
             >
               That the information you provided in this form is complete and
               accurate.
@@ -255,7 +255,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
             />
             <label
               htmlFor="no-sanctioned"
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base font-normal leading-tight cursor-pointer"
             >
               That no person or legal entity associated with your grant
               application is a resident of, or located within, any jurisdiction
@@ -278,7 +278,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
             />
             <label
               htmlFor="no-prohibited"
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base font-normal leading-tight cursor-pointer"
             >
               That no person or legal entity associated with your grant
               application is a resident of, or located within Belarus, Cuba,
@@ -301,7 +301,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
             />
             <label
               htmlFor="no-sponsorship"
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base font-normal leading-tight cursor-pointer"
             >
               That no person or legal entity associated with your grant has
               received any sponsorship, assistance, or financial contributions
@@ -323,7 +323,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
             />
             <label
               htmlFor="not-barred"
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base font-normal leading-tight cursor-pointer"
             >
               That no person or legal entity is barred from participating in the
               Optimism Foundation&#39;s grant programs under any Terms &
@@ -346,7 +346,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
             />
             <label
               htmlFor="authorized"
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base font-normal leading-tight cursor-pointer"
             >
               Your submission of this form, and your assent to these and all
               other representations and warranties contained in this form, was
