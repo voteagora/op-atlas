@@ -57,6 +57,16 @@ export default defineConfig({
       NEXT_PUBLIC_ENV: "development",
       NEXT_PUBLIC_WORLD_APP_ID: "test-world-app-id",
       NEXT_PUBLIC_WORLD_APP_ACTION: "test-action",
+      // Impersonation settings
+      USE_IMPERSONATION: process.env.USE_IMPERSONATION || "false",
+      PROD_DATABASE_URL: process.env.PROD_DATABASE_URL || "",
+      PROD_DB_READ_ONLY: process.env.PROD_DB_READ_ONLY || "true",
+      PROD_DB_SAFE_MODE: process.env.PROD_DB_SAFE_MODE || "true",
+      IMPERSONATION_MASK_EMAILS: process.env.IMPERSONATION_MASK_EMAILS || "true",
+      IMPERSONATION_AUDIT_LOGGING: process.env.IMPERSONATION_AUDIT_LOGGING || "true",
+      // EAS settings
+      EAS_SIGNER_PRIVATE_KEY: process.env.EAS_SIGNER_PRIVATE_KEY || "test-eas-signer-key",
+      EAS_ADDRESS: process.env.EAS_ADDRESS || "0x1234567890123456789012345678901234567890",
     },
   },
 })

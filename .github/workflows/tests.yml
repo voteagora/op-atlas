@@ -31,6 +31,17 @@ env:
   NEXT_PUBLIC_SAFE_API_KEY: "test"
   NEXT_PUBLIC_ENV: "development"
 
+  # Impersonation system settings
+  USE_IMPERSONATION: "true"
+  PROD_DB_READ_ONLY: "true"
+  PROD_DB_SAFE_MODE: "true"
+  IMPERSONATION_MASK_EMAILS: "true"
+  IMPERSONATION_AUDIT_LOGGING: "true"
+
+  # EAS settings for testing
+  EAS_SIGNER_PRIVATE_KEY: "test-eas-signer-key"
+  EAS_ADDRESS: "0x1234567890123456789012345678901234567890"
+
 
 jobs:
   test:
@@ -98,6 +109,16 @@ jobs:
           CI: true
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
           # Test mode is already set in global env above
+
+      - name: Run Impersonation tests (if production DB available)
+        run: |
+          cd app
+          npx playwright test --grep "User Impersonation"
+        env:
+          CI: true
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
+          PROD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        continue-on-error: true
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
