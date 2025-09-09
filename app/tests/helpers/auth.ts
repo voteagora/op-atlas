@@ -41,6 +41,10 @@ export const authenticateTestUser = async (
   if (!result.success) {
     throw new Error(`Test authentication failed: ${result.error}`)
   }
+
+  // Navigate to a page to establish the session in the browser
+  await page.goto("/")
+  await page.waitForLoadState("domcontentloaded")
 }
 
 /**
