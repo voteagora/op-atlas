@@ -1,3 +1,5 @@
+"use server"
+
 import { KYCUser } from "@prisma/client"
 
 import { prisma } from "./client"
@@ -207,7 +209,7 @@ export async function getKYCUsersByProjectId({
   // join "KYCUserTeams" kut on kut."kycTeamId" = p."kycTeamId"
   // join "KYCUser" ku on ku.id = kut."kycUserId"
   // where p.id = '...'
-  return await prisma.kYCUser.findMany({
+  const value = await prisma.kYCUser.findMany({
     where: {
       KYCUserTeams: {
         some: {
@@ -222,4 +224,6 @@ export async function getKYCUsersByProjectId({
       },
     },
   })
+  console.log("getKYCUsersByProjectId: ", { value })
+  return value
 }
