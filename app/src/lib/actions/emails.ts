@@ -7,6 +7,14 @@ import { auth } from "@/auth"
 import { prisma } from "@/db/client"
 import { createPersonaInquiryLink } from "./persona"
 import { getUserProjectRole, getUserOrganizationRole } from "./utils"
+import {
+  getKYCEmailTemplate,
+  getKYCReminderEmailTemplate,
+  getKYBEmailTemplate,
+  getKYBReminderEmailTemplate,
+  getKYCApprovedEmailTemplate,
+  getKYBApprovedEmailTemplate,
+} from "@/lib/emailTemplates"
 
 const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
 
@@ -122,7 +130,7 @@ export const sendKYCStartedEmail = async (
 
   const emailParams = {
     to: kycUser.email,
-    subject: "Retro Funding: Complete KYC to receive your rewards.",
+    subject: "Action Required: Complete KYC to Unlock Your Optimism Grant",
     html,
   }
 
@@ -167,7 +175,7 @@ export const sendKYBStartedEmail = async (
 
   const emailResult = await sendTransactionEmail({
     to: kycUser.email,
-    subject: "Retro Funding: Complete KYB to receive your rewards.",
+    subject: "Action Required: Complete KYB to Unlock Your Optimism Grant",
     html,
   })
 
@@ -182,71 +190,6 @@ export const sendKYBStartedEmail = async (
   return emailResult
 }
 
-// Template for individual KYC users
-function getKYCEmailTemplate(kycUser: KYCUser, kycLink: string): string {
-  return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
-    </div>
-
-    <h1 style="color: #333; text-align: center; margin-top: 0;">Retro Funding: Complete KYC to Receive Your Rewards</h1>
-    <p>Hi ${kycUser.firstName},</p>
-    <p>Congratulations again on your Retro Funding allocation!</p>
-    <p>In order to receive your OP tokens, you must complete KYC (Know Your Customer) verification for your project.</p>
-    <p><strong>To start your KYC process, click the link below:</strong></p>
-    <div style="text-align: center; margin: 30px 0;">
-        <a href="${kycLink}" style="background-color: #FF0420; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Start KYC Verification</a>
-    </div>
-    <p><strong>Important Notes:</strong></p>
-    <ul>
-        <li>This link will expire in 7 days</li>
-        <li>You can also access KYC functionality on your Project/Org settings under "Grant Address"</li>
-        <li>If you encounter any issues, contact retrofunding@optimism.io</li>
-    </ul>
-    <p>Stay Optimistic.</p>
-    <p>Best regards,<br>The OP Atlas Team</p>
-    <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
-    <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
-    </div>
-</div>
-    `
-}
-
-// Template for business KYB users
-function getKYBEmailTemplate(kycUser: KYCUser, kycLink: string): string {
-  return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
-    </div>
-
-    <h1 style="color: #333; text-align: center; margin-top: 0;">Retro Funding: Complete KYB to Receive Your Rewards</h1>
-    <p>Hi ${kycUser.firstName},</p>
-    <p>Congratulations again on your Retro Funding allocation!</p>
-    <p>In order to receive your OP tokens, you must complete KYB (Know Your Business) verification for your project.</p>
-    <p><strong>Business Name:</strong> ${kycUser.businessName}</p>
-    <p><strong>To start your KYB process, click the link below:</strong></p>
-    <div style="text-align: center; margin: 30px 0;">
-        <a href="${kycLink}" style="background-color: #FF0420; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Start KYB Verification</a>
-    </div>
-    <p><strong>Important Notes:</strong></p>
-    <ul>
-        <li>This link will expire in 7 days</li>
-        <li>KYB verification requires business documentation and may take longer than individual KYC</li>
-        <li>You can also access KYB functionality on your Project/Org settings under "Grant Address"</li>
-        <li>If you encounter any issues, contact retrofunding@optimism.io</li>
-    </ul>
-    <p>Stay Optimistic.</p>
-    <p>Best regards,<br>The OP Atlas Team</p>
-    <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
-    <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
-    </div>
-</div>
-    `
-}
 
 export const sendKYCReminderEmail = async (
   kycUser: KYCUser,
@@ -311,11 +254,11 @@ export const sendKYCReminderEmail = async (
 
   const kycLink = inquiryResult.inquiryUrl
 
-  const html = getKYCEmailTemplate(kycUser, kycLink)
+  const html = getKYCReminderEmailTemplate(kycUser, kycLink)
 
   const emailParams = {
     to: kycUser.email,
-    subject: "Reminder: Complete KYC to receive your rewards.",
+    subject: "Reminder: Complete Your KYC to Receive Your Optimism Grant",
     html,
   }
 
@@ -356,11 +299,11 @@ export const sendKYBReminderEmail = async (
 
   const kycLink = inquiryResult.inquiryUrl
 
-  const html = getKYBEmailTemplate(kycUser, kycLink)
+  const html = getKYBReminderEmailTemplate(kycUser, kycLink)
 
   const emailParams = {
     to: kycUser.email,
-    subject: "Reminder: Complete KYB to receive your rewards.",
+    subject: "Reminder: Complete Your KYB to Receive Your Optimism Grant",
     html,
   }
 
@@ -384,7 +327,7 @@ export const sendKYCApprovedEmail = async (
 
   const emailParams = {
     to: kycUser.email,
-    subject: "Your KYC verification is approved",
+    subject: "Verification complete!",
     html,
   }
 
@@ -408,7 +351,7 @@ export const sendKYBApprovedEmail = async (
 
   const emailParams = {
     to: kycUser.email,
-    subject: "Your KYB verification is approved",
+    subject: "Verification complete!",
     html,
   }
 
@@ -425,56 +368,3 @@ export const sendKYBApprovedEmail = async (
   return emailResult
 }
 
-function getKYCApprovedEmailTemplate(kycUser: KYCUser): string {
-  return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
-    </div>
-
-    <h1 style="color: #333; text-align: center; margin-top: 0;">Your KYC Verification is Approved! 🎉</h1>
-    <p>Hi ${kycUser.firstName},</p>
-    <p>Great news! Your KYC (Know Your Customer) verification has been successfully approved.</p>
-    <p><strong>What's next?</strong></p>
-    <ul>
-        <li>Your rewards are now eligible for distribution</li>
-        <li>You'll receive further instructions about reward claiming via email</li>
-        <li>You can check your status anytime in your Project/Org settings</li>
-    </ul>
-    <p>Thank you for completing the verification process. This helps us maintain the security and integrity of the Retro Funding program.</p>
-    <p>Stay Optimistic.</p>
-    <p>Best regards,<br>The OP Atlas Team</p>
-    <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
-    <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
-    </div>
-</div>
-    `
-}
-
-function getKYBApprovedEmailTemplate(kycUser: KYCUser): string {
-  return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
-    </div>
-
-    <h1 style="color: #333; text-align: center; margin-top: 0;">Your KYB Verification is Approved! 🎉</h1>
-    <p>Hi ${kycUser.firstName},</p>
-    <p>Great news! Your KYB (Know Your Business) verification for <strong>${kycUser.businessName}</strong> has been successfully approved.</p>
-    <p><strong>What's next?</strong></p>
-    <ul>
-        <li>Your organization's rewards are now eligible for distribution</li>
-        <li>You'll receive further instructions about reward claiming via email</li>
-        <li>You can check your status anytime in your Organization settings</li>
-    </ul>
-    <p>Thank you for completing the business verification process. This helps us maintain the security and integrity of the Retro Funding program.</p>
-    <p>Stay Optimistic.</p>
-    <p>Best regards,<br>The OP Atlas Team</p>
-    <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
-    <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
-    </div>
-</div>
-    `
-}
