@@ -3,6 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
+import { signIn } from "@/auth"
 import { userImpersonationService } from "../../../../lib/auth/userImpersonation"
 
 export async function GET(request: NextRequest) {
@@ -61,9 +62,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    let result
-    if (scenario) {
-      // Discover and impersonate first user for scenario
+    let userToImpersonateId = prodUserId
+
+    if (scenario && !prodUserId) {
+      // Discover and get first user for scenario
       const users = await userImpersonationService.discoverUsers(scenario)
       if (users.length === 0) {
         return NextResponse.json({
@@ -71,17 +73,48 @@ export async function POST(request: NextRequest) {
           error: `No users found for scenario: ${scenario}`
         }, { status: 404 })
       }
-      result = await userImpersonationService.impersonateUser(users[0].id, impersonatedBy || "test-system")
-    } else {
-      result = await userImpersonationService.impersonateUser(prodUserId, impersonatedBy || "test-system")
+      userToImpersonateId = users[0].id
     }
+
+    // Get real user data from production database
+    const realUser = await userImpersonationService.getRealUserData(userToImpersonateId)
+    if (!realUser) {
+      return NextResponse.json({
+        success: false,
+        error: `User ${userToImpersonateId} not found in production database`
+      }, { status: 404 })
+    }
+
+    // Create impersonated user in test database
+    const impersonatedUser = await userImpersonationService.createImpersonatedUser(realUser, impersonatedBy || "test-system")
+
+    // Sign in as the impersonated user using the test auth system
+    const result = await signIn("credentials", {
+      privy: JSON.stringify({
+        id: impersonatedUser.privyDid,
+        email: { address: realUser.emails?.[0]?.email || "impersonated@example.com" },
+        createdAt: impersonatedUser.createdAt.toISOString(),
+      }),
+      privyAccessToken: "mock-impersonation-token",
+      testMode: "true",
+      testUserId: impersonatedUser.id,
+      redirect: false,
+    })
 
     return NextResponse.json({
       success: true,
-      user: result,
-      message: "User impersonated successfully"
+      user: {
+        id: impersonatedUser.id,
+        name: impersonatedUser.name,
+        email: realUser.emails?.[0]?.email || "impersonated@example.com",
+        imageUrl: impersonatedUser.imageUrl,
+        isImpersonated: true,
+        originalUserId: userToImpersonateId
+      },
+      message: "User impersonated and signed in successfully"
     })
   } catch (error) {
+    console.error("Impersonation API Error:", error)
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : "Impersonation failed"

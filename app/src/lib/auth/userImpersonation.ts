@@ -53,12 +53,11 @@ class UserImpersonationService {
     return this.buildUserProfiles(users)
   }
 
-  async impersonateUser(prodUserId: string, impersonatedBy: string): Promise<User> {
+  async getRealUserData(prodUserId: string): Promise<any> {
     if (!this.isAvailable()) {
       throw new Error('Impersonation not available')
     }
 
-    // Get real user from production
     const realUser = await dualDb.getClient('prod').user.findUnique({
       where: { id: prodUserId },
       include: {
@@ -70,22 +69,62 @@ class UserImpersonationService {
       }
     })
 
-    if (!realUser) {
-      throw new Error(`User ${prodUserId} not found in production database`)
+    return realUser
+  }
+
+  async createImpersonatedUser(realUser: any, impersonatedBy: string): Promise<User> {
+    if (!this.isAvailable()) {
+      throw new Error('Impersonation not available')
     }
 
-    // Create impersonated user in test database
+    // Create impersonated user in test database with real user's data
     const impersonatedUser = await dualDb.getClient('test').user.create({
       data: {
-        id: `impersonated-${prodUserId}-${Date.now()}`,
+        id: `impersonated-${realUser.id}-${Date.now()}`,
         name: realUser.name,
         farcasterId: realUser.farcasterId,
+        privyDid: `impersonated-privy-${realUser.id}-${Date.now()}`,
+        username: realUser.username || realUser.name?.toLowerCase().replace(/\s+/g, ''),
+        imageUrl: realUser.imageUrl,
+        bio: realUser.bio,
+        github: realUser.github,
+        discord: realUser.discord,
         createdAt: new Date(),
         updatedAt: new Date()
       }
     })
 
+    // Copy emails if they exist
+    if (realUser.emails && realUser.emails.length > 0) {
+      for (const email of realUser.emails) {
+        await dualDb.getClient('test').userEmail.create({
+          data: {
+            userId: impersonatedUser.id,
+            email: email.email,
+            verified: email.verified,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        })
+      }
+    }
+
     return impersonatedUser
+  }
+
+  async impersonateUser(prodUserId: string, impersonatedBy: string): Promise<User> {
+    if (!this.isAvailable()) {
+      throw new Error('Impersonation not available')
+    }
+
+    // Get real user from production
+    const realUser = await this.getRealUserData(prodUserId)
+    if (!realUser) {
+      throw new Error(`User ${prodUserId} not found in production database`)
+    }
+
+    // Create impersonated user in test database
+    return await this.createImpersonatedUser(realUser, impersonatedBy)
   }
 
   async getStatistics(): Promise<any> {
