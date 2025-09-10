@@ -414,9 +414,6 @@ export const mapValueToVoteType = (
   value: JsonValue,
 ): { voteType: VoteType; selections?: number[] } | null => {
   const valueArray = Array.isArray(value) ? value : [value]
-
-  console.log("mapValueToVoteType", { valueArray })
-
   if (
     proposalType === ProposalType.OFFCHAIN_STANDARD ||
     proposalType === ProposalType.HYBRID_STANDARD

@@ -217,7 +217,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const extractIds = (proposalData: ProposalData) => {
     const pData = proposalData.proposalData as any
-    console.log("extractIds", { pData })
     if (
       pData?.options &&
       Array.isArray(pData.options) &&
