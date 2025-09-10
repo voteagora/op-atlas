@@ -94,6 +94,18 @@ export async function deleteKycTeam({
   hasActiveStream?: boolean
 }) {
   await prisma.$transaction(async (tx) => {
+    // Mark any active (draft) GrantEligibility forms linked to this KYC team as deleted
+    // This ensures users truly "start over" after removing an address
+    await tx.grantEligibility.updateMany({
+      where: {
+        kycTeamId,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    })
+
     // First, get all KYC users that are only associated with this KYC team
     // and don't have APPROVED status (since approved users should be preserved)
     const kycUsersToDelete = await tx.kYCUser.findMany({
