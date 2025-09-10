@@ -20,11 +20,11 @@ async function handleKYCEmailsCron(request: NextRequest) {
   }
 
   try {
-    // Process reminders (10 days old, [`created`, `pending`, `needs_review`], no reminder sent yet)
+    // Process reminders (7 days old, [`created`, `pending`, `needs_review`], no reminder sent yet)
     console.log("🔍 Processing KYC/KYB reminder emails...")
     
     const threshold = new Date()
-    threshold.setDate(threshold.getDate() - 10)
+    threshold.setDate(threshold.getDate() - 7)
     
     const reminderCandidates = await prisma.kYCUser.findMany({
       where: {
