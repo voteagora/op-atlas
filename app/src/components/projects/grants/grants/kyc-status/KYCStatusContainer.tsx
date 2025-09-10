@@ -89,7 +89,7 @@ const KYCSkeleton = () => (
   </div>
 )
 
-const KYCStatusTitle = () => {
+const KYCStatusTitle = ({ hasKYCTeam = false }: { hasKYCTeam?: boolean }) => {
   return (
     <div className="space-y-6">
       <h2>Grant Delivery Address</h2>
@@ -97,9 +97,11 @@ const KYCStatusTitle = () => {
         Add the wallet address your rewards will be delivered to. Identity
         verification is required for each address.
       </p>
-      <p className="text-secondary-foreground font-normal">
-        Get started by submitting the grant eligibility form.
-      </p>
+      {!hasKYCTeam && (
+        <p className="text-secondary-foreground font-normal">
+          Get started by submitting the grant eligibility form.
+        </p>
+      )}
     </div>
   )
 }
@@ -344,7 +346,7 @@ const OrganizationKYCStatusContainer = ({
       {verifiedTeams.length > 0 && (
         <div className="space-y-6">
           <h4 className="font-semibold text-xl leading-6 text-text-default">
-            Verified Addresses
+            Verified
           </h4>
           {verifiedTeams.map((team) => (
             <OrganizationKYCTeamCard

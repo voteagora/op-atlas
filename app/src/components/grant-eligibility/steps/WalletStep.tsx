@@ -82,6 +82,8 @@ export default function WalletStep() {
             setForm(updatedForm)
             setVerificationStatus("verified")
             setIsProcessing(false)
+            // Immediately advance using the same code path as Next
+            handleNext(true)
           }
         })
         setOpenDialog("verify_grant_delivery_address")
@@ -91,9 +93,9 @@ export default function WalletStep() {
       toast.error("Failed to save progress. Please try again.")
     }
   }
-
-  const handleNext = async () => {
-    if (!isVerified) {
+  
+  const handleNext = async (force = false) => {
+    if (!force && !isVerified) {
       toast.error("Please verify your wallet address first")
       return
     }
@@ -170,6 +172,7 @@ export default function WalletStep() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletAddress, checkboxes, verificationStatus, isProcessing, canProceed])
 
+  
   return (
     <div className="space-y-8 w-full">
       <div className="space-y-4">
@@ -202,7 +205,7 @@ export default function WalletStep() {
         </div>
 
         <div className="space-y-6">
-          <div className="flex items-start gap-3">
+          <div className="flex items-center gap-3">
             <Checkbox
               id="mainnet"
               checked={checkboxes.onMainnet}
@@ -213,7 +216,7 @@ export default function WalletStep() {
             />
             <label 
               htmlFor="mainnet" 
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base text-secondary-foreground font-normal leading-tight cursor-pointer"
             >
               I confirm this address is on OP Mainnet
             </label>
@@ -230,7 +233,7 @@ export default function WalletStep() {
             />
             <label 
               htmlFor="contract-calls" 
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base text-secondary-foreground font-normal leading-tight cursor-pointer"
             >
               I confirm this address can make contract calls
             </label>
@@ -247,7 +250,7 @@ export default function WalletStep() {
             />
             <label 
               htmlFor="delegate" 
-              className="text-sm font-normal leading-tight cursor-pointer"
+              className="text-base text-secondary-foreground font-normal leading-tight cursor-pointer"
             >
               I pledge to choose a delegate for this wallet in{" "}
               <a 
