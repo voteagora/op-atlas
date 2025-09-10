@@ -65,7 +65,7 @@ export default async function Page({
 
   return (
     <div className="space-y-12">
-      <KYCStatusTitle />
+      <KYCStatusTitle hasKYCTeam={hasKycTeam} />
       {project?.organization?.organization?.id ? (
         <>
           <GrantDeliveryAddress kycTeam={kycTeam} />

@@ -50,7 +50,7 @@ export function DeleteKYCTeamDialog({
       title={
         hasActiveStream
           ? "Are you sure?"
-          : "Are you sure you want to delete this wallet and start the verification process over?"
+          : "Are you sure you want to remove this address and start the verification process over?"
       }
       description={
         hasActiveStream
@@ -60,7 +60,7 @@ export function DeleteKYCTeamDialog({
       confirmText={
         hasActiveStream
           ? "Stop stream and invalidate address"
-          : "Yes, delete this wallet"
+          : "Remove and start over"
       }
       cancelText="Go back"
       variant="destructive"

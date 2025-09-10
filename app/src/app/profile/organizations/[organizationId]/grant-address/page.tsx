@@ -64,7 +64,7 @@ export default async function Page({
 
   return (
     <div className="space-y-12">
-      <KYCStatusTitle />
+      <KYCStatusTitle hasKYCTeam={hasAnyKycTeams} />
       {/* Show KYC status container if there are any KYC teams (old or new flow) */}
       {hasAnyKycTeams && (
         <KYCStatusContainer organization={organization} isAdmin={isAdmin} />

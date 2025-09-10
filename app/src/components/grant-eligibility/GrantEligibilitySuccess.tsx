@@ -38,8 +38,8 @@ export default function GrantEligibilitySuccess({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-[712px] w-full flex flex-col items-center text-center">
+    <div className="fixed inset-0 flex items-center justify-center px-4 overflow-hidden">
+      <div className="max-w-[712px] w-full flex flex-col items-center justify-center text-center">
         {/* Animated Sun Character */}
         <div className="w-48 h-48">
           <RiveComponent className="w-full h-full" />

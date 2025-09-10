@@ -214,13 +214,13 @@ export function AddGrantDeliveryAddressDialog({
           </div>
           <div className="flex flex-col self-stretch gap-1">
             <div className="text-sm font-medium">Message to sign</div>
-            <Textarea disabled value={messageToSign} className="resize-none" />
+            <Textarea readOnly value={messageToSign} className="resize-none cursor-text text-secondary-foreground" />
             <Button type="button" onClick={handleCopy} variant="secondary">
               Copy
             </Button>
           </div>
           <div className="flex flex-col self-stretch gap-1">
-            <div>Signature hash</div>
+            <div className="text-sm font-medium">Signature hash</div>
             <Controller
               control={control}
               name="signature"
