@@ -436,7 +436,8 @@ export const mapValueToVoteType = (
     proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
     proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
   ) {
-    return { voteType: VoteType.Veto }
+    if (valueArray[0] === 0) return { voteType: VoteType.Veto }
+    return { voteType: VoteType.Abstain }
   } else if (
     proposalType === ProposalType.OFFCHAIN_APPROVAL ||
     proposalType === ProposalType.HYBRID_APPROVAL
