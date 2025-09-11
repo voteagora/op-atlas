@@ -210,7 +210,7 @@ const KYCStatusPresenter = ({
                 )}
               </>
             )}
-            {showEditFooter && status !== "APPROVED" && isAdmin && (
+            {showEditFooter && isAdmin && (
               <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">
                 <p className="font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
                   Is something missing or incorrect?
