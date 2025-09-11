@@ -11,19 +11,13 @@ const payloadSchema = z.object({
   nomineeApplicationId: z.number().int().positive(),
 })
 
-function isFeatureEnabled() {
-  return process.env.NEXT_PUBLIC_FEATURE_SC_ENDORSEMENTS === "true"
-}
-
 export async function POST(req: NextRequest) {
-  if (!isFeatureEnabled()) return new Response("Disabled", { status: 404 })
   const session = await auth()
   if (!session?.user?.id) return new Response("Unauthorized", { status: 401 })
 
   const json = await req.json().catch(() => null)
   const parsed = payloadSchema.safeParse(json)
-  if (!parsed.success)
-    return new Response("Bad Request", { status: 400 })
+  if (!parsed.success) return new Response("Bad Request", { status: 400 })
 
   const { context, nomineeApplicationId } = parsed.data
 
@@ -32,12 +26,15 @@ export async function POST(req: NextRequest) {
     include: { role: true },
   })
   if (!application?.role) return new Response("Not Found", { status: 404 })
-  // Optional: gate endorsements by role nomination window (between start and end)
+
   const now = new Date()
-  if (
-    (application.role.startAt && now < new Date(application.role.startAt)) ||
-    (application.role.voteStartAt && now > new Date(application.role.voteStartAt))
-  ) {
+  const voteStartAt = application.role.voteStartAt
+    ? new Date(application.role.voteStartAt)
+    : null
+  const voteEndAt = application.role.voteEndAt
+    ? new Date(application.role.voteEndAt)
+    : null
+  if ((voteStartAt && now < voteStartAt) || (voteEndAt && now > voteEndAt)) {
     return new Response("Window closed", { status: 403 })
   }
 
@@ -65,9 +62,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
-  const nomineeIds = searchParams
-    .getAll("nomineeId")
-    .map((x) => Number(x))
+  const nomineeIds = searchParams.getAll("nomineeId").map((x) => Number(x))
   if (!context || nomineeIds.length === 0)
     return new Response("Bad Request", { status: 400 })
 

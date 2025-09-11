@@ -1,13 +1,25 @@
+import { Prisma } from "@prisma/client"
+
+import { prisma } from "@/db/client"
+
 export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
   const unique = Array.from(new Set(addresses.map((a) => a.toLowerCase())))
   if (unique.length === 0) return false
 
+  try {
+    const rows = await prisma.$queryRaw<{ is_top100: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM public."TopDelegates"
+        WHERE lower(recipient) IN (${Prisma.join(unique)})
+      ) AS is_top100;
+    `
+    if (rows?.[0]?.is_top100 !== undefined) return !!rows[0].is_top100
+  } catch {}
+
   const baseUrl = process.env.TOP100_API_URL
   const apiKey = process.env.TOP100_API_KEY
-  if (!baseUrl) {
-    // Service not configured yet; keep gated off
-    return false
-  }
+  if (!baseUrl) return false
 
   const url = new URL("/isTop100", baseUrl)
   for (const addr of unique) url.searchParams.append("addresses", addr)
