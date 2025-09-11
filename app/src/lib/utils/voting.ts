@@ -77,12 +77,10 @@ const youVoted = (proposalData: ProposalData, vote: VoteType) => {
     proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
     proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
   ) {
+    const isVeto = vote === VoteType.Against
     return {
       cardText: {
-        title:
-          vote == VoteType.Veto
-            ? "You vetoed the decision"
-            : "You voted ‘no veto’",
+        title: isVeto ? "You vetoed the decision" : "You voted ‘no veto’",
         descriptionElement: `Your vote can take up to 5 minutes to publish on Agora.`,
         needsAgoraLink: true,
         proposalId: proposalData.id,
@@ -394,9 +392,10 @@ export const mapVoteTypeToValue = (
     proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
     proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
   ) {
-    return selectedVotes.voteType === VoteType.Veto
+    // UI uses VoteType.Against to represent a Veto selection. Treat it as Veto here.
+    return selectedVotes.voteType === VoteType.Against
       ? JSON.stringify([0]) // Veto
-      : JSON.stringify([2]) // Abstain
+      : JSON.stringify([2]) // No veto (Abstain)
   } else if (
     proposalType === ProposalType.OFFCHAIN_APPROVAL ||
     proposalType === ProposalType.HYBRID_APPROVAL
@@ -433,7 +432,7 @@ export const mapValueToVoteType = (
     proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
     proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
   ) {
-    if (valueArray[0] === 0) return { voteType: VoteType.Veto }
+    if (valueArray[0] === "0") return { voteType: VoteType.Against }
     return { voteType: VoteType.Abstain }
   } else if (
     proposalType === ProposalType.OFFCHAIN_APPROVAL ||
