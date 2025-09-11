@@ -71,7 +71,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
 
           <AnalyticsTracker role={role} />
 
-          <div className="flex flex-col gap-y-8 mt-12">
+          <div className="flex flex-col gap-y-4 mt-12">
             <div className="flex flex-col gap-4">
               <div className="text-3xl font-semibold">{`Self-nominate for ${role.title}`}</div>
               {role.startAt && role.endAt && (
