@@ -33,7 +33,7 @@ export function getKYCEmailTemplate(kycUser: KYCUser, kycLink: string): string {
     
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
     </div>
 </div>
     `
@@ -71,7 +71,7 @@ export function getKYCReminderEmailTemplate(kycUser: KYCUser, kycLink: string): 
     
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
     </div>
 </div>
     `
@@ -109,7 +109,7 @@ export function getKYBReminderEmailTemplate(kycUser: KYCUser, kycLink: string): 
     
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
     </div>
 </div>
     `
@@ -148,7 +148,7 @@ export function getKYBEmailTemplate(kycUser: KYCUser, kycLink: string): string {
     
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
     </div>
 </div>
     `
@@ -177,7 +177,7 @@ export function getKYCApprovedEmailTemplate(kycUser: KYCUser): string {
     
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
     </div>
 </div>
     `
@@ -206,7 +206,7 @@ export function getKYBApprovedEmailTemplate(kycUser: KYCUser): string {
     
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimismAtlasLogo.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
     </div>
 </div>
     `
