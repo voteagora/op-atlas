@@ -9,13 +9,16 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
+import { formatMMMd } from "@/lib/utils/date"
 
 export default function SidebarApplications({
   applications,
   isSecurityRole,
+  voteEndsAt,
 }: {
   applications?: RoleApplication[]
   isSecurityRole?: boolean
+  voteEndsAt: Date | null
 }) {
   if ((!applications || applications.length === 0) && !isSecurityRole) {
     return null
@@ -24,14 +27,15 @@ export default function SidebarApplications({
     <>
       <div className="w-full flex flex-col border border-border-secondary rounded-lg">
         {isSecurityRole ? (
-          <div className="text-center p-6">
+          <div className="text-center p-6 border-b border-border-secondary">
             <div className="flex flex-col gap-2">
               <div className="font-semibold text-secondary-foreground">
                 8 approvals from Top 100 Delegates are required to move on to
                 the vote
               </div>
               <div className="text-sm text-secondary-foreground">
-                Top 100 Delegates may provide approval until Oct 15.
+                Top 100 Delegates may provide approval{" "}
+                {voteEndsAt ? "until " + formatMMMd(voteEndsAt) : ""}.
               </div>
             </div>
           </div>
@@ -42,7 +46,11 @@ export default function SidebarApplications({
           </div>
         )}
         {applications && applications.length > 0 ? (
-          <div className="flex flex-col gap-4 P-6">
+          <div className="flex flex-col gap-4 p-6">
+            <div className="text-secondary-foreground text-sm font-semibold">
+              {applications.length} candidate
+              {applications.length > 1 ? "s" : ""}
+            </div>
             {applications?.map((application) =>
               application.userId ? (
                 <UserCandidate key={application.id} application={application} />
@@ -52,7 +60,7 @@ export default function SidebarApplications({
             )}
           </div>
         ) : (
-          <div className="text-center p-6 border-t border-border-secondary text-sm font-medium">
+          <div className="text-center p-6 border-border-secondary text-sm font-medium">
             No candidates yet
           </div>
         )}
@@ -84,7 +92,7 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
 
   return (
     <div
-      className="flex flex-row gap-2 w-full justify-between cursor-pointer "
+      className="flex flex-row w-full justify-between cursor-pointer py-2"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="button"
@@ -92,7 +100,7 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
       aria-label={`View ${org.name}`}
     >
       <div className="flex flex-row gap-2 text-sm ">
-        <UserAvatar imageUrl={org.avatarUrl} size={"sm"} />
+        <UserAvatar imageUrl={org.avatarUrl} size={"20px"} />
         {org.name}
       </div>
       <ArrowRightS className="w-4 h-4" />
@@ -118,7 +126,7 @@ const UserCandidate = ({ application }: { application: RoleApplication }) => {
 
   return (
     <div
-      className="flex flex-row gap-2 w-full justify-between cursor-pointer "
+      className="flex flex-row gap-2 w-full justify-between cursor-pointer py-2"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       role="button"
@@ -126,7 +134,7 @@ const UserCandidate = ({ application }: { application: RoleApplication }) => {
       aria-label={`View profile of ${username || user.name}`}
     >
       <div className="flex flex-row gap-2 text-sm ">
-        <UserAvatar imageUrl={user.imageUrl} size={"sm"} />
+        <UserAvatar imageUrl={user.imageUrl} size={"20px"} />
         {username || user.name}
       </div>
       <ArrowRightS className="w-4 h-4" />
@@ -138,7 +146,7 @@ const CandidateSkeleton = () => {
   return (
     <div className="flex flex-row gap-2 w-full">
       <div className="flex flex-row gap-2 text-sm">
-        <Skeleton className="w-6 h-6 rounded-full" />
+        <Skeleton className="w-[20px] h-[20px] rounded-full" />
         <Skeleton className="w-24 h-4" />
       </div>
     </div>

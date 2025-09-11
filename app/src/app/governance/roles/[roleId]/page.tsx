@@ -53,7 +53,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
       : null
 
   const isSecurityRole =
-    role.title.includes("Security") || role.title.includes("security");
+    role.title.includes("Security") || role.title.includes("security")
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -140,6 +140,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
             <SidebarApplications
               applications={applications}
               isSecurityRole={isSecurityRole}
+              voteEndsAt={role.voteEndAt}
             />
           )}
         </div>

@@ -23,10 +23,10 @@ import {
   UserProjectsWithDetails,
   UserWithProjects,
 } from "@/lib/types"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { withChangelogTracking } from "@/lib/utils/changelog"
 
 async function getUserProjectsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
