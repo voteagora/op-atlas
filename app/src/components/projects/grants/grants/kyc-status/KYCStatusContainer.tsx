@@ -252,6 +252,7 @@ const ProjectKYCStatusContainer = ({
     data: kycUsers,
     isLoading,
     isError,
+    error: useKYCProjectError,
   } = useKYCProject({ projectId: project.id })
   const projectStatus = kycUsers ? resolveProjectStatus(kycUsers) : "PENDING"
 
@@ -270,7 +271,7 @@ const ProjectKYCStatusContainer = ({
   }))
 
   if (isError) {
-    console.error("Error loading KYC users data")
+    console.error(`Error loading KYC users data: ${useKYCProjectError}`)
   }
 
   return (
