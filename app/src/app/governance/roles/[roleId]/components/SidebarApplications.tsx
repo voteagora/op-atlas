@@ -3,6 +3,7 @@
 import { RoleApplication } from "@prisma/client"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
+import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
@@ -11,25 +12,58 @@ import { useUsername } from "@/hooks/useUsername"
 
 export default function SidebarApplications({
   applications,
+  isSecurityRole,
 }: {
-  applications: RoleApplication[]
+  applications?: RoleApplication[]
+  isSecurityRole?: boolean
 }) {
+  if ((!applications || applications.length === 0) && !isSecurityRole) {
+    return null
+  }
   return (
-    <div className="w-full flex flex-col gap-6 border border-border-secondary rounded-lg p-6">
-      <div className="text-secondary-foreground text-sm font-semibold">
-        {applications.length} candidate{applications.length > 1 ? "s" : ""} so
-        far
-      </div>
-      <div className="flex flex-col gap-4">
-        {applications.map((application) =>
-          application.userId ? (
-            <UserCandidate key={application.id} application={application} />
-          ) : (
-            <OrgCandidate key={application.id} application={application} />
-          ),
+    <>
+      <div className="w-full flex flex-col border border-border-secondary rounded-lg">
+        {isSecurityRole ? (
+          <div className="text-center p-6">
+            <div className="flex flex-col gap-2">
+              <div className="font-semibold text-secondary-foreground">
+                8 approvals from Top 100 Delegates are required to move on to
+                the vote
+              </div>
+              <div className="text-sm text-secondary-foreground">
+                Top 100 Delegates may provide approval until Oct 15.
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-secondary-foreground text-sm font-semibold p-6">
+            {applications?.length ?? 0} candidate
+            {(applications?.length ?? 0) > 1 ? "s" : ""} so far
+          </div>
+        )}
+        {applications && applications.length > 0 ? (
+          <div className="flex flex-col gap-4 P-6">
+            {applications?.map((application) =>
+              application.userId ? (
+                <UserCandidate key={application.id} application={application} />
+              ) : (
+                <OrgCandidate key={application.id} application={application} />
+              ),
+            )}
+          </div>
+        ) : (
+          <div className="text-center p-6 border-t border-border-secondary text-sm font-medium">
+            No candidates yet
+          </div>
         )}
       </div>
-    </div>
+      <div className="text-center text-sm text-secondary-foreground">
+        <span className="font-medium">Need help? </span>
+        <ExternalLink href="https://discord.gg/opatlas" className="underline">
+          Ask on Discord
+        </ExternalLink>
+      </div>
+    </>
   )
 }
 

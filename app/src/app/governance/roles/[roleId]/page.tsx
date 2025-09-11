@@ -17,6 +17,7 @@ import { formatMMMd } from "@/lib/utils/date"
 import { RoleDates } from "./components/RoleDates"
 import { Metadata } from "next"
 import { sharedMetadata } from "@/app/shared-metadata"
+import { useMemo } from "react"
 
 export async function generateMetadata({
   params,
@@ -50,6 +51,9 @@ export default async function Page({ params }: { params: { roleId: string } }) {
           new Date(role.voteEndAt!),
         )}`
       : null
+
+  const isSecurityRole =
+    role.title.includes("Security") || role.title.includes("security");
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -132,8 +136,11 @@ export default async function Page({ params }: { params: { roleId: string } }) {
         </div>
         <div className="flex flex-col gap-6 w-full lg:w-[304px] lg:flex-shrink-0">
           <Sidebar role={role} />
-          {applications && applications.length > 0 && (
-            <SidebarApplications applications={applications} />
+          {((applications && applications.length > 0) || isSecurityRole) && (
+            <SidebarApplications
+              applications={applications}
+              isSecurityRole={isSecurityRole}
+            />
           )}
         </div>
       </div>
