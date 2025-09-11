@@ -118,7 +118,9 @@ export async function deleteCitizen(id: number) {
   })
 }
 
-export async function getCitizenByAddress(address: string): Promise<Citizen | null> {
+export async function getCitizenByAddress(
+  address: string,
+): Promise<Citizen | null> {
   return prisma.citizen.findUnique({
     where: { address },
   })

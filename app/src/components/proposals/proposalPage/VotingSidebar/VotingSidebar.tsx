@@ -8,10 +8,10 @@ import VotingColumn from "@/components/proposals/proposalPage/VotingSidebar/voti
 import VotingRedirect from "@/components/proposals/proposalPage/VotingSidebar/VotingRedirect"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
-import { useUserByContext, useUserCitizen } from "@/hooks/citizen/useUserCitizen"
+import { useUserByContext } from "@/hooks/citizen/useUserCitizen"
+import { useWallet } from "@/hooks/useWallet"
 import { ProposalData } from "@/lib/proposals"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
-import { useWallet } from "@/hooks/useWallet"
 
 interface VotingSidebarProps {
   proposalData: ProposalData
@@ -45,7 +45,6 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
     useCitizenQualification(user?.id)
   const { citizen, isLoading: isCitizenLoading } = useUserByContext()
-  console.log("citizen", citizen)
   const { data: session } = useSession()
   useEffect(() => {
     if (!isEligibilityLoading && !isCitizenLoading) {
