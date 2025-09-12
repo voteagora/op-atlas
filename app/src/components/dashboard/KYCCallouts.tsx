@@ -32,7 +32,7 @@ function KYCInProgressCallout({ kycTeam }: KYCInProgressCalloutProps) {
           />
           <div className="ml-2">
             <span className="text-sm font-medium text-blue-800">
-              Your grant address is being verified. Rewards can't be streamed until this is complete.{" "}
+              Your grant address is being verified. Rewards can&apos;t be streamed until this is complete.{" "}
             </span>
             <TrackedLink
               className="text-sm font-medium text-blue-800 underline"
