@@ -22,6 +22,28 @@ export const caseStatusMap = {
   "Ready for Review": "PENDING",
 } as const
 
+// Add a function to map case statuses to valid PersonaStatus enum values
+export function mapCaseStatusToPersonaStatus(caseStatus: string): string {
+  const status = caseStatus.toLowerCase()
+
+  // Map to valid PersonaStatus enum values
+  switch (status) {
+    case "approved":
+      return "approved"
+    case "declined":
+      return "declined"
+    case "open":
+    case "created":
+    case "expired":
+    case "waiting on ubos":
+    case "ready for review":
+      return "pending"
+    default:
+      console.warn(`Unknown case status: ${caseStatus}, defaulting to pending`)
+      return "pending"
+  }
+}
+
 export type PersonaInquiry = {
   id: string
   attributes: {
@@ -37,6 +59,7 @@ export type PersonaInquiry = {
     "name-last": string
     "name-middle": string
     "email-address": string
+    "reference-id": string
   }
 }
 
@@ -49,6 +72,7 @@ export type PersonaCase = {
     "updated-at": string
     "started-at": string
     "resolved-at": string
+    "reference-id": string
     fields: {
       "business-name": {
         type: string
@@ -60,6 +84,9 @@ export type PersonaCase = {
       }
     }
   }
+  relationships: {
+    inquiries: { data: { type: string; id: string }[] }
+  }
 }
 
 type PersonaResponse<T> = {
@@ -69,6 +96,10 @@ type PersonaResponse<T> = {
   }
 }
 
+type PersonaSingleResponse<T> = {
+  data: T
+}
+
 class PersonaClient {
   constructor(private readonly apiKey?: string) {
     if (!apiKey) {
@@ -76,7 +107,11 @@ class PersonaClient {
     }
   }
 
-  async getCases(nextUrl?: string): Promise<PersonaResponse<PersonaCase>> {
+  async getCases({
+    nextUrl,
+  }: {
+    nextUrl?: string
+  }): Promise<PersonaResponse<PersonaCase>> {
     const url = `${PERSONA_API_URL}${nextUrl || "/api/v1/cases"}`
     const response = await fetch(url, {
       headers: {
@@ -87,9 +122,11 @@ class PersonaClient {
     return response.json()
   }
 
-  async getInquiries(
-    nextUrl?: string,
-  ): Promise<PersonaResponse<PersonaInquiry>> {
+  async getInquiries({
+    nextUrl,
+  }: {
+    nextUrl?: string
+  }): Promise<PersonaResponse<PersonaInquiry>> {
     const url = `${PERSONA_API_URL}${nextUrl || "/api/v1/inquiries"}`
     const response = await fetch(url, {
       headers: {
@@ -99,9 +136,45 @@ class PersonaClient {
 
     return response.json()
   }
+
+  async getInquiryById({
+    inquiryId,
+  }: {
+    inquiryId: string
+  }): Promise<PersonaInquiry | null> {
+    const apiKey = this.apiKey
+    if (!apiKey) {
+      console.warn("Persona API key not set")
+      return null
+    }
+
+    try {
+      const url = `${PERSONA_API_URL}/api/v1/inquiries/${inquiryId}`
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null
+        }
+        throw new Error(
+          `Failed to fetch inquiry: ${response.status} ${response.statusText}`,
+        )
+      }
+
+      const data: PersonaSingleResponse<PersonaInquiry> = await response.json()
+      return data.data
+    } catch (error) {
+      console.error(`Error fetching inquiry ${inquiryId}:`, error)
+      return null
+    }
+  }
 }
 
-const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
+export const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
 
 async function* fetchGenerator<T>(
   client: PersonaClient,
@@ -111,9 +184,10 @@ async function* fetchGenerator<T>(
   let currentUrl = nextUrl
 
   do {
-    const response = (await client[path as keyof PersonaClient](
-      currentUrl,
-    )) as PersonaResponse<T>
+    const response = (await client[path as keyof PersonaClient]({
+      nextUrl: currentUrl,
+      inquiryId: "",
+    })) as PersonaResponse<T>
 
     const batch = response.data
     yield batch
