@@ -34,6 +34,7 @@ model User {
   projects           UserProjects[]
   worldId            UserWorldId?
   changelog          UserChangelog[]
+  endorsements       Endorsement[]      @relation("UserEndorsements")
 
   @@index([username])
   @@index([farcasterId])
@@ -723,6 +724,7 @@ model RoleApplication {
   organization   Organization?         @relation(fields: [organizationId], references: [id])
   role           Role                  @relation(fields: [roleId], references: [id])
   user           User?                 @relation(fields: [userId], references: [id])
+  endorsements   Endorsement[]         @relation("NomineeApplicationEndorsements")
 
   @@index([roleId])
   @@index([userId])
@@ -820,4 +822,21 @@ model ApplicationChangelog {
   @@index([applicationId])
   @@index([action])
   @@index([createdAt])
+}
+
+model Endorsement {
+  id                   String           @id @default(uuid())
+  context              String
+  nomineeApplicationId Int
+  endorserAddress      String
+  endorserUserId       String?
+  createdAt            DateTime         @default(now())
+  revokedAt            DateTime?
+
+  nomineeApplication   RoleApplication  @relation("NomineeApplicationEndorsements", fields: [nomineeApplicationId], references: [id], onDelete: Cascade)
+  endorserUser         User?            @relation("UserEndorsements", fields: [endorserUserId], references: [id])
+
+  @@unique([context, nomineeApplicationId, endorserAddress])
+  @@index([context, nomineeApplicationId])
+  @@index([endorserAddress])
 }

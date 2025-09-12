@@ -25,7 +25,10 @@ export async function createEndorsement({
       endorserAddress: endorserAddress.toLowerCase(),
       endorserUserId,
     },
-    update: {},
+    update: {
+      endorserUserId: endorserUserId,
+    },
+    select: { id: true },
   })
 }
 
@@ -58,6 +61,7 @@ export async function getEndorsementCounts({
   context: string
   nomineeApplicationIds: number[]
 }) {
+  if (nomineeApplicationIds.length === 0) return new Map<number, number>()
   const rows = await prisma.endorsement.groupBy({
     by: ["nomineeApplicationId"],
     where: {
