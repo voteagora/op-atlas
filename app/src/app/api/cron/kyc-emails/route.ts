@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 const MONITOR_SLUG = "cron-kyc-emails"
-const REMINDER_CUTOFF_DATE = new Date('2025-09-15') // Only send reminders to users created after this date
+// Only send reminder and approval emails to KYCUsers created after this date
+const EMAIL_START_DATE = new Date('2025-09-15')
 
 async function handleKYCEmailsCron(request: NextRequest) {
   const results = {
@@ -20,7 +21,6 @@ async function handleKYCEmailsCron(request: NextRequest) {
   }
 
   try {
-    // Process reminders (7 days old, [`created`, `pending`, `needs_review`], no reminder sent yet)
     console.log("🔍 Processing KYC/KYB reminder emails...")
     
     const threshold = new Date()
@@ -28,10 +28,11 @@ async function handleKYCEmailsCron(request: NextRequest) {
     
     const reminderCandidates = await prisma.kYCUser.findMany({
       where: {
+        status: 'PENDING',
         personaStatus: { in: ['created', 'pending', 'needs_review'] },
         createdAt: { 
           lte: threshold,
-          gte: REMINDER_CUTOFF_DATE
+          gte: EMAIL_START_DATE
         },
         EmailNotifications: {
           none: {
@@ -39,7 +40,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
           }
         }
       },
-      take: 500 // Process in batches to avoid timeout
+      take: 500
     })
 
     console.log(`Found ${reminderCandidates.length} reminder candidates`)
@@ -76,10 +77,10 @@ async function handleKYCEmailsCron(request: NextRequest) {
     
     const approvalCandidates = await prisma.kYCUser.findMany({
       where: {
-        OR: [
-          { status: 'APPROVED' },
-          { personaStatus: 'approved' }
-        ],
+        status: 'APPROVED',
+        createdAt: {
+          gte: EMAIL_START_DATE
+        },
         EmailNotifications: {
           none: {
             type: 'KYCB_APPROVED'
