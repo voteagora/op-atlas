@@ -81,6 +81,8 @@ export async function processStream(
     (project) => project.recurringRewards.length > 0,
   )
 
+  const amounts = calculateRewardAmounts(projectsWithRewards)
+
   return {
     id:
       streamId ??
@@ -93,12 +95,13 @@ export async function processStream(
     wallets,
     KYCStatusCompleted: isKycStreamTeamVerified(currentTeam),
     amounts: [
-      calculateRewardAmounts(projectsWithRewards)[0],
-      calculateRewardAmounts(projectsWithRewards)[1],
-      calculateRewardAmounts(projectsWithRewards)[2],
-      calculateRewardAmounts(projectsWithRewards)[3],
-      calculateRewardAmounts(projectsWithRewards)[4],
-      calculateRewardAmounts(projectsWithRewards)[5],
+      amounts[0],
+      amounts[1],
+      amounts[2],
+      amounts[3],
+      amounts[4],
+      amounts[5],
+      amounts[6],
     ],
   }
 }
