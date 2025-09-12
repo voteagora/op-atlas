@@ -7,6 +7,8 @@ import { mainnet, optimism, optimismSepolia, sepolia } from "viem/chains"
 import { http } from "wagmi"
 
 import { SafeContextProvider } from "@/providers/SafeContextProvider"
+import { isTestMode } from "@/lib/auth/testMode"
+import TestModeProvider from "@/providers/TestModeProvider"
 
 export const privyWagmiConfig = createConfig({
   chains: [mainnet, sepolia, optimismSepolia, optimism],
@@ -19,12 +21,17 @@ export const privyWagmiConfig = createConfig({
 })
 
 const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = new QueryClient()
+
+  // In test mode, use the test provider that doesn't depend on Privy
+  if (isTestMode()) {
+    return <TestModeProvider>{children}</TestModeProvider>
+  }
+
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
   if (!appId) {
     throw new Error("Missing NEXT_PUBLIC_PRIVY_APP_ID environment variable")
   }
-
-  const queryClient = new QueryClient()
 
   return (
     <PrivyProvider
@@ -46,9 +53,7 @@ const PrivyAuthProvider = ({ children }: { children: React.ReactNode }) => {
     >
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={privyWagmiConfig}>
-          <SafeContextProvider>
-            {children}
-          </SafeContextProvider>
+          <SafeContextProvider>{children}</SafeContextProvider>
         </WagmiProvider>
       </QueryClientProvider>
     </PrivyProvider>
