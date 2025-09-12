@@ -6,7 +6,7 @@ import { auth } from "@/auth"
 import KYCStatusContainer, {
   KYCStatusTitle,
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
-import { getOrganization } from "@/db/organizations"
+import { getOrganization, getOrganizationKYCTeams } from "@/db/organizations"
 import { getUserOrganizationRole, verifyOrganizationMembership } from "@/lib/actions/utils"
 
 import GrantAddressForm from "./components/GrantAddressForm"
@@ -59,12 +59,17 @@ export default async function Page({
   if (!organization) {
     return notFound()
   }
-  // Determine if org has any KYC teams based on lightweight include
+  // Determine if org has any KYC teams with users 
+  const orgKycTeams = await getOrganizationKYCTeams({ organizationId: params.organizationId })
+  const hasAnyKycTeamsWithUsers = orgKycTeams.some(kycOrg => {
+    const tamUsers = kycOrg.team.team.flatMap((t: any) => t.users || [])
+    return tamUsers.length > 0
+  })
   const hasAnyKycTeams = (organization.OrganizationKYCTeams?.length ?? 0) > 0
 
   return (
     <div className="space-y-12">
-      <KYCStatusTitle hasKYCTeam={hasAnyKycTeams} />
+      <KYCStatusTitle hasKYCTeamWithUsers={hasAnyKycTeamsWithUsers} />
       {/* Show KYC status container if there are any KYC teams (old or new flow) */}
       {hasAnyKycTeams && (
         <KYCStatusContainer organization={organization} isAdmin={isAdmin} />

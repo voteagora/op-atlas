@@ -61,11 +61,11 @@ export default async function Page({
 
   const project = await getKycTeamForProject({ projectId: params.projectId })
   const kycTeam = project?.kycTeam ?? undefined
-  const hasKycTeam = !!kycTeam
+  const hasKycTeamWithUsers = !!(kycTeam && kycTeam.team && kycTeam.team.length > 0)
 
   return (
     <div className="space-y-12">
-      <KYCStatusTitle hasKYCTeam={hasKycTeam} />
+      <KYCStatusTitle hasKYCTeamWithUsers={hasKycTeamWithUsers} />
       {project?.organization?.organization?.id ? (
         <>
           <GrantDeliveryAddress kycTeam={kycTeam} />
@@ -78,7 +78,7 @@ export default async function Page({
           </Button>
         </>
       ) : (
-        !hasKycTeam && (
+        !hasKycTeamWithUsers && (
           <div className="space-y-6">
             <GrantDeliveryAddressSection 
               projectId={params.projectId}
@@ -88,7 +88,7 @@ export default async function Page({
         )
       )}
       
-      {project && hasKycTeam && (
+      {project && hasKycTeamWithUsers && (
         <KYCStatusContainer project={project} isAdmin={isAdmin} />
       )}
     </div>

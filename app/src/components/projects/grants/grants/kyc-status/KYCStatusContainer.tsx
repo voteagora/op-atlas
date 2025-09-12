@@ -89,7 +89,7 @@ const KYCSkeleton = () => (
   </div>
 )
 
-const KYCStatusTitle = ({ hasKYCTeam = false }: { hasKYCTeam?: boolean }) => {
+const KYCStatusTitle = ({ hasKYCTeamWithUsers = false }: { hasKYCTeamWithUsers?: boolean }) => {
   return (
     <div className="space-y-6">
       <h2>Grant Delivery Address</h2>
@@ -97,7 +97,7 @@ const KYCStatusTitle = ({ hasKYCTeam = false }: { hasKYCTeam?: boolean }) => {
         Add the wallet address your rewards will be delivered to. Identity
         verification is required for each address.
       </p>
-      {!hasKYCTeam && (
+      {!hasKYCTeamWithUsers && (
         <p className="text-secondary-foreground font-normal">
           Get started by submitting the grant eligibility form.
         </p>
@@ -312,27 +312,29 @@ const OrganizationKYCStatusContainer = ({
     return null
   }
 
-  // Group KYC organizations by status
-  const kycTeamsWithStatus = kycOrganizations.map((kycOrg) => {
-    // We need to check TAM users (all users in the org's KYC team)
-    // Flatten all users from the organization's KYC team structure
-    const tamUsers = kycOrg.team.team.flatMap((t: any) => t.users || [])
-    const hasActiveStream =
-      kycOrg.team.rewardStreams && kycOrg.team.rewardStreams.length > 0
+  // Group KYC organizations by status - only include teams that have users
+  const kycTeamsWithStatus = kycOrganizations
+    .map((kycOrg) => {
+      // We need to check TAM users (all users in the org's KYC team)
+      // Flatten all users from the organization's KYC team structure
+      const tamUsers = kycOrg.team.team.flatMap((t: any) => t.users || [])
+      const hasActiveStream =
+        kycOrg.team.rewardStreams && kycOrg.team.rewardStreams.length > 0
 
-    const orgStatus = (
-      tamUsers && tamUsers.length > 0
-        ? resolveProjectStatus(tamUsers)
-        : "PENDING"
-    ) as import("@/components/projects/types").ExtendedPersonaStatus
+      const orgStatus = (
+        tamUsers && tamUsers.length > 0
+          ? resolveProjectStatus(tamUsers)
+          : "PENDING"
+      ) as import("@/components/projects/types").ExtendedPersonaStatus
 
-    return {
-      kycOrg,
-      users: tamUsers,
-      status: orgStatus,
-      hasActiveStream,
-    }
-  })
+      return {
+        kycOrg,
+        users: tamUsers,
+        status: orgStatus,
+        hasActiveStream,
+      }
+    })
+    .filter((team) => team.users.length > 0) // Only show teams that have users
 
   const verifiedTeams = kycTeamsWithStatus.filter(
     (team) => team.status === "APPROVED",
