@@ -13,7 +13,7 @@ import { useSafeContext } from "@/hooks/useSafeContext"
 import { safeService } from "@/services/SafeService"
 import type { SafeContextValue, SignerWallet } from "@/types/safe"
 
-const SafeContext = createContext<SafeContextValue | null>(null)
+export const SafeContext = createContext<SafeContextValue | null>(null)
 
 export const useSafeContextValue = (): SafeContextValue => {
   const context = useContext(SafeContext)

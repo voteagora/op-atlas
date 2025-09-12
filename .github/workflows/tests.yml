@@ -8,16 +8,40 @@ on:
     branches: [ main, develop ]
 
 env:
-  NEXT_PUBLIC_PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
-  PRIVY_APP_ID: ${{ secrets.PRIVY_APP_ID }}
-  PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  NEXT_PUBLIC_AGORA_API_URL: ${{ secrets.NEXT_PUBLIC_AGORA_API_URL}}
-  NEXT_PUBLIC_VERCEL_URL: ${{ secrets.NEXT_PUBLIC_VERCEL_URL}}
-  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  NODE_ENV: "test"
+  ATLAS_TEST_MODE: "true"
+  USE_TEST_AUTH: "true"
+  NEXT_PUBLIC_ATLAS_TEST_MODE: "true"
+  NEXT_PUBLIC_USE_TEST_AUTH: "true"
+  MOCK_EXTERNAL_SERVICES: "true"
+
+  NEXT_PUBLIC_PRIVY_APP_ID: "test-app-id"
+  PRIVY_APP_ID: "test-app-id"
+  PRIVY_APP_SECRET: "test-app-secret"
+
+  NEXTAUTH_SECRET: "test-nextauth-secret"
   NEXTAUTH_URL: "http://localhost:3000"
-  MAILCHIMP_API_KEY: ${{ secrets.MAILCHIMP_API_KEY }}
-  MAILCHIMP_SERVER_PREFIX: ${{ secrets.MAILCHIMP_SERVER_PREFIX }}
+
+  NEXT_PUBLIC_AGORA_API_URL: "http://localhost:3000/api/mock"
+  NEXT_PUBLIC_VERCEL_URL: "http://localhost:3000"
+  NEXT_PUBLIC_APP_DOMAIN: "localhost:3000"
+  NEXT_PUBLIC_VERCEL_ENV: "development"
+  NEXT_PUBLIC_MIXPANEL_TOKEN: "test"
+  NEXT_PUBLIC_POSTHOG_KEY: "test"
+  NEXT_PUBLIC_SAFE_API_KEY: "test"
+  NEXT_PUBLIC_ENV: "development"
+
+  # Impersonation system settings
+  USE_IMPERSONATION: "true"
+  PROD_DB_READ_ONLY: "true"
+  PROD_DB_SAFE_MODE: "true"
+  IMPERSONATION_MASK_EMAILS: "true"
+  IMPERSONATION_AUDIT_LOGGING: "true"
+
+  # EAS settings for testing
+  EAS_SIGNER_PRIVATE_KEY: "test-eas-signer-key"
+  EAS_ADDRESS: "0x1234567890123456789012345678901234567890"
+
 
 jobs:
   test:
@@ -55,10 +79,27 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate GraphQL types
+        run: |
+          cd app
+          pnpm graphql:generate
+
+      - name: Generate Prisma client
+        run: |
+          cd app
+          npx prisma generate
+
       - name: Install Playwright browsers
         run: |
           cd app
           npx playwright install --with-deps
+
+      - name: Setup test database schema
+        run: |
+          cd app
+          npx prisma db push
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
 
       - name: Run Playwright tests
         run: |
@@ -66,6 +107,18 @@ jobs:
           npx playwright test
         env:
           CI: true
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
+          # Test mode is already set in global env above
+
+      - name: Run Impersonation tests (if production DB available)
+        run: |
+          cd app
+          npx playwright test --grep "User Impersonation"
+        env:
+          CI: true
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test
+          PROD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        continue-on-error: true
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
