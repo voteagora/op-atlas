@@ -99,6 +99,7 @@ export async function processStream(
       calculateRewardAmounts(projectsWithRewards)[3],
       calculateRewardAmounts(projectsWithRewards)[4],
       calculateRewardAmounts(projectsWithRewards)[5],
+      calculateRewardAmounts(projectsWithRewards)[6],
     ],
   }
 }
