@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic"
 export const revalidate = 0
 
 const MONITOR_SLUG = "cron-kyc-emails"
-const REMINDER_CUTOFF_DATE = new Date('2025-09-01') // Only send reminders to users created after this date
+const REMINDER_CUTOFF_DATE = new Date('2025-09-15') // Only send reminders to users created after this date
 
 async function handleKYCEmailsCron(request: NextRequest) {
   const results = {
@@ -58,7 +58,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
           
           const result = isKYB 
             ? await sendKYBReminderEmail(user)
-            : await sendKYCReminderEmail(user, {}) // Empty context for cron job
+            : await sendKYCReminderEmail(user, { bypassAuth: true })
             
           if (result.success) {
             results.remindersSent++
