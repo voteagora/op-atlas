@@ -16,6 +16,7 @@ import {
 } from "@/db/projects"
 import { getDeployedContractsServerParsed } from "@/lib/oso"
 
+import { UNIVERSAL_CREATE2_FACTORY } from "../constants"
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
 import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
@@ -168,10 +169,11 @@ export const verifyContract = async ({
         // proceed without trace
       } else {
         // Additional fallback: Universal CREATE2 Factory
-        const UNIVERSAL_CREATE2_FACTORY =
-          "0x4e59b44847b379578588920ca78fbf26c0b4956c"
         if (
-          isAddressEqual(tx.to, getAddress(UNIVERSAL_CREATE2_FACTORY as Address)) &&
+          isAddressEqual(
+            tx.to,
+            getAddress(UNIVERSAL_CREATE2_FACTORY as Address),
+          ) &&
           sentByDeployer &&
           (tx.status as unknown as string) === "success"
         ) {
