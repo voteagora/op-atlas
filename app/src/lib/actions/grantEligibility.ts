@@ -328,7 +328,7 @@ export async function submitGrantEligibilityForm(params: {
         }
 
         let kycUser = await tx.kYCUser.findFirst({
-          where: { email: signer.email.toLowerCase() },
+          where: { email: signer.email.toLowerCase(), kycUserType: "USER" },
         })
 
         let isNewUser = false
@@ -378,7 +378,7 @@ export async function submitGrantEligibilityForm(params: {
         }
 
         let kycUser = await tx.kYCUser.findFirst({
-          where: { email: entity.controllerEmail.toLowerCase() },
+          where: { email: entity.controllerEmail.toLowerCase(), kycUserType: "LEGAL_ENTITY" },
         })
 
         let isNewUser = false
