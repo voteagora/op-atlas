@@ -97,7 +97,6 @@ export async function processStream(
   const activeTranches = SEASON_TRANCHES[seasonKey] || []
   
   // Map only the active tranches
-<<<<<<< HEAD
   const amounts = activeTranches.map(trancheNum =>
     calculatedAmounts[trancheNum - 1] ?? "0"
   )
@@ -110,11 +109,6 @@ export async function processStream(
   if (!hasNonZeroAmounts) {
     return null
   }
-=======
-  const amounts = activeTranches.map(trancheNum => 
-    calculatedAmounts[trancheNum - 1] ?? null
-  )
->>>>>>> 4fade20c7ba7e603c362e0307d6b65eb28b67917
 
   return {
     id:
