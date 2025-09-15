@@ -13,6 +13,7 @@ import {
   ProjectWithDetails,
   UserOrganizationsWithDetails,
   UserWithAddresses,
+  UserKYCTeam,
 } from "@/lib/types"
 import { cn, profileProgress } from "@/lib/utils"
 
@@ -26,6 +27,7 @@ import ApplicationBanner from "./ApplicationBanner"
 import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
+import { KYCCalloutsContainer } from "./KYCCallouts"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
@@ -40,6 +42,7 @@ const Dashboard = ({
   applications,
   organizations,
   adminProjects,
+  kycTeams,
 }: {
   className?: string
   user: UserWithAddresses
@@ -47,6 +50,7 @@ const Dashboard = ({
   applications: ApplicationWithDetails[]
   organizations?: UserOrganizationsWithDetails[]
   adminProjects: ProjectWithDetails[]
+  kycTeams?: UserKYCTeam[]
 }) => {
   // Use last 16 chars of privyDid for user-specific cookie
   const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
@@ -99,6 +103,9 @@ const Dashboard = ({
   }
   return (
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
+      {/* KYC Status Callouts */}
+      <KYCCalloutsContainer kycTeams={kycTeams} />
+      
       {/* <RewardsCallout
         roundName="Onchain Builders"
         rewardPeriodStart={new Date("2025-02-01T21:53:13.300Z")}

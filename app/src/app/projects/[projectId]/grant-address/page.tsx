@@ -6,10 +6,13 @@ import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
 import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
+import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
+import KYCStatusContainer, {
+  KYCStatusTitle,
+} from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
-
-import { AddGrantDeliveryAddressContainer } from "./components"
+import { getUserProjectRole, verifyMembership } from "@/lib/actions/utils"
 
 export async function generateMetadata({
   params,
@@ -46,22 +49,23 @@ export default async function Page({
     redirect("/")
   }
 
-  const project = await getKycTeamForProject({ projectId: params.projectId })
+  // Check user membership - redirect non-members to homepage
+  const membershipCheck = await verifyMembership(params.projectId, userId)
+  if (membershipCheck?.error) {
+    redirect("/")
+  }
 
+  // Get user role
+  const userRole = await getUserProjectRole(params.projectId, userId)
+  const isAdmin = userRole === "admin"
+
+  const project = await getKycTeamForProject({ projectId: params.projectId })
   const kycTeam = project?.kycTeam ?? undefined
+  const hasKycTeamWithUsers = !!(kycTeam && kycTeam.team && kycTeam.team.length > 0)
 
   return (
     <div className="space-y-12">
-      <div className="space-y-6">
-        <h2>Grant Delivery Address</h2>
-        <p className="text-secondary-foreground font-normal">
-          Add the address(es) your rewards will be delivered to. You can do this
-          at any time, and your entry will be valid for one year.
-        </p>
-        <p className="text-secondary-foreground font-normal">
-          KYC (identity verification) is required for each address.
-        </p>
-      </div>
+      <KYCStatusTitle hasKYCTeamWithUsers={hasKycTeamWithUsers} />
       {project?.organization?.organization?.id ? (
         <>
           <GrantDeliveryAddress kycTeam={kycTeam} />
@@ -74,20 +78,18 @@ export default async function Page({
           </Button>
         </>
       ) : (
-        <div className="space-y-6">
-          <AddGrantDeliveryAddressContainer projectId={params.projectId} />
-          <div>
-            <p className="text-secondary-foreground text-sm font-normal">
-              Need help? Contact{" "}
-              <Link
-                href="mailto:retrofunding@optimism.io"
-                className="underline"
-              >
-                retrofunding@optimism.io
-              </Link>
-            </p>
+        !hasKycTeamWithUsers && (
+          <div className="space-y-6">
+            <GrantDeliveryAddressSection 
+              projectId={params.projectId}
+              isAdmin={isAdmin}
+            />
           </div>
-        </div>
+        )
+      )}
+      
+      {project && hasKycTeamWithUsers && (
+        <KYCStatusContainer project={project} isAdmin={isAdmin} />
       )}
     </div>
   )

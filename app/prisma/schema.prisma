@@ -27,13 +27,13 @@ model User {
   RewardClaim        RewardClaim[]
   roleApplications   RoleApplication[]
   addresses          UserAddress[]
+  changelog          UserChangelog[]
   emails             UserEmail[]
   interaction        UserInteraction?
   organizations      UserOrganization[]
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
-  changelog          UserChangelog[]
 
   @@index([username])
   @@index([farcasterId])
@@ -154,6 +154,7 @@ model Organization {
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
   deletedAt            DateTime?
+  GrantEligibilitys    GrantEligibility[]
   OrganizationKYCTeams OrganizationKYCTeam[]
   snapshots            OrganizationSnapshot[]
   projects             ProjectOrganization[]
@@ -234,7 +235,10 @@ model Project {
   kycTeamId                 String?
   applications              Application[]
   rewards                   FundingReward[]
+  GrantEligibilitys         GrantEligibility[]
   kycTeam                   KYCTeam?                         @relation(fields: [kycTeamId], references: [id])
+  blacklist                 ProjectBlacklist?
+  changelog                 ProjectChangelog[]
   contracts                 ProjectContract[]
   funding                   ProjectFunding[]
   links                     ProjectLinks[]
@@ -250,8 +254,6 @@ model Project {
   recurringRewards          RecurringReward[]
   team                      UserProjects[]
   projectOSOData            projectOSOData[]
-  blacklist                 ProjectBlacklist?
-  changelog                 ProjectChangelog[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
@@ -263,7 +265,7 @@ model ProjectBlacklist {
   reason    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId])
 }
@@ -281,8 +283,8 @@ model Application {
   category                  Category?               @relation(fields: [categoryId], references: [id])
   project                   Project                 @relation(fields: [projectId], references: [id])
   round                     FundingRound            @relation(fields: [roundId], references: [id])
-  impactStatementAnswer     ImpactStatementAnswer[]
   changelog                 ApplicationChangelog[]
+  impactStatementAnswer     ImpactStatementAnswer[]
 
   @@index([projectId])
   @@index([roundId])
@@ -480,18 +482,37 @@ model ContactEmailTags {
 }
 
 model KYCUser {
-  id           String         @id @default(uuid())
-  email        String
-  firstName    String
-  lastName     String
-  businessName String?
-  status       KYCStatus      @default(PENDING)
-  expiry       DateTime
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  KYCUserTeams KYCUserTeams[]
+  id                 String              @id @default(uuid())
+  email              String
+  firstName          String
+  lastName           String
+  businessName       String?
+  status             KYCStatus           @default(PENDING)
+  expiry             DateTime
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  personaStatus      PersonaStatus?
+  kycUserType        KYCUserType         @default(USER)
+  KYCUserTeams       KYCUserTeams[]
+  EmailNotifications EmailNotification[]
 
   @@index([email])
+}
+
+model EmailNotification {
+  id        String                @id @default(uuid())
+  kycUserId String
+  type      EmailNotificationType
+  sentAt    DateTime              @default(now())
+  emailTo   String                // Store the actual email used
+  success   Boolean               @default(true)
+  error     String?               // Store any error messages
+  
+  kycUser   KYCUser               @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
+  
+  @@index([kycUserId])
+  @@index([type])
+  @@index([sentAt])
 }
 
 model KYCTeam {
@@ -500,6 +521,7 @@ model KYCTeam {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   deletedAt            DateTime?
+  GrantEligibilitys    GrantEligibility[]
   team                 KYCUserTeams[]
   OrganizationKYCTeams OrganizationKYCTeam[]
   projects             Project[]
@@ -708,6 +730,7 @@ model Role {
   voteEndAt    DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @default(now()) @updatedAt
+  proposalId   String?
   applications RoleApplication[]
 }
 
@@ -729,53 +752,45 @@ model RoleApplication {
   @@index([organizationId])
 }
 
-view OffChainVote {
-  attestationId   String          @id
-  voterAddress    String
-  proposalId      String
-  vote            Json
-  transactionHash String?
-  citizenId       Int
-  citizenCategory citizenCategory
-  createdAt       DateTime        @db.Timestamptz(6)
+model GrantEligibility {
+  id             String                      @id @default(uuid())
+  currentStep    Int                         @default(1)
+  expiresAt      DateTime?
+  submittedAt    DateTime?
+  grantType      GrantType?
+  walletAddress  String?
+  attestations   Json?
+  data           Json
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+  deletedAt      DateTime?
+  projectId      String?
+  organizationId String?
+  kycTeamId      String?
+  kycTeam        KYCTeam?                    @relation(fields: [kycTeamId], references: [id])
+  organization   Organization?               @relation(fields: [organizationId], references: [id])
+  project        Project?                    @relation(fields: [projectId], references: [id])
+  changelog      GrantEligibilityChangelog[]
 
-  @@unique([proposalId, citizenId])
+  @@index([projectId])
+  @@index([organizationId])
+  @@index([kycTeamId])
+  @@index([createdAt])
 }
 
-enum KYCStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
+model GrantEligibilityChangelog {
+  id          String           @id @default(uuid())
+  formId      String
+  action      String
+  performedBy String?
+  oldData     Json?
+  newData     Json?
+  createdAt   DateTime         @default(now())
+  form        GrantEligibility @relation(fields: [formId], references: [id])
 
-enum ProjectOSOMetric {
-  TVL
-  GAS_FEES
-  ACTIVE_ADDRESSES_COUNT
-  TRANSACTION_COUNT
-  HAS_DEFILLAMA_ADAPTER
-  HAS_BUNDLE_BEAR
-  IS_ONCHAIN_BUILDER_ELIGIBLE
-  IS_DEV_TOOLING_ELIGIBLE
-  STAR_COUNT
-  FORK_COUNT
-  NUM_PACKAGES_IN_DEPS_DEV
-  PACKAGE_CONNECTION_COUNT
-  DEVELOPER_CONNECTION_COUNT
-  TRUSTED_DEVELOPER_USERNAME
-  DOWNSTREAM_GAS
-}
-
-enum citizenCategory {
-  CHAIN
-  APP
-  USER
-}
-
-enum RoleApplicationStatus {
-  pending
-  approved
-  rejected
+  @@index([formId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 model UserChangelog {
@@ -820,4 +835,156 @@ model ApplicationChangelog {
   @@index([applicationId])
   @@index([action])
   @@index([createdAt])
+}
+
+view OffChainVote {
+  attestationId   String          @id
+  voterAddress    String
+  proposalId      String
+  vote            Json
+  transactionHash String?
+  citizenId       Int
+  citizenCategory citizenCategory
+  createdAt       DateTime        @db.Timestamptz(6)
+  updatedAt       DateTime?       @db.Timestamptz(6)
+
+  @@unique([proposalId, citizenId])
+}
+
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+view pg_stat_statements_info {
+  dealloc     BigInt?
+  stats_reset DateTime? @db.Timestamptz(6)
+
+  @@ignore
+}
+
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+view VotesWithMeta {
+  transaction_hash String?
+  proposal_id      String?
+  voter            String?
+  support          String?
+  weight           Decimal? @db.Decimal
+  reason           String?
+  params           String?
+  block_number     Int?
+  citizen_type     String?
+  voter_metadata   Json?    @db.Json
+
+  @@ignore
+}
+
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+view pg_stat_statements {
+  userid                 Int?     @db.Oid
+  dbid                   Int?     @db.Oid
+  toplevel               Boolean?
+  queryid                BigInt?
+  query                  String?
+  plans                  BigInt?
+  total_plan_time        Float?
+  min_plan_time          Float?
+  max_plan_time          Float?
+  mean_plan_time         Float?
+  stddev_plan_time       Float?
+  calls                  BigInt?
+  total_exec_time        Float?
+  min_exec_time          Float?
+  max_exec_time          Float?
+  mean_exec_time         Float?
+  stddev_exec_time       Float?
+  rows                   BigInt?
+  shared_blks_hit        BigInt?
+  shared_blks_read       BigInt?
+  shared_blks_dirtied    BigInt?
+  shared_blks_written    BigInt?
+  local_blks_hit         BigInt?
+  local_blks_read        BigInt?
+  local_blks_dirtied     BigInt?
+  local_blks_written     BigInt?
+  temp_blks_read         BigInt?
+  temp_blks_written      BigInt?
+  blk_read_time          Float?
+  blk_write_time         Float?
+  temp_blk_read_time     Float?
+  temp_blk_write_time    Float?
+  wal_records            BigInt?
+  wal_fpi                BigInt?
+  wal_bytes              Decimal? @db.Decimal
+  jit_functions          BigInt?
+  jit_generation_time    Float?
+  jit_inlining_count     BigInt?
+  jit_inlining_time      Float?
+  jit_optimization_count BigInt?
+  jit_optimization_time  Float?
+  jit_emission_count     BigInt?
+  jit_emission_time      Float?
+
+  @@ignore
+}
+
+enum KYCUserType {
+  USER
+  LEGAL_ENTITY
+}
+
+enum KYCStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ProjectOSOMetric {
+  TVL
+  GAS_FEES
+  ACTIVE_ADDRESSES_COUNT
+  TRANSACTION_COUNT
+  HAS_DEFILLAMA_ADAPTER
+  HAS_BUNDLE_BEAR
+  IS_ONCHAIN_BUILDER_ELIGIBLE
+  IS_DEV_TOOLING_ELIGIBLE
+  STAR_COUNT
+  FORK_COUNT
+  NUM_PACKAGES_IN_DEPS_DEV
+  PACKAGE_CONNECTION_COUNT
+  DEVELOPER_CONNECTION_COUNT
+  TRUSTED_DEVELOPER_USERNAME
+  DOWNSTREAM_GAS
+}
+
+enum citizenCategory {
+  CHAIN
+  APP
+  USER
+}
+
+enum RoleApplicationStatus {
+  pending
+  approved
+  rejected
+}
+
+enum PersonaStatus {
+  created
+  pending
+  completed
+  failed
+  expired
+  needs_review
+  approved
+  declined
+}
+
+enum EmailNotificationType {
+  KYCB_STARTED
+  KYCB_REMINDER
+  KYCB_APPROVED
+}
+
+enum GrantType {
+  RETRO_FUNDING
+  AUDIT_GRANT
+  GROWTH_GRANT
+  FOUNDATION_MISSION
 }

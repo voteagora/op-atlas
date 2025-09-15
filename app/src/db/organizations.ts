@@ -40,12 +40,11 @@ async function getOrganizationsFn(userId: string) {
   `
 
   // Transform the raw result to match the expected structure
-  const transformed =
+  return (
     result[0]?.result.organizations.map(
       (organizationObj) => organizationObj.organization,
     ) || []
-
-  return transformed
+  )
 }
 
 export const getOrganizations = cache(getOrganizationsFn)
@@ -155,11 +154,11 @@ async function getUserProjectOrganizationsFn(
   `
 
   // Transform the raw result to match the expected structure
-  const transformed = result[0]?.result || {
-    organizations: [],
-  }
-
-  return transformed
+  return (
+    result[0]?.result || {
+      organizations: [],
+    }
+  )
 }
 
 export const getUserProjectOrganizations = cache(getUserProjectOrganizationsFn)
@@ -394,6 +393,10 @@ async function getOrganizationFn({ id }: { id: string }) {
     include: {
       team: { where: { deletedAt: null }, include: { user: true } },
       projects: true,
+      OrganizationKYCTeams: {
+        where: { deletedAt: null },
+        select: { id: true },
+      },
     },
   })
 }
@@ -697,8 +700,10 @@ export async function createOrganizationKycTeam({
     // This means that user has recently stopped one of their streams
     // and needs to create a new kyc team for the same stream
     // and connect all projects to the same kyc team
+    let createdKycTeam: { id: string; walletAddress: string }
+
     if (orgProjectWithDeletedKycTeam.length > 0) {
-      await prisma.$transaction(async (tx) => {
+      createdKycTeam = await prisma.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -746,9 +751,11 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
+
+        return kycTeam
       })
     } else {
-      await prisma.$transaction(async (tx) => {
+      createdKycTeam = await prisma.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -774,10 +781,16 @@ export async function createOrganizationKycTeam({
             },
           }),
         ])
+
+        return kycTeam
       })
     }
 
-    return { error: null }
+    return {
+      id: createdKycTeam.id,
+      walletAddress: createdKycTeam.walletAddress,
+      error: null,
+    }
   } catch (error: any) {
     if (error.message.includes("Unique constraint failed")) {
       return { error: "KYC team with this Wallet Address already exists" }
