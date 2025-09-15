@@ -94,7 +94,7 @@ async function trackEmailNotification(params: {
 }): Promise<void> {
   try {
     await prisma.emailNotification.create({
-      data: params
+      data: params,
     })
   } catch (error) {
     console.error("Failed to track email notification:", error)
@@ -141,7 +141,7 @@ export const sendKYCStartedEmail = async (
     type: "KYCB_STARTED",
     emailTo: kycUser.email,
     success: emailResult.success,
-    error: emailResult.error
+    error: emailResult.error,
   })
 
   return emailResult
@@ -184,12 +184,11 @@ export const sendKYBStartedEmail = async (
     type: "KYCB_STARTED",
     emailTo: kycUser.email,
     success: emailResult.success,
-    error: emailResult.error
+    error: emailResult.error,
   })
 
   return emailResult
 }
-
 
 export const sendKYCReminderEmail = async (
   kycUser: KYCUser,
@@ -197,7 +196,7 @@ export const sendKYCReminderEmail = async (
     projectId?: string
     organizationId?: string
     bypassAuth?: boolean
-  }
+  },
 ): Promise<EmailResponse> => {
   // Check authentication and admin permissions unless bypassed
   if (!context?.bypassAuth) {
@@ -205,7 +204,7 @@ export const sendKYCReminderEmail = async (
     if (!session?.user?.id) {
       return {
         success: false,
-        error: "Unauthorized"
+        error: "Unauthorized",
       }
     }
 
@@ -217,21 +216,24 @@ export const sendKYCReminderEmail = async (
       if (userRole !== "admin") {
         return {
           success: false,
-          error: "Unauthorized - Project admin access required"
+          error: "Unauthorized - Project admin access required",
         }
       }
     } else if (context.organizationId) {
-      const userRole = await getUserOrganizationRole(context.organizationId, userId)
+      const userRole = await getUserOrganizationRole(
+        context.organizationId,
+        userId,
+      )
       if (userRole !== "admin") {
         return {
           success: false,
-          error: "Unauthorized - Organization admin access required"
+          error: "Unauthorized - Organization admin access required",
         }
       }
     } else {
       return {
         success: false,
-        error: "Missing context - projectId or organizationId required"
+        error: "Missing context - projectId or organizationId required",
       }
     }
   }
@@ -266,15 +268,15 @@ export const sendKYCReminderEmail = async (
   }
 
   const emailResult = await sendTransactionEmail(emailParams)
-  
+
   await trackEmailNotification({
     kycUserId: kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
-    error: emailResult.error
+    error: emailResult.error,
   })
-  
+
   return emailResult
 }
 
@@ -311,15 +313,15 @@ export const sendKYBReminderEmail = async (
   }
 
   const emailResult = await sendTransactionEmail(emailParams)
-  
+
   await trackEmailNotification({
     kycUserId: kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
-    error: emailResult.error
+    error: emailResult.error,
   })
-  
+
   return emailResult
 }
 
@@ -335,15 +337,15 @@ export const sendKYCApprovedEmail = async (
   }
 
   const emailResult = await sendTransactionEmail(emailParams)
-  
+
   await trackEmailNotification({
     kycUserId: kycUser.id,
     type: "KYCB_APPROVED",
     emailTo: kycUser.email,
     success: emailResult.success,
-    error: emailResult.error
+    error: emailResult.error,
   })
-  
+
   return emailResult
 }
 
@@ -359,15 +361,14 @@ export const sendKYBApprovedEmail = async (
   }
 
   const emailResult = await sendTransactionEmail(emailParams)
-  
+
   await trackEmailNotification({
     kycUserId: kycUser.id,
     type: "KYCB_APPROVED",
     emailTo: kycUser.email,
     success: emailResult.success,
-    error: emailResult.error
+    error: emailResult.error,
   })
-  
+
   return emailResult
 }
-

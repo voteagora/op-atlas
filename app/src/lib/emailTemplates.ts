@@ -40,7 +40,10 @@ export function getKYCEmailTemplate(kycUser: KYCUser, kycLink: string): string {
 }
 
 // Template for KYC reminder email
-export function getKYCReminderEmailTemplate(kycUser: KYCUser, kycLink: string): string {
+export function getKYCReminderEmailTemplate(
+  kycUser: KYCUser,
+  kycLink: string,
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -78,7 +81,10 @@ export function getKYCReminderEmailTemplate(kycUser: KYCUser, kycLink: string): 
 }
 
 // Template for KYB reminder email
-export function getKYBReminderEmailTemplate(kycUser: KYCUser, kycLink: string): string {
+export function getKYBReminderEmailTemplate(
+  kycUser: KYCUser,
+  kycLink: string,
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -123,7 +129,7 @@ export function getKYBEmailTemplate(kycUser: KYCUser, kycLink: string): string {
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${kycUser.firstName},<br>Congratulations on your Optimism Grant! 🎉</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${kycUser.firstName},<br>Congratulations on applying for your Optimism Grant! 🎉</h1>
     
     <p style="font-size: 16px; margin-bottom: 40px;">To receive your OP tokens, we need you to complete a quick KYB (Know Your Business) verification for <strong>${kycUser.businessName}</strong>. This is a standard security procedure that helps us ensure proper distribution of rewards.</p>
     
