@@ -65,7 +65,14 @@ export async function processStream(
   roundId: string,
   season: number,
   streamId?: string,
-) {
+): Promise<{
+  id: string
+  projectIds: string[]
+  projectNames: string[]
+  wallets: string[]
+  KYCStatusCompleted: boolean
+  amounts: string[]
+} | null> {
   const orderedStreams = streams.sort(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(), // Sort by createdAt ascending
   )
@@ -90,9 +97,18 @@ export async function processStream(
   const activeTranches = SEASON_TRANCHES[seasonKey] || []
   
   // Map only the active tranches
-  const amounts = activeTranches.map(trancheNum => 
-    calculatedAmounts[trancheNum - 1] ?? null
+  const amounts = activeTranches.map(trancheNum =>
+    calculatedAmounts[trancheNum - 1] ?? "0"
   )
+
+  // Filter out streams where all amounts are zero/null
+  const hasNonZeroAmounts = amounts.some(amount =>
+    amount && amount !== "0" && amount !== "0.0"
+  )
+
+  if (!hasNonZeroAmounts) {
+    return null
+  }
 
   return {
     id:
