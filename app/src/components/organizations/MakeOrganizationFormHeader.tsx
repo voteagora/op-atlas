@@ -15,8 +15,7 @@ import {
 import { deleteUserOrganization } from "@/lib/actions/organizations"
 import { useIsOrganizationAdmin } from "@/lib/hooks"
 import { OrganizationWithDetails } from "@/lib/types"
-
-import { DeleteOrganizationDialog } from "./DeleteOrganizationDialog"
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
 
 const MakeOrganizationFormHeader = ({
   organization,
@@ -62,10 +61,15 @@ const MakeOrganizationFormHeader = ({
         </DropdownMenu>
       )}
       {deletingOrganization && (
-        <DeleteOrganizationDialog
-          open
+        <ConfirmationDialog
+          open={deletingOrganization}
+          onOpenChange={(open) => setDeletingOrganization(open)}
           onConfirm={deleteOrganization}
-          onOpenChange={(open) => !open && setDeletingOrganization(false)}
+          title="Are you sure you want to delete this organization?"
+          description="This action cannot be undone."
+          confirmText="Yes, delete this organization"
+          cancelText="Cancel"
+          variant="destructive"
         />
       )}
     </div>

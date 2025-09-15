@@ -25,7 +25,7 @@ import { getUserById } from "@/db/users"
 import { createEntityAttestation } from "../eas/serverOnly"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
-import { verifyOrganizationAdmin } from "./utils"
+import { verifyOrganizationAdmin, verifyOrganizationMembership } from "./utils"
 
 export const getUserOrganizations = async (userId: string) => {
   const user = await getUserOrganizationsWithDetails(userId)
@@ -332,7 +332,7 @@ export const getOrganizationKycTeamsAction = async ({
     throw new Error("Unauthorized")
   }
 
-  const isInvalid = await verifyOrganizationAdmin(
+  const isInvalid = await verifyOrganizationMembership(
     organizationId,
     session.user.id,
   )

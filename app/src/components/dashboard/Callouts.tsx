@@ -269,3 +269,6 @@ export function ApplicationSubmittedCallout() {
     </Link>
   )
 }
+
+// Export KYC callouts for consistency
+export { KYCCalloutsContainer } from "./KYCCallouts"

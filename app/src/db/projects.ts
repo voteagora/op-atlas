@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma, Project, PublishedContract } from "@prisma/client"
+import { KYCUser, Prisma, Project, PublishedContract } from "@prisma/client"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
@@ -9,6 +9,7 @@ import {
   Oso_ProjectsByCollectionV1,
   Oso_ProjectsV1,
 } from "@/graphql/__generated__/types"
+import { sendKYBStartedEmail, sendKYCStartedEmail } from "@/lib/actions/emails"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -23,10 +24,10 @@ import {
   UserProjectsWithDetails,
   UserWithProjects,
 } from "@/lib/types"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
-import { withChangelogTracking } from "@/lib/utils/changelog"
 
 async function getUserProjectsFn({ userId }: { userId: string }) {
   const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
@@ -1671,7 +1672,7 @@ export async function createProjectKycTeam({
   walletAddress: string
 }) {
   try {
-    await prisma.$transaction(async (tx) => {
+    const kycTeam = await prisma.$transaction(async (tx) => {
       // Check if project already has a kyc team
       const project = await tx.project.findUnique({
         where: {
@@ -1727,7 +1728,7 @@ export async function createProjectKycTeam({
       return kycTeam
     })
 
-    return { error: null }
+    return { id: kycTeam.id, walletAddress: kycTeam.walletAddress, error: null }
   } catch (error: any) {
     if (error.message.includes("Unique constraint failed")) {
       return { error: "KYC team with this Wallet Address already exists" }
@@ -1879,6 +1880,12 @@ export async function addKYCTeamMembers({
       })),
     })
 
+    // Send transactional email to new KYC and KYB users
+    await Promise.all([
+      ...createdIndividuals.map(sendKYCStartedEmail),
+      ...createdBusinesses.map(sendKYBStartedEmail),
+    ])
+
     const allMembers = [...toAdd, ...createdIndividuals, ...createdBusinesses]
 
     await Promise.all([
@@ -1905,15 +1912,27 @@ export async function createProjectKycTeams({
   kycTeamId: string
 }) {
   // Check for projects with active reward streams before reassignment
-  const projectsWithActiveStreams = await prisma.project.findMany({
+  const projectsToCheck = await prisma.project.findMany({
     where: {
       id: { in: projectIds },
+    },
+    select: {
+      id: true,
+      name: true,
       kycTeam: {
-        rewardStreams: {},
+        select: {
+          rewardStreams: true,
+        },
       },
     },
-    select: { id: true, name: true },
   })
+
+  const projectsWithActiveStreams = projectsToCheck.filter(
+    (project) =>
+      project.kycTeam &&
+      project.kycTeam.rewardStreams &&
+      project.kycTeam.rewardStreams.length > 0,
+  )
 
   if (projectsWithActiveStreams.length > 0) {
     const projectNames = projectsWithActiveStreams.map((p) => p.name).join(", ")
@@ -1934,6 +1953,57 @@ export async function createProjectKycTeams({
   return updates
 }
 
+export async function detachProjectsFromKycTeam({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) {
+  // Check for projects with active reward streams before detaching
+  const projectsToCheck = await prisma.project.findMany({
+    where: {
+      id: { in: projectIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      kycTeam: {
+        select: {
+          rewardStreams: true,
+        },
+      },
+    },
+  })
+
+  const projectsWithActiveStreams = projectsToCheck.filter(
+    (project) =>
+      project.kycTeam &&
+      project.kycTeam.rewardStreams &&
+      project.kycTeam.rewardStreams.length > 0,
+  )
+
+  if (projectsWithActiveStreams.length > 0) {
+    const projectNames = projectsWithActiveStreams.map((p) => p.name).join(", ")
+    throw new Error(
+      `Cannot detach projects from KYC team: The following projects have active reward streams: ${projectNames}`,
+    )
+  }
+
+  // Just detach the projects from the KYC team, don't delete the team
+  const updates = await prisma.project.updateMany({
+    where: {
+      id: { in: projectIds },
+      kycTeamId: kycTeamId, // Ensure we only detach projects that are actually assigned to this team
+    },
+    data: {
+      kycTeamId: null,
+    },
+  })
+
+  return updates
+}
+
 export async function deleteProjectKycTeams({
   projectIds,
   kycTeamId,
@@ -1941,6 +2011,36 @@ export async function deleteProjectKycTeams({
   projectIds: string[]
   kycTeamId: string
 }) {
+  // Check for projects with active reward streams before removal
+  const projectsToCheck = await prisma.project.findMany({
+    where: {
+      id: { in: projectIds },
+    },
+    select: {
+      id: true,
+      name: true,
+      kycTeam: {
+        select: {
+          rewardStreams: true,
+        },
+      },
+    },
+  })
+
+  const projectsWithActiveStreams = projectsToCheck.filter(
+    (project) =>
+      project.kycTeam &&
+      project.kycTeam.rewardStreams &&
+      project.kycTeam.rewardStreams.length > 0,
+  )
+
+  if (projectsWithActiveStreams.length > 0) {
+    const projectNames = projectsWithActiveStreams.map((p) => p.name).join(", ")
+    throw new Error(
+      `Cannot remove projects from KYC team: The following projects have active reward streams: ${projectNames}`,
+    )
+  }
+
   return await prisma.$transaction(async (tx) => {
     await tx.kYCTeam.update({
       where: {

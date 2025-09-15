@@ -11,7 +11,7 @@ export default function Layout({ children }: PropsWithChildren<object>) {
         >
           <ProfileSidebar />
         </Suspense>
-        <div className="card flex-1">
+        <div className="card flex-1 w-full max-w-[840px]">
           <Suspense fallback={null}>{children}</Suspense>
         </div>
       </div>

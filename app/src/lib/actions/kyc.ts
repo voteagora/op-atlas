@@ -3,18 +3,20 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import {
-  deleteKycTeam,
-  updateKYBUserStatus,
-  updateKYCUserStatus,
-} from "@/db/kyc"
+import { prisma } from "@/db/client"
+import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
+import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
   caseStatusMap,
   inquiryStatusMap,
+  mapCaseStatusToPersonaStatus,
   PersonaCase,
+  personaClient,
   PersonaInquiry,
 } from "@/lib/persona"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
+import { UserKYCTeam } from "@/lib/types"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
 
@@ -164,10 +166,8 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
     inquiries.map(async (inquiry) => {
       const {
         attributes: {
-          "email-address": email,
-          "name-first": firstName,
-          "name-last": lastName,
           "updated-at": updatedAt,
+          "reference-id": referenceId,
           status,
         },
       } = inquiry
@@ -180,16 +180,21 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
         return
       }
 
-      if (!email || !firstName || !lastName) {
-        console.warn(`Missing required fields for inquiry ${inquiry.id}`)
+      if (!referenceId) {
+        console.warn(
+          `Missing the required referecedId for inquiry ${inquiry.id}`,
+        )
         return
       }
 
       await updateKYCUserStatus(
-        `${firstName.split(" ")[0]} ${lastName}`,
-        email,
         parsedStatus,
+        status,
         new Date(updatedAt),
+        referenceId,
+        inquiry.attributes["expires-at"]
+          ? new Date(inquiry.attributes["expires-at"])
+          : null,
       )
     }),
   )
@@ -205,33 +210,48 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
 
       const {
         attributes: {
-          fields: {
-            "form-filler-email-address": { value: email },
-            "business-name": { value: businessName },
-          },
           "updated-at": updatedAt,
+          // The Case.status takes precedence over the Inquiry.status whenever the Inquiriy
+          // is associated with a Case.
           status,
+        },
+        relationships: {
+          inquiries: { data: inquiries },
         },
       } = c
 
-      if (!email || !businessName) {
-        console.warn(`Missing required fields for case ${c.id}`)
-        return
+      for (const inquiryRef of inquiries) {
+        const inquiryId = inquiryRef.id
+        if (!inquiryId) {
+          console.warn(`Missing inquiry id in case ${c.id}`)
+          continue
+        }
+
+        const inquiry: PersonaInquiry | null =
+          await personaClient.getInquiryById(inquiryId)
+
+        if (!inquiry) {
+          console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
+          continue
+        }
+        if (inquiry.attributes["reference-id"]) {
+          const parsedStatus =
+            caseStatusMap[status as keyof typeof caseStatusMap]
+          // The persona status value of a Case is slightly different from the status value of an Inquiry.
+          // Adjust Case statues like "Waiting on UBOs" to Pending for now.
+          const personaStatus = mapCaseStatusToPersonaStatus(status)
+
+          await updateKYCUserStatus(
+            parsedStatus,
+            personaStatus,
+            new Date(updatedAt),
+            inquiry.attributes["reference-id"],
+            inquiry.attributes["expires-at"]
+              ? new Date(inquiry.attributes["expires-at"])
+              : null,
+          )
+        }
       }
-
-      const parsedStatus = caseStatusMap[status as keyof typeof caseStatusMap]
-
-      if (!parsedStatus) {
-        console.warn(`Unknown case status: ${status}`)
-        return
-      }
-
-      await updateKYBUserStatus(
-        businessName,
-        email,
-        parsedStatus,
-        new Date(updatedAt),
-      )
     }),
   )
 }
@@ -275,4 +295,141 @@ export const deleteKYCTeamAction = async ({
     kycTeamId,
     hasActiveStream,
   })
+}
+
+export const getKYCUsersByProjectId = async (projectId: string) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    throw new Error("Unauthorized")
+  }
+
+  const isInvalid = await verifyAdminStatus(projectId, userId)
+  if (isInvalid?.error) {
+    throw new Error(isInvalid.error)
+  }
+
+  return await getKYCUsersByProjId({ projectId })
+}
+
+export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
+  // Fetch user's admin projects with KYC teams
+  const adminProjects = await prisma.project.findMany({
+    where: {
+      team: {
+        some: {
+          userId,
+          role: "admin",
+        },
+      },
+      kycTeamId: {
+        not: null,
+      },
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      kycTeam: {
+        include: {
+          team: {
+            include: {
+              users: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // Fetch user's admin organizations with KYC teams
+  const adminOrganizations = await prisma.organization.findMany({
+    where: {
+      team: {
+        some: {
+          userId,
+          role: "admin",
+        },
+      },
+      OrganizationKYCTeams: {
+        some: {
+          deletedAt: null,
+        },
+      },
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      OrganizationKYCTeams: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            include: {
+              team: {
+                include: {
+                  users: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  const kycTeams: UserKYCTeam[] = []
+
+  // Process project KYC teams
+  for (const project of adminProjects) {
+    if (project.kycTeam) {
+      const users = project.kycTeam.team.map((teamMember) => ({
+        id: teamMember.users.id,
+        status: teamMember.users.status,
+        updatedAt: teamMember.users.updatedAt,
+      }))
+
+      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+
+      kycTeams.push({
+        id: project.kycTeam.id,
+        walletAddress: project.kycTeam.walletAddress,
+        createdAt: project.kycTeam.createdAt,
+        updatedAt: project.kycTeam.updatedAt,
+        projectId: project.id,
+        projectName: project.name,
+        users,
+        status,
+      })
+    }
+  }
+
+  // Process organization KYC teams
+  for (const organization of adminOrganizations) {
+    for (const orgKycTeam of organization.OrganizationKYCTeams) {
+      const users = orgKycTeam.team.team.map((teamMember) => ({
+        id: teamMember.users.id,
+        status: teamMember.users.status,
+        updatedAt: teamMember.users.updatedAt,
+      }))
+
+      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+
+      kycTeams.push({
+        id: orgKycTeam.team.id,
+        walletAddress: orgKycTeam.team.walletAddress,
+        createdAt: orgKycTeam.team.createdAt,
+        updatedAt: orgKycTeam.team.updatedAt,
+        organizationId: organization.id,
+        organizationName: organization.name,
+        users,
+        status,
+      })
+    }
+  }
+
+  return kycTeams
 }
