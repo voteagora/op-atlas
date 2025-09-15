@@ -1,6 +1,7 @@
 import { Prisma, SuperfluidStream } from "@prisma/client"
 import { formatUnits, keccak256, parseUnits } from "viem"
 
+import { SEASON_TRANCHES } from "@/lib/constants/rewards"
 import { isKycStreamTeamVerified } from "@/lib/utils/kyc"
 
 import {
@@ -62,6 +63,7 @@ export async function processStream(
   streams: StreamWithKYCTeam[],
   currentTeam: KYCStreamTeam,
   roundId: string,
+  season: number,
   streamId?: string,
 ) {
   const orderedStreams = streams.sort(
@@ -81,7 +83,16 @@ export async function processStream(
     (project) => project.recurringRewards.length > 0,
   )
 
-  const amounts = calculateRewardAmounts(projectsWithRewards)
+  const calculatedAmounts = calculateRewardAmounts(projectsWithRewards)
+  
+  // Get active tranches for this season/round combination
+  const seasonKey = `${season}-${roundId}` as keyof typeof SEASON_TRANCHES
+  const activeTranches = SEASON_TRANCHES[seasonKey] || []
+  
+  // Map only the active tranches
+  const amounts = activeTranches.map(trancheNum => 
+    calculatedAmounts[trancheNum - 1] ?? null
+  )
 
   return {
     id:
@@ -94,15 +105,7 @@ export async function processStream(
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets,
     KYCStatusCompleted: isKycStreamTeamVerified(currentTeam),
-    amounts: [
-      amounts[0],
-      amounts[1],
-      amounts[2],
-      amounts[3],
-      amounts[4],
-      amounts[5],
-      amounts[6],
-    ],
+    amounts,
   }
 }
 

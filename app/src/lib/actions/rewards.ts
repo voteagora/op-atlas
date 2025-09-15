@@ -172,17 +172,18 @@ type RewardStream = {
 
 export const getRewardStreamsForRound = async (
   roundId: string,
+  season: number,
 ): Promise<RewardStream[]> => {
   const existingStreams = await getRewardStreamsWithRewardsForRound(roundId)
   const processedExistingStreams = await Promise.all(
     existingStreams.map((stream) =>
-      processStream(stream.streams, stream.team, roundId, stream.id),
+      processStream(stream.streams, stream.team, roundId, season, stream.id),
     ),
   )
 
   const kycTeams = await getKYCTeamsWithRewardsForRound(roundId)
   const newStreams = await Promise.all(
-    kycTeams.map((kycTeam) => processStream([], kycTeam, roundId)),
+    kycTeams.map((kycTeam) => processStream([], kycTeam, roundId, season)),
   )
 
   return [...processedExistingStreams, ...newStreams]
