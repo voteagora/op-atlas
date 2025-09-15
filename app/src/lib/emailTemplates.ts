@@ -40,7 +40,10 @@ export function getKYCEmailTemplate(kycUser: KYCUser, kycLink: string): string {
 }
 
 // Template for KYC reminder email
-export function getKYCReminderEmailTemplate(kycUser: KYCUser, kycLink: string): string {
+export function getKYCReminderEmailTemplate(
+  kycUser: KYCUser,
+  kycLink: string,
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -78,7 +81,10 @@ export function getKYCReminderEmailTemplate(kycUser: KYCUser, kycLink: string): 
 }
 
 // Template for KYB reminder email
-export function getKYBReminderEmailTemplate(kycUser: KYCUser, kycLink: string): string {
+export function getKYBReminderEmailTemplate(
+  kycUser: KYCUser,
+  kycLink: string,
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
