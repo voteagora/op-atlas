@@ -186,7 +186,9 @@ export const getRewardStreamsForRound = async (
     kycTeams.map((kycTeam) => processStream([], kycTeam, roundId, season)),
   )
 
-  return [...processedExistingStreams, ...newStreams]
+  // Filter out null results (streams with no rewards)
+  const allStreams = [...processedExistingStreams, ...newStreams]
+  return allStreams.filter((stream): stream is RewardStream => stream !== null)
 }
 
 export const processSuperfluidStream = async (
