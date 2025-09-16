@@ -28,7 +28,74 @@ import path from "node:path"
 // - The script is non-transactional and best effort; it tries to continue on minor failures.
 // - Generated emails for KYC users are unique per run to avoid conflicts.
 
+// Inline spec support: define your explicit seed data directly here.
+// Set INLINE_SPEC to an object to enable, or leave as undefined to skip.
+// Example template:
+const INLINE_SPEC: SeedSpec = {
+  organizations: [],
+  projects: [
+    {
+      name: "Test Project",
+      description: "Seeded from inline spec",
+      website: ["https://myproject.example"],
+      organizationName: "",
+      kycTeam: { walletAddress: "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40" },
+      // The user below will be created (if needed), added to the project team,
+      // and used to initialize a GrantEligibility form for this project.
+      createdByUser: {
+        // Prefer linking by a stable identifier like wallet address or Privy DID since usernames can change.
+        // Fill in one of the following to link to your existing account:
+        // - addresses: ["0xYourPrimaryWallet..."]
+        // - privyDid: "did:privy:..."
+        // Optionally include name/emails if creating a new user.
+        addresses: ["0xDBb050a8692afF8b5EF4A3F36D53900B14210E40"],
+        // privyDid: "did:privy:example",
+        // name: "Seed Creator",
+        // emails: ["creator@example.test"],
+      },
+      kycUsers: [
+        {
+          email: "garrett@voteagora.com",
+          firstName: "Garrett",
+          lastName: "Berg",
+          kycUserType: "USER",
+          status: "PENDING",
+        },
+        {
+          email: "acme@example.test",
+          firstName: "Acme",
+          lastName: "Inc",
+          kycUserType: "LEGAL_ENTITY",
+          businessName: "Acme Inc",
+        },
+      ],
+      // Additional users can still be listed here to be added to the project team
+      users: [
+        {
+          username: "teammate1",
+          name: "Teammate One",
+          emails: ["teammate1@example.test"],
+        },
+      ],
+    },
+  ],
+}
+
 const prisma = new PrismaClient()
+
+// Simple inputs: define a list of entries with either an address or an email (or both).
+// Either address or email must be present, but not both empty.
+// Example:
+// const SEED_ENTRIES: SeedEntry[] = [
+//   { address: "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40" },
+//   { email: "garrett@voteagora.com" },
+//   { address: "0x1111111111111111111111111111111111111111", email: "creator@example.test" },
+// ]
+
+type SeedEntry = { address?: string; email?: string }
+const SEED_ENTRIES: SeedEntry[] = [
+  // Fill with your targets. At least one field (address or email) must be present per entry.
+]
 
 function randInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -114,6 +181,7 @@ type SeedSpec = {
       name?: string
       emails?: string[]
       addresses?: string[]
+      privyDid?: string
     }
     kycUsers?: Array<{
       email: string
@@ -129,11 +197,15 @@ type SeedSpec = {
       name?: string
       emails?: string[]
       addresses?: string[]
+      privyDid?: string
     }>
   }>
 }
 
-type SummaryOrganization = { organization: { id: string; name: string }; source?: string }
+type SummaryOrganization = {
+  organization: { id: string; name: string }
+  source?: string
+}
 
 type SummaryProject = {
   project: { id: string; name: string }
@@ -153,6 +225,7 @@ type SeedUserInput = {
   name?: string
   emails?: string[]
   addresses?: string[]
+  privyDid?: string
 }
 
 async function ensureOrganizationByName(
@@ -175,9 +248,13 @@ async function ensureOrganizationByName(
   })
 }
 
-type KYCTeamSlim = Prisma.KYCTeamGetPayload<{ select: { id: true; walletAddress: true } }>
+type KYCTeamSlim = Prisma.KYCTeamGetPayload<{
+  select: { id: true; walletAddress: true }
+}>
 
-async function ensureKycTeamByWallet(walletAddress?: string): Promise<KYCTeamSlim> {
+async function ensureKycTeamByWallet(
+  walletAddress?: string,
+): Promise<KYCTeamSlim> {
   const wallet =
     walletAddress && walletAddress.startsWith("0x")
       ? walletAddress
@@ -194,7 +271,9 @@ async function ensureKycTeamByWallet(walletAddress?: string): Promise<KYCTeamSli
   return team
 }
 
-type ProjectSlim = Prisma.ProjectGetPayload<{ select: { id: true; name: true; kycTeamId: true } }>
+type ProjectSlim = Prisma.ProjectGetPayload<{
+  select: { id: true; name: true; kycTeamId: true }
+}>
 
 async function ensureProjectWithTeamAndOrg(input: {
   name: string
@@ -260,11 +339,13 @@ async function addKycUsersToTeam(
   for (const u of kycUsers ?? []) {
     const typeVal =
       typeof u.kycUserType === "string"
-        ? (KYCUserType as Record<string, KYCUserType>)[u.kycUserType] ?? KYCUserType.USER
+        ? (KYCUserType as Record<string, KYCUserType>)[u.kycUserType] ??
+          KYCUserType.USER
         : u.kycUserType ?? KYCUserType.USER
     const statusVal =
       typeof u.status === "string"
-        ? (KYCStatus as Record<string, KYCStatus>)[u.status] ?? KYCStatus.PENDING
+        ? (KYCStatus as Record<string, KYCStatus>)[u.status] ??
+          KYCStatus.PENDING
         : u.status ?? KYCStatus.PENDING
     let kycUser = await prisma.kYCUser.findFirst({
       where: { email: u.email },
@@ -311,6 +392,13 @@ async function ensureUserWithDetails(u: SeedUserInput) {
       select: { id: true, username: true },
     })
   }
+  // Lookup by privyDid if provided
+  if (!user && u.privyDid) {
+    user = await prisma.user.findFirst({
+      where: { privyDid: u.privyDid },
+      select: { id: true, username: true },
+    })
+  }
   if (!user) {
     // Try via first email
     const email = u.emails && u.emails.length > 0 ? u.emails[0] : undefined
@@ -327,11 +415,25 @@ async function ensureUserWithDetails(u: SeedUserInput) {
       }
     }
   }
+  // Lookup by any provided address
+  if (!user && (u.addresses?.length ?? 0) > 0) {
+    for (const address of u.addresses!) {
+      const existingAddress = await prisma.userAddress.findFirst({
+        where: { address },
+        select: { user: { select: { id: true, username: true } } },
+      })
+      if (existingAddress?.user) {
+        user = existingAddress.user
+        break
+      }
+    }
+  }
   if (!user) {
     user = await prisma.user.create({
       data: {
         name: u.name ?? u.username ?? "Seed User",
         username: u.username,
+        privyDid: u.privyDid,
       },
       select: { id: true, username: true },
     })
@@ -407,57 +509,16 @@ async function addRegularUsersToProject(
   return created
 }
 
-// Inline spec support: define your explicit seed data directly here.
-// Set INLINE_SPEC to an object to enable, or leave as undefined to skip.
-// Example template:
-const INLINE_SPEC: SeedSpec = {
-  organizations: [],
-  projects: [
-    {
-      name: "Test Project",
-      description: "Seeded from inline spec",
-      website: ["https://myproject.example"],
-      organizationName: "",
-      kycTeam: { walletAddress: "0xDBb050a8692afF8b5EF4A3F36D53900B14210E40" },
-      // The user below will be created (if needed), added to the project team,
-      // and used to initialize a GrantEligibility form for this project.
-      createdByUser: {
-        username: "seed_creator",
-        name: "Seed Creator",
-        emails: ["creator@example.test"],
-        addresses: ["0x1111111111111111111111111111111111111111"],
-      },
-      kycUsers: [
-        {
-          email: "garrett@voteagora.com",
-          firstName: "Garrett",
-          lastName: "Berg",
-          kycUserType: "USER",
-          status: "PENDING",
-        },
-        {
-          email: "acme@example.test",
-          firstName: "Acme",
-          lastName: "Inc",
-          kycUserType: "LEGAL_ENTITY",
-          businessName: "Acme Inc",
-        },
-      ],
-      // Additional users can still be listed here to be added to the project team
-      users: [
-        {
-          username: "teammate1",
-          name: "Teammate One",
-          emails: ["teammate1@example.test"],
-        },
-      ],
-    },
-  ],
-}
-
-async function ensureGrantEligibilityForProject(projectId: string, kycTeamId?: string, createdByUserId?: string): Promise<{ id: string }> {
+async function ensureGrantEligibilityForProject(
+  projectId: string,
+  kycTeamId?: string,
+  createdByUserId?: string,
+): Promise<{ id: string }> {
   // Check if a form already exists for this project
-  const existing = await prisma.grantEligibility.findFirst({ where: { projectId }, select: { id: true } })
+  const existing = await prisma.grantEligibility.findFirst({
+    where: { projectId },
+    select: { id: true },
+  })
   if (existing) return existing
 
   // collect user emails and primary address to embed into form data
@@ -552,7 +613,12 @@ async function processProvidedSpec(
         ).length,
       },
       usersCount: users.length + (createdByUser ? 1 : 0),
-      createdByUser: createdByUser ? { id: createdByUser.id, username: createdByUser.username ?? undefined } : undefined,
+      createdByUser: createdByUser
+        ? {
+            id: createdByUser.id,
+            username: createdByUser.username ?? undefined,
+          }
+        : undefined,
       grantEligibilityId: grantEligibility?.id,
       source,
     })
@@ -733,118 +799,97 @@ function hashToProbability(input: string): number {
   return (n >>> 0) / 0xffffffff
 }
 
-async function main() {
-  const ORG_COUNT = Number(process.env.ORG_COUNT ?? 3)
-  const PROJECT_COUNT = Number(process.env.PROJECT_COUNT ?? 5)
-  const KYC_MIN = Number(process.env.KYC_MIN ?? 1)
-  const KYC_MAX = Number(process.env.KYC_MAX ?? 5)
-  const USERS_MIN = Number(process.env.USERS_MIN ?? 0)
-  const USERS_MAX = Number(process.env.USERS_MAX ?? 3)
-  const ASSIGN_ORG_PROB = Number(process.env.ASSIGN_ORG_PROB ?? 0.7)
+// Fresh simple seeding flow based on SEED_ENTRIES
+async function ensureUserKycLink(userId: string, kycUserId: string) {
+  try {
+    await prisma.userKYCUser.create({ data: { userId, kycUserId } })
+  } catch (e) {
+    // ignore unique conflicts
+  }
+}
 
-  console.log("Seeding demo data (idempotent)...")
-  const summary: SummaryItem[] = []
+async function processSimpleSeed(summary: SummaryItem[]) {
+  for (const entry of SEED_ENTRIES) {
+    if (!entry.address && !entry.email) {
+      console.warn("Skipping entry with neither address nor email")
+      continue
+    }
 
-  // 1) Process explicit spec first if provided
-  await processSpecIfPresent(summary)
+    const seedUser: SeedUserInput = {
+      emails: entry.email ? [entry.email] : [],
+      addresses: entry.address ? [entry.address] : [],
+    }
+    const user = await ensureUserWithDetails(seedUser)
 
-  // 2) Then proceed with auto/demo generation
-  const orgs = await createOrganizations(ORG_COUNT)
-  console.log(`Prepared ${orgs.length} organizations`)
-
-  for (let i = 0; i < PROJECT_COUNT; i++) {
-    const teamAddress = deterministicWalletAddress(i)
-    let kycTeam = await prisma.kYCTeam.findUnique({
-      where: { walletAddress: teamAddress },
-      select: { id: true },
+    const display = entry.email ?? entry.address ?? "unknown"
+    const { project, team } = await ensureProjectWithTeamAndOrg({
+      name: `Project for ${display}`,
+      description: `Auto-created for ${display}`,
+      website: [],
+      farcaster: [],
+      kycTeamWallet: entry.address, // Prefer using provided address for KYCTeam wallet
     })
-    if (!kycTeam) {
-      kycTeam = await prisma.kYCTeam.create({
-        data: { walletAddress: teamAddress },
-        select: { id: true },
-      })
-    }
 
-    const projectName = `Demo Project ${i + 1}`
-    let project: ProjectSlim | null = await prisma.project.findFirst({
-      where: { name: projectName },
-      select: { id: true, name: true, kycTeamId: true },
+    await linkUserToProject(user.id, project.id)
+
+    const form = await ensureGrantEligibilityForProject(project.id, team.id, user.id)
+
+    // Prepare KYC user details
+    const email = entry.email
+      ? entry.email
+      : `${(entry.address ?? "noaddr").toLowerCase().replace(/^0x/, "")}@seed.local`
+
+    const userRecord = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { name: true },
     })
-    if (!project) {
-      project = await prisma.project.create({
-        data: {
-          name: projectName,
-          description: `Autogenerated project ${i + 1}`,
-          website: [],
-          farcaster: [],
-          kycTeamId: kycTeam.id,
-        },
-        select: { id: true, name: true, kycTeamId: true },
-      })
-    } else if (!project.kycTeamId) {
-      await prisma.project.update({
-        where: { id: project.id },
-        data: { kycTeamId: kycTeam.id },
-      })
-      project.kycTeamId = kycTeam.id
+    const name = userRecord?.name ?? "Seeded User"
+    const [firstNameRaw, ...rest] = name.trim().split(/\s+/)
+    const firstName = firstNameRaw || "Seeded"
+    const lastName = rest.join(" ") || "User"
+
+    const createdKycUsers = await addKycUsersToTeam(team.id, [
+      {
+        email,
+        firstName,
+        lastName,
+        kycUserType: KYCUserType.USER,
+        status: KYCStatus.PENDING,
+      },
+    ])
+
+    const kycUserId = createdKycUsers[0]?.id
+    if (kycUserId) {
+      await ensureUserKycLink(user.id, kycUserId)
     }
-
-    const kycCount = randInt(KYC_MIN, Math.max(KYC_MIN, KYC_MAX))
-    const kycUsers = await createKycUsersForTeam(kycTeam.id, kycCount, i)
-
-    // Deterministic optional assignment to an org
-    let orgAssigned: { id: string; name: string } | undefined
-    if (orgs.length > 0 && hashToProbability(`assign-${i}`) < ASSIGN_ORG_PROB) {
-      const orgIndex =
-        parseInt(
-          createHash("sha256").update(`org-${i}`).digest("hex").slice(0, 8),
-          16,
-        ) % orgs.length
-      const org = orgs[orgIndex]
-      // Link project to organization if not already linked
-      const existingPO = await prisma.projectOrganization.findFirst({
-        where: { projectId: project.id },
-      })
-      if (!existingPO) {
-        await prisma.projectOrganization.create({
-          data: { projectId: project.id, organizationId: org.id },
-        })
-      }
-      // Also connect org to this kycTeam if not already linked
-      const existingOKT = await prisma.organizationKYCTeam.findFirst({
-        where: { organizationId: org.id, kycTeamId: kycTeam.id },
-      })
-      if (!existingOKT) {
-        await prisma.organizationKYCTeam.create({
-          data: { organizationId: org.id, kycTeamId: kycTeam.id },
-        })
-      }
-      orgAssigned = org
-    }
-
-    // Create a few regular Users and add them to project team
-    const userCount = randInt(USERS_MIN, Math.max(USERS_MIN, USERS_MAX))
-    const users = await createRegularUsersForProject(project.id, userCount, i)
 
     summary.push({
       project: { id: project.id, name: project.name },
-      kycTeamId: kycTeam.id,
+      kycTeamId: team.id,
       kycUserCounts: {
-        total: kycUsers.length,
-        USER: kycUsers.filter((u) => u.type === KYCUserType.USER).length,
-        LEGAL_ENTITY: kycUsers.filter(
+        total: createdKycUsers.length,
+        USER: createdKycUsers.filter((u) => u.type === KYCUserType.USER).length,
+        LEGAL_ENTITY: createdKycUsers.filter(
           (u) => u.type === KYCUserType.LEGAL_ENTITY,
         ).length,
       },
-      usersCount: users.length,
-      organization: orgAssigned
-        ? { id: orgAssigned.id, name: orgAssigned.name }
-        : null,
+      usersCount: 1,
+      createdByUser: { id: user.id, username: undefined },
+      grantEligibilityId: form.id,
+      source: "simple",
     })
   }
+}
+
+async function main() {
+  console.log("Fresh KYC seeding from SEED_ENTRIES (idempotent)...")
+  const summary: SummaryItem[] = []
+
+  await processSimpleSeed(summary)
 
   console.log("Seed summary:")
   console.log(JSON.stringify(summary, null, 2))
+  return
 }
 
 main()
