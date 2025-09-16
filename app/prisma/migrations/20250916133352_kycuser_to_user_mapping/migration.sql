@@ -2,7 +2,7 @@
 CREATE TABLE "UserKYCUser" (
     "id" TEXT NOT NULL,
     "kycUserId" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "userId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "UserKYCUser_pkey" PRIMARY KEY ("id")
