@@ -342,6 +342,26 @@ export async function submitGrantEligibilityForm(params: {
           },
         })
 
+        const addUserKYCUser = async (user: any, kycUserId: string) => {
+          const userByEmail = await tx.userEmail.findFirst({
+            where: {
+              email: user.email.toLowerCase(),
+            },
+          })
+          // If we find an associated user, link them to the KYC user
+          if (userByEmail) {
+            const UserKYCUser = await tx.userKYCUser.create({
+              data: {
+                userId: userByEmail.userId,
+                kycUserId: kycUserId,
+              },
+            })
+            if (!UserKYCUser) {
+              throw new Error("KYC user not Created")
+            }
+          }
+        }
+
         const kycTargets: KYCUser[] = []
         const kybTargets: KYCUser[] = []
 
@@ -371,6 +391,11 @@ export async function submitGrantEligibilityForm(params: {
               },
             })
             isNewUser = true
+            try {
+              await addUserKYCUser(signer, kycUser.id)
+            } catch (e) {
+              console.error("Error creating UserKYCUser:", e)
+            }
           }
 
           const existingLink = await tx.kYCUserTeams.findFirst({
@@ -430,6 +455,11 @@ export async function submitGrantEligibilityForm(params: {
               },
             })
             isNewUser = true
+            try {
+              await addUserKYCUser(entity, kycUser.id)
+            } catch (e) {
+              console.error("Error creating UserKYCUser:", e)
+            }
           }
 
           const existingLink = await tx.kYCUserTeams.findFirst({
