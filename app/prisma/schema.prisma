@@ -34,6 +34,7 @@ model User {
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
+  userKYCUsers       UserKYCUser[]
 
   @@index([username])
   @@index([farcasterId])
@@ -495,6 +496,7 @@ model KYCUser {
   kycUserType        KYCUserType         @default(USER)
   KYCUserTeams       KYCUserTeams[]
   EmailNotifications EmailNotification[]
+  UserKYCUsers       UserKYCUser[]
 
   @@index([email])
 }
@@ -542,6 +544,21 @@ model KYCUserTeams {
 
   @@index([kycUserId])
   @@index([kycTeamId])
+}
+
+model UserKYCUser {
+  id        String   @id @default(uuid())
+  kycUserId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kycUser KYCUser @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([kycUserId])
+  @@unique([userId, kycUserId])
 }
 
 model OrganizationKYCTeam {
