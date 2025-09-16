@@ -8,6 +8,7 @@ import {
 } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
 import { getAllPublishedProjects } from "@/lib/actions/projects"
+import { getKYCUserStatus } from "@/db/kyc"
 
 export default async function PublicProfile({
   params,
@@ -30,9 +31,10 @@ export default async function PublicProfile({
     notFound()
   }
 
-  const [organizations, projects] = await Promise.all([
+  const [organizations, projects, kycStatus] = await Promise.all([
     getOrganizations(user.id),
     getAllPublishedProjects(user.id),
+    getKYCUserStatus(user.id),
   ])
 
   return (
@@ -40,6 +42,7 @@ export default async function PublicProfile({
       user={user}
       organizations={organizations || []}
       projects={projects}
+      kycStatus={kycStatus?.kycUser.status}
     />
   )
 }

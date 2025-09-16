@@ -16,11 +16,13 @@ const PublicUserProfile = ({
   user,
   organizations,
   projects,
+                             kycStatus,
 }: {
   className?: string
   user: UserWithAddresses
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
+  kycStatus?: string
 }) => {
 
   return (
@@ -29,7 +31,7 @@ const PublicUserProfile = ({
 
         <div className="lg:col-span-1">
           <div className="sticky top-0">
-            <ProfileHeader user={user} />
+            <ProfileHeader user={user} kycStatus={kycStatus} />
             <ProfileOrganizations organizations={organizations} />
           </div>
         </div>

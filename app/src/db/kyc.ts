@@ -299,3 +299,18 @@ export async function getUserKycTeamSources(userId: string) {
 
   return { adminProjects, adminOrganizations }
 }
+
+export async function getKYCUserStatus(userId: string) {
+  return await prisma.userKYCUser.findFirst({
+    where: {
+      userId,
+    },
+    select: {
+      kycUser: {
+        select: {
+          status: true,
+        },
+      },
+    },
+  })
+}
