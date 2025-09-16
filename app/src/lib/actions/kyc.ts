@@ -3,8 +3,7 @@
 import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
-import { prisma } from "@/db/client"
-import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
+import { deleteKycTeam, updateKYCUserStatus, getUserKycTeamSources } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
@@ -18,7 +17,7 @@ import {
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { UserKYCTeam } from "@/lib/types"
 
-import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+import { verifyAdminStatus, verifyOrganizationAdmin } from "@/lib/actions/utils"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -314,72 +313,7 @@ export const getKYCUsersByProjectId = async (projectId: string) => {
 }
 
 export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
-  // Fetch user's admin projects with KYC teams
-  const adminProjects = await prisma.project.findMany({
-    where: {
-      team: {
-        some: {
-          userId,
-          role: "admin",
-        },
-      },
-      kycTeamId: {
-        not: null,
-      },
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-      name: true,
-      kycTeam: {
-        include: {
-          team: {
-            include: {
-              users: true,
-            },
-          },
-        },
-      },
-    },
-  })
-
-  // Fetch user's admin organizations with KYC teams
-  const adminOrganizations = await prisma.organization.findMany({
-    where: {
-      team: {
-        some: {
-          userId,
-          role: "admin",
-        },
-      },
-      OrganizationKYCTeams: {
-        some: {
-          deletedAt: null,
-        },
-      },
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-      name: true,
-      OrganizationKYCTeams: {
-        where: {
-          deletedAt: null,
-        },
-        include: {
-          team: {
-            include: {
-              team: {
-                include: {
-                  users: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
+  const { adminProjects, adminOrganizations } = await getUserKycTeamSources(userId)
 
   const kycTeams: UserKYCTeam[] = []
 
@@ -392,7 +326,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: project.kycTeam.id,
@@ -416,7 +353,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: orgKycTeam.team.id,

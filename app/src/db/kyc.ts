@@ -227,3 +227,75 @@ export async function getKYCUsersByProjectId({
   console.log("getKYCUsersByProjectId: ", { value })
   return value
 }
+
+// Encapsulate prisma calls for fetching user's KYC team sources (projects and organizations)
+export async function getUserKycTeamSources(userId: string) {
+  // Fetch user's admin projects with KYC teams
+  const adminProjects = await prisma.project.findMany({
+    where: {
+      team: {
+        some: {
+          userId,
+          role: "admin",
+        },
+      },
+      kycTeamId: {
+        not: null,
+      },
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      kycTeam: {
+        include: {
+          team: {
+            include: {
+              users: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // Fetch user's admin organizations with KYC teams
+  const adminOrganizations = await prisma.organization.findMany({
+    where: {
+      team: {
+        some: {
+          userId,
+          role: "admin",
+        },
+      },
+      OrganizationKYCTeams: {
+        some: {
+          deletedAt: null,
+        },
+      },
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      name: true,
+      OrganizationKYCTeams: {
+        where: {
+          deletedAt: null,
+        },
+        include: {
+          team: {
+            include: {
+              team: {
+                include: {
+                  users: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  return { adminProjects, adminOrganizations }
+}
