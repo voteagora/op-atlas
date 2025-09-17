@@ -35,7 +35,6 @@ export default async function Page({ params }: PageProps) {
     getRoleById(parseInt(params.roleId)),
     getRoleApplicationById(parseInt(params.applicationId)),
   ])
-
   if (!role || !application) {
     notFound()
   }
