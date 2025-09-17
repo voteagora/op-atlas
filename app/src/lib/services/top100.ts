@@ -1,5 +1,3 @@
-import { Prisma } from "@prisma/client"
-
 import { prisma } from "@/db/client"
 
 export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
@@ -11,7 +9,7 @@ export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
       SELECT EXISTS (
         SELECT 1
         FROM public."TopDelegates"
-        WHERE lower(recipient) IN (${Prisma.join(unique)})
+        WHERE lower(recipient) = ANY(${unique})
       ) AS is_top100;
     `
     return !!rows?.[0]?.is_top100
