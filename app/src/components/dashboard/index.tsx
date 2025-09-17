@@ -15,6 +15,7 @@ import {
   UserWithAddresses,
   UserKYCTeam,
 } from "@/lib/types"
+import { UserKYCStatus } from "@/lib/actions/userKyc"
 import { cn, profileProgress } from "@/lib/utils"
 
 import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
@@ -28,6 +29,7 @@ import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import { KYCCalloutsContainer } from "./KYCCallouts"
+import { KYCVerificationCallout } from "./KYCVerificationCallout"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
@@ -43,6 +45,7 @@ const Dashboard = ({
   organizations,
   adminProjects,
   kycTeams,
+  userKYCStatus,
 }: {
   className?: string
   user: UserWithAddresses
@@ -51,6 +54,7 @@ const Dashboard = ({
   organizations?: UserOrganizationsWithDetails[]
   adminProjects: ProjectWithDetails[]
   kycTeams?: UserKYCTeam[]
+  userKYCStatus?: UserKYCStatus
 }) => {
   // Use last 16 chars of privyDid for user-specific cookie
   const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
@@ -105,6 +109,9 @@ const Dashboard = ({
     <div className={cn("flex flex-col gap-y-6 mt-6", className)}>
       {/* KYC Status Callouts */}
       <KYCCalloutsContainer kycTeams={kycTeams} />
+
+      {/* Personal KYC Verification Callout */}
+      {userKYCStatus && <KYCVerificationCallout userKYCStatus={userKYCStatus} />}
       
       {/* <RewardsCallout
         roundName="Onchain Builders"

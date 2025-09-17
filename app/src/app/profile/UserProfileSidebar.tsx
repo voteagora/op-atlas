@@ -108,6 +108,23 @@ export function UserProfileSidebar({
             </div>
             Verified addresses
           </Link>
+          <Link
+            href="/profile/kyc"
+            className={cn(
+              currentPage === "kyc" && "text-foreground",
+              "flex gap-2 items-center",
+            )}
+          >
+            <div
+              className={cn(
+                currentPage !== "kyc" && "invisible",
+                "text-lg pb-0.5 w-4 text-muted-foreground",
+              )}
+            >
+              •
+            </div>
+            KYC Verification
+          </Link>
         </div>
       </div>
       <div>

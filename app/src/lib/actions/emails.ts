@@ -237,6 +237,29 @@ export const sendKYCReminderEmail = async (
       }
     }
   }
+
+  // Rate limiting: Check if a reminder email was already sent in the last 24 hours
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  const recentReminder = await prisma.emailNotification.findFirst({
+    where: {
+      kycUserId: kycUser.id,
+      type: "KYCB_REMINDER",
+      sentAt: {
+        gte: twentyFourHoursAgo,
+      },
+      success: true,
+    },
+    orderBy: {
+      sentAt: "desc",
+    },
+  })
+
+  if (recentReminder) {
+    return {
+      success: false,
+      error: "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
+    }
+  }
   const templateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
 
   if (!templateId) {
@@ -365,6 +388,114 @@ export const sendKYBApprovedEmail = async (
   await trackEmailNotification({
     kycUserId: kycUser.id,
     type: "KYCB_APPROVED",
+    emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error,
+  })
+
+  return emailResult
+}
+
+export const sendPersonalKYCReminderEmail = async (
+  kycUserId: string,
+): Promise<EmailResponse> => {
+  // Check authentication - user can only resend email for their own KYC
+  const session = await auth()
+  if (!session?.user?.id) {
+    return {
+      success: false,
+      error: "Unauthorized",
+    }
+  }
+
+  const userId = session.user.id
+
+  // Verify that this KYCUser belongs to the authenticated user
+  const userKycUser = await prisma.userKYCUser.findFirst({
+    where: {
+      userId,
+      kycUserId,
+    },
+    include: {
+      kycUser: true,
+    },
+  })
+
+  if (!userKycUser) {
+    return {
+      success: false,
+      error: "KYC verification not found or unauthorized",
+    }
+  }
+
+  const kycUser = userKycUser.kycUser
+
+  // Don't allow resending for approved users
+  if (kycUser.status === "APPROVED") {
+    return {
+      success: false,
+      error: "Cannot resend email for already approved verification",
+    }
+  }
+
+  // Rate limiting: Check if a reminder email was already sent in the last 24 hours
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  const recentReminder = await prisma.emailNotification.findFirst({
+    where: {
+      kycUserId: kycUser.id,
+      type: "KYCB_REMINDER",
+      sentAt: {
+        gte: twentyFourHoursAgo,
+      },
+      success: true,
+    },
+    orderBy: {
+      sentAt: "desc",
+    },
+  })
+
+  if (recentReminder) {
+    return {
+      success: false,
+      error: "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
+    }
+  }
+
+  const templateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
+
+  if (!templateId) {
+    return {
+      success: false,
+      error:
+        "Missing required Persona KYC template ID. Look this up in Persona dashboard.",
+    }
+  }
+
+  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+
+  if (!inquiryResult.success) {
+    return { success: false, error: inquiryResult.error }
+  }
+
+  if (!inquiryResult.inquiryUrl) {
+    return { success: false, error: "Failed to generate verification link" }
+  }
+
+  const kycLink = inquiryResult.inquiryUrl
+
+  const html = getKYCReminderEmailTemplate(kycUser, kycLink)
+
+  const emailParams = {
+    to: kycUser.email,
+    subject: "Reminder: Complete Your KYC to Receive Your Optimism Grant",
+    html,
+  }
+
+  const emailResult = await sendTransactionEmail(emailParams)
+
+  await trackEmailNotification({
+    kycUserId: kycUser.id,
+    type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
     error: emailResult.error,
