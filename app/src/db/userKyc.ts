@@ -42,3 +42,18 @@ export async function getUserPersonalKYC(userId: string) {
 
   return userKyc?.kycUser || null
 }
+
+export async function getKYCUserStatus(userId: string) {
+  return await prisma.userKYCUser.findFirst({
+    where: {
+      userId,
+    },
+    select: {
+      kycUser: {
+        select: {
+          status: true,
+        },
+      },
+    },
+  })
+}

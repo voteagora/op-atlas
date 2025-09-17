@@ -8,7 +8,7 @@ import {
 } from "@/db/organizations"
 import { getUserByUsername } from "@/db/users"
 import { getAllPublishedProjects } from "@/lib/actions/projects"
-import { getKYCUserStatus } from "@/db/kyc"
+import { getKYCUserStatus } from "@/db/userKyc"
 
 export default async function PublicProfile({
   params,

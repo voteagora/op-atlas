@@ -14,8 +14,6 @@ import {
   personaClient,
   PersonaInquiry,
 } from "@/lib/persona"
-import { resolveProjectStatus } from "@/lib/utils/kyc"
-import { UserKYCTeam } from "@/lib/types"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "@/lib/actions/utils"
 
@@ -312,64 +310,3 @@ export const getKYCUsersByProjectId = async (projectId: string) => {
   return await getKYCUsersByProjId({ projectId })
 }
 
-export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
-  const { adminProjects, adminOrganizations } = await getUserKycTeamSources(userId)
-
-  const kycTeams: UserKYCTeam[] = []
-
-  // Process project KYC teams
-  for (const project of adminProjects) {
-    if (project.kycTeam) {
-      const users = project.kycTeam.team.map((teamMember) => ({
-        id: teamMember.users.id,
-        status: teamMember.users.status,
-        updatedAt: teamMember.users.updatedAt,
-      }))
-
-      const status = resolveProjectStatus(users) as
-        | "PENDING"
-        | "APPROVED"
-        | "project_issue"
-
-      kycTeams.push({
-        id: project.kycTeam.id,
-        walletAddress: project.kycTeam.walletAddress,
-        createdAt: project.kycTeam.createdAt,
-        updatedAt: project.kycTeam.updatedAt,
-        projectId: project.id,
-        projectName: project.name,
-        users,
-        status,
-      })
-    }
-  }
-
-  // Process organization KYC teams
-  for (const organization of adminOrganizations) {
-    for (const orgKycTeam of organization.OrganizationKYCTeams) {
-      const users = orgKycTeam.team.team.map((teamMember) => ({
-        id: teamMember.users.id,
-        status: teamMember.users.status,
-        updatedAt: teamMember.users.updatedAt,
-      }))
-
-      const status = resolveProjectStatus(users) as
-        | "PENDING"
-        | "APPROVED"
-        | "project_issue"
-
-      kycTeams.push({
-        id: orgKycTeam.team.id,
-        walletAddress: orgKycTeam.team.walletAddress,
-        createdAt: orgKycTeam.team.createdAt,
-        updatedAt: orgKycTeam.team.updatedAt,
-        organizationId: organization.id,
-        organizationName: organization.name,
-        users,
-        status,
-      })
-    }
-  }
-
-  return kycTeams
-}

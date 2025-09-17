@@ -4,7 +4,7 @@ import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
-import { getUserKycTeams } from "@/lib/actions/kyc"
+import { getUserKycTeams } from "@/db/kyc"
 import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import {
