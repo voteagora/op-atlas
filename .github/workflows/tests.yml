@@ -60,12 +60,21 @@ jobs:
           cd app
           npx playwright install --with-deps
 
+      - name: Prepare test DB
+        run: |
+          cd app
+          pnpm exec prisma generate
+          pnpm exec prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test?schema=public
+
       - name: Run Playwright tests
         run: |
           cd app
           npx playwright test
         env:
           CI: true
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/atlas_test?schema=public
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

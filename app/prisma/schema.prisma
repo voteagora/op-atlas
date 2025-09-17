@@ -34,6 +34,7 @@ model User {
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
+  endorsements       Endorsement[]      @relation("UserEndorsements")
 
   @@index([username])
   @@index([farcasterId])
@@ -504,12 +505,12 @@ model EmailNotification {
   kycUserId String
   type      EmailNotificationType
   sentAt    DateTime              @default(now())
-  emailTo   String                // Store the actual email used
+  emailTo   String // Store the actual email used
   success   Boolean               @default(true)
-  error     String?               // Store any error messages
-  
-  kycUser   KYCUser               @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
-  
+  error     String? // Store any error messages
+
+  kycUser KYCUser @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
+
   @@index([kycUserId])
   @@index([type])
   @@index([sentAt])
@@ -746,6 +747,7 @@ model RoleApplication {
   organization   Organization?         @relation(fields: [organizationId], references: [id])
   role           Role                  @relation(fields: [roleId], references: [id])
   user           User?                 @relation(fields: [userId], references: [id])
+  endorsements   Endorsement[]         @relation("NomineeApplicationEndorsements")
 
   @@index([roleId])
   @@index([userId])
@@ -835,6 +837,23 @@ model ApplicationChangelog {
   @@index([applicationId])
   @@index([action])
   @@index([createdAt])
+}
+
+model Endorsement {
+  id                   String    @id @default(uuid())
+  context              String
+  nomineeApplicationId Int
+  endorserAddress      String
+  endorserUserId       String?
+  createdAt            DateTime  @default(now())
+  revokedAt            DateTime?
+
+  nomineeApplication RoleApplication @relation("NomineeApplicationEndorsements", fields: [nomineeApplicationId], references: [id], onDelete: Cascade)
+  endorserUser       User?           @relation("UserEndorsements", fields: [endorserUserId], references: [id])
+
+  @@unique([context, nomineeApplicationId, endorserAddress])
+  @@index([context, nomineeApplicationId])
+  @@index([endorserAddress])
 }
 
 view OffChainVote {
