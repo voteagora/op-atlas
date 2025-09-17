@@ -18,6 +18,9 @@ type DataType = {
   kycTeamId?: string
   alreadySelectedProjectIds?: string[]
   hasActiveStream?: boolean
+  formId?: string
+  onSuccess?: (data?: any) => void
+  allOrgKycTeams?: any[]
 }
 
 type AppDialog = {

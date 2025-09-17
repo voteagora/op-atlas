@@ -426,3 +426,20 @@ export type CitizenLookup =
   | { type: typeof CITIZEN_TYPES.user; id: string }
   | { type: typeof CITIZEN_TYPES.chain; id: string }
   | { type: typeof CITIZEN_TYPES.app; id: string }
+
+export interface UserKYCTeam {
+  id: string
+  walletAddress: string
+  createdAt: Date
+  updatedAt: Date
+  projectId?: string
+  organizationId?: string
+  projectName?: string
+  organizationName?: string
+  users: Array<{
+    id: string
+    status: "PENDING" | "APPROVED" | "REJECTED"
+    updatedAt: Date
+  }>
+  status: "PENDING" | "APPROVED" | "project_issue"
+}
