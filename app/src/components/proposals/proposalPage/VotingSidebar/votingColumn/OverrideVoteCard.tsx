@@ -1,7 +1,7 @@
 "use client"
 
-import VoteButton from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VoteButton"
 import { VoteType } from "@/components/proposals/proposal.types"
+import VoteButton from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/VoteButton"
 
 interface overrideVoteCardProps {
   selectedVote?: VoteType
@@ -12,14 +12,19 @@ const OverrideVoteCard = ({
   selectedVote,
   setSelectedVote,
 }: overrideVoteCardProps) => {
-  const vetoText = "Yes, I want to veto"
-
   return (
     <div className={"gap-[8px] flex items-center justify-center"}>
       <VoteButton
-        textValue={vetoText}
+        textValue={"Veto"}
         onClick={() => setSelectedVote(VoteType.Against)}
         selected={selectedVote === VoteType.Against}
+        size={"veto"}
+        voteType={VoteType.Veto}
+      />
+      <VoteButton
+        textValue={"No veto"}
+        onClick={() => setSelectedVote(VoteType.Abstain)}
+        selected={selectedVote === VoteType.Abstain}
         size={"veto"}
         voteType={VoteType.Veto}
       />

@@ -6,17 +6,10 @@ SELECT
   '' :: text AS "transactionHash",
   c.id AS "citizenId",
   (upper(c.type)) :: "citizenCategory" AS "citizenCategory",
-  to_timestamp((v.created_at) :: double precision) AS "createdAt"
+  to_timestamp((v.created_at) :: double precision) AS "createdAt",
+  to_timestamp((v.created_at) :: double precision) AS "updatedAt"
 FROM
   (
     eas.votes v
     LEFT JOIN "Citizen" c ON ((c."attestationId" = v.voter_id))
-  )
-WHERE
-  (
-    (v.params IS NOT NULL)
-    AND (v.params !~ '\]\[' :: text)
-    AND (v.params !~ '\}\{' :: text)
-    AND (v.params ~ '^[\s]*[\{\[]' :: text)
-    AND (v.params ~ '[\}\]][\s]*$' :: text)
   );

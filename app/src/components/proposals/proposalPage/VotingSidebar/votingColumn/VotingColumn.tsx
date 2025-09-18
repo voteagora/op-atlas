@@ -217,7 +217,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const extractIds = (proposalData: ProposalData) => {
     const pData = proposalData.proposalData as any
-    console.log("extractIds", { pData })
     if (
       pData?.options &&
       Array.isArray(pData.options) &&
@@ -267,6 +266,12 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     isLoading: isVoteLoading,
   } = useMyVote(proposalData.offchainProposalId)
 
+  // Optimistic vote state to reflect UI immediately after casting
+  const [justVoted, setJustVoted] = useState(false)
+  const [justVotedSelection, setJustVotedSelection] = useState<
+    { voteType: VoteType; selections?: number[] } | undefined
+  >(undefined)
+
   const { data: session } = useSession()
   const { user } = useWallet()
 
@@ -288,11 +293,29 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     ? mapValueToVoteType(proposalData.proposalType, myVote.vote) || {}
     : {}
 
+  // Prefer optimistic local vote if present; otherwise use fetched vote
+  const displayVoteType =
+    justVoted && justVotedSelection?.voteType
+      ? justVotedSelection.voteType
+      : myVoteType
+  const displayVoteSelections =
+    justVoted && justVotedSelection?.selections
+      ? justVotedSelection.selections
+      : myVoteSelections
+
   const votingActions = getVotingActions(
     !!session?.user?.id,
     !!citizen,
     !!citizenEligibility?.eligible,
   )
+
+  // When a real vote arrives from the backend, clear optimistic state
+  useEffect(() => {
+    if (myVoteType) {
+      setJustVoted(false)
+      setJustVotedSelection(undefined)
+    }
+  }, [myVoteType])
 
   const canVote =
     !!session?.user?.id &&
@@ -772,6 +795,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       loading: "Casting vote...",
       success: (ctx: "EOA" | "SAFE" | "SC") => {
         setShowConfetti(true)
+        // Optimistically reflect the vote in UI immediately
+        setJustVoted(true)
+        setJustVotedSelection(selectedVotes)
         if (ctx === "SAFE") {
           return "Safe transaction proposed. Open your Safe to approve and execute the vote."
         }
@@ -792,7 +818,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         <CardText
           proposalData={proposalData}
           isCitizen={!!citizen}
-          vote={myVoteType}
+          vote={displayVoteType}
           eligibility={citizenEligibility}
         />
       </div>
@@ -811,16 +837,16 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       <div className="w-full md:w-[304px] flex flex-col rounded-b-lg border-x border-b py-6 px-4 duration-300 ease-in-out">
         <div className="w-full md:w-[272px] gap-2">
-          {myVoteType &&
+          {displayVoteType &&
             proposalData.status === ProposalStatus.ACTIVE &&
             (proposalData.proposalType === "OFFCHAIN_STANDARD" ||
               proposalData.proposalType === "HYBRID_STANDARD") && (
               <div className="transition-all duration-300 ease-in-out animate-in slide-in-from-top-2 mb-4">
-                <MyVote voteType={myVoteType} />
+                <MyVote voteType={displayVoteType} />
               </div>
             )}
 
-          {myVoteType &&
+          {displayVoteType &&
             proposalData.status === ProposalStatus.ACTIVE &&
             (proposalData.proposalType === "OFFCHAIN_APPROVAL" ||
               proposalData.proposalType === "HYBRID_APPROVAL") && (
@@ -828,10 +854,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                 <CandidateCards
                   candidateIds={candidateIds}
                   selectedVote={{
-                    voteType: myVoteType,
+                    voteType: displayVoteType,
                     selections:
-                      myVoteSelections && myVoteSelections[0]
-                        ? (myVoteSelections[0] as unknown as number[])
+                      displayVoteSelections && displayVoteSelections[0]
+                        ? (displayVoteSelections[0] as unknown as number[])
                         : undefined,
                   }}
                   setSelectedVote={() => {}}
@@ -845,7 +871,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         {/* Pending Safe banner removed */}
         {proposalData.status === ProposalStatus.ACTIVE &&
           votingActions &&
-          !myVote && (
+          !myVote &&
+          !justVoted && (
             <div className="flex flex-col items-center gap-y-2 mb-4 transition-all duration-300 ease-in-out">
               {(canVote || proposalData.proposalType.includes("APPROVAL")) && (
                 <VotingChoices
@@ -880,18 +907,23 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                   })}
                 />
               </div>
-              {addressMismatch && citizen && !myVote && !!session?.user?.id && (
-                <div className="text-red-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
-                  Your citizen wallet is not connected. Try signing out and
-                  signing in with your Citizen wallet:{" "}
-                  {citizen.address && truncateAddress(citizen.address)}
-                </div>
-              )}
+              {addressMismatch &&
+                citizen &&
+                !myVote &&
+                !justVoted &&
+                !!session?.user?.id && (
+                  <div className="text-red-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
+                    Your citizen wallet is not connected. Try signing out and
+                    signing in with your Citizen wallet:{" "}
+                    {citizen.address && truncateAddress(citizen.address)}
+                  </div>
+                )}
 
               {isSmartContract &&
                 !addressMismatch &&
                 citizen &&
                 !myVote &&
+                !justVoted &&
                 !!session?.user?.id && (
                   <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
                     <Lock className="text-blue-500 w-4 h-4" />

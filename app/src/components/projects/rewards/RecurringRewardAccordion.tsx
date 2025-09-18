@@ -51,12 +51,15 @@ const RewardAccordion = ({
   const linkToStream =
     teamVerified &&
     sortedStreams[0]?.id &&
-    sortedStreams[0]?.receiver === reward.kycTeam?.walletAddress &&
+    sortedStreams[0]?.receiver?.toLowerCase() ===
+      reward.kycTeam?.walletAddress?.toLowerCase() &&
     `${SUPERFLUID_STREAM_URL}${sortedStreams[0]?.id}`
 
   const stoppedStreams = teamVerified
     ? sortedStreams.filter(
-        (stream) => stream.receiver !== reward.kycTeam?.walletAddress,
+        (stream) =>
+          stream.receiver?.toLowerCase() !==
+          reward.kycTeam?.walletAddress?.toLowerCase(),
       )
     : sortedStreams
 

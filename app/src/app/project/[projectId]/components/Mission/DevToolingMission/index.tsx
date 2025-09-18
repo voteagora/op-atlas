@@ -114,7 +114,7 @@ export default function DevToolingMission({
                   <AccordionItem value="retro-funding" className="w-full">
                     <div className="flex flex-col items-center w-full">
                       <p className="font-semibold text-base text-foreground">
-                        Requirements to earn rewards in February were not met
+                        Requirements to earn rewards in {month} were not met
                       </p>
                       <div className="flex items-center space-x-1">
                         <p className="text-secondary-foreground text-base font-normal">
