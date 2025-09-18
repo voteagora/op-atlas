@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation"
 import ReactMarkdown from "react-markdown"
-import { Role } from "@prisma/client"
 
 import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/components/AnalyticsTracker"
 import { Sidebar } from "@/app/governance/roles/[roleId]/components/Sidebar"
@@ -132,9 +131,12 @@ export default async function Page({ params }: { params: { roleId: string } }) {
           <Sidebar role={role} />
           {((applications && applications.length > 0) || isSecurityRole) && (
             <SidebarApplications
+              roleId={role.id}
               applications={applications}
               isSecurityRole={isSecurityRole}
               endorsementEndAt={role.endorsementEndAt}
+              voteStartsAt={role.voteStartAt}
+              voteEndsAt={role.voteEndAt}
             />
           )}
         </div>
