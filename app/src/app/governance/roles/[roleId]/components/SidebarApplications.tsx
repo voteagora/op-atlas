@@ -46,8 +46,8 @@ export default function SidebarApplications({
           </div>
         )}
         {applications && applications.length > 0 ? (
-          <div className="flex flex-col gap-4 p-6">
-            <div className="text-secondary-foreground text-sm font-semibold">
+          <div className="flex flex-col p-6">
+            <div className="text-secondary-foreground text-sm font-semibold mb-2">
               {applications.length} candidate
               {applications.length > 1 ? "s" : ""}
             </div>
