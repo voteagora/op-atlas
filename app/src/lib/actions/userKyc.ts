@@ -230,3 +230,166 @@ export async function deletePersonalKYC(kycUserId: string) {
     return { error: "Failed to delete KYC verification. Please try again." }
   }
 }
+
+export async function validateOrphanedKYCEmail(email: string) {
+  try {
+    // Check if email belongs to an orphaned, non-expired KYCUser
+    const orphanedKYCUser = await prisma.kYCUser.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        expiry: {
+          gt: new Date(), // Not expired
+        },
+        UserKYCUsers: {
+          none: {}, // No existing user associations (orphaned)
+        },
+      },
+    })
+
+    if (!orphanedKYCUser) {
+      return {
+        success: false,
+        error: "No KYC verification found for this email address.",
+      }
+    }
+
+    return {
+      success: true,
+      kycUser: orphanedKYCUser,
+    }
+  } catch (error) {
+    console.error("Error validating orphaned KYC email:", error)
+    return {
+      success: false,
+      error: "Failed to validate email. Please try again.",
+    }
+  }
+}
+
+
+export async function linkKYCToUser(verificationToken: string) {
+  try {
+    // Find UserEmail with valid token
+    const userEmail = await prisma.userEmail.findFirst({
+      where: {
+        verificationToken,
+        verificationTokenExpiresAt: {
+          gt: new Date(), // Token not expired
+        },
+        verified: false,
+      },
+      include: {
+        user: true,
+      },
+    })
+
+    if (!userEmail) {
+      return {
+        success: false,
+        error: "Invalid or expired verification link.",
+      }
+    }
+
+    // Find the KYCUser for this email
+    const kycUser = await prisma.kYCUser.findFirst({
+      where: {
+        email: userEmail.email,
+        expiry: {
+          gt: new Date(), // Not expired
+        },
+        UserKYCUsers: {
+          none: {}, // Still orphaned
+        },
+      },
+    })
+
+    if (!kycUser) {
+      return {
+        success: false,
+        error: "KYC verification no longer available for linking.",
+      }
+    }
+
+    // Check if user already has a KYC
+    const existingUserKyc = await getUserKYCUser(userEmail.userId)
+    if (existingUserKyc) {
+      return {
+        success: false,
+        error: "You already have an active KYC verification.",
+      }
+    }
+
+    // Link KYC to user in a transaction
+    await prisma.$transaction(async (tx) => {
+      // Mark email as verified and clear token
+      await tx.userEmail.update({
+        where: { id: userEmail.id },
+        data: {
+          verified: true,
+          verificationToken: null,
+          verificationTokenExpiresAt: null,
+        },
+      })
+
+      // Create UserKYCUser relationship
+      await tx.userKYCUser.create({
+        data: {
+          userId: userEmail.userId,
+          kycUserId: kycUser.id,
+        },
+      })
+    })
+
+    // Revalidate pages
+    revalidatePath("/dashboard")
+    revalidatePath("/profile/kyc")
+
+    return {
+      success: true,
+      message: "KYC verification successfully linked to your account!",
+    }
+  } catch (error) {
+    console.error("Error linking KYC to user:", error)
+    return {
+      success: false,
+      error: "Failed to link KYC verification. Please try again.",
+    }
+  }
+}
+
+export async function checkPendingKYCVerification() {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    // Check if user has a pending verification email
+    const pendingVerification = await prisma.userEmail.findFirst({
+      where: {
+        userId,
+        verified: false,
+        verificationToken: {
+          not: null,
+        },
+        verificationTokenExpiresAt: {
+          gt: new Date(), // Token not expired
+        },
+      },
+    })
+
+    return {
+      success: true,
+      hasPendingVerification: !!pendingVerification,
+      email: pendingVerification?.email || null,
+    }
+  } catch (error) {
+    console.error("Error checking pending KYC verification:", error)
+    return {
+      success: false,
+      error: "Failed to check verification status.",
+    }
+  }
+}

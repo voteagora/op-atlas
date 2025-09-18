@@ -42,15 +42,18 @@ model User {
 }
 
 model UserEmail {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  userId    String
-  verified  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
+  id                           String    @id @default(uuid())
+  email                        String    @unique
+  userId                       String
+  verified                     Boolean   @default(false)
+  verificationToken            String?   @unique
+  verificationTokenExpiresAt   DateTime?
+  createdAt                    DateTime  @default(now())
+  updatedAt                    DateTime  @updatedAt
+  user                         User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([verificationToken])
 }
 
 model UserInteraction {
@@ -997,6 +1000,7 @@ enum EmailNotificationType {
   KYCB_STARTED
   KYCB_REMINDER
   KYCB_APPROVED
+  KYC_EMAIL_VERIFICATION
 }
 
 enum GrantType {

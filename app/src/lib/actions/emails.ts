@@ -14,6 +14,7 @@ import {
   getKYBReminderEmailTemplate,
   getKYCApprovedEmailTemplate,
   getKYBApprovedEmailTemplate,
+  getKYCEmailVerificationTemplate,
 } from "@/lib/emailTemplates"
 
 const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
@@ -34,6 +35,7 @@ export interface EmailData {
 export interface EmailResponse {
   success: boolean
   error?: string
+  message?: string
 }
 
 export const sendTransactionEmail = async (
@@ -502,4 +504,267 @@ export const sendPersonalKYCReminderEmail = async (
   })
 
   return emailResult
+}
+
+export const sendKYCEmailVerificationEmail = async (
+  email: string,
+  firstName: string,
+  verificationLink: string,
+  kycUserId: string,
+): Promise<EmailResponse> => {
+  const html = getKYCEmailVerificationTemplate(firstName, verificationLink)
+
+  const emailParams = {
+    to: email,
+    subject: "Verify your email to link your KYC verification",
+    html,
+  }
+
+  const emailResult = await sendTransactionEmail(emailParams)
+
+  await trackEmailNotification({
+    kycUserId,
+    type: "KYC_EMAIL_VERIFICATION",
+    emailTo: email,
+    success: emailResult.success,
+    error: emailResult.error,
+  })
+
+  return emailResult
+}
+
+export async function sendKYCVerificationEmail(email: string): Promise<EmailResponse> {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    // Validate the orphaned KYC user for this email
+    const orphanedKYCUser = await prisma.kYCUser.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        expiry: {
+          gt: new Date(), // Not expired
+        },
+        UserKYCUsers: {
+          none: {}, // No existing user associations (orphaned)
+        },
+      },
+    })
+
+    if (!orphanedKYCUser) {
+      return {
+        success: false,
+        error: "No KYC verification found for this email address.",
+      }
+    }
+
+    // Check if user already has a KYC
+    const existingUserKyc = await prisma.userKYCUser.findFirst({
+      where: {
+        userId,
+      },
+      include: {
+        kycUser: true,
+      },
+    })
+
+    if (existingUserKyc) {
+      return {
+        success: false,
+        error: "You already have an active KYC verification.",
+      }
+    }
+
+    // Rate limiting check - no more than one verification email per 24 hours for this KYC
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const recentVerificationEmail = await prisma.emailNotification.findFirst({
+      where: {
+        kycUserId: orphanedKYCUser.id,
+        type: "KYC_EMAIL_VERIFICATION",
+        sentAt: {
+          gte: twentyFourHoursAgo,
+        },
+        success: true,
+      },
+      orderBy: {
+        sentAt: "desc",
+      },
+    })
+
+    if (recentVerificationEmail) {
+      return {
+        success: false,
+        error: "A verification email was already sent within the last 24 hours. Please wait before requesting another.",
+      }
+    }
+
+    // Delete any existing unverified UserEmail records for this user before creating a new one
+    await prisma.userEmail.deleteMany({
+      where: {
+        userId,
+        verified: false,
+      },
+    })
+
+    // Check if there's already a UserEmail record for this user and email
+    let userEmail = await prisma.userEmail.findFirst({
+      where: {
+        userId,
+        email: email.toLowerCase(),
+      },
+    })
+
+    // Generate verification token and expiry (7 days)
+    const verificationToken = crypto.randomUUID()
+    const verificationTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+    if (userEmail) {
+      // Update existing record with new token
+      userEmail = await prisma.userEmail.update({
+        where: { id: userEmail.id },
+        data: {
+          verified: false,
+          verificationToken,
+          verificationTokenExpiresAt,
+        },
+      })
+    } else {
+      // Create new UserEmail record
+      userEmail = await prisma.userEmail.create({
+        data: {
+          userId,
+          email: email.toLowerCase(),
+          verified: false,
+          verificationToken,
+          verificationTokenExpiresAt,
+        },
+      })
+    }
+
+    // Generate verification link
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+    const verificationLink = `${baseUrl}/api/kyc/verify-email?token=${verificationToken}`
+
+    // Send verification email
+    const emailResult = await sendKYCEmailVerificationEmail(
+      email.toLowerCase(),
+      orphanedKYCUser.firstName,
+      verificationLink,
+      orphanedKYCUser.id
+    )
+
+    if (emailResult.success) {
+      return {
+        success: true,
+        message: `Verification email sent to ${email}. Please check your inbox and click the link to link your KYC verification.`,
+      }
+    } else {
+      return emailResult
+    }
+  } catch (error) {
+    console.error("Error sending KYC verification email:", error)
+    return {
+      success: false,
+      error: "Failed to send verification email. Please try again.",
+    }
+  }
+}
+
+export const resendKYCVerificationEmail = async (): Promise<EmailResponse> => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    // Find the UserEmail record with pending verification token for this user
+    const userEmail = await prisma.userEmail.findFirst({
+      where: {
+        userId,
+        verified: false,
+        verificationToken: {
+          not: null,
+        },
+        verificationTokenExpiresAt: {
+          gt: new Date(), // Token not expired
+        },
+      },
+    })
+
+    if (!userEmail) {
+      return {
+        success: false,
+        error: "No pending email verification found. Please start the process again.",
+      }
+    }
+
+    // Find the KYCUser for this email to get firstName and kycUserId
+    const kycUser = await prisma.kYCUser.findFirst({
+      where: {
+        email: userEmail.email,
+        expiry: {
+          gt: new Date(), // Not expired
+        },
+        UserKYCUsers: {
+          none: {}, // Still orphaned
+        },
+      },
+    })
+
+    if (!kycUser) {
+      return {
+        success: false,
+        error: "KYC verification no longer available for linking.",
+      }
+    }
+
+    // Check rate limiting - email verification emails in last 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const recentVerificationEmail = await prisma.emailNotification.findFirst({
+      where: {
+        kycUserId: kycUser.id,
+        type: "KYC_EMAIL_VERIFICATION",
+        sentAt: {
+          gte: twentyFourHoursAgo,
+        },
+        success: true,
+      },
+      orderBy: {
+        sentAt: "desc",
+      },
+    })
+
+    if (recentVerificationEmail) {
+      return {
+        success: false,
+        error: "A verification email was already sent within the last 24 hours. Please wait before requesting another.",
+      }
+    }
+
+    // Generate verification link with existing token
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+    const verificationLink = `${baseUrl}/api/kyc/verify-email?token=${userEmail.verificationToken}`
+
+    // Send verification email
+    const emailResult = await sendKYCEmailVerificationEmail(
+      userEmail.email,
+      kycUser.firstName,
+      verificationLink,
+      kycUser.id
+    )
+
+    return emailResult
+  } catch (error) {
+    console.error("Error resending KYC verification email:", error)
+    return {
+      success: false,
+      error: "Failed to resend verification email. Please try again.",
+    }
+  }
 }
