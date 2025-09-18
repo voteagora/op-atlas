@@ -10,19 +10,7 @@ import { UserAvatar } from "@/components/common/UserAvatar"
 
 import { AnalyticsTracker } from "./AnalyticsTracker"
 import { CopyForumTextButton } from "./CopyForumTextButton"
-
-const confettiConfig = {
-  angle: 90,
-  spread: 360,
-  startVelocity: 40,
-  elementCount: 70,
-  dragFriction: 0.12,
-  duration: 10000,
-  stagger: 3,
-  width: "10px",
-  height: "10px",
-  colors: ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"],
-}
+import { useConfetti } from "@/providers/LayoutProvider"
 
 interface SuccessPageClientProps {
   role: Role
@@ -45,8 +33,8 @@ export const SuccessPageClient = ({
   forumText,
   voteSchedule,
 }: SuccessPageClientProps) => {
-  const [showConfetti, setShowConfetti] = useState(false)
   const router = useRouter()
+  const setShowConfetti = useConfetti()
 
   const isSecurityRole =
     role.title.includes("Security") || role.title.includes("security")
@@ -55,18 +43,12 @@ export const SuccessPageClient = ({
     if (isSecurityRole) {
       setShowConfetti(true)
     }
-  }, [isSecurityRole])
+  }, [isSecurityRole, setShowConfetti])
 
   if (isSecurityRole) {
     return (
       <main className="flex flex-col items-center justify-center h-full gap-8 w-full bg-foreground min-h-screen">
         <AnalyticsTracker role={role} />
-
-        {/* Confetti Background */}
-        <div className="fixed inset-0 pointer-events-none top-0">
-          <Confetti active={showConfetti} config={confettiConfig} />
-        </div>
-
         <div className="flex flex-col items-center justify-center gap-8 max-w-[712px] relative z-10">
           {isUser ? (
             <UserAvatar imageUrl={user?.imageUrl} />
