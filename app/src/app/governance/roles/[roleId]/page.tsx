@@ -138,8 +138,10 @@ export default async function Page({ params }: { params: { roleId: string } }) {
           <Sidebar role={role} />
           {((applications && applications.length > 0) || isSecurityRole) && (
             <SidebarApplications
+              roleId={role.id}
               applications={applications}
               isSecurityRole={isSecurityRole}
+              voteStartsAt={role.voteStartAt}
               voteEndsAt={role.voteEndAt}
             />
           )}
