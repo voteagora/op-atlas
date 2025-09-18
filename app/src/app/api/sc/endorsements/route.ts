@@ -21,20 +21,33 @@ export async function POST(req: NextRequest) {
 
   const { context, nomineeApplicationId } = parsed.data
 
-  const application = await prisma.roleApplication.findUnique({
+  // Read role window with safe fallback for pre-migration DBs (no endorsement* columns)
+  let start: Date | null = null
+  let end: Date | null = null
+  const appRole = await prisma.roleApplication.findUnique({
     where: { id: nomineeApplicationId },
-    include: { role: true },
+    select: { roleId: true },
   })
-  if (!application?.role) return new Response("Not Found", { status: 404 })
+  if (!appRole?.roleId) return new Response("Not Found", { status: 404 })
+  const roleWindow = await prisma.role.findUnique({
+    where: { id: appRole.roleId },
+    select: {
+      voteStartAt: true,
+      voteEndAt: true,
+    },
+  })
+  if (!roleWindow) return new Response("Not Found", { status: 404 })
+  const extended = roleWindow as unknown as {
+    endorsementStartAt?: Date | null
+    endorsementEndAt?: Date | null
+    voteStartAt?: Date | null
+    voteEndAt?: Date | null
+  }
+  start = extended.endorsementStartAt ?? extended.voteStartAt ?? null
+  end = extended.endorsementEndAt ?? extended.voteEndAt ?? null
 
   const now = new Date()
-  const voteStartAt = application.role.voteStartAt
-    ? new Date(application.role.voteStartAt)
-    : null
-  const voteEndAt = application.role.voteEndAt
-    ? new Date(application.role.voteEndAt)
-    : null
-  if ((voteStartAt && now < voteStartAt) || (voteEndAt && now > voteEndAt)) {
+  if ((start && now < start) || (end && now > end)) {
     return new Response("Window closed", { status: 403 })
   }
 

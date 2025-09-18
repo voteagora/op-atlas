@@ -14,11 +14,28 @@ export async function GET(req: NextRequest) {
     return new Response("Bad Request", { status: 400 })
   }
 
-  const role = await prisma.role.findUnique({ where: { id: roleId } })
-  if (!role) return new Response("Not Found", { status: 404 })
+  // Read role window with safe fallback for pre-migration DBs (no endorsement* columns)
+  let start: Date | null = null
+  let end: Date | null = null
+  const roleWindow = await prisma.role.findUnique({
+    where: { id: roleId },
+    select: {
+      voteStartAt: true,
+      voteEndAt: true,
+    },
+  })
+  if (!roleWindow) return new Response("Not Found", { status: 404 })
+  const extended = roleWindow as unknown as {
+    endorsementStartAt?: Date | null
+    endorsementEndAt?: Date | null
+    voteStartAt?: Date | null
+    voteEndAt?: Date | null
+  }
+  start = extended.endorsementStartAt ?? extended.voteStartAt ?? null
+  end = extended.endorsementEndAt ?? extended.voteEndAt ?? null
 
   const now = new Date()
-  if ((role.voteStartAt && now < role.voteStartAt) || (role.voteEndAt && now > role.voteEndAt)) {
+  if ((start && now < start) || (end && now > end)) {
     return NextResponse.json({ eligible: false, reason: "window_closed" })
   }
 
@@ -30,8 +47,8 @@ export async function GET(req: NextRequest) {
   })
   const addresses = user?.addresses?.map((a) => a.address) || []
   const top100 = await isTop100Delegate(addresses)
-
-  return NextResponse.json({ eligible: top100, reason: top100 ? undefined : "not_top100" })
+  return NextResponse.json({
+    eligible: top100,
+    reason: top100 ? undefined : "not_top100",
+  })
 }
-
-
