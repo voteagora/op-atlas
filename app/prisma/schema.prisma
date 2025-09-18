@@ -729,6 +729,8 @@ model Role {
   endAt        DateTime?
   voteStartAt  DateTime?
   voteEndAt    DateTime?
+  endorsementStartAt DateTime?
+  endorsementEndAt   DateTime?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @default(now()) @updatedAt
   proposalId   String?
