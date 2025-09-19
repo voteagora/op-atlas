@@ -377,9 +377,31 @@ export async function submitGrantEligibilityForm(params: {
           continue
         }
 
-        let kycUser = await tx.kYCUser.findFirst({
-          where: { email: entity.controllerEmail.toLowerCase(), kycUserType: "LEGAL_ENTITY" },
-        })
+        // For KYB case, check organization along with email and user type
+        // If form is tied to a project (no organization), always create new KYC user
+        // If form is tied to an organization, check if KYC user exists for same email, type, and organization
+        let kycUser = null
+        if (existingForm.organizationId) {
+          kycUser = await tx.kYCUser.findFirst({
+            where: {
+              email: entity.controllerEmail.toLowerCase(),
+              kycUserType: "LEGAL_ENTITY",
+              KYCUserTeams: {
+                some: {
+                  team: {
+                    OrganizationKYCTeams: {
+                      some: {
+                        organizationId: existingForm.organizationId,
+                        deletedAt: null
+                      }
+                    }
+                  }
+                }
+              }
+            },
+          })
+        }
+        // If form is tied to project (no organization), we always create new KYC user, so kycUser stays null
 
         let isNewUser = false
 
