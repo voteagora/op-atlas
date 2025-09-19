@@ -14,6 +14,9 @@ export const metadata = {
 export default async function Page() {
   const [roles, session] = await Promise.all([getAllRoles(), auth()])
   const hasRoles = roles.length > 0
+  const securityRoles = roles.filter((role) =>
+    role.title.toLowerCase().includes("security"),
+  )
   const userId = session?.user?.id
 
   return (
@@ -25,7 +28,7 @@ export default async function Page() {
           </h1>
         </div>
         {hasRoles && <RolesPage roles={roles} />}
-        <ProposalsPage userId={userId} />
+        <ProposalsPage userId={userId} securityRoles={securityRoles} />
       </div>
     </main>
   )

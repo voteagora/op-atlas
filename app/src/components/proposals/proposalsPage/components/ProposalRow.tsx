@@ -12,11 +12,7 @@ import { StandardProposalProps } from "./Proposals"
 
 export const ProposalRow = (props: StandardProposalProps) => {
   return (
-    <ProposalCard
-      roundedTop={props.roundedTop}
-      roundedBottom={props.roundedBottom}
-      href={props.arrow.href}
-    >
+    <ProposalCard href={props.arrow.href}>
       <ProposalBadge type={props.badge.badgeType} />
       <ProposalTextContent
         title={props.textContent.title}
