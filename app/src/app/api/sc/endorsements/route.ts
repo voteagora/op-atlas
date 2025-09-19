@@ -46,21 +46,8 @@ export async function POST(req: NextRequest) {
   const allowed = await isTop100Delegate(addresses)
   if (!allowed) return new Response("Forbidden", { status: 403 })
 
-  const lower = addresses.map((a) => a.toLowerCase())
-  const matches = await prisma.$queryRaw<{ recipient: string }[]>`
-    SELECT recipient
-    FROM public."TopDelegates"
-    WHERE lower(recipient) = ANY(${lower}::text[])
-       OR lower(RIGHT(recipient, 40)) = ANY(${lower}::text[])
-  `
-  const matched = matches?.[0]?.recipient?.toLowerCase() || null
-  const endorserAddress = matched
-    ? addresses.find(
-        (a) =>
-          a.toLowerCase() === matched ||
-          a.toLowerCase().endsWith(matched.slice(-40)),
-      ) || addresses[0]
-    : addresses[0]
+  const endorserAddress =
+    user?.addresses?.find((a) => a.primary)?.address || addresses[0]
   if (!endorserAddress) return new Response("No address", { status: 400 })
 
   const endorsement = await createEndorsement({
