@@ -1,0 +1,6 @@
+-- Safe ALTERs for Role table (Dev only)
+ALTER TABLE "Role" ADD COLUMN IF NOT EXISTS "endorsementStartAt" TIMESTAMP(3);
+ALTER TABLE "Role" ADD COLUMN IF NOT EXISTS "endorsementEndAt" TIMESTAMP(3);
+ALTER TABLE "Role" ADD COLUMN IF NOT EXISTS "isSecurityRole" BOOLEAN NOT NULL DEFAULT false;
+
+
