@@ -46,14 +46,14 @@ export async function POST(req: NextRequest) {
   const allowed = await isTop100Delegate(addresses)
   if (!allowed) return new Response("Forbidden", { status: 403 })
 
-  const primary =
+  const endorserAddress =
     user?.addresses?.find((a) => a.primary)?.address || addresses[0]
-  if (!primary) return new Response("No address", { status: 400 })
+  if (!endorserAddress) return new Response("No address", { status: 400 })
 
   const endorsement = await createEndorsement({
     context,
     nomineeApplicationId,
-    endorserAddress: primary,
+    endorserAddress,
     endorserUserId: session.user.id,
   })
   return NextResponse.json({ id: endorsement.id })
