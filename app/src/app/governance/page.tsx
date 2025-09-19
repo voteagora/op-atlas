@@ -12,11 +12,8 @@ export const metadata = {
 }
 
 export default async function Page() {
-  const roles = await getAllRoles()
-
+  const [roles, session] = await Promise.all([getAllRoles(), auth()])
   const hasRoles = roles.length > 0
-
-  const session = await auth()
   const userId = session?.user?.id
 
   return (

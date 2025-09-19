@@ -6,7 +6,7 @@ import { UserFill } from "../icons/remix"
 interface UserAvatarProps {
   imageUrl?: string | null
   children?: React.ReactNode
-  size?: "xs" | "sm" | "lg"
+  size?: "xs" | "sm" | "lg" | "20px"
 }
 
 export function UserAvatar({
@@ -22,6 +22,12 @@ export function UserAvatar({
           container: "w-5 h-5",
           placeholder: "w-5 h-5",
           iconSize: "w-2.5 h-2.5",
+        }
+      case "20px":
+        return {
+          container: "w-[20px] h-[20px]",
+          placeholder: "w-[20px] h-[20px]",
+          iconSize: "w-[20px] h-[20px]",
         }
       case "sm":
         return {
