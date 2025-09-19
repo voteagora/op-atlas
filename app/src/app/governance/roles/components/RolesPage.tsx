@@ -28,7 +28,12 @@ export default function RolesPage({ roles }: { roles: Role[] }) {
 
       <div className="flex flex-col">
         {roles.map((role, index) => (
-          <RoleRow key={role.id} role={role} rounded={index === 0} />
+          <RoleRow
+            key={role.id}
+            role={role}
+            roundedTop={index === 0}
+            roundedBottom={index === roles.length - 1}
+          />
         ))}
       </div>
     </div>

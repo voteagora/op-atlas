@@ -11,7 +11,15 @@ import ProposalCard, {
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { formatMMMd } from "@/lib/utils/date"
 
-export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
+export function RoleRow({
+  role,
+  roundedTop,
+  roundedBottom,
+}: {
+  role: Role
+  roundedTop: boolean
+  roundedBottom: boolean
+}) {
   const isActive =
     role.startAt &&
     role.endAt &&
@@ -20,7 +28,11 @@ export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
   const isUpcoming = role.startAt && new Date() < new Date(role.startAt)
 
   return (
-    <ProposalCard rounded={rounded} href={`/governance/roles/${role.id}`}>
+    <ProposalCard
+      roundedTop={roundedTop}
+      roundedBottom={roundedBottom}
+      href={`/governance/roles/${role.id}`}
+    >
       <ProposalBadge
         type={
           isActive
