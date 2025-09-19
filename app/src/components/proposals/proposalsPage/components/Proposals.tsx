@@ -76,8 +76,8 @@ const SecurityPlaceholderRow = ({ role }: SecurityPlaceholderRowProps) => (
       <span className="text-base font-normal leading-6">
         {role.startAt && role.endAt && (
           <ProposalDates
-            startDate={formatMMMd(role.startAt || new Date())}
-            endDate={formatMMMd(role.endAt || new Date())}
+            startDate={formatMMMd(role.voteStartAt || new Date())}
+            endDate={formatMMMd(role.voteEndAt || new Date())}
           />
         )}
       </span>

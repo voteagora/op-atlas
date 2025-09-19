@@ -32,7 +32,7 @@ export default function RoleApplication({
   const [conflicts, setConflicts] = useState<string | null>(null)
   const [projects, setProjects] = useState<any[] | null>(null)
   const [personalStatement, setPersonalStatement] = useState<string>("")
-  const [externalLinks, setExternalLinks] = useState<string[]>([])
+  const [externalLinks, setExternalLinks] = useState<{ url: string; description: string }[]>([])
   const { data: activeApplications, isLoading } = useActiveUserApplications({
     userId: user?.id,
     organizationId: organization?.id,
@@ -56,9 +56,7 @@ export default function RoleApplication({
       setConflicts(application.conflictsOfInterest)
       setProjects(application.projects)
       setPersonalStatement(application.personalStatement)
-      setExternalLinks(
-        application.externalLinks.map(({ url }: { url: string }) => url),
-      )
+      setExternalLinks(application.externalLinks)
       if (organization) {
         // Find application with matching organizationId
         const orgApplication = activeApplications.find(
@@ -179,23 +177,24 @@ export default function RoleApplication({
         <div className="text-foreground font-medium">
           Share any links that demonstrate your expertise:
         </div>
-        {externalLinks.length > 0 ? (
+        {externalLinks.length > 0 && externalLinks.map((link) => (
           <>
-            {externalLinks.map((link: string, idx: number) => (
+
               <div
-                key={idx}
+                key={link.url}
                 className="text-secondary-foreground hover:underline flex flex-row gap-2"
               >
                 <LinkIcon />
-                <Link href={link} target="_blank">
-                  {link}
+                <Link href={link.url} target="_blank">
+                  {link.url}
                 </Link>
               </div>
-            ))}
+            <p className="text-secondary-foreground">
+              {link.description || "None"}
+            </p>
           </>
-        ) : (
-          <div className="text-secondary-foreground">None</div>
-        )}
+        ))}
+        {externalLinks.length === 0 && <div className="text-secondary-foreground">None</div>}
       </>
     )
   }

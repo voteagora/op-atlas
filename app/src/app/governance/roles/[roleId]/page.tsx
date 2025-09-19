@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import ReactMarkdown from "react-markdown"
+import { Role } from "@prisma/client"
 
 import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/components/AnalyticsTracker"
 import { Sidebar } from "@/app/governance/roles/[roleId]/components/Sidebar"
@@ -17,7 +18,6 @@ import { formatMMMd } from "@/lib/utils/date"
 import { RoleDates } from "./components/RoleDates"
 import { Metadata } from "next"
 import { sharedMetadata } from "@/app/shared-metadata"
-import { useMemo } from "react"
 
 export async function generateMetadata({
   params,
@@ -38,22 +38,16 @@ export async function generateMetadata({
 }
 
 export default async function Page({ params }: { params: { roleId: string } }) {
-  const role = await getRoleById(parseInt(params.roleId))
-  const applications = await getRoleApplications(parseInt(params.roleId))
+  const [role, applications] = await Promise.all([
+    getRoleById(parseInt(params.roleId)),
+    getRoleApplications(parseInt(params.roleId)),
+  ])
 
   if (!role) {
-    notFound()
+    return notFound()
   }
 
-  const voteSchedule =
-    role?.voteStartAt && role?.voteEndAt
-      ? `Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
-          new Date(role.voteEndAt!),
-        )}`
-      : null
-
-  const isSecurityRole =
-    role.title.includes("Security") || role.title.includes("security")
+  const isSecurityRole = role.isSecurityRole
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -140,7 +134,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
             <SidebarApplications
               applications={applications}
               isSecurityRole={isSecurityRole}
-              voteEndsAt={role.voteEndAt}
+              endorsementEndAt={role.endorsementEndAt}
             />
           )}
         </div>

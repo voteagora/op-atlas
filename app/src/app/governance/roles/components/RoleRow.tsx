@@ -13,12 +13,8 @@ import { formatMMMd } from "@/lib/utils/date"
 
 export function RoleRow({
   role,
-  roundedTop,
-  roundedBottom,
 }: {
   role: Role
-  roundedTop: boolean
-  roundedBottom: boolean
 }) {
   const isActive =
     role.startAt &&
@@ -27,10 +23,11 @@ export function RoleRow({
     new Date() <= new Date(role.endAt)
   const isUpcoming = role.startAt && new Date() < new Date(role.startAt)
 
+  let startDate = formatMMMd(role.startAt || new Date())
+  let endDate = formatMMMd(role.endAt || new Date())
+
   return (
     <ProposalCard
-      roundedTop={roundedTop}
-      roundedBottom={roundedBottom}
       href={`/governance/roles/${role.id}`}
     >
       <ProposalBadge
@@ -45,8 +42,8 @@ export function RoleRow({
       <ProposalTextContent title={role.title} />
       <div className="hidden md:block">
         <ProposalDates
-          startDate={formatMMMd(role.startAt || new Date())}
-          endDate={formatMMMd(role.endAt || new Date())}
+          startDate={startDate}
+          endDate={endDate}
         />
       </div>
       <ProposalArrow

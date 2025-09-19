@@ -27,7 +27,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
   const userId = session?.user?.id
 
   if (!userId) {
-    redirect(`/governance/roles/${params.roleId}`)
+    return redirect(`/governance/roles/${params.roleId}`)
   }
 
   const [role, user, userOrgs] = await Promise.all([
@@ -37,15 +37,8 @@ export default async function Page({ params }: { params: { roleId: string } }) {
   ])
 
   if (!role || !user || !userOrgs) {
-    notFound()
+    return notFound()
   }
-
-  const voteSchedule =
-    role?.voteStartAt && role?.voteEndAt
-      ? `Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
-          new Date(role.voteEndAt!),
-        )}`
-      : null
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -77,13 +70,9 @@ export default async function Page({ params }: { params: { roleId: string } }) {
               {role.startAt && role.endAt && (
                 <div className="text-muted-foreground flex flex-row gap-2">
                   <div>
-                    Submit your application between{" "}
-                    {formatMMMd(new Date(role.startAt))}
-                    {" - "}
+                    Submit this application by {" "}
                     {formatMMMd(new Date(role.endAt))}
                   </div>
-                  {voteSchedule && <div>{" | "}</div>}
-                  {voteSchedule && <div>{voteSchedule}</div>}
                 </div>
               )}
             </div>

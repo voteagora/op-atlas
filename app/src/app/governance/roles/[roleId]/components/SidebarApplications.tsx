@@ -14,11 +14,11 @@ import { formatMMMd } from "@/lib/utils/date"
 export default function SidebarApplications({
   applications,
   isSecurityRole,
-  voteEndsAt,
+  endorsementEndAt,
 }: {
   applications?: RoleApplication[]
   isSecurityRole?: boolean
-  voteEndsAt: Date | null
+  endorsementEndAt: Date | null
 }) {
   if ((!applications || applications.length === 0) && !isSecurityRole) {
     return null
@@ -35,7 +35,10 @@ export default function SidebarApplications({
               </div>
               <div className="text-sm text-secondary-foreground">
                 Top 100 Delegates may provide approval{" "}
-                {voteEndsAt ? "until " + formatMMMd(voteEndsAt) : ""}.
+                {endorsementEndAt
+                  ? "until " + formatMMMd(endorsementEndAt)
+                  : ""}
+                .
               </div>
             </div>
           </div>
