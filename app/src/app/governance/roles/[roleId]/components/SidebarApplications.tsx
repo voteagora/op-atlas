@@ -188,16 +188,13 @@ const OrgCandidate = ({
       </div>
       <div className="flex items-center gap-2">
         {count > 0 && (
-          <div
-            className="text-[11px] leading-4 px-[5px] py-0.5 rounded text-center text-secondary-foreground"
-            style={{ backgroundColor: "#f2f3f8" }}
-          >
+          <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
             {count}
           </div>
         )}
         {showApprove && !endorsed?.endorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-medium"
             onClick={onApprove}
             disabled={approve.isPending}
           >
@@ -206,7 +203,7 @@ const OrgCandidate = ({
         )}
         {showApprove && endorsed?.endorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default font-medium"
             disabled
           >
             <span className="font-medium text-xs leading-4">Approved</span>
@@ -265,20 +262,19 @@ const UserCandidate = ({
     >
       <div className="flex flex-row gap-2 text-sm items-center min-w-0">
         <UserAvatar imageUrl={user.imageUrl} size={"20px"} />
-        <span className="truncate whitespace-nowrap">{username || user.name}</span>
+        <span className="truncate whitespace-nowrap">
+          {username || user.name}
+        </span>
       </div>
       <div className="flex items-center gap-2">
         {count > 0 && (
-          <div
-            className="text-[11px] leading-4 px-[5px] py-0.5 rounded text-center text-secondary-foreground"
-            style={{ backgroundColor: "#f2f3f8" }}
-          >
+          <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
             {count}
           </div>
         )}
         {showApprove && !endorsed?.endorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-medium"
             onClick={onApprove}
             disabled={approve.isPending}
           >
@@ -287,7 +283,7 @@ const UserCandidate = ({
         )}
         {showApprove && endorsed?.endorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default font-medium"
             disabled
           >
             <span className="font-medium text-xs leading-4">Approved</span>
