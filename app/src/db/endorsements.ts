@@ -74,3 +74,19 @@ export async function getEndorsementCounts({
   for (const row of rows) map.set(row.nomineeApplicationId, row._count._all)
   return map
 }
+
+export async function getEndorsementCountsByRole({
+  context,
+  roleId,
+}: {
+  context: string
+  roleId: number
+}) {
+  const apps = await prisma.roleApplication.findMany({
+    where: { roleId },
+    select: { id: true },
+  })
+  const nomineeApplicationIds = apps.map((a) => a.id)
+  const map = await getEndorsementCounts({ context, nomineeApplicationIds })
+  return map
+}

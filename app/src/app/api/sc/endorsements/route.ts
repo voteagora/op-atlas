@@ -3,7 +3,11 @@ import { z } from "zod"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { createEndorsement, getEndorsementCounts } from "@/db/endorsements"
+import {
+  createEndorsement,
+  getEndorsementCounts,
+  getEndorsementCountsByRole,
+} from "@/db/endorsements"
 import { isTop100Delegate } from "@/lib/services/top100"
 
 const payloadSchema = z.object({
@@ -78,18 +82,33 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
+  const roleId = Number(searchParams.get("roleId"))
   const nomineeIds = searchParams.getAll("nomineeId").map((x) => Number(x))
-  if (!context || nomineeIds.length === 0)
-    return new Response("Bad Request", { status: 400 })
 
-  const map = await getEndorsementCounts({
-    context,
-    nomineeApplicationIds: nomineeIds,
-  })
-  return NextResponse.json(
-    nomineeIds.map((id) => ({
-      nomineeApplicationId: id,
-      count: map.get(id) || 0,
-    })),
-  )
+  if (!context) return new Response("Bad Request", { status: 400 })
+
+  if (Number.isFinite(roleId) && roleId > 0) {
+    const map = await getEndorsementCountsByRole({ context, roleId })
+    return NextResponse.json(
+      Array.from(map.entries()).map(([id, count]) => ({
+        nomineeApplicationId: id,
+        count,
+      })),
+    )
+  }
+
+  if (nomineeIds.length > 0) {
+    const map = await getEndorsementCounts({
+      context,
+      nomineeApplicationIds: nomineeIds,
+    })
+    return NextResponse.json(
+      nomineeIds.map((id) => ({
+        nomineeApplicationId: id,
+        count: map.get(id) || 0,
+      })),
+    )
+  }
+
+  return new Response("Bad Request", { status: 400 })
 }
