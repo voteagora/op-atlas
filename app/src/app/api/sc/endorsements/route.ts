@@ -34,8 +34,11 @@ export async function POST(req: NextRequest) {
     select: {
       voteStartAt: true,
       voteEndAt: true,
+      endorsementStartAt: true,
+      endorsementEndAt: true,
     },
   })
+
   if (!roleWindow) return new Response("Not Found", { status: 404 })
   const extended = roleWindow as unknown as {
     endorsementStartAt?: Date | null

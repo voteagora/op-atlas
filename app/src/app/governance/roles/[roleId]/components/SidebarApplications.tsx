@@ -48,7 +48,6 @@ export default function SidebarApplications({
   }, [elig, voteStartsAt, voteEndsAt])
 
   const isTop100 = Boolean(t100?.top100)
-
   if ((!applications || applications.length === 0) && !isSecurityRole) {
     return null
   }
@@ -159,13 +158,16 @@ const OrgCandidate = ({
         <UserAvatar imageUrl={org.avatarUrl} size={"20px"} />
         {org.name}
       </div>
-      {showApprove ? (
-        <Button className="h-6 px-2 py-1 text-xs" onClick={onApprove} disabled={approve.isPending}>
+      {showApprove && (
+        <Button
+          className="h-6 px-2 py-1 text-xs"
+          onClick={onApprove}
+          disabled={approve.isPending}
+        >
           {approve.isPending ? "Approving..." : "Approve"}
         </Button>
-      ) : (
-        <ArrowRightS className="w-4 h-4" />
       )}
+      <ArrowRightS className="w-4 h-4" />
     </div>
   )
 }
@@ -213,13 +215,16 @@ const UserCandidate = ({
         <UserAvatar imageUrl={user.imageUrl} size={"20px"} />
         {username || user.name}
       </div>
-      {showApprove ? (
-        <Button className="h-6 px-2 py-1 text-xs" onClick={onApprove} disabled={approve.isPending}>
+      {showApprove && (
+        <Button
+          className="h-6 px-2 py-1 text-xs outline"
+          onClick={onApprove}
+          disabled={approve.isPending}
+        >
           {approve.isPending ? "Approving..." : "Approve"}
         </Button>
-      ) : (
-        <ArrowRightS className="w-4 h-4" />
       )}
+      <ArrowRightS className="w-4 h-4" />
     </div>
   )
 }

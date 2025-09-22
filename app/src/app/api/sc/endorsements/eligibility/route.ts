@@ -22,6 +22,8 @@ export async function GET(req: NextRequest) {
     select: {
       voteStartAt: true,
       voteEndAt: true,
+      endorsementStartAt: true,
+      endorsementEndAt: true,
     },
   })
   if (!roleWindow) return new Response("Not Found", { status: 404 })
