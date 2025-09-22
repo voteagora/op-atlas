@@ -30,8 +30,7 @@ export function useApproveNominee() {
       return (await res.json()) as { id: string }
     },
     onSuccess: () => {
-      // invalidate counts if we add a count hook later
-      qc.invalidateQueries({ queryKey: TOP100_QUERY_KEY })
+      qc.invalidateQueries()
     },
   })
 }
@@ -40,12 +39,55 @@ export function useEndorsementEligibility(roleId: number) {
   return useQuery({
     queryKey: ["sc-eligibility", roleId],
     queryFn: async () => {
-      const res = await fetch(`/api/sc/endorsements/eligibility?roleId=${roleId}`, {
-        cache: "no-store",
-      })
+      const res = await fetch(
+        `/api/sc/endorsements/eligibility?roleId=${roleId}`,
+        {
+          cache: "no-store",
+        },
+      )
       if (!res.ok) return { eligible: false as const }
       return (await res.json()) as { eligible: boolean; reason?: string }
     },
     staleTime: 30_000,
+  })
+}
+
+export function useEndorsementCounts(roleId: number, context: string) {
+  return useQuery({
+    queryKey: ["sc-endorsement-counts", roleId, context],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/sc/endorsements?roleId=${roleId}&context=${encodeURIComponent(
+          context,
+        )}`,
+        {
+          cache: "no-store",
+        },
+      )
+      if (!res.ok)
+        return [] as { nomineeApplicationId: number; count: number }[]
+      return (await res.json()) as {
+        nomineeApplicationId: number
+        count: number
+      }[]
+    },
+    staleTime: 15_000,
+  })
+}
+
+export function useHasEndorsed(nomineeId: number, context: string) {
+  return useQuery({
+    queryKey: ["sc-endorsed", nomineeId, context],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/sc/endorsements/me?nomineeId=${nomineeId}&context=${encodeURIComponent(
+          context,
+        )}`,
+        { cache: "no-store" },
+      )
+      if (!res.ok) return { endorsed: false as const }
+      return (await res.json()) as { endorsed: boolean }
+    },
+    staleTime: 10_000,
   })
 }
