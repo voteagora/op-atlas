@@ -9,10 +9,16 @@ import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
+import {
+  useApproveNominee,
+  useEndorsementCounts,
+  useEndorsementEligibility,
+  useHasEndorsed,
+  useIsTop100,
+} from "@/hooks/db/useTop100"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { formatMMMd } from "@/lib/utils/date"
-import { useIsTop100, useApproveNominee, useEndorsementEligibility } from "@/hooks/db/useTop100"
 
 export default function SidebarApplications({
   roleId,
@@ -30,7 +36,9 @@ export default function SidebarApplications({
   voteEndsAt: Date | null
 }) {
   const { data: t100, isLoading: loadingTop } = useIsTop100()
-  const { data: elig, isLoading: loadingElig } = useEndorsementEligibility(roleId)
+  const { data: elig, isLoading: loadingElig } =
+    useEndorsementEligibility(roleId)
+  const { data: counts } = useEndorsementCounts(roleId, `role-${roleId}`)
   const withinWindow = useMemo(() => {
     if (elig && typeof elig.eligible === "boolean") {
       // eligibility endpoint already checked time window (and top-100). Here we only reuse window state
@@ -87,15 +95,29 @@ export default function SidebarApplications({
                 <UserCandidate
                   key={application.id}
                   application={application}
-                  showApprove={!loadingTop && !loadingElig && isTop100 && withinWindow}
+                  showApprove={
+                    !loadingTop && !loadingElig && isTop100 && withinWindow
+                  }
                   roleId={roleId}
+                  count={
+                    counts?.find(
+                      (c) => c.nomineeApplicationId === application.id,
+                    )?.count || 0
+                  }
                 />
               ) : (
                 <OrgCandidate
                   key={application.id}
                   application={application}
-                  showApprove={!loadingTop && !loadingElig && isTop100 && withinWindow}
+                  showApprove={
+                    !loadingTop && !loadingElig && isTop100 && withinWindow
+                  }
                   roleId={roleId}
+                  count={
+                    counts?.find(
+                      (c) => c.nomineeApplicationId === application.id,
+                    )?.count || 0
+                  }
                 />
               ),
             )}
@@ -120,13 +142,16 @@ const OrgCandidate = ({
   application,
   showApprove,
   roleId,
+  count,
 }: {
   application: RoleApplication
   showApprove: boolean
   roleId: number
+  count: number
 }) => {
   const { data: org } = useOrganization({ id: application.organizationId! })
   const approve = useApproveNominee()
+  const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
 
   if (!org) {
     return <CandidateSkeleton />
@@ -142,7 +167,10 @@ const OrgCandidate = ({
 
   const onApprove = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    approve.mutate({ context: `role-${roleId}`, nomineeApplicationId: application.id })
+    approve.mutate({
+      context: `role-${roleId}`,
+      nomineeApplicationId: application.id,
+    })
   }
 
   return (
@@ -154,20 +182,38 @@ const OrgCandidate = ({
       tabIndex={0}
       aria-label={`View ${org.name}`}
     >
-      <div className="flex flex-row gap-2 text-sm ">
+      <div className="flex flex-row gap-2 text-sm items-center min-w-0">
         <UserAvatar imageUrl={org.avatarUrl} size={"20px"} />
-        {org.name}
+        <span className="truncate whitespace-nowrap">{org.name}</span>
       </div>
-      {showApprove && (
-        <Button
-          className="h-6 px-2 py-1 text-xs"
-          onClick={onApprove}
-          disabled={approve.isPending}
-        >
-          {approve.isPending ? "Approving..." : "Approve"}
-        </Button>
-      )}
-      <ArrowRightS className="w-4 h-4" />
+      <div className="flex items-center gap-2">
+        {count > 0 && (
+          <div
+            className="text-[11px] leading-4 px-[5px] py-0.5 rounded text-center text-secondary-foreground"
+            style={{ backgroundColor: "#f2f3f8" }}
+          >
+            {count}
+          </div>
+        )}
+        {showApprove && !endorsed?.endorsed && (
+          <button
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
+            onClick={onApprove}
+            disabled={approve.isPending}
+          >
+            <span className="font-medium text-xs leading-4">Approve</span>
+          </button>
+        )}
+        {showApprove && endorsed?.endorsed && (
+          <button
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default"
+            disabled
+          >
+            <span className="font-medium text-xs leading-4">Approved</span>
+          </button>
+        )}
+        <ArrowRightS className="w-4 h-4" />
+      </div>
     </div>
   )
 }
@@ -176,14 +222,17 @@ const UserCandidate = ({
   application,
   showApprove,
   roleId,
+  count,
 }: {
   application: RoleApplication
   showApprove: boolean
   roleId: number
+  count: number
 }) => {
   const { user } = useUser({ id: application.userId! })
   const username = useUsername(user)
   const approve = useApproveNominee()
+  const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
 
   if (!user) {
     return <CandidateSkeleton />
@@ -199,7 +248,10 @@ const UserCandidate = ({
 
   const onApprove = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    approve.mutate({ context: `role-${roleId}`, nomineeApplicationId: application.id })
+    approve.mutate({
+      context: `role-${roleId}`,
+      nomineeApplicationId: application.id,
+    })
   }
 
   return (
@@ -211,31 +263,48 @@ const UserCandidate = ({
       tabIndex={0}
       aria-label={`View profile of ${username || user.name}`}
     >
-      <div className="flex flex-row gap-2 text-sm ">
+      <div className="flex flex-row gap-2 text-sm items-center min-w-0">
         <UserAvatar imageUrl={user.imageUrl} size={"20px"} />
-        {username || user.name}
+        <span className="truncate whitespace-nowrap">{username || user.name}</span>
       </div>
-      {showApprove && (
-        <Button
-          className="h-6 px-2 py-1 text-xs outline"
-          onClick={onApprove}
-          disabled={approve.isPending}
-        >
-          {approve.isPending ? "Approving..." : "Approve"}
-        </Button>
-      )}
-      <ArrowRightS className="w-4 h-4" />
+      <div className="flex items-center gap-2">
+        {count > 0 && (
+          <div
+            className="text-[11px] leading-4 px-[5px] py-0.5 rounded text-center text-secondary-foreground"
+            style={{ backgroundColor: "#f2f3f8" }}
+          >
+            {count}
+          </div>
+        )}
+        {showApprove && !endorsed?.endorsed && (
+          <button
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117]"
+            onClick={onApprove}
+            disabled={approve.isPending}
+          >
+            <span className="font-medium text-xs leading-4">Approve</span>
+          </button>
+        )}
+        {showApprove && endorsed?.endorsed && (
+          <button
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default"
+            disabled
+          >
+            <span className="font-medium text-xs leading-4">Approved</span>
+          </button>
+        )}
+        <ArrowRightS className="w-4 h-4" />
+      </div>
     </div>
   )
 }
 
 const CandidateSkeleton = () => {
   return (
-    <div className="flex flex-row w-full justify-between py-2">
-      <div className="flex flex-row gap-3 text-sm items-center">
-        <Skeleton className="w-[20px] h-[20px] rounded-full" />
-        <Skeleton className="w-28 h-4" />
-      </div>
+    <div className="flex flex-row w-full items-center gap-3 py-3">
+      <Skeleton className="w-[20px] h-[20px] rounded-full" />
+      <Skeleton className="h-4 flex-1" />
     </div>
   )
 }
+
