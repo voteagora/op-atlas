@@ -15,7 +15,7 @@ export default async function Page() {
   const [roles, session] = await Promise.all([getAllRoles(), auth()])
   const hasRoles = roles.length > 0
   const securityRoles = roles.filter((role) =>
-    role.title.toLowerCase().includes("security"),
+    role.isSecurityRole,
   )
   const userId = session?.user?.id
 

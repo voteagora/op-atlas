@@ -4,11 +4,7 @@ import { AnalyticsTracker } from "@/app/governance/components/AnalyticsTracker"
 import { RoleRow } from "@/app/governance/roles/components/RoleRow"
 
 export default function RolesPage({ roles }: { roles: Role[] }) {
-  const hasASecurityRole = roles.some(
-    (role) =>
-      role.title.toLowerCase().includes("security") ||
-      role.title.toLowerCase().includes("Security"),
-  )
+  const hasASecurityRole = roles.some((role) => role.isSecurityRole)
 
   return (
     <div className="flex flex-col gap-6">

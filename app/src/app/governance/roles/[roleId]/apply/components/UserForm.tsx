@@ -60,8 +60,7 @@ export const UserForm = ({
 
   const { data: userProjects } = useUserAdminProjects({ userId: user.id })
 
-  const isSecurityRole =
-    role.title.includes("Security") || role.title.includes("security")
+  const isSecurityRole = role.isSecurityRole
 
   const handleFormSubmit = (applicationData: any) => {
     const projectsData = applicationData.projects || []

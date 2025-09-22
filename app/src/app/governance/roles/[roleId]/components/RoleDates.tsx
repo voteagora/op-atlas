@@ -21,10 +21,6 @@ export const RoleDates = ({ role }: { role: Role }) => {
 
   const isClosed = role.voteEndAt && new Date() > new Date(role.voteEndAt)
 
-    console.log("isNominationPhase", isNominationPhase)
-  console.log("isVotingPhase", isVotingPhase)
-  console.log("isClosed", isClosed)
-  console.log("endorsementPhase", endorsementPhase)
   if (isClosed) {
     return (
       <div className="text-muted-foreground flex flex-row gap-2">

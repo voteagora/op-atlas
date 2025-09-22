@@ -39,20 +39,17 @@ export default function RoleApplication({
     enabled: !!user?.id || !!organization?.id,
   })
   const router = useRouter()
-  const username = useUsername(user)
 
   const { data: role, isLoading: isLoadingRole } = useRole({
     id: roleId!,
     enabled: !!roleId,
   })
 
-  const isSecurityRole =
-    role?.title.includes("Security") || role?.title.includes("security")
+  const isSecurityRole = role?.isSecurityRole
 
   useEffect(() => {
     if (activeApplications && activeApplications.length > 0) {
       const application = JSON.parse(activeApplications[0].application)
-      console.log(application)
       setConflicts(application.conflictsOfInterest)
       setProjects(application.projects)
       setPersonalStatement(application.personalStatement)

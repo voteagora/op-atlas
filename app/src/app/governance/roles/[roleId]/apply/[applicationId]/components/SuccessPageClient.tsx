@@ -35,8 +35,7 @@ export const SuccessPageClient = ({
   const router = useRouter()
   const setShowConfetti = useConfetti()
 
-  const isSecurityRole =
-    role.title.includes("Security") || role.title.includes("security")
+  const isSecurityRole = role.isSecurityRole
   const avatarImageUrl = isUser ? user?.imageUrl : org?.avatarUrl
   const baseTextColor = isSecurityRole ? "text-foreground" : ""
   const handleViewRole = () => router.push(`/governance/roles/${role.id}`)
