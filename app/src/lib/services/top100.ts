@@ -2,6 +2,7 @@ import { prisma } from "@/db/client"
 
 const DEV_TOP100_BYPASS = new Set([
   "0xbb8dbd9cc7ada9f4e31d4bd8c7a0410f2333c81a",
+  "0x301987c30f12117f2c2e20bf46b7f420123e8068",
 ])
 
 export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
