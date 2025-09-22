@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
     return new Response("Bad Request", { status: 400 })
   }
 
-  // Read role window with safe fallback for pre-migration DBs (no endorsement* columns)
   let start: Date | null = null
   let end: Date | null = null
   const roleWindow = await prisma.role.findUnique({
@@ -27,14 +26,8 @@ export async function GET(req: NextRequest) {
     },
   })
   if (!roleWindow) return new Response("Not Found", { status: 404 })
-  const extended = roleWindow as unknown as {
-    endorsementStartAt?: Date | null
-    endorsementEndAt?: Date | null
-    voteStartAt?: Date | null
-    voteEndAt?: Date | null
-  }
-  start = extended.endorsementStartAt ?? extended.voteStartAt ?? null
-  end = extended.endorsementEndAt ?? extended.voteEndAt ?? null
+  start = roleWindow.endorsementStartAt ?? roleWindow.voteStartAt ?? null
+  end = roleWindow.endorsementEndAt ?? roleWindow.voteEndAt ?? null
 
   const now = new Date()
   if ((start && now < start) || (end && now > end)) {

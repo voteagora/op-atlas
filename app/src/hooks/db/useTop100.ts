@@ -91,3 +91,23 @@ export function useHasEndorsed(nomineeId: number, context: string) {
     staleTime: 10_000,
   })
 }
+
+export function useRemoveEndorsement() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (params: {
+      context: string
+      nomineeApplicationId: number
+    }) => {
+      const url = `/api/sc/endorsements?context=${encodeURIComponent(
+        params.context,
+      )}&nomineeId=${params.nomineeApplicationId}`
+      const res = await fetch(url, { method: "DELETE" })
+      if (!res.ok) throw new Error(await res.text())
+      return (await res.json()) as { removed: number }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries()
+    },
+  })
+}

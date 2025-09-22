@@ -15,6 +15,7 @@ import {
   useEndorsementEligibility,
   useHasEndorsed,
   useIsTop100,
+  useRemoveEndorsement,
 } from "@/hooks/db/useTop100"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
@@ -151,6 +152,7 @@ const OrgCandidate = ({
 }) => {
   const { data: org } = useOrganization({ id: application.organizationId! })
   const approve = useApproveNominee()
+  const remove = useRemoveEndorsement()
   const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
 
   if (!org) {
@@ -203,8 +205,15 @@ const OrgCandidate = ({
         )}
         {showApprove && endorsed?.endorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default font-medium"
-            disabled
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
+            onClick={(e) => {
+              e.stopPropagation()
+              remove.mutate({
+                context: `role-${roleId}`,
+                nomineeApplicationId: application.id,
+              })
+            }}
+            disabled={remove.isPending}
           >
             <span className="font-medium text-xs leading-4">Approved</span>
           </button>
@@ -229,6 +238,7 @@ const UserCandidate = ({
   const { user } = useUser({ id: application.userId! })
   const username = useUsername(user)
   const approve = useApproveNominee()
+  const remove = useRemoveEndorsement()
   const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
 
   if (!user) {
@@ -283,8 +293,15 @@ const UserCandidate = ({
         )}
         {showApprove && endorsed?.endorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 cursor-default font-medium"
-            disabled
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
+            onClick={(e) => {
+              e.stopPropagation()
+              remove.mutate({
+                context: `role-${roleId}`,
+                nomineeApplicationId: application.id,
+              })
+            }}
+            disabled={remove.isPending}
           >
             <span className="font-medium text-xs leading-4">Approved</span>
           </button>
@@ -303,4 +320,3 @@ const CandidateSkeleton = () => {
     </div>
   )
 }
-

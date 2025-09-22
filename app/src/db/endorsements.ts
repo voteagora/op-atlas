@@ -90,3 +90,24 @@ export async function getEndorsementCountsByRole({
   const map = await getEndorsementCounts({ context, nomineeApplicationIds })
   return map
 }
+
+export async function deleteEndorsementsForAddresses({
+  context,
+  nomineeApplicationId,
+  addresses,
+}: {
+  context: string
+  nomineeApplicationId: number
+  addresses: string[]
+}) {
+  if (addresses.length === 0) return 0
+  const lower = Array.from(new Set(addresses.map((a) => a.toLowerCase())))
+  const res = await prisma.endorsement.deleteMany({
+    where: {
+      context,
+      nomineeApplicationId,
+      endorserAddress: { in: lower },
+    },
+  })
+  return res.count
+}

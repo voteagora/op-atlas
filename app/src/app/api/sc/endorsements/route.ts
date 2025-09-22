@@ -5,6 +5,7 @@ import { auth } from "@/auth"
 import { prisma } from "@/db/client"
 import {
   createEndorsement,
+  deleteEndorsementsForAddresses,
   getEndorsementCounts,
   getEndorsementCountsByRole,
 } from "@/db/endorsements"
@@ -25,7 +26,6 @@ export async function POST(req: NextRequest) {
 
   const { context, nomineeApplicationId } = parsed.data
 
-  // Read role window with safe fallback for pre-migration DBs (no endorsement* columns)
   let start: Date | null = null
   let end: Date | null = null
   const appRole = await prisma.roleApplication.findUnique({
@@ -44,14 +44,8 @@ export async function POST(req: NextRequest) {
   })
 
   if (!roleWindow) return new Response("Not Found", { status: 404 })
-  const extended = roleWindow as unknown as {
-    endorsementStartAt?: Date | null
-    endorsementEndAt?: Date | null
-    voteStartAt?: Date | null
-    voteEndAt?: Date | null
-  }
-  start = extended.endorsementStartAt ?? extended.voteStartAt ?? null
-  end = extended.endorsementEndAt ?? extended.voteEndAt ?? null
+  start = roleWindow.endorsementStartAt ?? roleWindow.voteStartAt ?? null
+  end = roleWindow.endorsementEndAt ?? roleWindow.voteEndAt ?? null
 
   const now = new Date()
   if ((start && now < start) || (end && now > end)) {
@@ -111,4 +105,28 @@ export async function GET(req: NextRequest) {
   }
 
   return new Response("Bad Request", { status: 400 })
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) return new Response("Unauthorized", { status: 401 })
+
+  const { searchParams } = new URL(req.url)
+  const context = searchParams.get("context")
+  const nomineeId = Number(searchParams.get("nomineeId"))
+  if (!context || !nomineeId)
+    return new Response("Bad Request", { status: 400 })
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { addresses: true },
+  })
+  const addresses = (user?.addresses || []).map((a) => a.address)
+
+  const removed = await deleteEndorsementsForAddresses({
+    context,
+    nomineeApplicationId: nomineeId,
+    addresses,
+  })
+  return NextResponse.json({ removed })
 }
