@@ -132,18 +132,12 @@ export default async function Page({ params }: { params: { roleId: string } }) {
           <Sidebar role={role} />
           {((applications && applications.length > 0) || isSecurityRole) && (
             <SidebarApplications
-<<<<<<< HEAD
               roleId={role.id}
               applications={applications}
               isSecurityRole={isSecurityRole}
               endorsementEndAt={role.endorsementEndAt}
               voteStartsAt={role.voteStartAt}
               voteEndsAt={role.voteEndAt}
-=======
-              applications={applications}
-              isSecurityRole={isSecurityRole}
-              endorsementEndAt={role.endorsementEndAt}
->>>>>>> main
             />
           )}
         </div>
