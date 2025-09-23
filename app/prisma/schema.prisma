@@ -35,6 +35,7 @@ model User {
   projects           UserProjects[]
   worldId            UserWorldId?
   endorsements       Endorsement[]      @relation("UserEndorsements")
+  safeAddresses      UserSafeAddress[]
 
   @@index([username])
   @@index([farcasterId])
@@ -857,6 +858,19 @@ model Endorsement {
   @@unique([context, nomineeApplicationId, endorserAddress])
   @@index([context, nomineeApplicationId])
   @@index([endorserAddress])
+}
+
+model UserSafeAddress {
+  id          String   @id @default(uuid())
+  userId      String
+  safeAddress String
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, safeAddress])
+  @@index([userId])
+  @@map("UserSafeAddresses")
 }
 
 view OffChainVote {
