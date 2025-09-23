@@ -23,8 +23,7 @@ export function RoleRow({
     isEndorsementPhase,
     isVotingPhase,
   } = getRolePhaseStatus(role)
-
-  const isActive = isNominationPhase || isEndorsementPhase
+  const isActive = isNominationPhase || isEndorsementPhase || isVotingPhase;
 
   const phaseDates = (() => {
     if (isEndorsementPhase) {

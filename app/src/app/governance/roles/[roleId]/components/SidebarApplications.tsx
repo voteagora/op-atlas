@@ -1,10 +1,9 @@
 "use client"
 
-import { RoleApplication } from "@prisma/client"
+import { Role, RoleApplication } from "@prisma/client"
 import { useMemo } from "react"
 import { toast } from "sonner"
 
-import { Button } from "@/components/common/Button"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
@@ -21,16 +20,19 @@ import {
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { formatMMMd } from "@/lib/utils/date"
+import { getRolePhaseStatus } from "@/lib/utils/roles"
+
+import { Button } from "@/components/common/Button"
 
 export default function SidebarApplications({
-  roleId,
+  role,
   applications,
   isSecurityRole,
   endorsementEndAt,
   voteStartsAt,
   voteEndsAt,
 }: {
-  roleId: number
+  role: Role
   applications?: RoleApplication[]
   isSecurityRole?: boolean
   endorsementEndAt: Date | null
@@ -39,8 +41,9 @@ export default function SidebarApplications({
 }) {
   const { data: t100, isLoading: loadingTop } = useIsTop100()
   const { data: elig, isLoading: loadingElig } =
-    useEndorsementEligibility(roleId)
-  const { data: counts } = useEndorsementCounts(roleId, `role-${roleId}`)
+    useEndorsementEligibility(role.id)
+  const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`)
+  const { isVotingPhase, isEndorsementPhase } = getRolePhaseStatus(role);
   const withinWindow = useMemo(() => {
     if (elig && typeof elig.eligible === "boolean") {
       // eligibility endpoint already checked time window (and top-100). Here we only reuse window state
@@ -58,34 +61,67 @@ export default function SidebarApplications({
   }, [elig, voteStartsAt, voteEndsAt])
 
   const isTop100 = Boolean(t100?.top100)
+
   if ((!applications || applications.length === 0) && !isSecurityRole) {
     return null
   }
-  return (
-    <>
-      <div className="w-full flex flex-col border border-border-secondary rounded-lg">
-        {isSecurityRole ? (
+
+  const renderHeader = () => {
+    if (isSecurityRole) {
+      let primaryText = "8 approvals from Top 100 Delegates are required to move on to the vote"
+      let secondaryText = `Top 100 Delegates may provide approval ${endorsementEndAt? "until " + formatMMMd(endorsementEndAt) : ""}.`
+
+      if (isVotingPhase) {
+        primaryText = "This vote is for delegates only"
+        secondaryText = "Delegates can cast their vote at Optimism Agora."
+      }
+
+      return (
           <div className="text-center p-6 border-b border-border-secondary">
             <div className="flex flex-col gap-2">
               <div className="font-semibold text-secondary-foreground">
-                8 approvals from Top 100 Delegates are required to move on to
-                the vote
+                {primaryText}
               </div>
               <div className="text-sm text-secondary-foreground">
-                Top 100 Delegates may provide approval{" "}
-                {endorsementEndAt
-                  ? "until " + formatMMMd(endorsementEndAt)
-                  : ""}
-                .
+                {secondaryText}
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="text-secondary-foreground text-sm font-semibold p-6">
-            {applications?.length ?? 0} candidate
-            {(applications?.length ?? 0) > 1 ? "s" : ""} so far
-          </div>
-        )}
+          </div>        
+      )
+    }
+
+    return (
+      <div className="text-secondary-foreground text-sm font-semibold p-6">
+        {applications?.length ?? 0} candidate
+        {(applications?.length ?? 0) > 1 ? "s" : ""} so far
+      </div>
+    )
+  }
+
+  const renderFooter = () => {
+    if(isSecurityRole && role.proposalId && isVotingPhase) {
+      return (
+        <div className="mx-4 mb-6">
+          <Button
+            className="w-full"
+            onClick={() =>
+              window.open(
+                `${process.env.NEXT_PUBLIC_AGORA_API_URL}proposals/${role.proposalId}`,
+                "_blank",
+              )
+            }
+          >
+            Vote on Agora
+          </Button>
+        </div>
+      )
+    }
+  }
+
+  return (
+    <>
+      <div className="w-full flex flex-col border border-border-secondary rounded-lg">
+        {renderHeader()}
         {applications && applications.length > 0 ? (
           <div className="flex flex-col p-6">
             <div className="text-secondary-foreground text-sm font-semibold mb-2">
@@ -100,11 +136,11 @@ export default function SidebarApplications({
                   showApprove={
                     !loadingTop && !loadingElig && isTop100 && withinWindow
                   }
-                  roleId={roleId}
-                  count={
+                  roleId={role.id}
+                  count={isEndorsementPhase ? 
                     counts?.find(
                       (c) => c.nomineeApplicationId === application.id,
-                    )?.count || 0
+                    )?.count || 0 : false
                   }
                 />
               ) : (
@@ -114,11 +150,11 @@ export default function SidebarApplications({
                   showApprove={
                     !loadingTop && !loadingElig && isTop100 && withinWindow
                   }
-                  roleId={roleId}
-                  count={
+                  roleId={role.id}
+                  count={isEndorsementPhase ? 
                     counts?.find(
                       (c) => c.nomineeApplicationId === application.id,
-                    )?.count || 0
+                    )?.count || 0 : false
                   }
                 />
               ),
@@ -129,6 +165,7 @@ export default function SidebarApplications({
             No candidates yet
           </div>
         )}
+        {renderFooter()}
       </div>
       <div className="text-center text-sm text-secondary-foreground">
         <span className="font-medium">Need help? </span>
@@ -149,7 +186,7 @@ const OrgCandidate = ({
   application: RoleApplication
   showApprove: boolean
   roleId: number
-  count: number
+  count: number | boolean
 }) => {
   const { data: org } = useOrganization({ id: application.organizationId! })
   const approve = useApproveNominee()
@@ -198,7 +235,7 @@ const OrgCandidate = ({
         <span className="truncate whitespace-nowrap">{org.name}</span>
       </div>
       <div className="flex items-center gap-2">
-        {count > 0 && (
+        {count !== false && (
           <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
             {count}
           </div>
@@ -252,7 +289,7 @@ const UserCandidate = ({
   application: RoleApplication
   showApprove: boolean
   roleId: number
-  count: number
+  count: number | boolean
 }) => {
   const { user } = useUser({ id: application.userId! })
   const username = useUsername(user)
@@ -304,7 +341,7 @@ const UserCandidate = ({
         </span>
       </div>
       <div className="flex items-center gap-2">
-        {count > 0 && (
+        {count !== false && (
           <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
             {count}
           </div>
