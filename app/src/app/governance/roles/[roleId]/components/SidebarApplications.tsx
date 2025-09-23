@@ -2,6 +2,7 @@
 
 import { RoleApplication } from "@prisma/client"
 import { useMemo } from "react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
 import { UserAvatar } from "@/components/common/UserAvatar"
@@ -169,10 +170,18 @@ const OrgCandidate = ({
 
   const onApprove = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    approve.mutate({
-      context: `role-${roleId}`,
-      nomineeApplicationId: application.id,
-    })
+    void toast.promise(
+      approve.mutateAsync({
+        context: `role-${roleId}`,
+        nomineeApplicationId: application.id,
+      }),
+      {
+        loading: "Approving...",
+        success: "Approved",
+        error: (err) =>
+          err instanceof Error ? err.message : "Failed to approve",
+      },
+    )
   }
 
   return (
@@ -208,10 +217,20 @@ const OrgCandidate = ({
             className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
             onClick={(e) => {
               e.stopPropagation()
-              remove.mutate({
-                context: `role-${roleId}`,
-                nomineeApplicationId: application.id,
-              })
+              void toast.promise(
+                remove.mutateAsync({
+                  context: `role-${roleId}`,
+                  nomineeApplicationId: application.id,
+                }),
+                {
+                  loading: "Removing approval...",
+                  success: "Approval removed",
+                  error: (err) =>
+                    err instanceof Error
+                      ? err.message
+                      : "Failed to remove approval",
+                },
+              )
             }}
             disabled={remove.isPending}
           >
@@ -255,10 +274,18 @@ const UserCandidate = ({
 
   const onApprove = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    approve.mutate({
-      context: `role-${roleId}`,
-      nomineeApplicationId: application.id,
-    })
+    void toast.promise(
+      approve.mutateAsync({
+        context: `role-${roleId}`,
+        nomineeApplicationId: application.id,
+      }),
+      {
+        loading: "Approving...",
+        success: "Approved",
+        error: (err) =>
+          err instanceof Error ? err.message : "Failed to approve",
+      },
+    )
   }
 
   return (
@@ -296,10 +323,20 @@ const UserCandidate = ({
             className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
             onClick={(e) => {
               e.stopPropagation()
-              remove.mutate({
-                context: `role-${roleId}`,
-                nomineeApplicationId: application.id,
-              })
+              void toast.promise(
+                remove.mutateAsync({
+                  context: `role-${roleId}`,
+                  nomineeApplicationId: application.id,
+                }),
+                {
+                  loading: "Removing approval...",
+                  success: "Approval removed",
+                  error: (err) =>
+                    err instanceof Error
+                      ? err.message
+                      : "Failed to remove approval",
+                },
+              )
             }}
             disabled={remove.isPending}
           >
