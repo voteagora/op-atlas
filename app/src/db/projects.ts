@@ -2115,7 +2115,7 @@ export const getPublicProject = cache(async (projectId: string) => {
 
 export const getProjectMetadata = cache(async (projectId: string) => {
   return prisma.project.findFirst({
-    where: { id: projectId },
+    where: { id: projectId, snapshots: { some: {} } },
     select: {
       id: true,
       name: true,
