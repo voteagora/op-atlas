@@ -1,13 +1,19 @@
+import { Role } from "@prisma/client"
 import { Scale } from "lucide-react"
 
 import { getEnrichedProposalData } from "@/lib/proposals"
+
 import PaginatedProposals from "./components/PaginatedProposals"
 
 interface ProposalsPageProps {
   userId?: string
+  securityRoles?: Role[]
 }
 
-const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
+const ProposalsPage = async ({
+  userId,
+  securityRoles = [],
+}: ProposalsPageProps) => {
   // Get the proposals
   const proposalData = await getEnrichedProposalData({
     userId: userId,
@@ -17,7 +23,8 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
   if (
     !proposalData ||
     (proposalData.standardProposals.proposals.length === 0 &&
-      proposalData.selfNominations.length === 0)
+      proposalData.selfNominations.length === 0 &&
+      securityRoles.length === 0)
   ) {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
@@ -41,6 +48,7 @@ const ProposalsPage = async ({ userId }: ProposalsPageProps) => {
           next_offset: standardProposals.pagination?.next_offset ?? 0,
         }}
         userId={userId}
+        securityRoles={securityRoles}
       />
     </div>
   )
