@@ -19,22 +19,26 @@ export async function GET(req: NextRequest) {
   const roleWindow = await prisma.role.findUnique({
     where: { id: roleId },
     select: {
-      voteStartAt: true,
-      voteEndAt: true,
       endorsementStartAt: true,
       endorsementEndAt: true,
     },
   })
   if (!roleWindow) return new Response("Not Found", { status: 404 })
-  start = roleWindow.endorsementStartAt ?? roleWindow.voteStartAt ?? null
-  end = roleWindow.endorsementEndAt ?? roleWindow.voteEndAt ?? null
+  start = roleWindow.endorsementStartAt ?? null
+  end = roleWindow.endorsementEndAt ?? null
+
+  // Require explicit endorsement window; if missing, treat as closed
+  if (!start || !end) {
+    return NextResponse.json({ eligible: false, reason: "window_closed" })
+  }
 
   const now = new Date()
   if ((start && now < start) || (end && now > end)) {
     return NextResponse.json({ eligible: false, reason: "window_closed" })
   }
 
-  if (!userId) return NextResponse.json({ eligible: false, reason: "unauthenticated" })
+  if (!userId)
+    return NextResponse.json({ eligible: false, reason: "unauthenticated" })
 
   const user = await prisma.user.findUnique({
     where: { id: userId },

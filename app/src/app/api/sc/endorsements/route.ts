@@ -36,16 +36,19 @@ export async function POST(req: NextRequest) {
   const roleWindow = await prisma.role.findUnique({
     where: { id: appRole.roleId },
     select: {
-      voteStartAt: true,
-      voteEndAt: true,
       endorsementStartAt: true,
       endorsementEndAt: true,
     },
   })
 
   if (!roleWindow) return new Response("Not Found", { status: 404 })
-  start = roleWindow.endorsementStartAt ?? roleWindow.voteStartAt ?? null
-  end = roleWindow.endorsementEndAt ?? roleWindow.voteEndAt ?? null
+  start = roleWindow.endorsementStartAt ?? null
+  end = roleWindow.endorsementEndAt ?? null
+
+  // Require explicit endorsement window; if missing, treat as closed
+  if (!start || !end) {
+    return new Response("Window closed", { status: 403 })
+  }
 
   const now = new Date()
   if ((start && now < start) || (end && now > end)) {
