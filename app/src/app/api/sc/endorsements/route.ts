@@ -3,7 +3,11 @@ import { z } from "zod"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { createEndorsement, getEndorsementCounts } from "@/db/endorsements"
+import {
+  createEndorsement,
+  deleteEndorsementsForAddresses,
+  getEndorsementCounts,
+} from "@/db/endorsements"
 import { isTop100Delegate } from "@/lib/services/top100"
 
 const payloadSchema = z.object({
@@ -21,20 +25,35 @@ export async function POST(req: NextRequest) {
 
   const { context, nomineeApplicationId } = parsed.data
 
-  const application = await prisma.roleApplication.findUnique({
+  // Read role window with safe fallback for pre-migration DBs (no endorsement* columns)
+  let start: Date | null = null
+  let end: Date | null = null
+  const appRole = await prisma.roleApplication.findUnique({
     where: { id: nomineeApplicationId },
     include: { role: true },
   })
-  if (!application?.role) return new Response("Not Found", { status: 404 })
+  if (!appRole?.roleId) return new Response("Not Found", { status: 404 })
+  const roleWindow = await prisma.role.findUnique({
+    where: { id: appRole.roleId },
+    select: {
+      voteStartAt: true,
+      voteEndAt: true,
+      endorsementStartAt: true,
+      endorsementEndAt: true,
+    },
+  })
+  if (!roleWindow) return new Response("Not Found", { status: 404 })
+  const extended = roleWindow as unknown as {
+    endorsementStartAt?: Date | null
+    endorsementEndAt?: Date | null
+    voteStartAt?: Date | null
+    voteEndAt?: Date | null
+  }
+  start = extended.endorsementStartAt ?? extended.voteStartAt ?? null
+  end = extended.endorsementEndAt ?? extended.voteEndAt ?? null
 
   const now = new Date()
-  const voteStartAt = application.role.voteStartAt
-    ? new Date(application.role.voteStartAt)
-    : null
-  const voteEndAt = application.role.voteEndAt
-    ? new Date(application.role.voteEndAt)
-    : null
-  if ((voteStartAt && now < voteStartAt) || (voteEndAt && now > voteEndAt)) {
+  if ((start && now < start) || (end && now > end)) {
     return new Response("Window closed", { status: 403 })
   }
 
@@ -76,4 +95,28 @@ export async function GET(req: NextRequest) {
       count: map.get(id) || 0,
     })),
   )
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) return new Response("Unauthorized", { status: 401 })
+
+  const { searchParams } = new URL(req.url)
+  const context = searchParams.get("context")
+  const nomineeId = Number(searchParams.get("nomineeId"))
+  if (!context || !nomineeId)
+    return new Response("Bad Request", { status: 400 })
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { addresses: true },
+  })
+  const addresses = (user?.addresses || []).map((a) => a.address)
+
+  const removed = await deleteEndorsementsForAddresses({
+    context,
+    nomineeApplicationId: nomineeId,
+    addresses,
+  })
+  return NextResponse.json({ removed })
 }

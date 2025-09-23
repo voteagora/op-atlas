@@ -1,12 +1,19 @@
 "use client"
 
 import { RoleApplication } from "@prisma/client"
+import { useParams } from "next/navigation"
+import { toast } from "sonner"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
+import {
+  useApproveNominee,
+  useHasEndorsed,
+  useRemoveEndorsement,
+} from "@/hooks/db/useTop100"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { formatMMMd } from "@/lib/utils/date"
@@ -78,8 +85,16 @@ export default function SidebarApplications({
   )
 }
 
+const mapErrorMessage = (fallback: string) => (err: unknown) =>
+  err instanceof Error ? err.message : fallback
+
 const OrgCandidate = ({ application }: { application: RoleApplication }) => {
   const { data: org } = useOrganization({ id: application.organizationId! })
+  const approve = useApproveNominee()
+  const remove = useRemoveEndorsement()
+  const params = useParams<{ roleId: string }>()
+  const roleId = Number(params.roleId)
+  const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
 
   if (!org) {
     return <CandidateSkeleton />
@@ -106,7 +121,49 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
         <UserAvatar imageUrl={org.avatarUrl} size={"20px"} />
         {org.name}
       </div>
-      <ArrowRightS className="w-4 h-4" />
+      {endorsed?.endorsed ? (
+        <button
+          className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
+          onClick={(e) => {
+            e.stopPropagation()
+            void toast.promise(
+              remove.mutateAsync({
+                context: `role-${roleId}`,
+                nomineeApplicationId: application.id,
+              }),
+              {
+                loading: "Removing approval...",
+                success: "Approval removed",
+                error: mapErrorMessage("Failed to remove approval"),
+              },
+            )
+          }}
+          disabled={remove.isPending}
+        >
+          <span className="font-medium text-xs leading-4">Approved</span>
+        </button>
+      ) : (
+        <button
+          className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-foreground border-border font-medium"
+          onClick={(e) => {
+            e.stopPropagation()
+            void toast.promise(
+              approve.mutateAsync({
+                context: `role-${roleId}`,
+                nomineeApplicationId: application.id,
+              }),
+              {
+                loading: "Approving...",
+                success: "Approved",
+                error: mapErrorMessage("Failed to approve"),
+              },
+            )
+          }}
+          disabled={approve.isPending}
+        >
+          <span className="font-medium text-xs leading-4">Approve</span>
+        </button>
+      )}
     </div>
   )
 }
@@ -114,6 +171,11 @@ const OrgCandidate = ({ application }: { application: RoleApplication }) => {
 const UserCandidate = ({ application }: { application: RoleApplication }) => {
   const { user } = useUser({ id: application.userId! })
   const username = useUsername(user)
+  const approve = useApproveNominee()
+  const remove = useRemoveEndorsement()
+  const params = useParams<{ roleId: string }>()
+  const roleId = Number(params.roleId)
+  const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
 
   if (!user) {
     return <CandidateSkeleton />
@@ -140,7 +202,49 @@ const UserCandidate = ({ application }: { application: RoleApplication }) => {
         <UserAvatar imageUrl={user.imageUrl} size={"20px"} />
         {username || user.name}
       </div>
-      <ArrowRightS className="w-4 h-4" />
+      {endorsed?.endorsed ? (
+        <button
+          className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
+          onClick={(e) => {
+            e.stopPropagation()
+            void toast.promise(
+              remove.mutateAsync({
+                context: `role-${roleId}`,
+                nomineeApplicationId: application.id,
+              }),
+              {
+                loading: "Removing approval...",
+                success: "Approval removed",
+                error: mapErrorMessage("Failed to remove approval"),
+              },
+            )
+          }}
+          disabled={remove.isPending}
+        >
+          <span className="font-medium text-xs leading-4">Approved</span>
+        </button>
+      ) : (
+        <button
+          className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-foreground border-border font-medium"
+          onClick={(e) => {
+            e.stopPropagation()
+            void toast.promise(
+              approve.mutateAsync({
+                context: `role-${roleId}`,
+                nomineeApplicationId: application.id,
+              }),
+              {
+                loading: "Approving...",
+                success: "Approved",
+                error: mapErrorMessage("Failed to approve"),
+              },
+            )
+          }}
+          disabled={approve.isPending}
+        >
+          <span className="font-medium text-xs leading-4">Approve</span>
+        </button>
+      )}
     </div>
   )
 }
