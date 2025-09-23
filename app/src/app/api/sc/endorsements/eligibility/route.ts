@@ -12,15 +12,16 @@ export async function GET(req: NextRequest) {
     select: {
       endorsementStartAt: true,
       endorsementEndAt: true,
-      voteStartAt: true,
-      voteEndAt: true,
     },
   })
   if (!roleWindow) return new Response("Not Found", { status: 404 })
 
-  // Read role window with safe fallback for pre-migration DBs (no endorsement* columns)
-  const start = roleWindow.endorsementStartAt ?? roleWindow.voteStartAt ?? null
-  const end = roleWindow.endorsementEndAt ?? roleWindow.voteEndAt ?? null
+  // Enforce explicit endorsement window only
+  const start = roleWindow.endorsementStartAt ?? null
+  const end = roleWindow.endorsementEndAt ?? null
+  if (!start || !end) {
+    return NextResponse.json({ eligible: false, reason: "window_closed" })
+  }
 
   const now = new Date()
   if ((start && now < start) || (end && now > end)) {
@@ -28,4 +29,3 @@ export async function GET(req: NextRequest) {
   }
   return NextResponse.json({ eligible: true })
 }
-

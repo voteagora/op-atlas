@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   const { context, nomineeApplicationId } = parsed.data
 
-  // Read role window with safe fallback for pre-migration DBs (no endorsement* columns)
+  // Endorsements are gated strictly by endorsement* window
   let start: Date | null = null
   let end: Date | null = null
   const appRole = await prisma.roleApplication.findUnique({
@@ -36,21 +36,16 @@ export async function POST(req: NextRequest) {
   const roleWindow = await prisma.role.findUnique({
     where: { id: appRole.roleId },
     select: {
-      voteStartAt: true,
-      voteEndAt: true,
       endorsementStartAt: true,
       endorsementEndAt: true,
     },
   })
   if (!roleWindow) return new Response("Not Found", { status: 404 })
-  const extended = roleWindow as unknown as {
-    endorsementStartAt?: Date | null
-    endorsementEndAt?: Date | null
-    voteStartAt?: Date | null
-    voteEndAt?: Date | null
+  start = roleWindow.endorsementStartAt ?? null
+  end = roleWindow.endorsementEndAt ?? null
+  if (!start || !end) {
+    return new Response("Window closed", { status: 403 })
   }
-  start = extended.endorsementStartAt ?? extended.voteStartAt ?? null
-  end = extended.endorsementEndAt ?? extended.voteEndAt ?? null
 
   const now = new Date()
   if ((start && now < start) || (end && now > end)) {
