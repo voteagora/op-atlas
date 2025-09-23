@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-export const TOP100_QUERY_KEY = ["sc-top100"] as const
+import { TOP100_QUERY_KEY } from "@/lib/constants"
 
 export function useIsTop100() {
   return useQuery({
@@ -52,7 +52,11 @@ export function useEndorsementEligibility(roleId: number) {
   })
 }
 
-export function useEndorsementCounts(roleId: number, context: string) {
+export function useEndorsementCounts(
+  roleId: number,
+  context: string,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: ["sc-endorsement-counts", roleId, context],
     queryFn: async () => {
@@ -72,6 +76,7 @@ export function useEndorsementCounts(roleId: number, context: string) {
       }[]
     },
     staleTime: 15_000,
+    enabled: options?.enabled ?? true,
   })
 }
 
@@ -87,6 +92,23 @@ export function useHasEndorsed(nomineeId: number, context: string) {
       )
       if (!res.ok) return { endorsed: false as const }
       return (await res.json()) as { endorsed: boolean }
+    },
+    staleTime: 10_000,
+  })
+}
+
+export function useMyEndorsements(roleId: number, context: string) {
+  return useQuery({
+    queryKey: ["sc-endorsed-by-role", roleId, context],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/sc/endorsements/me?roleId=${roleId}&context=${encodeURIComponent(
+          context,
+        )}`,
+        { cache: "no-store" },
+      )
+      if (!res.ok) return { endorsedIds: [] as number[] }
+      return (await res.json()) as { endorsedIds: number[] }
     },
     staleTime: 10_000,
   })

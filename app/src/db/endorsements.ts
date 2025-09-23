@@ -111,3 +111,33 @@ export async function deleteEndorsementsForAddresses({
   })
   return res.count
 }
+
+export async function getEndorsedNomineeIdsForAddressesByRole({
+  context,
+  roleId,
+  addresses,
+}: {
+  context: string
+  roleId: number
+  addresses: string[]
+}) {
+  if (addresses.length === 0) return [] as number[]
+  const lower = Array.from(new Set(addresses.map((a) => a.toLowerCase())))
+
+  const apps = await prisma.roleApplication.findMany({
+    where: { roleId },
+    select: { id: true },
+  })
+  const nomineeApplicationIds = apps.map((a) => a.id)
+  if (nomineeApplicationIds.length === 0) return []
+
+  const rows = await prisma.endorsement.findMany({
+    where: {
+      context,
+      nomineeApplicationId: { in: nomineeApplicationIds },
+      endorserAddress: { in: lower },
+    },
+    select: { nomineeApplicationId: true },
+  })
+  return Array.from(new Set(rows.map((r) => r.nomineeApplicationId)))
+}

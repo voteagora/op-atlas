@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { hasEndorsed } from "@/db/endorsements"
+import {
+  getEndorsedNomineeIdsForAddressesByRole,
+  hasEndorsed,
+} from "@/db/endorsements"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -10,8 +13,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
   const nomineeId = Number(searchParams.get("nomineeId"))
-  if (!context || !nomineeId)
-    return new Response("Bad Request", { status: 400 })
+  const roleId = Number(searchParams.get("roleId"))
+  if (!context) return new Response("Bad Request", { status: 400 })
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -21,19 +24,33 @@ export async function GET(req: NextRequest) {
     new Set((user?.addresses || []).map((a) => a.address.toLowerCase())),
   )
 
-  let endorsed = false
-  for (const addr of addresses) {
-    if (
-      await hasEndorsed({
-        context,
-        nomineeApplicationId: nomineeId,
-        endorserAddress: addr,
-      })
-    ) {
-      endorsed = true
-      break
+  // If nomineeId is provided, return boolean endorsed for that nominee
+  if (Number.isFinite(nomineeId) && nomineeId > 0) {
+    let endorsed = false
+    for (const addr of addresses) {
+      if (
+        await hasEndorsed({
+          context,
+          nomineeApplicationId: nomineeId,
+          endorserAddress: addr,
+        })
+      ) {
+        endorsed = true
+        break
+      }
     }
+    return NextResponse.json({ endorsed })
   }
 
-  return NextResponse.json({ endorsed })
+  // If roleId is provided, return all nominee ids endorsed by this user for the role
+  if (Number.isFinite(roleId) && roleId > 0) {
+    const endorsedIds = await getEndorsedNomineeIdsForAddressesByRole({
+      context,
+      roleId,
+      addresses,
+    })
+    return NextResponse.json({ endorsedIds })
+  }
+
+  return new Response("Bad Request", { status: 400 })
 }

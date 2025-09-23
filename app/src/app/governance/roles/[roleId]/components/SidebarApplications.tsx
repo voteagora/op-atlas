@@ -4,6 +4,7 @@ import { Role, RoleApplication } from "@prisma/client"
 import { useMemo } from "react"
 import { toast } from "sonner"
 
+import { Button } from "@/components/common/Button"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
@@ -12,17 +13,14 @@ import { useOrganization } from "@/hooks/db/useOrganization"
 import {
   useApproveNominee,
   useEndorsementCounts,
-  useEndorsementEligibility,
-  useHasEndorsed,
   useIsTop100,
+  useMyEndorsements,
   useRemoveEndorsement,
 } from "@/hooks/db/useTop100"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { formatMMMd } from "@/lib/utils/date"
 import { getRolePhaseStatus } from "@/lib/utils/roles"
-
-import { Button } from "@/components/common/Button"
 
 export default function SidebarApplications({
   role,
@@ -40,25 +38,12 @@ export default function SidebarApplications({
   voteEndsAt: Date | null
 }) {
   const { data: t100, isLoading: loadingTop } = useIsTop100()
-  const { data: elig, isLoading: loadingElig } =
-    useEndorsementEligibility(role.id)
-  const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`)
-  const { isVotingPhase, isEndorsementPhase } = getRolePhaseStatus(role);
-  const withinWindow = useMemo(() => {
-    if (elig && typeof elig.eligible === "boolean") {
-      // eligibility endpoint already checked time window (and top-100). Here we only reuse window state
-      // Treat eligible false with reason window_closed as outside window
-      if (!elig.eligible && elig.reason === "window_closed") return false
-      return true
-    }
-    // fallback
-    const now = Date.now()
-    const start = voteStartsAt ? new Date(voteStartsAt).getTime() : undefined
-    const end = voteEndsAt ? new Date(voteEndsAt).getTime() : undefined
-    if (start && now < start) return false
-    if (end && now > end) return false
-    return true
-  }, [elig, voteStartsAt, voteEndsAt])
+  const { isVotingPhase, isEndorsementPhase } = getRolePhaseStatus(role)
+  const withinWindow = isEndorsementPhase
+  const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
+    enabled: isEndorsementPhase,
+  })
+  const { data: myEndorsements } = useMyEndorsements(role.id, `role-${role.id}`)
 
   const isTop100 = Boolean(t100?.top100)
 
@@ -68,8 +53,11 @@ export default function SidebarApplications({
 
   const renderHeader = () => {
     if (isSecurityRole) {
-      let primaryText = "8 approvals from Top 100 Delegates are required to move on to the vote"
-      let secondaryText = `Top 100 Delegates may provide approval ${endorsementEndAt? "until " + formatMMMd(endorsementEndAt) : ""}.`
+      let primaryText =
+        "8 approvals from Top 100 Delegates are required to move on to the vote"
+      let secondaryText = `Top 100 Delegates may provide approval ${
+        endorsementEndAt ? "until " + formatMMMd(endorsementEndAt) : ""
+      }.`
 
       if (isVotingPhase) {
         primaryText = "This vote is for delegates only"
@@ -77,16 +65,16 @@ export default function SidebarApplications({
       }
 
       return (
-          <div className="text-center p-6 border-b border-border-secondary">
-            <div className="flex flex-col gap-2">
-              <div className="font-semibold text-secondary-foreground">
-                {primaryText}
-              </div>
-              <div className="text-sm text-secondary-foreground">
-                {secondaryText}
-              </div>
+        <div className="text-center p-6 border-b border-border-secondary">
+          <div className="flex flex-col gap-2">
+            <div className="font-semibold text-secondary-foreground">
+              {primaryText}
             </div>
-          </div>        
+            <div className="text-sm text-secondary-foreground">
+              {secondaryText}
+            </div>
+          </div>
+        </div>
       )
     }
 
@@ -99,7 +87,7 @@ export default function SidebarApplications({
   }
 
   const renderFooter = () => {
-    if(isSecurityRole && role.proposalId && isVotingPhase) {
+    if (isSecurityRole && role.proposalId && isVotingPhase) {
       return (
         <div className="mx-4 mb-6">
           <Button
@@ -133,28 +121,28 @@ export default function SidebarApplications({
                 <UserCandidate
                   key={application.id}
                   application={application}
-                  showApprove={
-                    !loadingTop && !loadingElig && isTop100 && withinWindow
-                  }
+                  showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
-                  count={isEndorsementPhase ? 
-                    counts?.find(
-                      (c) => c.nomineeApplicationId === application.id,
-                    )?.count || 0 : false
+                  count={
+                    isEndorsementPhase
+                      ? counts?.find(
+                          (c) => c.nomineeApplicationId === application.id,
+                        )?.count || 0
+                      : false
                   }
                 />
               ) : (
                 <OrgCandidate
                   key={application.id}
                   application={application}
-                  showApprove={
-                    !loadingTop && !loadingElig && isTop100 && withinWindow
-                  }
+                  showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
-                  count={isEndorsementPhase ? 
-                    counts?.find(
-                      (c) => c.nomineeApplicationId === application.id,
-                    )?.count || 0 : false
+                  count={
+                    isEndorsementPhase
+                      ? counts?.find(
+                          (c) => c.nomineeApplicationId === application.id,
+                        )?.count || 0
+                      : false
                   }
                 />
               ),
@@ -191,7 +179,10 @@ const OrgCandidate = ({
   const { data: org } = useOrganization({ id: application.organizationId! })
   const approve = useApproveNominee()
   const remove = useRemoveEndorsement()
-  const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
+  const { data: orgEndorsements } = useMyEndorsements(roleId, `role-${roleId}`)
+  const isEndorsed = Boolean(
+    orgEndorsements?.endorsedIds?.includes(application.id),
+  )
 
   if (!org) {
     return <CandidateSkeleton />
@@ -240,7 +231,7 @@ const OrgCandidate = ({
             {count}
           </div>
         )}
-        {showApprove && !endorsed?.endorsed && (
+        {showApprove && !isEndorsed && (
           <button
             className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-medium"
             onClick={onApprove}
@@ -249,7 +240,7 @@ const OrgCandidate = ({
             <span className="font-medium text-xs leading-4">Approve</span>
           </button>
         )}
-        {showApprove && endorsed?.endorsed && (
+        {showApprove && isEndorsed && (
           <button
             className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
             onClick={(e) => {
@@ -295,7 +286,11 @@ const UserCandidate = ({
   const username = useUsername(user)
   const approve = useApproveNominee()
   const remove = useRemoveEndorsement()
-  const { data: endorsed } = useHasEndorsed(application.id, `role-${roleId}`)
+  // derive endorsed state from aggregated hook
+  const { data: userEndorsements } = useMyEndorsements(roleId, `role-${roleId}`)
+  const isEndorsed = Boolean(
+    userEndorsements?.endorsedIds?.includes(application.id),
+  )
 
   if (!user) {
     return <CandidateSkeleton />
@@ -346,7 +341,7 @@ const UserCandidate = ({
             {count}
           </div>
         )}
-        {showApprove && !endorsed?.endorsed && (
+        {showApprove && !isEndorsed && (
           <button
             className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-medium"
             onClick={onApprove}
@@ -355,7 +350,7 @@ const UserCandidate = ({
             <span className="font-medium text-xs leading-4">Approve</span>
           </button>
         )}
-        {showApprove && endorsed?.endorsed && (
+        {showApprove && isEndorsed && (
           <button
             className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
             onClick={(e) => {
