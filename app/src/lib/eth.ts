@@ -10,12 +10,14 @@ import {
   mint,
   mode,
   optimism,
+  optimismSepolia,
   shape,
   soneium,
   superseed,
   unichain,
   worldchain,
   zora,
+  sepolia,
 } from "viem/chains"
 
 import { polynomial } from "@/components/common/chain"
@@ -57,6 +59,10 @@ export const clients = {
   [Chain.Optimism]: createClient(
     optimism,
     `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
+  ),
+  [Chain.Sepolia]: createClient(
+    sepolia,
+    `https://sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
   ),
   [Chain.Polynomial]: createClient(polynomial, "https://rpc.polynomial.fi"),
   [Chain.Race]: createClient(race, "https://racemainnet.io"),
