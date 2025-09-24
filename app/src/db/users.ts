@@ -199,6 +199,7 @@ export async function getUserByUsername(username: string): Promise<
     FROM "User" u
     LEFT JOIN "UserAddress" a ON u."id" = a."userId"
     LEFT JOIN "UserEmail" e ON u."id" = e."userId"
+    LEFT JOIN "UserSafeAddresses" sa ON u."id" = sa."userId"
     LEFT JOIN "UserInteraction" i ON u."id" = i."userId"
     WHERE u."username" = ${username}
     GROUP BY 
