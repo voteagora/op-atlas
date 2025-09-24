@@ -24,10 +24,10 @@ const MakeFirstOrganization = ({
         <div className="flex gap-4 items-center">
           <div className="flex h-12 w-12 items-center justify-center border border-dashed border-muted overflow-hidden rounded-full shrink-0">
             <Image
-              src="/assets/icons/user-icon.svg"
-              width={13}
-              height={17}
-              alt="User"
+              src="/assets/icons/plus.svg"
+              width={20}
+              height={20}
+              alt="Plus"
             />
           </div>
           <div className="flex flex-col text-start">

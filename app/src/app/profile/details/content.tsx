@@ -19,7 +19,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
   if (!user?.farcasterId) {
     return (
       <div className="flex flex-col gap-4">
-        <div>
+        <div className="text-base text-secondary-foreground">
           Most of your profile information comes from your Farcaster account.
         </div>
 
@@ -33,7 +33,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-foreground font-medium text-sm">
+      <div className="text-foreground font-semibold text-base">
         Photo, display name, username and bio.
       </div>
       <div className="border border-border rounded-xl p-10">

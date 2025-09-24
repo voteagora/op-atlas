@@ -417,7 +417,7 @@ export const Account = () => {
           <hr className="w-full border-[0.5px] border-border" />
           <ProfileMenuItem
             href="/profile/details"
-            label="Profile details"
+            label="Account details"
             currentContext={currentContext}
           />
           <ProfileMenuItem

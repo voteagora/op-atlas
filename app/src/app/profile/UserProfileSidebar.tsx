@@ -72,7 +72,7 @@ export function UserProfileSidebar({
             >
               •
             </div>
-            Profile details
+            Account details
           </Link>
           <Link
             href="/profile/connected-apps"
