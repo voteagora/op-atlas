@@ -1,12 +1,12 @@
--- DropForeignKey
-ALTER TABLE "UserKYCUser" DROP CONSTRAINT "UserKYCUser_kycUserId_fkey";
+-- DropForeignKey (guarded)
+ALTER TABLE IF EXISTS "UserKYCUser" DROP CONSTRAINT IF EXISTS "UserKYCUser_kycUserId_fkey";
 
--- DropForeignKey
-ALTER TABLE "UserKYCUser" DROP CONSTRAINT "UserKYCUser_userId_fkey";
+-- DropForeignKey (guarded)
+ALTER TABLE IF EXISTS "UserKYCUser" DROP CONSTRAINT IF EXISTS "UserKYCUser_userId_fkey";
 
--- AlterTable
-ALTER TABLE "Role" ADD COLUMN     "endorsementEndAt" TIMESTAMP(3),
-ADD COLUMN     "endorsementStartAt" TIMESTAMP(3);
+-- AlterTable (idempotent)
+ALTER TABLE "Role" ADD COLUMN IF NOT EXISTS "endorsementEndAt" TIMESTAMP(3);
+ALTER TABLE "Role" ADD COLUMN IF NOT EXISTS "endorsementStartAt" TIMESTAMP(3);
 
--- DropTable
-DROP TABLE "UserKYCUser";
+-- DropTable (guarded)
+DROP TABLE IF EXISTS "UserKYCUser";
