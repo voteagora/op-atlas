@@ -35,23 +35,6 @@ export function useApproveNominee() {
   })
 }
 
-export function useEndorsementEligibility(roleId: number) {
-  return useQuery({
-    queryKey: ["sc-eligibility", roleId],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/sc/endorsements/eligibility?roleId=${roleId}`,
-        {
-          cache: "no-store",
-        },
-      )
-      if (!res.ok) return { eligible: false as const }
-      return (await res.json()) as { eligible: boolean; reason?: string }
-    },
-    staleTime: 30_000,
-  })
-}
-
 export function useEndorsementCounts(
   roleId: number,
   context: string,
