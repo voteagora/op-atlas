@@ -237,3 +237,5 @@ export const ZERO_BYTES32 =
 
 export const UNIVERSAL_CREATE2_FACTORY =
   "0x4e59b44847b379578588920ca78fbf26c0b4956c" as const
+
+export const TOP100_QUERY_KEY = ["sc-top100"] as const
