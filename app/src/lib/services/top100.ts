@@ -20,11 +20,16 @@ export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
   }
 
   try {
+    // Build padded 32-byte versions of addresses (left-pad with 24 zeros)
+    const padded = unique.map(
+      (address) => ("0x" + "0".repeat(24) + address.slice(2)) as string,
+    )
+    const candidates = Array.from(new Set([...unique, ...padded]))
     const rows = await prisma.$queryRaw<{ is_top100: boolean }[]>`
       SELECT EXISTS (
         SELECT 1
         FROM public."TopDelegates"
-        WHERE lower(recipient) = ANY(${unique})
+        WHERE lower(recipient) = ANY(${candidates})
       ) AS is_top100;
     `
     return !!rows?.[0]?.is_top100
