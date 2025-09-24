@@ -1,10 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 
 import { Button } from "@/components/common/Button"
 import { ArrowDownS, ArrowUpS, Information } from "@/components/icons/remix"
+import { Link as LinkIcon } from "@/components/icons/remix"
 import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
 import { useProject } from "@/hooks/db/useProject"
@@ -29,26 +31,29 @@ export default function RoleApplication({
 
   const [conflicts, setConflicts] = useState<string | null>(null)
   const [projects, setProjects] = useState<any[] | null>(null)
-
+  const [personalStatement, setPersonalStatement] = useState<string>("")
+  const [externalLinks, setExternalLinks] = useState<{ url: string; description: string }[]>([])
   const { data: activeApplications, isLoading } = useActiveUserApplications({
     userId: user?.id,
     organizationId: organization?.id,
     enabled: !!user?.id || !!organization?.id,
   })
-
-  const username = useUsername(user)
+  const router = useRouter()
 
   const { data: role, isLoading: isLoadingRole } = useRole({
     id: roleId!,
     enabled: !!roleId,
   })
 
+  const isSecurityRole = role?.isSecurityRole
+
   useEffect(() => {
     if (activeApplications && activeApplications.length > 0) {
       const application = JSON.parse(activeApplications[0].application)
       setConflicts(application.conflictsOfInterest)
       setProjects(application.projects)
-
+      setPersonalStatement(application.personalStatement)
+      setExternalLinks(application.externalLinks)
       if (organization) {
         // Find application with matching organizationId
         const orgApplication = activeApplications.find(
@@ -119,15 +124,92 @@ export default function RoleApplication({
 
   const renderVoteButton = () => {
     if (!role.voteStartAt || !role.voteEndAt) return null
-
     const now = new Date()
     const isWithinVotingPeriod =
       now >= new Date(role.voteStartAt) && now <= new Date(role.voteEndAt)
+    const isWithInNomiationPeriod =
+      now >= new Date(role.startAt || "") && now <= new Date(role.endAt || "")
+    if (isSecurityRole && (isWithInNomiationPeriod || isWithinVotingPeriod)) {
+      return (
+        <Button onClick={() => router.push(`/governance/roles/${roleId}`)}>
+          View Proposal
+        </Button>
+      )
+    }
 
     if (!isWithinVotingPeriod) return null
 
     return (
-      <Button onClick={() => window.open("/governance", "_blank")}>Vote</Button>
+      <Button onClick={() => window.open("/governance", "_blank")}>View</Button>
+    )
+  }
+
+  const renderInterestInRole = () => {
+    return (
+      <>
+        <div className="text-foreground font-medium">
+          Why are you interested in this role?
+        </div>
+        <div className="text-secondary-foreground">
+          {personalStatement || "None"}
+        </div>
+      </>
+    )
+  }
+
+  const renderConflictsOfInterest = () => {
+    return (
+      <>
+        <div className="text-foreground font-medium">
+          If you have any conflicts of interest, please explain them here.
+        </div>
+        <div className="text-secondary-foreground">{conflicts || "None"}</div>
+      </>
+    )
+  }
+
+  const renderExternalLinks = () => {
+    return (
+      <>
+        <div className="text-foreground font-medium">
+          Share any links that demonstrate your expertise:
+        </div>
+        {externalLinks.length > 0 && externalLinks.map((link) => (
+          <>
+
+              <div
+                key={link.url}
+                className="text-secondary-foreground hover:underline flex flex-row gap-2"
+              >
+                <LinkIcon />
+                <Link href={link.url} target="_blank">
+                  {link.url}
+                </Link>
+              </div>
+            <p className="text-secondary-foreground">
+              {link.description || "None"}
+            </p>
+          </>
+        ))}
+        {externalLinks.length === 0 && <div className="text-secondary-foreground">None</div>}
+      </>
+    )
+  }
+
+  const renderProjects = () => {
+    return (
+      <>
+        <div className="text-foreground font-medium">
+          Which of your projects demonstrate your expertise?
+        </div>
+        {projects && projects.length > 0 ? (
+          projects.map((project: any, idx: number) => (
+            <ProjectDetails key={idx} projectApplication={project} />
+          ))
+        ) : (
+          <div className="text-secondary-foreground">None</div>
+        )}
+      </>
     )
   }
 
@@ -154,31 +236,16 @@ export default function RoleApplication({
           <div>
             <div>Candidate for {role.title}</div>
             <div className="text-secondary-foreground">
-              Season 8 <span className="text-muted">|</span> Voting{" "}
-              {formatMMMd(new Date(role.voteStartAt!))} -{" "}
+              Voting {formatMMMd(new Date(role.voteStartAt!))} -{" "}
               {formatMMMd(new Date(role.voteEndAt!))}
             </div>
           </div>
         </div>
         <div className="border-t border-border-secondary"></div>
-
-        <div>
-          If you have any conflicts of interest, please explain them here.
-        </div>
-        <div className="text-secondary-foreground">
-          {conflicts ? conflicts : "None"}
-        </div>
-
-        <div>Which of your projects demonstrate your expertise?</div>
-
-        {projects && projects.length > 0 ? (
-          projects.map((project: any, idx: number) => (
-            <ProjectDetails key={idx} projectApplication={project} />
-          ))
-        ) : (
-          <div className="text-secondary-foreground">None</div>
-        )}
-
+        {isSecurityRole && renderInterestInRole()}
+        {renderProjects()}
+        {isSecurityRole && renderExternalLinks()}
+        {renderConflictsOfInterest()}
         {renderRoleDescription()}
 
         <div className="flex flex-row justify-between items-center">
@@ -196,12 +263,14 @@ export default function RoleApplication({
             )}
           </button>
           <div className="flex flex-row gap-2">
-            <Button
-              variant="outline"
-              onClick={() => role.link && window.open(role.link, "_blank")}
-            >
-              View discussion
-            </Button>
+            {!isSecurityRole && (
+              <Button
+                variant="outline"
+                onClick={() => role.link && window.open(role.link, "_blank")}
+              >
+                View discussion
+              </Button>
+            )}
             {renderVoteButton()}
           </div>
         </div>

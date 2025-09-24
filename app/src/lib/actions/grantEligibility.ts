@@ -421,75 +421,80 @@ export async function submitGrantEligibilityForm(params: {
         }
 
         // Process entities (business KYB)
-        for (const entity of entities) {
-          if (
-            !entity.controllerEmail ||
-            !entity.controllerFirstName ||
-            !entity.controllerLastName ||
-            !entity.company
-          ) {
-            console.warn("Skipping entity with incomplete data:", entity)
-            continue
-          }
+      for (const entity of entities) {
+        if (!entity.controllerEmail || !entity.controllerFirstName || !entity.controllerLastName || !entity.company) {
+          console.warn("Skipping entity with incomplete data:", entity)
+          continue
+        }
 
-          let kycUser = await tx.kYCUser.findFirst({
+        // For KYB case, check organization along with email and user type
+        // If form is tied to a project (no organization), always create new KYC user
+        // If form is tied to an organization, check if KYC user exists for same email, type, and organization
+        let kycUser = null
+        if (existingForm.organizationId) {
+          kycUser = await tx.kYCUser.findFirst({
             where: {
               email: entity.controllerEmail.toLowerCase(),
               kycUserType: "LEGAL_ENTITY",
+              KYCUserTeams: {
+                some: {
+                  team: {
+                    OrganizationKYCTeams: {
+                      some: {
+                        organizationId: existingForm.organizationId,
+                        deletedAt: null
+                      }
+                    }
+                  }
+                }
+              }
             },
           })
+        }
+        // If form is tied to project (no organization), we always create new KYC user, so kycUser stays null
 
-          let isNewUser = false
+        let isNewUser = false
 
-          // If user doesn't exist or is expired, create/recreate them
-          if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
-            kycUser = await tx.kYCUser.create({
-              data: {
-                email: entity.controllerEmail.toLowerCase(),
-                firstName: entity.controllerFirstName,
-                lastName: entity.controllerLastName,
-                businessName: entity.company,
-                kycUserType: "LEGAL_ENTITY",
-                status: "PENDING",
-                expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-              },
-            })
-            isNewUser = true
-            try {
-              await addUserKYCUser(entity, kycUser.id)
-            } catch (e) {
-              console.error("Error creating UserKYCUser:", e)
-            }
-          }
+        // If user doesn't exist or is expired, create/recreate them
+        if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
+          kycUser = await tx.kYCUser.create({
+            data: {
+              email: entity.controllerEmail.toLowerCase(),
+              firstName: entity.controllerFirstName,
+              lastName: entity.controllerLastName,
+              businessName: entity.company,
+              kycUserType: "LEGAL_ENTITY",
+              status: "PENDING",
+              expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            },
+          })
+          isNewUser = true
+        }
 
-          const existingLink = await tx.kYCUserTeams.findFirst({
-            where: {
+        const existingLink = await tx.kYCUserTeams.findFirst({
+          where: {
+            kycUserId: kycUser.id,
+            kycTeamId,
+          },
+        })
+
+        if (!existingLink) {
+          await tx.kYCUserTeams.create({
+            data: {
               kycUserId: kycUser.id,
               kycTeamId,
             },
           })
-
-          if (!existingLink) {
-            await tx.kYCUserTeams.create({
-              data: {
-                kycUserId: kycUser.id,
-                kycTeamId,
-              },
-            })
-          }
-
-          // Only send email if this is a new user
-          if (isNewUser) {
-            kybTargets.push(kycUser)
-          }
         }
 
-        return {
-          updatedForm: updated,
-          kycEmailTargets: kycTargets,
-          kybEmailTargets: kybTargets,
+        // Only send email if this is a new user
+        if (isNewUser) {
+          kybTargets.push(kycUser)
         }
-      })
+      }
+
+      return { updatedForm: updated, kycEmailTargets: kycTargets, kybEmailTargets: kybTargets }
+    })
 
     const emailPromises: Array<
       Promise<{

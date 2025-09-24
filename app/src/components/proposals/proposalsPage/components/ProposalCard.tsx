@@ -15,13 +15,11 @@ import { cn } from "@/lib/utils"
 
 type ProposalCardProps = {
   children: React.ReactNode
-  rounded?: boolean
   href?: string
 }
 
 const ProposalCard = ({
   children,
-  rounded = false,
   href,
 }: ProposalCardProps) => {
   const cardContent = (
@@ -35,11 +33,7 @@ const ProposalCard = ({
       <Link
         href={href}
         className={cn(
-          "border-border group cursor-pointer w-full text-left bg-transparent block",
-          {
-            "border border-border rounded-t-lg": rounded,
-            "border-l border-r border-b border-border": !rounded,
-          },
+          "border-border group cursor-pointer w-full text-left bg-transparent block border-l border-r border-b first:rounded-t-lg first:border-t last:rounded-b-lg",
         )}
       >
         {cardContent}
@@ -49,10 +43,9 @@ const ProposalCard = ({
 
   return (
     <div
-      className={cn("border-border w-full text-left bg-transparent", {
-        "border border-border rounded-t-lg": rounded,
-        "border-l border-r border-b border-border": !rounded,
-      })}
+      className={cn(
+        "border-border w-full text-left bg-transparent border-l border-r border-b first:rounded-t-lg first:border-t last:rounded-b-lg",
+      )}
     >
       {cardContent}
     </div>
