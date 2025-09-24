@@ -29,7 +29,7 @@ const ButtonBadge = ({
   return (
     <button
       className={cn(
-        "group relative flex items-center rounded-full space-x-2 transition-colors",
+        "group relative flex items-center rounded-full gap-1 transition-colors",
         accent
           ? "bg-[#3374DB] hover:bg-[#2E62B7]"
           : "bg-backgroundSecondary hover:bg-backgroundSecondaryHover",
@@ -58,9 +58,11 @@ const ButtonBadge = ({
       >
         {text}
       </p>
-      <span className="absolute -top-[calc(100%+4px)] -left-1/2 whitespace-nowrap rounded bg-white px-2 py-1 text-sm shadow-md opacity-0 transition-opacity group-hover:opacity-100">
-        {tooltipText}
-      </span>
+      {tooltipText && (
+        <span className="absolute -top-[calc(100%+4px)] -left-1/2 whitespace-nowrap rounded bg-white px-2 py-1 text-sm shadow-md opacity-0 transition-opacity group-hover:opacity-100">
+          {tooltipText}
+        </span>
+      )}
     </button>
   )
 }
@@ -112,9 +114,11 @@ const LabelBadge = ({
       >
         {text}
       </p>
-      <span className="absolute -top-[calc(100%+4px)] -left-1/2 whitespace-nowrap rounded bg-white px-2 py-1 text-sm shadow-md opacity-0 transition-opacity group-hover:opacity-100">
-        {tooltipText}
-      </span>
+      {tooltipText && (
+        <span className="absolute -top-[calc(100%+4px)] -left-1/2 whitespace-nowrap rounded bg-white px-2 py-1 text-sm shadow-md opacity-0 transition-opacity group-hover:opacity-100">
+          {tooltipText}
+        </span>
+      )}
     </div>
   )
 }

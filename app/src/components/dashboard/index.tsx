@@ -29,7 +29,6 @@ import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import { KYCCalloutsContainer } from "./KYCCallouts"
-import { KYCVerificationCallout } from "./KYCVerificationCallout"
 import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
@@ -110,8 +109,6 @@ const Dashboard = ({
       {/* KYC Status Callouts */}
       <KYCCalloutsContainer kycTeams={kycTeams} />
 
-      {/* Personal KYC Verification Callout */}
-      {userKYCStatus && <KYCVerificationCallout userKYCStatus={userKYCStatus} />}
       
       {/* <RewardsCallout
         roundName="Onchain Builders"
@@ -174,7 +171,7 @@ const Dashboard = ({
             onOpenChange={(open) => setJoinProjectDialogOpen(open)}
           />
         )}
-        <ProfileDetailCard user={user} />
+        <ProfileDetailCard user={user} userKYCStatus={userKYCStatus} />
 
         {(!projects.length ||
           !!!organizations?.length ||
