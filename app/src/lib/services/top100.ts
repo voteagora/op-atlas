@@ -9,27 +9,26 @@ const DEV_TOP100_BYPASS = new Set([
 ])
 
 export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
-  const unique = Array.from(new Set(addresses.map((a) => a.toLowerCase())))
-  if (unique.length === 0) return false
+  const lower = addresses.map((a) => a.toLowerCase())
+  if (lower.length === 0) return false
 
   if (
     process.env.NEXT_PUBLIC_ENV === "dev" &&
-    unique.some((address) => DEV_TOP100_BYPASS.has(address))
+    lower.some((address) => DEV_TOP100_BYPASS.has(address))
   ) {
     return true
   }
 
   try {
     // Build padded 32-byte versions of addresses (left-pad with 24 zeros)
-    const padded = unique.map(
+    const padded = lower.map(
       (address) => ("0x" + "0".repeat(24) + address.slice(2)) as string,
     )
-    const candidates = Array.from(new Set([...unique, ...padded]))
     const rows = await prisma.$queryRaw<{ is_top100: boolean }[]>`
       SELECT EXISTS (
         SELECT 1
         FROM public."TopDelegates"
-        WHERE lower(recipient) = ANY(${candidates})
+        WHERE lower(recipient) = ANY(${padded})
       ) AS is_top100;
     `
     return !!rows?.[0]?.is_top100
