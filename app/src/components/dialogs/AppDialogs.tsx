@@ -10,6 +10,7 @@ import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceAddressDialog from "./GovernanceAddressDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
+import KYCEmailVerificationDialog from "./KYCEmailVerificationDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
 import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
@@ -77,6 +78,12 @@ export default function AppDialogs() {
         <ImportFromFarcasterDialog
           open
           onOpenChange={onOpenChange("import_from_farcaster")}
+        />
+      )}
+      {openDialog === "kyc_email_verification" && (
+        <KYCEmailVerificationDialog
+          open
+          onOpenChange={onOpenChange("kyc_email_verification")}
         />
       )}
     </>

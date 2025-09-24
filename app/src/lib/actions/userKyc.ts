@@ -7,8 +7,8 @@ import { sendKYCStartedEmail } from "./emails"
 import { revalidatePath } from "next/cache"
 
 export interface CreateUserKYCParams {
-  firstName: string
-  lastName: string
+  firstName?: string
+  lastName?: string
   email: string
   businessName?: string
 }
@@ -46,9 +46,19 @@ export async function createUserKYC(params: CreateUserKYCParams) {
 
   const { firstName, lastName, email, businessName } = params
 
-  // Validate required fields
-  if (!firstName.trim() || !lastName.trim() || !email.trim()) {
-    return { error: "First name, last name, and email are required" }
+  // Email is always required
+  if (!email.trim()) {
+    return { error: "Email is required" }
+  }
+
+  // If firstName or lastName are provided, both must be provided
+  if ((firstName && !lastName) || (!firstName && lastName)) {
+    return { error: "Both first name and last name are required when providing name information" }
+  }
+
+  // If firstName and lastName are provided, validate them
+  if (firstName && lastName && (!firstName.trim() || !lastName.trim())) {
+    return { error: "First name and last name cannot be empty" }
   }
 
   // Basic email validation
@@ -64,10 +74,11 @@ export async function createUserKYC(params: CreateUserKYCParams) {
       return { error: "You already have an active KYC verification. Please check your status." }
     }
 
-    // Check if email is already used for an active KYC
+    // Check if email is already used for an active KYC of type USER
     const existingKycUser = await prisma.kYCUser.findFirst({
       where: {
         email: email.toLowerCase(),
+        kycUserType: "USER",
         expiry: {
           gt: new Date(),
         },
@@ -82,8 +93,8 @@ export async function createUserKYC(params: CreateUserKYCParams) {
       kycUser = await prisma.kYCUser.create({
         data: {
           email: email.toLowerCase(),
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
+          firstName: firstName?.trim() || null,
+          lastName: lastName?.trim() || null,
           businessName: businessName?.trim() || null,
           kycUserType: businessName?.trim() ? "LEGAL_ENTITY" : "USER",
           status: "PENDING",
@@ -115,9 +126,10 @@ export async function createUserKYC(params: CreateUserKYCParams) {
     return {
       success: true,
       kycUser,
+      isNewUser,
       message: isNewUser
-        ? "KYC verification started successfully! Check your email for next steps."
-        : "KYC verification resumed successfully!"
+        ? "A message from compliance@optimism.io has been sent to [email@email.com]. Please complete KYC via the link provided and allow 48 hours for your status to update."
+        : "KYC verification successfully found for this email!"
     }
 
   } catch (error) {

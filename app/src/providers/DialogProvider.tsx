@@ -21,6 +21,8 @@ type DataType = {
   formId?: string
   onSuccess?: (data?: any) => void
   allOrgKycTeams?: any[]
+  email?: string
+  isNewUser?: boolean
 }
 
 type AppDialog = {

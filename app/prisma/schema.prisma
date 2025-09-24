@@ -490,8 +490,8 @@ model ContactEmailTags {
 model KYCUser {
   id                 String              @id @default(uuid())
   email              String
-  firstName          String
-  lastName           String
+  firstName          String?
+  lastName           String?
   businessName       String?
   status             KYCStatus           @default(PENDING)
   expiry             DateTime
