@@ -511,7 +511,24 @@ export async function submitGrantEligibilityForm(params: {
       emailPromises.push(
         (async () => {
           try {
-            const res = await sendKYCStartedEmail(user)
+            // Re-fetch user with relations for email template
+            const userWithRelations = await prisma.kYCUser.findUnique({
+              where: { id: user.id },
+              include: {
+                KYCUserTeams: true,
+                UserKYCUsers: {
+                  include: {
+                    user: true
+                  }
+                }
+              }
+            })
+
+            if (!userWithRelations) {
+              throw new Error("KYC user not found")
+            }
+
+            const res = await sendKYCStartedEmail(userWithRelations)
             return {
               type: "KYC" as const,
               user: `${user.firstName} ${user.lastName}`,
@@ -536,7 +553,24 @@ export async function submitGrantEligibilityForm(params: {
       emailPromises.push(
         (async () => {
           try {
-            const res = await sendKYBStartedEmail(user)
+            // Re-fetch user with relations for email template
+            const userWithRelations = await prisma.kYCUser.findUnique({
+              where: { id: user.id },
+              include: {
+                KYCUserTeams: true,
+                UserKYCUsers: {
+                  include: {
+                    user: true
+                  }
+                }
+              }
+            })
+
+            if (!userWithRelations) {
+              throw new Error("KYC user not found")
+            }
+
+            const res = await sendKYBStartedEmail(userWithRelations)
             return {
               type: "KYB" as const,
               user: `${user.firstName} ${user.lastName}`,

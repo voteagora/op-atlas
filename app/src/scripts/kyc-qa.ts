@@ -251,10 +251,24 @@ async function createKYCUser({
 
     // Send welcome email to the new user
     try {
-      const emailResult = await sendKYCStartedEmail(newUser)
+      // Re-fetch user with relations for email template
+      const newUserWithRelations = await prisma.kYCUser.findUnique({
+        where: { id: newUser.id },
+        include: {
+          KYCUserTeams: true,
+          UserKYCUsers: {
+            include: {
+              user: true
+            }
+          }
+        }
+      })
 
-      if (!emailResult.success) {
-        console.log("⚠️  Welcome email failed to send:", emailResult.error)
+      if (newUserWithRelations) {
+        const emailResult = await sendKYCStartedEmail(newUserWithRelations)
+        if (!emailResult.success) {
+          console.log("⚠️  Welcome email failed to send:", emailResult.error)
+        }
       }
     } catch (emailError) {
       console.log(

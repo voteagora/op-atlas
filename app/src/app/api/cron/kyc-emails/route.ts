@@ -30,13 +30,21 @@ async function handleKYCEmailsCron(request: NextRequest) {
       where: {
         status: 'PENDING',
         personaStatus: { in: ['created', 'pending', 'needs_review'] },
-        createdAt: { 
+        createdAt: {
           lte: threshold,
           gte: EMAIL_START_DATE
         },
         EmailNotifications: {
           none: {
             type: 'KYCB_REMINDER'
+          }
+        }
+      },
+      include: {
+        KYCUserTeams: true,
+        UserKYCUsers: {
+          include: {
+            user: true
           }
         }
       },
@@ -84,6 +92,14 @@ async function handleKYCEmailsCron(request: NextRequest) {
         EmailNotifications: {
           none: {
             type: 'KYCB_APPROVED'
+          }
+        }
+      },
+      include: {
+        KYCUserTeams: true,
+        UserKYCUsers: {
+          include: {
+            user: true
           }
         }
       },

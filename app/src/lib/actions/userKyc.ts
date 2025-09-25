@@ -112,9 +112,24 @@ export async function createUserKYC(params: CreateUserKYCParams) {
     // Send KYC started email if this is a new user
     if (isNewUser) {
       try {
-        const emailResult = await sendKYCStartedEmail(kycUser)
-        if (!emailResult.success) {
-          console.warn("Failed to send KYC started email:", emailResult.error)
+        // Re-fetch kycUser with relations for email template
+        const kycUserWithRelations = await prisma.kYCUser.findUnique({
+          where: { id: kycUser.id },
+          include: {
+            KYCUserTeams: true,
+            UserKYCUsers: {
+              include: {
+                user: true
+              }
+            }
+          }
+        })
+
+        if (kycUserWithRelations) {
+          const emailResult = await sendKYCStartedEmail(kycUserWithRelations)
+          if (!emailResult.success) {
+            console.warn("Failed to send KYC started email:", emailResult.error)
+          }
         }
       } catch (error) {
         console.warn("Failed to send KYC started email:", error)

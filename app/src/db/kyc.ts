@@ -225,6 +225,14 @@ export async function getKYCUsersByProjectId({
         },
       },
     },
+    include: {
+      KYCUserTeams: true,
+      UserKYCUsers: {
+        include: {
+          user: true,
+        },
+      },
+    },
   })
   console.log("getKYCUsersByProjectId: ", { value })
   return value

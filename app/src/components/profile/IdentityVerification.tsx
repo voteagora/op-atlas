@@ -4,6 +4,7 @@ import { KYCUser } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
 import { useTransition } from "react"
 import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/common/Button"
 import { Callout } from "@/components/common/Callout"
@@ -102,7 +103,8 @@ export const IdentityVerification = ({
         onClick={handleGetVerified}
         disabled={isPending}
       >
-        {isPending ? "Starting verification..." : "Get verified"}
+        {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+        Get verified
       </Button>
       <Button
         variant="secondary"
