@@ -14,8 +14,13 @@ import {
   getGrantEligibilityFormStatus,
   GrantEligibilityFormStatus,
 } from "@/lib/utils/grantEligibilityFormStatus"
+import { getExistingLegalEntities } from "@/lib/actions/kyc"
 
-import { sendKYBStartedEmail, sendKYCStartedEmail } from "./emails"
+import {
+  sendKYBStartedEmail,
+  sendKYCStartedEmail,
+  sendKYBStartedEmailForLegalEntity,
+} from "./emails"
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
 
 export interface CreateGrantEligibilityFormParams {
@@ -350,7 +355,8 @@ export async function submitGrantEligibilityForm(params: {
     const formData = (existingForm.data as any) || {}
     const signers = formData.signers || []
     const entities = formData.entities || []
-    const selectedExistingEntityIds: string[] = formData.selectedExistingEntityIds || []
+    const selectedExistingEntityIds: string[] =
+      formData.selectedExistingEntityIds || []
     const kycTeamId: string = existingForm.kycTeamId as string
 
     // Do ONLY database work inside the transaction
@@ -369,7 +375,13 @@ export async function submitGrantEligibilityForm(params: {
         })
 
         const kycTargets: KYCUser[] = []
-        const kybTargets: KYCUser[] = []
+        const kybTargets: Array<{
+          id: string
+          email: string
+          firstName: string
+          lastName: string
+          businessName?: string
+        }> = []
 
         // Process signers (individual KYC)
         for (const signer of signers) {
@@ -379,7 +391,7 @@ export async function submitGrantEligibilityForm(params: {
           }
 
           let kycUser = await tx.kYCUser.findFirst({
-            where: { email: signer.email.toLowerCase(), kycUserType: "USER" },
+            where: { email: signer.email.toLowerCase() },
           })
 
           let isNewUser = false
@@ -391,7 +403,6 @@ export async function submitGrantEligibilityForm(params: {
                 email: signer.email.toLowerCase(),
                 firstName: signer.firstName,
                 lastName: signer.lastName,
-                kycUserType: "USER",
                 status: "PENDING",
                 expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
               },
@@ -424,7 +435,9 @@ export async function submitGrantEligibilityForm(params: {
         // Link selected existing legal entities to KYC team (no creation/email)
         for (const legalEntityId of selectedExistingEntityIds) {
           try {
-            const existingEntity = await tx.legalEntity.findUnique({ where: { id: legalEntityId } })
+            const existingEntity = await tx.legalEntity.findUnique({
+              where: { id: legalEntityId },
+            })
             if (!existingEntity) {
               console.warn("Selected legal entity not found:", legalEntityId)
               continue
@@ -433,14 +446,20 @@ export async function submitGrantEligibilityForm(params: {
               where: { kycTeamId_legalEntityId: { kycTeamId, legalEntityId } },
             })
             if (!existingTeamLink) {
-              await tx.kYCTeamEntity.create({ data: { kycTeamId, legalEntityId } })
+              await tx.kYCTeamEntity.create({
+                data: { kycTeamId, legalEntityId },
+              })
             }
           } catch (e) {
-            console.error("Failed linking existing legal entity:", legalEntityId, e)
+            console.error(
+              "Failed linking existing legal entity:",
+              legalEntityId,
+              e,
+            )
           }
         }
 
-        // Process entities (business KYB)
+        // Process entities (business KYB): create LegalEntity + Controller and link to KYC team only
         for (const entity of entities) {
           if (
             !entity.controllerEmail ||
@@ -473,70 +492,16 @@ export async function submitGrantEligibilityForm(params: {
             },
           })
 
-          // For KYB case, check organization along with email and user type
-          // If form is tied to a project (no organization), always create new KYC user
-          // If form is tied to an organization, check if KYC user exists for same email, type, and organization
-          let kycUser = null
-          if (existingForm.organizationId) {
-            kycUser = await tx.kYCUser.findFirst({
-              where: {
-                email: entity.controllerEmail.toLowerCase(),
-                kycUserType: "LEGAL_ENTITY",
-                KYCUserTeams: {
-                  some: {
-                    team: {
-                      OrganizationKYCTeams: {
-                        some: {
-                          organizationId: existingForm.organizationId,
-                          deletedAt: null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            })
-          }
-          // If form is tied to project (no organization), we always create new KYC user, so kycUser stays null
-
-          let isNewUser = false
-
-          // If user doesn't exist or is expired, create/recreate them
-          if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
-            kycUser = await tx.kYCUser.create({
-              data: {
-                email: entity.controllerEmail.toLowerCase(),
-                firstName: entity.controllerFirstName,
-                lastName: entity.controllerLastName,
-                businessName: entity.company,
-                kycUserType: "LEGAL_ENTITY",
-                status: "PENDING",
-                expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-              },
-            })
-            isNewUser = true
-          }
-
-          const existingLink = await tx.kYCUserTeams.findFirst({
-            where: {
-              kycUserId: kycUser.id,
-              kycTeamId,
-            },
+          // Queue KYB email for this new legal entity using controller info
+          kybTargets.push({
+            id: legalEntity.id,
+            email: entity.controllerEmail.toLowerCase(),
+            firstName: entity.controllerFirstName,
+            lastName: entity.controllerLastName,
+            businessName: entity.company,
           })
 
-          if (!existingLink) {
-            await tx.kYCUserTeams.create({
-              data: {
-                kycUserId: kycUser.id,
-                kycTeamId,
-              },
-            })
-          }
-
-          // Only send email if this is a new user
-          if (isNewUser) {
-            kybTargets.push(kycUser)
-          }
+          // Note: We no longer create a KYCUser for legal entities here.
         }
 
         return {
@@ -548,7 +513,7 @@ export async function submitGrantEligibilityForm(params: {
 
     const emailPromises: Array<
       Promise<{
-        type: "KYC" | "KYB"
+        type: "KYC"
         user?: string
         email: string
         company?: string
@@ -582,25 +547,28 @@ export async function submitGrantEligibilityForm(params: {
       )
     }
 
-    for (const user of kybEmailTargets) {
+    // Also send KYB emails for newly created legal entities using controller info
+    for (const le of kybEmailTargets) {
       emailPromises.push(
         (async () => {
           try {
-            const res = await sendKYBStartedEmail(user)
+            const res = await sendKYBStartedEmailForLegalEntity({
+              id: le.id,
+              email: le.email,
+              firstName: le.firstName,
+              lastName: le.lastName,
+              businessName: le.businessName,
+            })
             return {
-              type: "KYB" as const,
-              user: `${user.firstName} ${user.lastName}`,
-              email: user.email,
-              company: user.businessName ?? undefined,
+              type: "KYC" as const, // keep aggregation simple; label not used elsewhere
+              email: le.email,
               success: res.success,
               error: res.error,
             }
           } catch (e: any) {
             return {
-              type: "KYB" as const,
-              user: `${user.firstName} ${user.lastName}`,
-              email: user.email,
-              company: user.businessName ?? undefined,
+              type: "KYC" as const,
+              email: le.email,
               success: false,
               error: e?.message || "Unknown error",
             }
@@ -837,6 +805,54 @@ export async function clearGrantEligibilityForm(formId: string) {
   }
 }
 
-async function getExistingLegalEntities(formId: string) {
-  //   TODO: Implement this function
+// Fetch existing reusable legal entities for a given GrantEligibility form
+export async function getExistingLegalEntitiesForForm(formId: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { error: "Unauthorized" }
+  }
+
+  try {
+    // Load the form to validate access and read KYCTeamId/currentStep
+    const form = await prisma.grantEligibility.findUnique({
+      where: { id: formId },
+      include: {
+        project: true,
+        organization: true,
+      },
+    })
+
+    if (!form) {
+      return { error: "Form not found" }
+    }
+
+    // Verify permissions
+    if (form.projectId) {
+      const isInvalid = await verifyAdminStatus(form.projectId, userId)
+      if (isInvalid?.error) {
+        return { error: isInvalid.error }
+      }
+    } else if (form.organizationId) {
+      const isInvalid = await verifyOrganizationAdmin(
+        form.organizationId,
+        userId,
+      )
+      if (isInvalid?.error) {
+        return { error: isInvalid.error }
+      }
+    }
+
+    // Only fetch if user has progressed to/ beyond step 3 and KYCTeam is present
+    if (!form.kycTeamId || (form.currentStep ?? 1) < 3) {
+      return { items: [] }
+    }
+
+    const items = await getExistingLegalEntities(form.kycTeamId)
+    return { items }
+  } catch (error) {
+    console.error("Error fetching existing legal entities for form:", error)
+    return { error: "Failed to fetch existing legal entities" }
+  }
 }

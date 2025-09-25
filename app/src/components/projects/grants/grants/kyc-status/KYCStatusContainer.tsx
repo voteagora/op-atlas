@@ -2,7 +2,7 @@
 
 import { KYCUser, Organization } from "@prisma/client"
 import { useParams } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ReactNode, useCallback } from "react"
 
 import ConnectedOrganizationProjects from "@/components/projects/grants/grants/kyc-status/ConnctedOrganizationProjects"
@@ -17,6 +17,7 @@ import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
 import { sendKYCReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
+import { getSelectedLegalEntitiesForTeam, resendKYBForLegalEntity } from "@/lib/actions/kyc"
 
 const KYCStatusContainer = ({
   project,
@@ -89,7 +90,11 @@ const KYCSkeleton = () => (
   </div>
 )
 
-const KYCStatusTitle = ({ hasKYCTeamWithUsers = false }: { hasKYCTeamWithUsers?: boolean }) => {
+const KYCStatusTitle = ({
+  hasKYCTeamWithUsers = false,
+}: {
+  hasKYCTeamWithUsers?: boolean
+}) => {
   return (
     <div className="space-y-6">
       <h2>Grant Delivery Address</h2>
@@ -180,12 +185,75 @@ const KYCStatusPresenter = ({
     setOpenDialog("delete_kyc_team")
   }
 
-  const individualStatuses = users
-    ? users.filter((u) => u.user.kycUserType === "USER")
-    : []
-  const legalEntitiesStatuses = users
-    ? users.filter((u) => u.user.kycUserType === "LEGAL_ENTITY")
-    : []
+  // Show all KYCUsers as individual statuses (no longer split by type)
+  const individualStatuses = users ? users : []
+
+  // Load legal entity statuses based on selected LegalEntity for this KYCTeam
+  const [legalEntitiesStatuses, setLegalEntitiesStatuses] = useState<
+    typeof users
+  >([])
+  const [legalSendingState, setLegalSendingState] = useState<Record<string, EmailState>>({})
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadLegalEntities() {
+      try {
+        if (!kycTeamId) {
+          setLegalEntitiesStatuses([])
+          return
+        }
+        const items = await getSelectedLegalEntitiesForTeam(kycTeamId)
+        if (cancelled) return
+        const mapped = (items || []).map((e: any) => ({
+          user: {
+            id: e.id,
+            email: e.controllerEmail || "",
+            firstName: e.controllerFirstName || "",
+            lastName: e.controllerLastName || "",
+            businessName: e.name,
+            status: e.status,
+            expiry: e.expiry || null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            kycUserType: "LEGAL_ENTITY",
+            // Unused optional fields for display purposes
+            personaStatus: null,
+            KYCUserTeams: [],
+            EmailNotifications: [],
+          } as unknown as KYCUser,
+          handleEmailResend: async (u: KYCUser) => {
+            try {
+              setLegalSendingState((prev) => ({ ...prev, [e.id]: EmailState.SENDING }))
+              await resendKYBForLegalEntity({
+                projectId: projectId as string | undefined,
+                organizationId: organizationId as string | undefined,
+                legalEntity: {
+                  id: e.id,
+                  email: e.controllerEmail || "",
+                  firstName: e.controllerFirstName || "",
+                  lastName: e.controllerLastName || "",
+                  businessName: e.name,
+                },
+              })
+            } finally {
+              setLegalSendingState((prev) => ({ ...prev, [e.id]: EmailState.SENT }))
+            }
+          },
+          emailResendBlock: e.status === "APPROVED" ? true : false,
+          emailState: legalSendingState[e.id] || EmailState.NOT_SENT,
+        }))
+        setLegalEntitiesStatuses(mapped as any)
+      } catch (e) {
+        if (!cancelled) {
+          console.error("Failed to load legal entity statuses", e)
+        }
+      }
+    }
+    loadLegalEntities()
+    return () => {
+      cancelled = true
+    }
+  }, [kycTeamId])
   return (
     <>
       <div className="flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
@@ -196,19 +264,11 @@ const KYCStatusPresenter = ({
             <ProjectStatus status={status} kycTeamId={kycTeamId} />
             <GrantDeliveryAddress address={address} />
             {extraMiddleContent}
-            {users && users.length > 0 && (
-              <>
-                <IndividualStatuses
-                  users={individualStatuses}
-                  isAdmin={isAdmin}
-                />
-                {users.some((u) => u.user.kycUserType === "LEGAL_ENTITY") && (
-                  <LegalEntities
-                    users={legalEntitiesStatuses}
-                    isAdmin={isAdmin}
-                  />
-                )}
-              </>
+            {individualStatuses && individualStatuses.length > 0 && (
+              <IndividualStatuses users={individualStatuses} isAdmin={isAdmin} />
+            )}
+            {legalEntitiesStatuses && legalEntitiesStatuses.length > 0 && (
+              <LegalEntities users={legalEntitiesStatuses as any} isAdmin={isAdmin} />
             )}
             {showEditFooter && isAdmin && (
               <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">

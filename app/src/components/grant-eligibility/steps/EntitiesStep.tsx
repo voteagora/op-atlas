@@ -6,7 +6,10 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { updateGrantEligibilityForm } from "@/lib/actions/grantEligibility"
+import {
+  updateGrantEligibilityForm,
+  getExistingLegalEntitiesForForm,
+} from "@/lib/actions/grantEligibility"
 import { useGrantEligibilityForm } from "@/providers/GrantEligibilityFormProvider"
 
 interface Entity {
@@ -23,6 +26,45 @@ export default function EntitiesStep() {
   // Existing verified legal entities tied to this project/org (to be loaded)
   const [existingEntities, setExistingEntities] = useState<VerifiedEntity[]>([])
   const [selectedExistingIds, setSelectedExistingIds] = useState<string[]>([])
+
+  // Load any previously selected existing entity ids from saved form data
+  useEffect(() => {
+    const savedIds =
+      form.data &&
+      typeof form.data === "object" &&
+      "selectedExistingEntityIds" in form.data
+        ? ((form.data as any).selectedExistingEntityIds as string[] | undefined)
+        : undefined
+    if (Array.isArray(savedIds)) {
+      setSelectedExistingIds(savedIds)
+    }
+  }, [form.data])
+
+  // Fetch existing legal entities for this form's KYCTeam once KYB step is available (step >= 3)
+  useEffect(() => {
+    let cancelled = false
+    async function fetchEntities() {
+      try {
+        if (!form?.id || !form?.kycTeamId || (form.currentStep ?? 1) < 3) {
+          setExistingEntities([])
+          return
+        }
+        const res = await getExistingLegalEntitiesForForm(form.id)
+        if (!cancelled && res && Array.isArray((res as any).items)) {
+          setExistingEntities((res as any).items)
+        }
+      } catch (e) {
+        if (!cancelled) {
+          console.error("Failed to load existing legal entities", e)
+          // Silent fail; do not block the user. Optionally show a toast in future.
+        }
+      }
+    }
+    fetchEntities()
+    return () => {
+      cancelled = true
+    }
+  }, [form.id, form.kycTeamId, form.currentStep])
 
   // Initialize entities from form data or with empty array by default.
   // If there are no saved entities, we start with none and let the user add
@@ -247,7 +289,9 @@ export default function EntitiesStep() {
           <VerifiedEntities
             items={existingEntities}
             selectedIds={selectedExistingIds}
-            onToggle={(id, checked, idx) => handleToggleExisting(id, checked, idx)}
+            onToggle={(id, checked, idx) =>
+              handleToggleExisting(id, checked, idx)
+            }
           />
         ) : null}
 
@@ -417,9 +461,7 @@ function VerifiedEntityRow({
       />
       <div className="flex-1 space-y-2">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div className="text-base font-medium">
-            {item.businessName}
-          </div>
+          <div className="text-base font-medium">{item.businessName}</div>
           {item.expiresAt ? (
             <div className="text-sm text-muted-foreground mt-1 md:mt-0">
               Expires: {new Date(item.expiresAt).toLocaleDateString()}

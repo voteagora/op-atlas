@@ -17,8 +17,10 @@ import {
 } from "@/lib/persona"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { UserKYCTeam } from "@/lib/types"
+import { KYCStatus } from "@prisma/client"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+import { sendKYBReminderEmailForLegalEntity } from "./emails"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -432,4 +434,128 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
   }
 
   return kycTeams
+}
+
+export async function getExistingLegalEntities(kycTeamId: string) {
+  try {
+    if (!kycTeamId) return []
+
+    const links = await prisma.kYCTeamEntity.findMany({
+      where: { kycTeamId },
+      include: {
+        legalEntity: {
+          include: {
+            LegalEnitityController: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    const now = new Date()
+
+    const items = links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      // Only reusable entities: approved and not expired
+      .filter(
+        (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
+      )
+      .map((e) => ({
+        id: e.id,
+        businessName: e.name,
+        controllerFirstName: e.LegalEnitityController?.firstName || "",
+        controllerLastName: e.LegalEnitityController?.lastName || "",
+        controllerEmail: e.LegalEnitityController?.email || "",
+        expiresAt: e.expiry ?? null,
+      }))
+
+    return items
+  } catch (e) {
+    console.error("getExistingLegalEntities error", e)
+    return []
+  }
+}
+
+// Fetch all selected legal entities for a KYCTeam, regardless of approval/expiry,
+// to drive the Legal Entities status list in the KYC status UI.
+export async function getSelectedLegalEntitiesForTeam(kycTeamId: string) {
+  try {
+    if (!kycTeamId) return []
+
+    const links = await prisma.kYCTeamEntity.findMany({
+      where: { kycTeamId },
+      include: {
+        legalEntity: {
+          include: {
+            LegalEnitityController: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    return links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .map((e) => ({
+        id: e.id,
+        name: e.name,
+        status: e.status,
+        expiry: e.expiry ?? null,
+        controllerFirstName: e.LegalEnitityController?.firstName || "",
+        controllerLastName: e.LegalEnitityController?.lastName || "",
+        controllerEmail: e.LegalEnitityController?.email || "",
+      }))
+  } catch (e) {
+    console.error("getSelectedLegalEntitiesForTeam error", e)
+    return []
+  }
+}
+
+
+// Resend KYB email for a selected Legal Entity (uses controller info)
+export async function resendKYBForLegalEntity(params: {
+  projectId?: string
+  organizationId?: string
+  legalEntity: {
+    id: string
+    email: string
+    firstName: string
+    lastName: string
+    businessName?: string
+  }
+}) {
+  const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  // Verify admin permissions based on context
+  if (params.projectId) {
+    const isInvalid = await verifyAdminStatus(params.projectId, userId)
+    if (isInvalid?.error) {
+      return { success: false, error: isInvalid.error }
+    }
+  } else if (params.organizationId) {
+    const isInvalid = await verifyOrganizationAdmin(params.organizationId, userId)
+    if (isInvalid?.error) {
+      return { success: false, error: isInvalid.error }
+    }
+  } else {
+    return {
+      success: false,
+      error: "Missing context - projectId or organizationId required",
+    }
+  }
+
+  const res = await sendKYBReminderEmailForLegalEntity({
+    id: params.legalEntity.id,
+    email: params.legalEntity.email,
+    firstName: params.legalEntity.firstName,
+    lastName: params.legalEntity.lastName,
+    businessName: params.legalEntity.businessName,
+  })
+  return res
 }
