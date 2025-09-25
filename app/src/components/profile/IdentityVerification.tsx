@@ -106,7 +106,10 @@ export const IdentityVerification = ({
       </Button>
       <Button
         variant="secondary"
-        onClick={() => (window.location.href = "/profile/kyc")}
+        onClick={() => {
+          setData({ email })
+          setOpenDialog("find_my_kyc")
+        }}
       >
         I've already completed KYC
       </Button>

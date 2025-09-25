@@ -5,6 +5,7 @@ import { EmailNotificationType, KYCUser } from "@prisma/client"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
+import { revalidatePath } from "next/cache"
 import { createPersonaInquiryLink } from "./persona"
 import { getUserProjectRole, getUserOrganizationRole } from "./utils"
 import {
@@ -15,6 +16,7 @@ import {
   getKYCApprovedEmailTemplate,
   getKYBApprovedEmailTemplate,
   getKYCEmailVerificationTemplate,
+  getFindMyKYCVerificationTemplate,
 } from "@/lib/emailTemplates"
 
 const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
@@ -652,7 +654,7 @@ export async function sendKYCVerificationEmail(email: string): Promise<EmailResp
     // Send verification email
     const emailResult = await sendKYCEmailVerificationEmail(
       email.toLowerCase(),
-      orphanedKYCUser.firstName,
+      orphanedKYCUser.firstName || "User",
       verificationLink,
       orphanedKYCUser.id
     )
@@ -754,7 +756,7 @@ export const resendKYCVerificationEmail = async (): Promise<EmailResponse> => {
     // Send verification email
     const emailResult = await sendKYCEmailVerificationEmail(
       userEmail.email,
-      kycUser.firstName,
+      kycUser.firstName || "User",
       verificationLink,
       kycUser.id
     )
@@ -765,6 +767,218 @@ export const resendKYCVerificationEmail = async (): Promise<EmailResponse> => {
     return {
       success: false,
       error: "Failed to resend verification email. Please try again.",
+    }
+  }
+}
+
+export async function sendFindMyKYCVerificationCode(email: string): Promise<EmailResponse> {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    // Check if user already has a KYC
+    const existingUserKyc = await prisma.userKYCUser.findFirst({
+      where: {
+        userId,
+      },
+      include: {
+        kycUser: true,
+      },
+    })
+
+    if (existingUserKyc) {
+      return {
+        success: false,
+        error: "You already have an active KYC verification.",
+      }
+    }
+
+    // Check if there's an orphaned KYCUser for this email (for tracking purposes)
+    const orphanedKYCUser = await prisma.kYCUser.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        expiry: {
+          gt: new Date(), // Not expired
+        },
+        UserKYCUsers: {
+          none: {}, // No existing user associations (orphaned)
+        },
+      },
+    })
+
+    // Delete any existing unverified UserEmail records for this user before creating a new one
+    await prisma.userEmail.deleteMany({
+      where: {
+        userId,
+        verified: false,
+      },
+    })
+
+    // Check if there's already a UserEmail record for this user and email
+    let userEmail = await prisma.userEmail.findFirst({
+      where: {
+        userId,
+        email: email.toLowerCase(),
+      },
+    })
+
+    // Generate 6-digit verification code and 10-minute expiry
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const verificationTokenExpiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+
+    if (userEmail) {
+      // Update existing record with new code
+      userEmail = await prisma.userEmail.update({
+        where: { id: userEmail.id },
+        data: {
+          verified: false,
+          verificationToken: verificationCode,
+          verificationTokenExpiresAt,
+        },
+      })
+    } else {
+      // Create new UserEmail record
+      userEmail = await prisma.userEmail.create({
+        data: {
+          userId,
+          email: email.toLowerCase(),
+          verified: false,
+          verificationToken: verificationCode,
+          verificationTokenExpiresAt,
+        },
+      })
+    }
+
+    // Send verification email with code
+    const html = getFindMyKYCVerificationTemplate(verificationCode)
+
+    const emailParams = {
+      to: email.toLowerCase(),
+      subject: "Verify your email to link your KYC verification",
+      html,
+    }
+
+    const emailResult = await sendTransactionEmail(emailParams)
+
+    // Track email notification if we found an orphaned KYC user
+    if (orphanedKYCUser) {
+      await trackEmailNotification({
+        kycUserId: orphanedKYCUser.id,
+        type: "KYC_EMAIL_VERIFICATION",
+        emailTo: email.toLowerCase(),
+        success: emailResult.success,
+        error: emailResult.error,
+      })
+    }
+
+    // Always return success to not reveal whether KYC exists for this email
+    return {
+      success: true,
+      message: `Verification code sent to ${email}. Please check your inbox and enter the code to link your KYC verification.`,
+    }
+  } catch (error) {
+    console.error("Error sending Find My KYC verification code:", error)
+    return {
+      success: false,
+      error: "Failed to send verification code. Please try again.",
+    }
+  }
+}
+
+export async function validateFindMyKYCCode(email: string, verificationCode: string): Promise<EmailResponse & { kycUser?: any }> {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    // Find the UserEmail record with the matching code
+    const userEmail = await prisma.userEmail.findFirst({
+      where: {
+        userId,
+        email: email.toLowerCase(),
+        verified: false,
+        verificationToken: verificationCode,
+        verificationTokenExpiresAt: {
+          gt: new Date(), // Token not expired
+        },
+      },
+    })
+
+    if (!userEmail) {
+      return {
+        success: false,
+        error: "Invalid or expired verification code.",
+      }
+    }
+
+    // Find the orphaned KYCUser for this email
+    const orphanedKYCUser = await prisma.kYCUser.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        expiry: {
+          gt: new Date(), // Not expired
+        },
+        UserKYCUsers: {
+          none: {}, // Still orphaned
+        },
+      },
+    })
+
+    if (!orphanedKYCUser) {
+      // Clear the verification token since KYC is no longer available
+      await prisma.userEmail.update({
+        where: { id: userEmail.id },
+        data: {
+          verificationToken: null,
+          verificationTokenExpiresAt: null,
+        },
+      })
+
+      return {
+        success: false,
+        error: "KYC verification is no longer available for linking.",
+      }
+    }
+
+    // Link the KYCUser to the current user
+    await prisma.userKYCUser.create({
+      data: {
+        userId,
+        kycUserId: orphanedKYCUser.id,
+      },
+    })
+
+    // Mark the email as verified and clear the verification token
+    await prisma.userEmail.update({
+      where: { id: userEmail.id },
+      data: {
+        verified: true,
+        verificationToken: null,
+        verificationTokenExpiresAt: null,
+      },
+    })
+
+    // Revalidate pages that show KYC status
+    revalidatePath("/dashboard")
+    revalidatePath("/profile/details")
+
+    return {
+      success: true,
+      message: "KYC verification successfully linked to your account.",
+      kycUser: orphanedKYCUser,
+    }
+  } catch (error) {
+    console.error("Error validating Find My KYC code:", error)
+    return {
+      success: false,
+      error: "Failed to validate verification code. Please try again.",
     }
   }
 }

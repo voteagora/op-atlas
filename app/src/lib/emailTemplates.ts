@@ -250,3 +250,48 @@ export function getKYCEmailVerificationTemplate(firstName: string, verificationL
 </div>
     `
 }
+
+export function getFindMyKYCVerificationTemplate(verificationCode: string): string {
+  const digits = verificationCode.split("")
+  const digitWidth = 42
+  const digitHeight = 42
+  const borderWidth = 1
+  const selectAllStyles = "cursor: text; user-select: all; -webkit-user-select: all; -moz-user-select: all; -ms-user-select: all;"
+  const digitCells = digits
+    .map(
+      digit =>
+        `<td style="padding: 0;"><div style="width: ${digitWidth}px; height: ${digitHeight}px; border: ${borderWidth}px solid #E0E2EB; border-radius: 8px; background-color: #FFFFFF; font-size: 14px; font-weight: 500; line-height: ${digitHeight}px; text-align: center; ${selectAllStyles}">${digit}</div></td>`,
+    )
+    .join("")
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
+    </div>
+
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Use this code to confirm your email</h1>
+
+    <p style="font-size: 16px; text-align: center; margin-bottom: 40px;">Please confirm your email in Optimism Atlas, then we'll search for your existing KYC record.</p>
+
+    <div style="text-align: center; margin: 40px 0;">
+        <table role="presentation" cellpadding="0" cellspacing="8" style="margin: 0 auto; border-collapse: separate; ${selectAllStyles}">
+            <tr>
+                ${digitCells}
+            </tr>
+        </table>
+
+        <p style="font-size: 12px; color: #6B7280; text-align: center; margin-top: 8px; margin-bottom: 0;">Select the code above and press Ctrl+C (or Cmd+C on Mac) to copy.</p>
+    </div>
+
+    <p style="font-size: 16px;">Questions or need assistance? Contact our support team via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>.</p>
+
+    <p style="font-size: 16px;">Stay Optimistic,<br>The Optimism Team</p>
+
+    <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
+    <div style="text-align: center;">
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+    </div>
+</div>
+    `
+}

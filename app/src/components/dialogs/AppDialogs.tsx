@@ -6,6 +6,7 @@ import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
+import FindMyKYCDialog from "./FindMyKYCDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceAddressDialog from "./GovernanceAddressDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
@@ -84,6 +85,12 @@ export default function AppDialogs() {
         <KYCEmailVerificationDialog
           open
           onOpenChange={onOpenChange("kyc_email_verification")}
+        />
+      )}
+      {openDialog === "find_my_kyc" && (
+        <FindMyKYCDialog
+          open
+          onOpenChange={onOpenChange("find_my_kyc")}
         />
       )}
     </>

@@ -139,11 +139,11 @@ const ProfileDetailCard = ({
 
           {/* KYC Verification Badge */}
           {userKYCStatus && (
-            userKYCStatus.hasValidKYC ? (
+            userKYCStatus.hasApprovedKYC ? (
               <Badge
                 text={
                   <span className="flex items-center gap-1">
-                    <UserRoundCheck size={12} />
+                    <UserRoundCheck fill="#000" size={12} />
                     Verified
                   </span>
                 }
@@ -155,7 +155,7 @@ const ProfileDetailCard = ({
                 text="Verify your identity"
                 leftIcon="/assets/icons/plus.svg"
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1"
-                onClick={() => window.location.href = '/profile/kyc'}
+                onClick={() => window.location.href = '/profile/details'}
               />
             )
           )}

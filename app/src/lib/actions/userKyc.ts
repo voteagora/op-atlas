@@ -15,6 +15,7 @@ export interface CreateUserKYCParams {
 
 export interface UserKYCStatus {
   hasValidKYC: boolean
+  hasApprovedKYC: boolean
   kycUser?: any
 }
 
@@ -24,7 +25,7 @@ export async function getUserKYCStatus(userId?: string): Promise<UserKYCStatus> 
     userId = session?.user?.id
 
     if (!userId) {
-      return { hasValidKYC: false }
+      return { hasValidKYC: false, hasApprovedKYC: false }
     }
   }
 
@@ -32,6 +33,7 @@ export async function getUserKYCStatus(userId?: string): Promise<UserKYCStatus> 
 
   return {
     hasValidKYC: !!userKycUser,
+    hasApprovedKYC: !!userKycUser && userKycUser.kycUser?.status === 'APPROVED',
     kycUser: userKycUser?.kycUser || null,
   }
 }
@@ -121,7 +123,7 @@ export async function createUserKYC(params: CreateUserKYCParams) {
 
     // Revalidate dashboard and profile pages
     revalidatePath("/dashboard")
-    revalidatePath("/profile/kyc")
+    revalidatePath("/profile/details")
 
     return {
       success: true,
@@ -230,7 +232,7 @@ export async function deletePersonalKYC(kycUserId: string) {
 
     // Revalidate pages
     revalidatePath("/dashboard")
-    revalidatePath("/profile/kyc")
+    revalidatePath("/profile/details")
 
     return {
       success: true,
@@ -354,7 +356,7 @@ export async function linkKYCToUser(verificationToken: string) {
 
     // Revalidate pages
     revalidatePath("/dashboard")
-    revalidatePath("/profile/kyc")
+    revalidatePath("/profile/details")
 
     return {
       success: true,
