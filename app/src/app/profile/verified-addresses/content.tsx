@@ -147,7 +147,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="font-medium text-sm text-foreground">
-              Safe addresses for Top 100 Delegates
+              Safe address for Top 100 Delegates
             </span>
           </div>
 
@@ -167,12 +167,14 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
               ))}
             </div>
           )}
-          <Button
-            className="button-primary w-fit"
-            onClick={() => setIsSafeDialogOpen(true)}
-          >
-            Verify Safe address
-          </Button>
+          {safeAddresses.length === 0 && (
+            <Button
+              className="button-primary w-fit mt-2"
+              onClick={() => setIsSafeDialogOpen(true)}
+            >
+              Verify Safe address
+            </Button>
+          )}
         </div>
       )}
 
