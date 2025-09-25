@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { Check } from "lucide-react"
+import { UserRoundCheck } from "lucide-react"
 
 import { CitizenshipBadge } from "@/components/common/CitizenshipBadge"
 import { PencilFill } from "@/components/icons/remix"
@@ -63,7 +63,11 @@ const ProfileHeader = ({
         )}
         <div className="flex flex-col gap-6">
           <div className="text-3xl font-semibold flex flex-wrap items-center gap-2">
-            {username} {isCitizen && <CitizenshipBadge />} {isVerified && <VerifiedBadge />}
+            {username}
+            <div className="flex items-center gap-1 ml-2">
+              {isCitizen && <CitizenshipBadge variant="icon" />}
+              {isVerified && <VerifiedBadge />}
+            </div>
           </div>
           <div className="text-sm text-muted-foreground">{user.bio}</div>
           <ProfileHeaderLinks user={user} />
@@ -75,9 +79,12 @@ const ProfileHeader = ({
 
 const VerifiedBadge = () => {
   return (
-    <div className="flex items-center gap-1 text-sm text-emerald-600" title="This user has successfully undergone KYC verification">
-      <Check className="w-4 h-4" />
-      <span className="text-xs font-medium">Verified</span>
+    <div title="Identity verified" className="cursor-default">
+      <UserRoundCheck
+        fill="#000"
+        size={20}
+        className="rounded"
+      />
     </div>
   )
 }

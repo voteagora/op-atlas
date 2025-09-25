@@ -109,7 +109,7 @@ const ProfileDetailCard = ({
 
         <div className="mt-2 mr-4 flex items-center gap-2 flex-wrap">
           {/* Citizenship Badge */}
-          {isCitizen && <CitizenshipBadge />}
+          {isCitizen && <CitizenshipBadge variant="full" />}
 
           {/* Username Badge */}
           {user.username && user.farcasterId ? (
