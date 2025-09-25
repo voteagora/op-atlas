@@ -2,9 +2,17 @@ import { Role } from "@prisma/client"
 
 import { AnalyticsTracker } from "@/app/governance/components/AnalyticsTracker"
 import { RoleRow } from "@/app/governance/roles/components/RoleRow"
+import { getRolePhaseStatus } from "@/lib/utils/roles"
 
 export default function RolesPage({ roles }: { roles: Role[] }) {
-  const hasASecurityRole = roles.some((role) => role.isSecurityRole)
+  const hasASecurityRole = roles.every((role) => role.isSecurityRole)
+  const isInVotingPhase = roles.every((role) => getRolePhaseStatus(role).isVotingPhase)
+
+  const hideRoles = isInVotingPhase && hasASecurityRole
+
+  if (hideRoles) {
+    return null
+  }
 
   return (
     <div className="flex flex-col gap-6">

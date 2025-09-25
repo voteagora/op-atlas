@@ -3,7 +3,12 @@ import { z } from "zod"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { createEndorsement, getEndorsementCounts } from "@/db/endorsements"
+import {
+  createEndorsement,
+  deleteEndorsementsForAddresses,
+  getEndorsementCounts,
+  getEndorsementCountsByRole,
+} from "@/db/endorsements"
 import { isTop100Delegate } from "@/lib/services/top100"
 
 const payloadSchema = z.object({
@@ -21,20 +26,32 @@ export async function POST(req: NextRequest) {
 
   const { context, nomineeApplicationId } = parsed.data
 
-  const application = await prisma.roleApplication.findUnique({
+  let start: Date | null = null
+  let end: Date | null = null
+  const appRole = await prisma.roleApplication.findUnique({
     where: { id: nomineeApplicationId },
-    include: { role: true },
+    select: { roleId: true },
   })
-  if (!application?.role) return new Response("Not Found", { status: 404 })
+  if (!appRole?.roleId) return new Response("Not Found", { status: 404 })
+  const roleWindow = await prisma.role.findUnique({
+    where: { id: appRole.roleId },
+    select: {
+      endorsementStartAt: true,
+      endorsementEndAt: true,
+    },
+  })
+
+  if (!roleWindow) return new Response("Not Found", { status: 404 })
+  start = roleWindow.endorsementStartAt ?? null
+  end = roleWindow.endorsementEndAt ?? null
+
+  // Require explicit endorsement window; if missing, treat as closed
+  if (!start || !end) {
+    return new Response("Window closed", { status: 403 })
+  }
 
   const now = new Date()
-  const voteStartAt = application.role.voteStartAt
-    ? new Date(application.role.voteStartAt)
-    : null
-  const voteEndAt = application.role.voteEndAt
-    ? new Date(application.role.voteEndAt)
-    : null
-  if ((voteStartAt && now < voteStartAt) || (voteEndAt && now > voteEndAt)) {
+  if ((start && now < start) || (end && now > end)) {
     return new Response("Window closed", { status: 403 })
   }
 
@@ -62,18 +79,57 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
+  const roleId = Number(searchParams.get("roleId"))
   const nomineeIds = searchParams.getAll("nomineeId").map((x) => Number(x))
-  if (!context || nomineeIds.length === 0)
+
+  if (!context) return new Response("Bad Request", { status: 400 })
+
+  if (Number.isFinite(roleId) && roleId > 0) {
+    const map = await getEndorsementCountsByRole({ context, roleId })
+    return NextResponse.json(
+      Array.from(map.entries()).map(([id, count]) => ({
+        nomineeApplicationId: id,
+        count,
+      })),
+    )
+  }
+
+  if (nomineeIds.length > 0) {
+    const map = await getEndorsementCounts({
+      context,
+      nomineeApplicationIds: nomineeIds,
+    })
+    return NextResponse.json(
+      nomineeIds.map((id) => ({
+        nomineeApplicationId: id,
+        count: map.get(id) || 0,
+      })),
+    )
+  }
+
+  return new Response("Bad Request", { status: 400 })
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) return new Response("Unauthorized", { status: 401 })
+
+  const { searchParams } = new URL(req.url)
+  const context = searchParams.get("context")
+  const nomineeId = Number(searchParams.get("nomineeId"))
+  if (!context || !nomineeId)
     return new Response("Bad Request", { status: 400 })
 
-  const map = await getEndorsementCounts({
-    context,
-    nomineeApplicationIds: nomineeIds,
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { addresses: true },
   })
-  return NextResponse.json(
-    nomineeIds.map((id) => ({
-      nomineeApplicationId: id,
-      count: map.get(id) || 0,
-    })),
-  )
+  const addresses = (user?.addresses || []).map((a) => a.address)
+
+  const removed = await deleteEndorsementsForAddresses({
+    context,
+    nomineeApplicationId: nomineeId,
+    addresses,
+  })
+  return NextResponse.json({ removed })
 }

@@ -7,7 +7,7 @@ import { prisma } from "./client"
 export async function getAllRoles(): Promise<Role[]> {
   return prisma.role.findMany({
     where: {
-      voteStartAt: {
+      voteEndAt: {
         gte: new Date(),
       },
     },
