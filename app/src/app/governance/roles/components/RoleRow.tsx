@@ -12,18 +12,10 @@ import ProposalCard, {
 import { formatMMMd } from "@/lib/utils/date"
 import { getRolePhaseStatus } from "@/lib/utils/roles"
 
-export function RoleRow({
-  role,
-}: {
-  role: Role
-}) {
-  const {
-    isUpcoming,
-    isNominationPhase,
-    isEndorsementPhase,
-    isVotingPhase,
-  } = getRolePhaseStatus(role)
-  const isActive = isNominationPhase || isEndorsementPhase || isVotingPhase;
+export function RoleRow({ role }: { role: Role }) {
+  const { isUpcoming, isNominationPhase, isEndorsementPhase, isVotingPhase } =
+    getRolePhaseStatus(role)
+  const isActive = isNominationPhase || isEndorsementPhase || isVotingPhase
 
   const phaseDates = (() => {
     if (isEndorsementPhase) {
@@ -49,7 +41,8 @@ export function RoleRow({
 
     return {
       start: role.startAt,
-      end: role.voteEndAt ?? role.endorsementEndAt ?? role.endAt ?? role.startAt,
+      end:
+        role.voteEndAt ?? role.endorsementEndAt ?? role.endAt ?? role.startAt,
     }
   })()
 
@@ -60,9 +53,7 @@ export function RoleRow({
   const endDate = formatDate(phaseDates.end)
 
   return (
-    <ProposalCard
-      href={`/governance/roles/${role.id}`}
-    >
+    <ProposalCard href={`/governance/roles/${role.id}`}>
       <ProposalBadge
         type={
           isActive
@@ -74,10 +65,7 @@ export function RoleRow({
       />
       <ProposalTextContent title={role.title} />
       <div className="hidden md:block">
-        <ProposalDates
-          startDate={startDate}
-          endDate={endDate}
-        />
+        <ProposalDates startDate={startDate} endDate={endDate} />
       </div>
       <ProposalArrow
         href={`/governance/roles/${role.id}`}
