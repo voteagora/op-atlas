@@ -18,6 +18,21 @@ const USERS = [
   },
 ]
 
+// Determine which step to stop at from CLI arguments (support only: --stop=2, --step=2). Default to 5.
+function parseStopAt(argv: string[]): 1 | 2 | 3 | 4 | 5 | undefined {
+  for (const a of argv) {
+    const eqMatch = a.match(/^--(?:stop|step)=(\d)$/)
+    if (eqMatch) {
+      const n = Number(eqMatch[1])
+      if (n >= 1 && n <= 5) return n as 1 | 2 | 3 | 4 | 5
+    }
+  }
+  return undefined
+}
+const resolved = parseStopAt(process.argv.slice(2))
+const STOP_AT: 1 | 2 | 3 | 4 | 5 = (resolved ?? 5) as 1 | 2 | 3 | 4 | 5
+console.log(`Seed KYC script will stop at step: ${STOP_AT} (args: ${process.argv.slice(2).join(" ") || "<none>"})`)
+
 function randomGrantType(): GrantType {
   const options: GrantType[] = [
     "RETRO_FUNDING",
@@ -32,6 +47,7 @@ async function ensureGrantEligibility(
   projectId: string,
   suppliedAddress?: string,
   signer?: { email?: string; firstName?: string; lastName?: string },
+  stopAt: 1 | 2 | 3 | 4 | 5 = 5,
 ) {
   // Find latest active draft
   const existing = await prisma.grantEligibility.findFirst({
@@ -152,7 +168,20 @@ async function ensureGrantEligibility(
     })
   }
 
-  // Upsert signer info from provided user details and advance to final step (Submit)
+  // If we should stop after wallet verification, do so now (before signers)
+  if (stopAt === 3) {
+    form = await prisma.grantEligibility.update({
+      where: { id: form.id },
+      data: { currentStep: 3, expiresAt: getGrantEligibilityExpiration() },
+    })
+
+    console.log(
+      `${existing ? "Updated" : "Created"} GrantEligibility form ${form.id} for project ${projectId} at step ${form.currentStep}\n-> http://localhost:3000/grant-eligibility/${form.id}`,
+    )
+    return form
+  }
+
+  // Upsert signer info from provided user details and advance further
   const existingData = (form.data as any) || {}
   const existingSigners = Array.isArray(existingData.signers)
     ? existingData.signers
@@ -177,13 +206,15 @@ async function ensureGrantEligibility(
     }
   }
 
+  const nextStep = stopAt >= 5 ? 5 : 4
   form = await prisma.grantEligibility.update({
     where: { id: form.id },
     data: {
-      currentStep: 5, // Skip Entities step and go to final Submit step
+      currentStep: nextStep, // 4: after signers, 5: after entities
       data: {
         ...existingData,
         signers: newSigners,
+        // Keep entities as-is; do not auto-fill. If stopAt==5, we still just advance step.
         entities: Array.isArray(existingData.entities)
           ? existingData.entities
           : [],
@@ -284,12 +315,44 @@ async function main() {
     // Create a minimal project using ProjectDetailsForm defaults where applicable
     const project = await createProject(user.id)
     if (project?.id) {
-      await ensureGrantEligibility(project.id, definedUser.address, {
-        email: definedUser.email,
-        firstName: (definedUser as any).firstName,
-        lastName:
-          (definedUser as any).lastName ?? (definedUser as any).LastName,
-      })
+      // Branch behavior based on STOP_AT
+      if (STOP_AT === 1) {
+        // Only create the project; do not start grant-eligibility
+        console.log(`Stopping at step 1 for project ${project.id}.`)
+      } else if (STOP_AT === 2) {
+        // Initialize grant eligibility and stop before wallet verification
+        await ensureGrantEligibility(project.id, undefined, undefined, 2)
+      } else if (STOP_AT === 3) {
+        // Complete wallet/address verification, stop before signers
+        await ensureGrantEligibility(project.id, definedUser.address, undefined, 3)
+      } else if (STOP_AT === 4) {
+        // Fill out signers, stop before entities
+        await ensureGrantEligibility(
+          project.id,
+          definedUser.address,
+          {
+            email: definedUser.email,
+            firstName: (definedUser as any).firstName,
+            lastName:
+              (definedUser as any).lastName ?? (definedUser as any).LastName,
+          },
+          4,
+        )
+      } else {
+        // STOP_AT === 5
+        // Fill out entities (we advance to step 5; entities data left as-is) and stop before submit
+        await ensureGrantEligibility(
+          project.id,
+          definedUser.address,
+          {
+            email: definedUser.email,
+            firstName: (definedUser as any).firstName,
+            lastName:
+              (definedUser as any).lastName ?? (definedUser as any).LastName,
+          },
+          5,
+        )
+      }
     }
   }
 }
