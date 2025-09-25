@@ -70,7 +70,7 @@ export default function PersonalKYCForm() {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-secondary-foreground">
-        Provide your information to begin the KYC process. We'll send you a secure verification link via email.
+        Provide your information to begin the KYC process. We&apos;ll send you a secure verification link via email.
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

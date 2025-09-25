@@ -79,7 +79,7 @@ export const IdentityVerification = ({
           <div className="flex items-center">
             <div className="ml-3 text-sm font-medium">
               <span className="">
-                You can't verify your identity until you've{" "}
+                You can&apos;t verify your identity until you&apos;ve{" "}
               </span>
               <button
                 onClick={linkEmail}
@@ -113,7 +113,7 @@ export const IdentityVerification = ({
           setOpenDialog("find_my_kyc")
         }}
       >
-        I've already completed KYC
+        I&apos;ve already completed KYC
       </Button>
     </div>
   )

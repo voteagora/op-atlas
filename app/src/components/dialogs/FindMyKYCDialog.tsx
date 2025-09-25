@@ -149,7 +149,7 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
             </div>
 
             <div className="text-base text-secondary-foreground mt-2">
-              We don't have a record of KYC for your account's email address. If you completed KYC under a different email, submit that address below.
+              We don&apos;t have a record of KYC for your account&apos;s email address. If you completed KYC under a different email, submit that address below.
             </div>
 
             <div className="mt-6 space-y-2">
@@ -204,7 +204,6 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
                 onChange={setVerificationCode}
                 length={6}
                 disabled={isPending}
-                autoFocus
               />
 
               {error && (
@@ -238,7 +237,7 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
 
             <div className="mt-6">
               <div className="font-semibold text-xl">
-                We're checking our KYC records for [{email}]
+                We&apos;re checking our KYC records for [{email}]
               </div>
               <div className="text-base text-secondary-foreground mt-2">
                 This could take a few minutes.
