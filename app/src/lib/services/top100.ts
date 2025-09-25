@@ -9,6 +9,7 @@ const DEV_TOP100_BYPASS = new Set([
   "0xfc42d9029e1a9a54e73aae2bb235b55668c0b86a",
   "0x9902f4bd594f7a4bbbedebc615c48e9982ef97cc",
   "0xc950b9f32259860f4731d318cb5a28b2db892f88",
+  "0xb47d0c4a565f05b77e42f14fe4be56afaeb60b67f",
 ])
 
 export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
