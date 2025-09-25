@@ -20,7 +20,9 @@ export default function EntitiesStep() {
   const { form, setForm, goToNextStep, setStepControls } =
     useGrantEligibilityForm()
   const [isPending, startTransition] = useTransition()
-  const verifiedEntities: any[] = [1]
+  // Existing verified legal entities tied to this project/org (to be loaded)
+  const [existingEntities, setExistingEntities] = useState<VerifiedEntity[]>([])
+  const [selectedExistingIds, setSelectedExistingIds] = useState<string[]>([])
 
   // Initialize entities from form data or with empty array by default.
   // If there are no saved entities, we start with none and let the user add
@@ -37,21 +39,36 @@ export default function EntitiesStep() {
         }))
       }
     }
-    // If no saved entities: show one empty form when there are no verified entities; otherwise start empty.
-    return Array.isArray(verifiedEntities) && verifiedEntities.length === 0
-      ? [
-          {
-            company: "",
-            controllerFirstName: "",
-            controllerLastName: "",
-            controllerEmail: "",
-          },
-        ]
-      : []
+    // If no saved entities: start with one empty form by default.
+    return [
+      {
+        company: "",
+        controllerFirstName: "",
+        controllerLastName: "",
+        controllerEmail: "",
+      },
+    ]
   }
 
   const initialEntities = getInitialEntities()
   const [entities, setEntities] = useState<Entity[]>(initialEntities)
+
+  // When selecting a verified entity, only toggle selection; do not prefill forms
+  const handleToggleExisting = (
+    id: string,
+    checked: boolean,
+    index: number,
+  ) => {
+    setSelectedExistingIds((prev) => {
+      const exists = prev.includes(id)
+      if (checked && !exists) {
+        return [...prev, id]
+      } else if (!checked && exists) {
+        return prev.filter((x) => x !== id)
+      }
+      return prev
+    })
+  }
 
   const handleEntityChange = (
     index: number,
@@ -159,6 +176,7 @@ export default function EntitiesStep() {
           data: {
             signers: existingData.signers || [],
             entities: entitiesToSave,
+            selectedExistingEntityIds: selectedExistingIds,
           },
         })
 
@@ -225,8 +243,12 @@ export default function EntitiesStep() {
       </div>
 
       <div className="space-y-20">
-        {Array.isArray(verifiedEntities) && verifiedEntities.length > 0 ? (
-          <VerifiedEntities />
+        {existingEntities.length > 0 ? (
+          <VerifiedEntities
+            items={existingEntities}
+            selectedIds={selectedExistingIds}
+            onToggle={(id, checked, idx) => handleToggleExisting(id, checked, idx)}
+          />
         ) : null}
 
         {/* Entities list - rendered only when at least one entity is present */}
@@ -363,16 +385,96 @@ const EntitiesFormList = ({
   )
 }
 
-const VerifiedEntities = () => {
+type VerifiedEntity = {
+  id: string
+  businessName: string
+  controllerFirstName: string
+  controllerLastName: string
+  controllerEmail: string
+  expiresAt?: string | Date | null
+}
+
+// Reusable row component that mirrors LegalEntities styling minus status/checkmarks
+function VerifiedEntityRow({
+  item,
+  checked,
+  onToggle,
+  index,
+}: {
+  item: VerifiedEntity
+  checked: boolean
+  index: number
+  onToggle: (id: string, checked: boolean, index: number) => void
+}) {
+  return (
+    <div className="rounded-lg border p-4 md:p-6 flex items-start gap-4">
+      <input
+        id={`verified-entity-${item.id}`}
+        type="checkbox"
+        className="mt-1 h-4 w-4 accent-primary"
+        checked={checked}
+        onChange={(e) => onToggle(item.id, e.target.checked, index)}
+      />
+      <div className="flex-1 space-y-2">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="text-base font-medium">
+            {item.businessName}
+          </div>
+          {item.expiresAt ? (
+            <div className="text-sm text-muted-foreground mt-1 md:mt-0">
+              Expires: {new Date(item.expiresAt).toLocaleDateString()}
+            </div>
+          ) : null}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-secondary-foreground">
+          <div>
+            <div className="font-medium">Controller Name</div>
+            <div>
+              {item.controllerFirstName} {item.controllerLastName}
+            </div>
+          </div>
+          <div>
+            <div className="font-medium">Controller Email</div>
+            <div>{item.controllerEmail}</div>
+          </div>
+          <div className="md:text-right">
+            <div className="font-medium">Business Name</div>
+            <div>{item.businessName}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function VerifiedEntities({
+  items,
+  selectedIds,
+  onToggle,
+}: {
+  items: VerifiedEntity[]
+  selectedIds: string[]
+  onToggle: (id: string, checked: boolean, index: number) => void
+}) {
   return (
     <div className="space-y-8 w-full">
-      <h2>Verified Entities</h2>
-      <p>
+      <h2 className="text-xl font-semibold">Verified Entities</h2>
+      <p className="text-base text-secondary-foreground">
         If structural changes have been made to any of your verified entities
         (ex: new business controller), please don’t select them. Instead, add a
         new entity below this section.
       </p>
-      <div>Verified Entities go here</div>
+      <div className="space-y-4">
+        {items.map((item, idx) => (
+          <VerifiedEntityRow
+            key={item.id}
+            item={item}
+            index={idx}
+            checked={selectedIds.includes(item.id)}
+            onToggle={onToggle}
+          />
+        ))}
+      </div>
     </div>
   )
 }
