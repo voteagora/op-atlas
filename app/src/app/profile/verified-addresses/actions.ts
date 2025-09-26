@@ -13,6 +13,7 @@ import {
 } from "@/db/users"
 import { getCitizen } from "@/lib/actions/citizens"
 import { CITIZEN_ATTESTATION_CODE, CITIZEN_TYPES } from "@/lib/constants"
+import { SAFE_OPMAINET_TRANSACTION_URL } from "@/lib/constants"
 import {
   createCitizenAttestation,
   createCitizenWalletChangeAttestation,
@@ -24,11 +25,9 @@ import { getSafeAddressVerificationMessage } from "@/lib/utils/safeAddresses"
 
 import { AddressData } from "./content"
 
-const SAFE_TRANSACTION_URL = "https://safe-transaction-optimism.safe.global/api"
-
 async function fetchSafeInfoFromMainnet(safeAddress: `0x${string}`) {
   try {
-    const endpoint = `${SAFE_TRANSACTION_URL}/v1/safes/${safeAddress}`
+    const endpoint = `${SAFE_OPMAINET_TRANSACTION_URL}/v1/safes/${safeAddress}`
     const response = await fetch(endpoint, {
       headers: {
         Accept: "application/json",
