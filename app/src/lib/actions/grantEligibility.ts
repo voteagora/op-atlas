@@ -14,7 +14,7 @@ import {
   getGrantEligibilityFormStatus,
   GrantEligibilityFormStatus,
 } from "@/lib/utils/grantEligibilityFormStatus"
-import { getExistingLegalEntities } from "@/lib/actions/kyc"
+import { getExistingLegalEntities, getAvailableLegalEntitiesForOrganization } from "@/lib/actions/kyc"
 
 import {
   sendKYBStartedEmail,
@@ -811,10 +811,13 @@ export async function getExistingLegalEntitiesForForm(formId: string) {
   const userId = session?.user?.id
 
   if (!userId) {
+    console.warn("getExistingLegalEntitiesForForm: Unauthorized call", { formId })
     return { error: "Unauthorized" }
   }
 
   try {
+    console.debug("getExistingLegalEntitiesForForm:start", { formId, userId })
+
     // Load the form to validate access and read KYCTeamId/currentStep
     const form = await prisma.grantEligibility.findUnique({
       where: { id: formId },
@@ -825,13 +828,23 @@ export async function getExistingLegalEntitiesForForm(formId: string) {
     })
 
     if (!form) {
+      console.warn("getExistingLegalEntitiesForForm: Form not found", { formId })
       return { error: "Form not found" }
     }
+
+    console.debug("getExistingLegalEntitiesForForm:loadedForm", {
+      formId: form.id,
+      projectId: form.projectId,
+      organizationId: form.organizationId,
+      kycTeamId: form.kycTeamId,
+      currentStep: form.currentStep,
+    })
 
     // Verify permissions
     if (form.projectId) {
       const isInvalid = await verifyAdminStatus(form.projectId, userId)
       if (isInvalid?.error) {
+        console.warn("getExistingLegalEntitiesForForm: project admin check failed", isInvalid)
         return { error: isInvalid.error }
       }
     } else if (form.organizationId) {
@@ -840,17 +853,44 @@ export async function getExistingLegalEntitiesForForm(formId: string) {
         userId,
       )
       if (isInvalid?.error) {
+        console.warn("getExistingLegalEntitiesForForm: org admin check failed", isInvalid)
         return { error: isInvalid.error }
       }
+    } else {
+      console.warn("getExistingLegalEntitiesForForm: no projectId or organizationId on form", { formId })
     }
 
-    // Only fetch if user has progressed to/ beyond step 3 and KYCTeam is present
-    if (!form.kycTeamId || (form.currentStep ?? 1) < 3) {
+    // Only fetch if user has progressed to/ beyond step 3
+    if ((form.currentStep ?? 1) < 3) {
+      console.debug("getExistingLegalEntitiesForForm:guardNotMet", {
+        hasKycTeamId: Boolean(form.kycTeamId),
+        currentStep: form.currentStep ?? 1,
+      })
       return { items: [] }
     }
 
-    const items = await getExistingLegalEntities(form.kycTeamId)
-    return { items }
+    // If we have an organization context, aggregate across all its KYCTeams
+    if (form.organizationId) {
+      const items = await getAvailableLegalEntitiesForOrganization(form.organizationId)
+      console.debug("getExistingLegalEntitiesForForm:itemsFetchedByOrg", {
+        organizationId: form.organizationId,
+        count: Array.isArray(items) ? items.length : null,
+      })
+      return { items }
+    }
+
+    // Fallback: use the current form's kycTeamId if present
+    if (form.kycTeamId) {
+      const items = await getExistingLegalEntities(form.kycTeamId)
+      console.debug("getExistingLegalEntitiesForForm:itemsFetchedByTeam", {
+        kycTeamId: form.kycTeamId,
+        count: Array.isArray(items) ? items.length : null,
+      })
+      return { items }
+    }
+
+    console.debug("getExistingLegalEntitiesForForm:noContextToFetch", { formId })
+    return { items: [] }
   } catch (error) {
     console.error("Error fetching existing legal entities for form:", error)
     return { error: "Failed to fetch existing legal entities" }

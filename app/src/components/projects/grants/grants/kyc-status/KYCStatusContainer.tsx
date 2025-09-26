@@ -17,7 +17,10 @@ import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
 import { sendKYCReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { getSelectedLegalEntitiesForTeam, resendKYBForLegalEntity } from "@/lib/actions/kyc"
+import {
+  getSelectedLegalEntitiesForTeam,
+  resendKYBForLegalEntity,
+} from "@/lib/actions/kyc"
 
 const KYCStatusContainer = ({
   project,
@@ -192,7 +195,9 @@ const KYCStatusPresenter = ({
   const [legalEntitiesStatuses, setLegalEntitiesStatuses] = useState<
     typeof users
   >([])
-  const [legalSendingState, setLegalSendingState] = useState<Record<string, EmailState>>({})
+  const [legalSendingState, setLegalSendingState] = useState<
+    Record<string, EmailState>
+  >({})
 
   useEffect(() => {
     let cancelled = false
@@ -223,7 +228,10 @@ const KYCStatusPresenter = ({
           } as unknown as KYCUser,
           handleEmailResend: async (u: KYCUser) => {
             try {
-              setLegalSendingState((prev) => ({ ...prev, [e.id]: EmailState.SENDING }))
+              setLegalSendingState((prev) => ({
+                ...prev,
+                [e.id]: EmailState.SENDING,
+              }))
               await resendKYBForLegalEntity({
                 projectId: projectId as string | undefined,
                 organizationId: organizationId as string | undefined,
@@ -236,7 +244,10 @@ const KYCStatusPresenter = ({
                 },
               })
             } finally {
-              setLegalSendingState((prev) => ({ ...prev, [e.id]: EmailState.SENT }))
+              setLegalSendingState((prev) => ({
+                ...prev,
+                [e.id]: EmailState.SENT,
+              }))
             }
           },
           emailResendBlock: e.status === "APPROVED" ? true : false,
@@ -265,10 +276,16 @@ const KYCStatusPresenter = ({
             <GrantDeliveryAddress address={address} />
             {extraMiddleContent}
             {individualStatuses && individualStatuses.length > 0 && (
-              <IndividualStatuses users={individualStatuses} isAdmin={isAdmin} />
+              <IndividualStatuses
+                users={individualStatuses}
+                isAdmin={isAdmin}
+              />
             )}
             {legalEntitiesStatuses && legalEntitiesStatuses.length > 0 && (
-              <LegalEntities users={legalEntitiesStatuses as any} isAdmin={isAdmin} />
+              <LegalEntities
+                users={legalEntitiesStatuses as any}
+                isAdmin={isAdmin}
+              />
             )}
             {showEditFooter && isAdmin && (
               <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">

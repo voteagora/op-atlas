@@ -7,8 +7,8 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-  updateGrantEligibilityForm,
   getExistingLegalEntitiesForForm,
+  updateGrantEligibilityForm,
 } from "@/lib/actions/grantEligibility"
 import { useGrantEligibilityForm } from "@/providers/GrantEligibilityFormProvider"
 
@@ -45,13 +45,26 @@ export default function EntitiesStep() {
     let cancelled = false
     async function fetchEntities() {
       try {
-        if (!form?.id || !form?.kycTeamId || (form.currentStep ?? 1) < 3) {
+        if (!form?.id || (form.currentStep ?? 1) < 3) {
+          console.debug("Skipping fetch of existing legal entities", {
+            hasFormId: Boolean(form?.id),
+            hasKycTeamId: Boolean(form?.kycTeamId),
+            currentStep: form?.currentStep ?? 1,
+          })
           setExistingEntities([])
           return
         }
         const res = await getExistingLegalEntitiesForForm(form.id)
-        if (!cancelled && res && Array.isArray((res as any).items)) {
-          setExistingEntities((res as any).items)
+        console.debug("Existing entities response:", { res })
+        if (!cancelled && res) {
+          if ((res as any).error) {
+            console.error("getExistingLegalEntitiesForForm returned error:", (res as any).error)
+          }
+          if (Array.isArray((res as any).items)) {
+            setExistingEntities((res as any).items)
+          } else {
+            console.warn("Unexpected response shape from getExistingLegalEntitiesForForm; expected items[]:", res)
+          }
         }
       } catch (e) {
         if (!cancelled) {
@@ -81,19 +94,13 @@ export default function EntitiesStep() {
         }))
       }
     }
-    // If no saved entities: start with one empty form by default.
-    return [
-      {
-        company: "",
-        controllerFirstName: "",
-        controllerLastName: "",
-        controllerEmail: "",
-      },
-    ]
+    // If no saved entities: start with no forms by default; user can click Add to reveal.
+    return []
   }
 
   const initialEntities = getInitialEntities()
   const [entities, setEntities] = useState<Entity[]>(initialEntities)
+  const [showManualForm, setShowManualForm] = useState<boolean>(false)
 
   // When selecting a verified entity, only toggle selection; do not prefill forms
   const handleToggleExisting = (
@@ -126,22 +133,9 @@ export default function EntitiesStep() {
   }
 
   const addEntity = () => {
-    setEntities([
-      ...entities,
-      {
-        company: "",
-        controllerFirstName: "",
-        controllerLastName: "",
-        controllerEmail: "",
-      },
-    ])
-  }
-
-  const removeEntity = (index: number) => {
-    if (entities.length > 1) {
-      setEntities(entities.filter((_, i) => i !== index))
-    } else {
-      // If removing the last entity, reset it to empty
+    // Reveal manual form and ensure at least one entity row exists
+    setShowManualForm(true)
+    if (entities.length === 0) {
       setEntities([
         {
           company: "",
@@ -150,7 +144,42 @@ export default function EntitiesStep() {
           controllerEmail: "",
         },
       ])
+    } else {
+      setEntities([
+        ...entities,
+        {
+          company: "",
+          controllerFirstName: "",
+          controllerLastName: "",
+          controllerEmail: "",
+        },
+      ])
     }
+  }
+
+  const removeEntity = (index: number) => {
+    if (entities.length > 1) {
+      setEntities(entities.filter((_, i) => i !== index))
+      return
+    }
+
+    // entities.length === 1
+    if (existingEntities.length > 0) {
+      // When there are verified entities available, allow removing the last manual entity entirely
+      setEntities([])
+      setShowManualForm(false)
+      return
+    }
+
+    // No verified entities available: keep one empty row as a guard
+    setEntities([
+      {
+        company: "",
+        controllerFirstName: "",
+        controllerLastName: "",
+        controllerEmail: "",
+      },
+    ])
   }
 
   const isEntityComplete = (entity: Entity): boolean => {
@@ -239,10 +268,12 @@ export default function EntitiesStep() {
   }
 
   useEffect(() => {
+    const hasExistingSelection = selectedExistingIds.length > 0
     const hasValidEntities = validateEntities()
     const hasIncomplete = hasAnyIncompleteData()
     const enabled = !hasIncomplete && !isPending
-    const nextLabel = hasValidEntities ? "Next" : "Skip"
+    const canProceed = hasValidEntities || hasExistingSelection
+    const nextLabel = canProceed ? "Next" : "Skip"
 
     setStepControls({
       enabled,
@@ -260,7 +291,7 @@ export default function EntitiesStep() {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entities, isPending])
+  }, [entities, selectedExistingIds, isPending])
 
   return (
     <div className="space-y-8 w-full">
@@ -295,8 +326,8 @@ export default function EntitiesStep() {
           />
         ) : null}
 
-        {/* Entities list - rendered only when at least one entity is present */}
-        {entities.length > 0 ? (
+        {/* Entities list - show only when user opts to add OR when there are no verified entities */}
+        {entities.length > 0 && (existingEntities.length === 0 || showManualForm) ? (
           <EntitiesFormList
             entities={entities}
             onChange={handleEntityChange}

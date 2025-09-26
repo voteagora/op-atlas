@@ -438,7 +438,12 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
 
 export async function getExistingLegalEntities(kycTeamId: string) {
   try {
-    if (!kycTeamId) return []
+    if (!kycTeamId) {
+      console.warn("getExistingLegalEntities: missing kycTeamId")
+      return []
+    }
+
+    console.debug("getExistingLegalEntities:start", { kycTeamId })
 
     const links = await prisma.kYCTeamEntity.findMany({
       where: { kycTeamId },
@@ -452,27 +457,104 @@ export async function getExistingLegalEntities(kycTeamId: string) {
       orderBy: { createdAt: "desc" },
     })
 
+    console.debug("getExistingLegalEntities:linksFetched", { count: links.length })
+
     const now = new Date()
 
-    const items = links
+    const mapped = links
       .map((l) => l.legalEntity)
       .filter((e): e is NonNullable<typeof e> => Boolean(e))
-      // Only reusable entities: approved and not expired
-      .filter(
-        (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
-      )
-      .map((e) => ({
-        id: e.id,
-        businessName: e.name,
-        controllerFirstName: e.LegalEnitityController?.firstName || "",
-        controllerLastName: e.LegalEnitityController?.lastName || "",
-        controllerEmail: e.LegalEnitityController?.email || "",
-        expiresAt: e.expiry ?? null,
-      }))
+
+    const filtered = mapped.filter(
+      (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
+    )
+
+    if (mapped.length !== filtered.length) {
+      const dropped = mapped.length - filtered.length
+      console.debug("getExistingLegalEntities:filteredOut", { total: mapped.length, approvedAndValid: filtered.length, dropped })
+    }
+
+    const items = filtered.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.LegalEnitityController?.firstName || "",
+      controllerLastName: e.LegalEnitityController?.lastName || "",
+      controllerEmail: e.LegalEnitityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug("getExistingLegalEntities:itemsPrepared", { count: items.length })
 
     return items
   } catch (e) {
     console.error("getExistingLegalEntities error", e)
+    return []
+  }
+}
+
+// Fetch distinct, approved, unexpired legal entities associated with any KYCTeam
+// linked to the given organization (to populate reusable entities list).
+export async function getAvailableLegalEntitiesForOrganization(organizationId: string) {
+  try {
+    if (!organizationId) {
+      console.warn("getAvailableLegalEntitiesForOrganization: missing organizationId")
+      return []
+    }
+    console.debug("getAvailableLegalEntitiesForOrganization:start", { organizationId })
+
+    // 1) Find all KYCTeams linked to this organization
+    const orgTeams = await prisma.organizationKYCTeam.findMany({
+      where: { organizationId },
+      select: { kycTeamId: true },
+    })
+    const kycTeamIds = orgTeams.map((t) => t.kycTeamId)
+    console.debug("getAvailableLegalEntitiesForOrganization:orgTeamsFetched", { teamCount: kycTeamIds.length })
+
+    if (kycTeamIds.length === 0) {
+      return []
+    }
+
+    // 2) Fetch all links from those teams to legal entities
+    const links = await prisma.kYCTeamEntity.findMany({
+      where: { kycTeamId: { in: kycTeamIds } },
+      include: {
+        legalEntity: {
+          include: { LegalEnitityController: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+    console.debug("getAvailableLegalEntitiesForOrganization:linksFetched", { count: links.length })
+
+    const now = new Date()
+
+    // 3) Map links to legal entities, filter approved + not expired, and dedupe by id
+    const approvedValid = links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .filter((e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now))
+
+    // Dedupe by id
+    const seen = new Set<string>()
+    const deduped = approvedValid.filter((e) => {
+      if (seen.has(e.id)) return false
+      seen.add(e.id)
+      return true
+    })
+
+    const items = deduped.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.LegalEnitityController?.firstName || "",
+      controllerLastName: e.LegalEnitityController?.lastName || "",
+      controllerEmail: e.LegalEnitityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug("getAvailableLegalEntitiesForOrganization:itemsPrepared", { count: items.length })
+    return items
+  } catch (e) {
+    console.error("getAvailableLegalEntitiesForOrganization error", e)
     return []
   }
 }
