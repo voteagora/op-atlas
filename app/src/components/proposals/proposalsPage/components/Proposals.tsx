@@ -67,14 +67,12 @@ interface SecurityPlaceholderRowProps {
   role: Role
 }
 
-const SecurityPlaceholderRow = ({
-  role,
-}: SecurityPlaceholderRowProps) => {
-    const { isVotingPhase } = getRolePhaseStatus(role)
-    const proposalBadgeType = isVotingPhase
-      ? ProposalBadgeType.now
-      : ProposalBadgeType.soon
-    const href = isVotingPhase ? `/governance/roles/${role.id}` : undefined
+const SecurityPlaceholderRow = ({ role }: SecurityPlaceholderRowProps) => {
+  const { isVotingPhase } = getRolePhaseStatus(role)
+  const proposalBadgeType = isVotingPhase
+    ? ProposalBadgeType.now
+    : ProposalBadgeType.soon
+  const href = isVotingPhase ? `/governance/roles/${role.id}` : undefined
   return (
     <ProposalCard href={href}>
       <ProposalBadge type={proposalBadgeType} />

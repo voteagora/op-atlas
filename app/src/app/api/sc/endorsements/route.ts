@@ -55,16 +55,24 @@ export async function POST(req: NextRequest) {
     return new Response("Window closed", { status: 403 })
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: { addresses: true },
-  })
-  const addresses = user?.addresses?.map((a) => a.address) || []
+  const [userWallets, safeWallets] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { addresses: true },
+    }),
+    prisma.userSafeAddress.findMany({
+      where: { userId: session.user.id },
+    }),
+  ])
+
+  const walletAddresses = userWallets?.addresses?.map((a) => a.address) || []
+  const safeAddresses = safeWallets?.map((a) => a.safeAddress) || []
+  const addresses = [...walletAddresses, ...safeAddresses]
   const allowed = await isTop100Delegate(addresses)
   if (!allowed) return new Response("Forbidden", { status: 403 })
 
   const endorserAddress =
-    user?.addresses?.find((a) => a.primary)?.address || addresses[0]
+    userWallets?.addresses?.find((a) => a.primary)?.address || addresses[0]
   if (!endorserAddress) return new Response("No address", { status: 400 })
 
   const endorsement = await createEndorsement({

@@ -7,6 +7,7 @@ import {
   UserEmail,
   UserInteraction,
   UserPassport,
+  UserSafeAddress,
 } from "@prisma/client"
 import { AggregatedType } from "eas-indexer/src/types"
 import { getAddress, isAddress } from "viem"
@@ -49,6 +50,7 @@ export async function getUserById(userId: string) {
         },
       },
       emails: true,
+      safeAddresses: true,
     },
   })
 
@@ -57,6 +59,7 @@ export async function getUserById(userId: string) {
   if (!session?.user || (session.user.id !== userId && user)) {
     if (user) {
       user.emails = []
+      user.safeAddresses = []
       user.privyDid = null
       user.createdAt = new Date(0)
       user.deletedAt = new Date(0)
@@ -89,6 +92,7 @@ export async function getUserByPrivyDid(privyDid: string): Promise<
       },
       interaction: true,
       emails: true,
+      safeAddresses: true,
     },
   })
 }
@@ -112,6 +116,7 @@ export async function getUserByAddress(
       },
       interaction: true,
       emails: true,
+      safeAddresses: true,
     },
   })
 
@@ -133,6 +138,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
           },
           interaction: true,
           emails: true,
+          safeAddresses: true,
         },
       },
     },
@@ -149,6 +155,7 @@ export async function getUserByFarcasterId(farcasterId: string) {
     include: {
       addresses: true,
       emails: true,
+      safeAddresses: true,
     },
   })
 }
@@ -158,6 +165,7 @@ export async function getUserByUsername(username: string): Promise<
       addresses: UserAddress[]
       interaction: UserInteraction | null
       emails: UserEmail[]
+      safeAddresses: UserSafeAddress[]
     })
   | null
 > {
@@ -166,12 +174,14 @@ export async function getUserByUsername(username: string): Promise<
       addresses: UserAddress[]
       interaction: UserInteraction | null
       emails: UserEmail[]
+      safeAddresses: UserSafeAddress[]
     })[]
   >`
     SELECT 
       u.*,
       json_agg(DISTINCT a) FILTER (WHERE a."address" IS NOT NULL) as "addresses",
       json_agg(DISTINCT e) FILTER (WHERE e."email" IS NOT NULL) as "emails",
+      json_agg(DISTINCT sa) FILTER (WHERE sa."safeAddress" IS NOT NULL) as "safeAddresses",
       CASE 
         WHEN i."id" IS NOT NULL THEN
           json_build_object(
@@ -189,6 +199,7 @@ export async function getUserByUsername(username: string): Promise<
     FROM "User" u
     LEFT JOIN "UserAddress" a ON u."id" = a."userId"
     LEFT JOIN "UserEmail" e ON u."id" = e."userId"
+    LEFT JOIN "UserSafeAddresses" sa ON u."id" = sa."userId"
     LEFT JOIN "UserInteraction" i ON u."id" = i."userId"
     WHERE u."username" = ${username}
     GROUP BY 
@@ -361,6 +372,7 @@ export async function addUserAddresses({
       address,
       source,
     })),
+    skipDuplicates: true,
   })
 }
 
@@ -376,6 +388,47 @@ export async function removeUserAddress({
       address_userId: {
         address,
         userId: id,
+      },
+    },
+  })
+}
+
+export async function addUserSafeAddress({
+  userId,
+  safeAddress,
+}: {
+  userId: string
+  safeAddress: string
+}) {
+  const formatted = getAddress(safeAddress)
+
+  return prisma.userSafeAddress.upsert({
+    where: {
+      userId_safeAddress: {
+        userId,
+        safeAddress: formatted,
+      },
+    },
+    create: {
+      userId,
+      safeAddress: formatted,
+    },
+    update: {},
+  })
+}
+
+export async function removeUserSafeAddress({
+  userId,
+  safeAddress,
+}: {
+  userId: string
+  safeAddress: string
+}) {
+  return prisma.userSafeAddress.delete({
+    where: {
+      userId_safeAddress: {
+        userId,
+        safeAddress: getAddress(safeAddress),
       },
     },
   })

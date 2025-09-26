@@ -239,3 +239,6 @@ export const UNIVERSAL_CREATE2_FACTORY =
   "0x4e59b44847b379578588920ca78fbf26c0b4956c" as const
 
 export const TOP100_QUERY_KEY = ["sc-top100"] as const
+
+export const SAFE_OPMAINET_TRANSACTION_URL =
+  "https://safe-transaction-optimism.safe.global/api"
