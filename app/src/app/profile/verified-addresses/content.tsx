@@ -1,15 +1,23 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
+import { useState } from "react"
+import { toast } from "sonner"
 
 import { AddressConnection } from "@/components/profile/AddressConnection"
+import { Button } from "@/components/ui/button"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
 import { UserAddressSource } from "@/lib/types"
 
-import { VerifiedAddress } from "./verified-address"
+import { removeSafeAddressAction } from "./actions"
+import {
+  SafeAddressRow,
+  VerifiedAddress,
+  VerifySafeAddressDialog,
+} from "./verified-address"
 
-interface AddressData {
+export interface AddressData {
   address: string
   source: UserAddressSource | string
   primary: boolean
@@ -24,9 +32,13 @@ interface PrivyWallet {
 
 export function VerifiedAddressesContent({ userId }: { userId: string }) {
   const { user: privyUser } = usePrivy()
-  const { user } = useUser({ id: userId, enabled: !!userId })
+  const { user, invalidate: invalidateUser } = useUser({
+    id: userId,
+    enabled: !!userId,
+  })
 
   const { unlinkWallet } = usePrivyLinkWallet(userId)
+  const [isSafeDialogOpen, setIsSafeDialogOpen] = useState(false)
 
   const privyWallets = (privyUser?.linkedAccounts?.filter(
     (account) => account.type === "wallet" && account.chainType === "ethereum",
@@ -99,10 +111,30 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
     }
   }
 
+  const handleRemoveSafeAddress = (address: string) => {
+    const promise = removeSafeAddressAction(address).then((res) => {
+      if (res.error) {
+        throw new Error(res.error)
+      }
+      return invalidateUser()
+    })
+
+    toast.promise(promise, {
+      loading: "Removing Safe address...",
+      success: "Safe address removed",
+      error: (err) => err.message ?? "Failed to remove Safe address",
+    })
+  }
+
+  const safeAddresses = user?.safeAddresses ?? []
+
+  const handleSafeAddressVerified = async (_safeAddress: string) => {
+    await invalidateUser()
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {renderAddresses()}
-
       {user && (
         <div className="flex items-center gap-2">
           <AddressConnection userId={user.id}>
@@ -110,6 +142,48 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
           </AddressConnection>
         </div>
       )}
+
+      {user && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="font-medium text-sm text-foreground">
+              Safe address for Top 100 Delegates
+            </span>
+          </div>
+
+          {safeAddresses.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Add an Optimism Safe address you control to participate in
+              elections as a Top 100 delegate.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {safeAddresses.map((entry) => (
+                <SafeAddressRow
+                  key={entry.id}
+                  address={entry.safeAddress}
+                  onRemove={handleRemoveSafeAddress}
+                />
+              ))}
+            </div>
+          )}
+          {safeAddresses.length === 0 && (
+            <Button
+              className="button-primary w-fit mt-2"
+              onClick={() => setIsSafeDialogOpen(true)}
+            >
+              Verify Safe address
+            </Button>
+          )}
+        </div>
+      )}
+
+      <VerifySafeAddressDialog
+        open={isSafeDialogOpen}
+        onOpenChange={setIsSafeDialogOpen}
+        onVerified={handleSafeAddressVerified}
+        allAddresses={allAddresses}
+      />
     </div>
   )
 }

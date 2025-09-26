@@ -1,15 +1,17 @@
 "use client"
 
-import { formatMMMd } from "@/lib/utils/date"
-import { getRolePhaseStatus } from "@/lib/utils/roles"
 import { Role } from "@prisma/client"
 
+import { formatMMMd } from "@/lib/utils/date"
+import { getRolePhaseStatus } from "@/lib/utils/roles"
+
 export const RoleDates = ({ role }: { role: Role }) => {
-  const isSecurityRole = role.isSecurityRole || false;
-  let prefixText = "Submit your application between";
-  let startDate = role.startAt;
-  let endDate = role.endAt;
-  const { isEndorsementPhase, isVotingPhase, isClosed } = getRolePhaseStatus(role)
+  const isSecurityRole = role.isSecurityRole || false
+  let prefixText = "Submit your application between"
+  let startDate = role.startAt
+  let endDate = role.endAt
+  const { isEndorsementPhase, isVotingPhase, isClosed } =
+    getRolePhaseStatus(role)
 
   if (isClosed) {
     return (
@@ -20,9 +22,9 @@ export const RoleDates = ({ role }: { role: Role }) => {
   }
 
   if (isSecurityRole && isEndorsementPhase) {
-    prefixText = "Approve candidates between";
-    startDate = role.endorsementStartAt;
-    endDate = role.endorsementEndAt;
+    prefixText = "Approve candidates between"
+    startDate = role.endorsementStartAt
+    endDate = role.endorsementEndAt
   } else if (isSecurityRole && isVotingPhase) {
     prefixText = "Delegate vote between"
     startDate = role.voteStartAt

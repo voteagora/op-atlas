@@ -138,8 +138,6 @@ export default async function Page({ params }: { params: { roleId: string } }) {
               applications={applications}
               isSecurityRole={isSecurityRole}
               endorsementEndAt={role.endorsementEndAt}
-              voteStartsAt={role.voteStartAt}
-              voteEndsAt={role.voteEndAt}
             />
           )}
         </div>

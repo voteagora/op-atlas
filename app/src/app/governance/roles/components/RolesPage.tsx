@@ -6,7 +6,9 @@ import { getRolePhaseStatus } from "@/lib/utils/roles"
 
 export default function RolesPage({ roles }: { roles: Role[] }) {
   const hasASecurityRole = roles.every((role) => role.isSecurityRole)
-  const isInVotingPhase = roles.every((role) => getRolePhaseStatus(role).isVotingPhase)
+  const isInVotingPhase = roles.every(
+    (role) => getRolePhaseStatus(role).isVotingPhase,
+  )
 
   const hideRoles = isInVotingPhase && hasASecurityRole
 
@@ -31,11 +33,8 @@ export default function RolesPage({ roles }: { roles: Role[] }) {
       <AnalyticsTracker />
 
       <div className="flex flex-col">
-        {roles.map((role, index) => (
-          <RoleRow
-            key={role.id}
-            role={role}
-          />
+        {roles.map((role) => (
+          <RoleRow key={role.id} role={role} />
         ))}
       </div>
     </div>

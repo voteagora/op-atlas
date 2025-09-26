@@ -44,10 +44,7 @@ export const getRolePhaseStatus = (
       now <= endorsementEnd,
   )
   const isVotingPhase = Boolean(
-    voteStart &&
-      voteEnd &&
-      hasStarted(voteStart) &&
-      now <= voteEnd,
+    voteStart && voteEnd && hasStarted(voteStart) && now <= voteEnd,
   )
   const isClosed = Boolean(voteEnd && now > voteEnd)
 

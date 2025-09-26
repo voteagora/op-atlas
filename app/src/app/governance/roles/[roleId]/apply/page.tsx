@@ -70,7 +70,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
               {role.startAt && role.endAt && (
                 <div className="text-muted-foreground flex flex-row gap-2">
                   <div>
-                    Submit this application by {" "}
+                    Submit this application by{" "}
                     {formatMMMd(new Date(role.endAt))}
                   </div>
                 </div>

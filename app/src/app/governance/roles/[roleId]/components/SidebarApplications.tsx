@@ -27,15 +27,11 @@ export default function SidebarApplications({
   applications,
   isSecurityRole,
   endorsementEndAt,
-  voteStartsAt,
-  voteEndsAt,
 }: {
   role: Role
   applications?: RoleApplication[]
   isSecurityRole?: boolean
   endorsementEndAt: Date | null
-  voteStartsAt: Date | null
-  voteEndsAt: Date | null
 }) {
   const { data: t100, isLoading: loadingTop } = useIsTop100()
   const { isVotingPhase, isEndorsementPhase } = getRolePhaseStatus(role)
@@ -43,7 +39,6 @@ export default function SidebarApplications({
   const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
     enabled: isEndorsementPhase,
   })
-  const { data: myEndorsements } = useMyEndorsements(role.id, `role-${role.id}`)
 
   const isTop100 = Boolean(t100?.top100)
 

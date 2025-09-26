@@ -10,6 +10,7 @@ import { useConfetti } from "@/providers/LayoutProvider"
 
 import { AnalyticsTracker } from "./AnalyticsTracker"
 import { CopyForumTextButton } from "./CopyForumTextButton"
+import { formatMMMd } from "@/lib/utils/date"
 
 interface SuccessPageClientProps {
   role: Role
@@ -67,7 +68,8 @@ export const SuccessPageClient = ({
 
           <div className="text-base text-center text-foreground leading-6">
             8 approvals from Top 100 Delegates are required to move on to the
-            vote. Voting happens Oct 16 – Oct 22.
+            vote. Voting happens {formatMMMd(new Date(role.voteStartAt!))} -
+            {formatMMMd(new Date(role.voteEndAt!))}.
           </div>
 
           <Button

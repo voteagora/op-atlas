@@ -238,6 +238,7 @@ export type UserWithAddresses = Prisma.UserGetPayload<{
   include: {
     addresses: true
     emails: true
+    safeAddresses: true
   }
 }>
 

@@ -12,13 +12,11 @@ import ProfileProjects from "./ProfileProjects"
 import ProfileRoles from "./ProfileRoles"
 
 const PublicUserProfile = ({
-
   user,
   organizations,
   projects,
                              kycStatus,
 }: {
-  className?: string
   user: UserWithAddresses
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
