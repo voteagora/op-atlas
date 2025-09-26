@@ -6,6 +6,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
   getExistingLegalEntitiesForForm,
   updateGrantEligibilityForm,
@@ -58,12 +59,18 @@ export default function EntitiesStep() {
         console.debug("Existing entities response:", { res })
         if (!cancelled && res) {
           if ((res as any).error) {
-            console.error("getExistingLegalEntitiesForForm returned error:", (res as any).error)
+            console.error(
+              "getExistingLegalEntitiesForForm returned error:",
+              (res as any).error,
+            )
           }
           if (Array.isArray((res as any).items)) {
             setExistingEntities((res as any).items)
           } else {
-            console.warn("Unexpected response shape from getExistingLegalEntitiesForForm; expected items[]:", res)
+            console.warn(
+              "Unexpected response shape from getExistingLegalEntitiesForForm; expected items[]:",
+              res,
+            )
           }
         }
       } catch (e) {
@@ -327,7 +334,8 @@ export default function EntitiesStep() {
         ) : null}
 
         {/* Entities list - show only when user opts to add OR when there are no verified entities */}
-        {entities.length > 0 && (existingEntities.length === 0 || showManualForm) ? (
+        {entities.length > 0 &&
+        (existingEntities.length === 0 || showManualForm) ? (
           <EntitiesFormList
             entities={entities}
             onChange={handleEntityChange}
@@ -482,39 +490,38 @@ function VerifiedEntityRow({
   onToggle: (id: string, checked: boolean, index: number) => void
 }) {
   return (
-    <div className="rounded-lg border p-4 md:p-6 flex items-start gap-4">
-      <input
-        id={`verified-entity-${item.id}`}
-        type="checkbox"
-        className="mt-1 h-4 w-4 accent-primary"
-        checked={checked}
-        onChange={(e) => onToggle(item.id, e.target.checked, index)}
-      />
-      <div className="flex-1 space-y-2">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div className="text-base font-medium">{item.businessName}</div>
-          {item.expiresAt ? (
-            <div className="text-sm text-muted-foreground mt-1 md:mt-0">
-              Expires: {new Date(item.expiresAt).toLocaleDateString()}
-            </div>
-          ) : null}
+    <div className="flex flex-row w-full pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rounded-[6px] border border-border bg-background">
+      <div className="flex flex-row gap-2 items-center w-full">
+        <div className="flex flex-row gap-2 items-center ">
+          <input
+            id={`verified-entity-${item.id}`}
+            type="checkbox"
+            className="h-4 w-4 accent-primary"
+            checked={checked}
+            onChange={(e) => onToggle(item.id, e.target.checked, index)}
+          />
+          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-text-foreground">
+            {[
+              item.businessName,
+              `${item.controllerFirstName} ${item.controllerLastName}`.trim(),
+              item.controllerEmail,
+            ]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-secondary-foreground">
-          <div>
-            <div className="font-medium">Controller Name</div>
-            <div>
-              {item.controllerFirstName} {item.controllerLastName}
-            </div>
-          </div>
-          <div>
-            <div className="font-medium">Controller Email</div>
-            <div>{item.controllerEmail}</div>
-          </div>
-          <div className="md:text-right">
-            <div className="font-medium">Business Name</div>
-            <div>{item.businessName}</div>
-          </div>
-        </div>
+        {item.expiresAt ? (
+          <Badge variant="secondary">
+            {`Verified until ${new Date(item.expiresAt).toLocaleDateString(
+              "en-US",
+              {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              },
+            )}`}
+          </Badge>
+        ) : null}
       </div>
     </div>
   )
