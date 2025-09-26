@@ -58,7 +58,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
           console.log(`Sending ${isKYB ? 'KYB' : 'KYC'} reminder to ${user.email}`)
           
           const result = isKYB 
-            ? await sendKYBReminderEmail(user)
+            ? await sendKYBReminderEmail(user, { bypassAuth: true })
             : await sendKYCReminderEmail(user, { bypassAuth: true })
             
           if (result.success) {

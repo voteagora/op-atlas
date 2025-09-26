@@ -14,7 +14,7 @@ import { EmailState, ProjectWithKycTeam } from "@/components/projects/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
-import { sendKYCReminderEmail } from "@/lib/actions/emails"
+import { sendKYCReminderEmail, sendKYBReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
@@ -123,7 +123,10 @@ const useKYCEmailResend = (context: {
         [kycUser.id]: EmailState.SENDING,
       }))
       try {
-        const response = await sendKYCReminderEmail(kycUser, context)
+        const isKYB = kycUser.kycUserType === "LEGAL_ENTITY"
+        const response = isKYB
+          ? await sendKYBReminderEmail(kycUser, context)
+          : await sendKYCReminderEmail(kycUser, context)
         console.log("Email resend success:", response)
       } catch (error) {
         console.error("Failed to send email:", error)
