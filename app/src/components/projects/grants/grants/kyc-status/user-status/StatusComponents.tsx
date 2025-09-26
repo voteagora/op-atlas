@@ -111,7 +111,10 @@ const EmailSendButton = ({
               handleEmailResend(user)
             }
           }}
-          onClick={() => handleEmailResend(user)}
+          onClick={() => {
+            console.debug("[StatusRow][UI] Resend email clicked", { user })
+            handleEmailResend(user)
+          }}
           className="rounded-md px-2 py-1 hover:bg-button-secondary hover:border hover:border-button-secondary hover:cursor-pointer active:border active:border-b-accent"
         >
           <p className="font-[Inter] font-normal text-[14px] leading-[20px] tracking-[0%]">

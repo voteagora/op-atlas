@@ -394,7 +394,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: project.kycTeam.id,
@@ -418,7 +421,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: orgKycTeam.team.id,
@@ -457,7 +463,9 @@ export async function getExistingLegalEntities(kycTeamId: string) {
       orderBy: { createdAt: "desc" },
     })
 
-    console.debug("getExistingLegalEntities:linksFetched", { count: links.length })
+    console.debug("getExistingLegalEntities:linksFetched", {
+      count: links.length,
+    })
 
     const now = new Date()
 
@@ -471,7 +479,11 @@ export async function getExistingLegalEntities(kycTeamId: string) {
 
     if (mapped.length !== filtered.length) {
       const dropped = mapped.length - filtered.length
-      console.debug("getExistingLegalEntities:filteredOut", { total: mapped.length, approvedAndValid: filtered.length, dropped })
+      console.debug("getExistingLegalEntities:filteredOut", {
+        total: mapped.length,
+        approvedAndValid: filtered.length,
+        dropped,
+      })
     }
 
     const items = filtered.map((e) => ({
@@ -483,7 +495,9 @@ export async function getExistingLegalEntities(kycTeamId: string) {
       expiresAt: e.expiry ?? null,
     }))
 
-    console.debug("getExistingLegalEntities:itemsPrepared", { count: items.length })
+    console.debug("getExistingLegalEntities:itemsPrepared", {
+      count: items.length,
+    })
 
     return items
   } catch (e) {
@@ -494,13 +508,19 @@ export async function getExistingLegalEntities(kycTeamId: string) {
 
 // Fetch distinct, approved, unexpired legal entities associated with any KYCTeam
 // linked to the given organization (to populate reusable entities list).
-export async function getAvailableLegalEntitiesForOrganization(organizationId: string) {
+export async function getAvailableLegalEntitiesForOrganization(
+  organizationId: string,
+) {
   try {
     if (!organizationId) {
-      console.warn("getAvailableLegalEntitiesForOrganization: missing organizationId")
+      console.warn(
+        "getAvailableLegalEntitiesForOrganization: missing organizationId",
+      )
       return []
     }
-    console.debug("getAvailableLegalEntitiesForOrganization:start", { organizationId })
+    console.debug("getAvailableLegalEntitiesForOrganization:start", {
+      organizationId,
+    })
 
     // 1) Find all KYCTeams linked to this organization
     const orgTeams = await prisma.organizationKYCTeam.findMany({
@@ -508,7 +528,9 @@ export async function getAvailableLegalEntitiesForOrganization(organizationId: s
       select: { kycTeamId: true },
     })
     const kycTeamIds = orgTeams.map((t) => t.kycTeamId)
-    console.debug("getAvailableLegalEntitiesForOrganization:orgTeamsFetched", { teamCount: kycTeamIds.length })
+    console.debug("getAvailableLegalEntitiesForOrganization:orgTeamsFetched", {
+      teamCount: kycTeamIds.length,
+    })
 
     if (kycTeamIds.length === 0) {
       return []
@@ -524,7 +546,9 @@ export async function getAvailableLegalEntitiesForOrganization(organizationId: s
       },
       orderBy: { createdAt: "desc" },
     })
-    console.debug("getAvailableLegalEntitiesForOrganization:linksFetched", { count: links.length })
+    console.debug("getAvailableLegalEntitiesForOrganization:linksFetched", {
+      count: links.length,
+    })
 
     const now = new Date()
 
@@ -532,7 +556,9 @@ export async function getAvailableLegalEntitiesForOrganization(organizationId: s
     const approvedValid = links
       .map((l) => l.legalEntity)
       .filter((e): e is NonNullable<typeof e> => Boolean(e))
-      .filter((e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now))
+      .filter(
+        (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
+      )
 
     // Dedupe by id
     const seen = new Set<string>()
@@ -551,7 +577,9 @@ export async function getAvailableLegalEntitiesForOrganization(organizationId: s
       expiresAt: e.expiry ?? null,
     }))
 
-    console.debug("getAvailableLegalEntitiesForOrganization:itemsPrepared", { count: items.length })
+    console.debug("getAvailableLegalEntitiesForOrganization:itemsPrepared", {
+      count: items.length,
+    })
     return items
   } catch (e) {
     console.error("getAvailableLegalEntitiesForOrganization error", e)
@@ -595,7 +623,6 @@ export async function getSelectedLegalEntitiesForTeam(kycTeamId: string) {
   }
 }
 
-
 // Resend KYB email for a selected Legal Entity (uses controller info)
 export async function resendKYBForLegalEntity(params: {
   projectId?: string
@@ -608,9 +635,16 @@ export async function resendKYBForLegalEntity(params: {
     businessName?: string
   }
 }) {
+  console.debug("[KYB][Server] resendKYBForLegalEntity:start", {
+    hasProjectId: Boolean(params.projectId),
+    hasOrganizationId: Boolean(params.organizationId),
+    legalEntityId: params.legalEntity?.id,
+    legalEntityEmail: params.legalEntity?.email,
+  })
   const session = await auth()
   const userId = session?.user?.id
   if (!userId) {
+    console.warn("[KYB][Server] Unauthorized resendKYBForLegalEntity call")
     return { success: false, error: "Unauthorized" }
   }
 
@@ -618,26 +652,45 @@ export async function resendKYBForLegalEntity(params: {
   if (params.projectId) {
     const isInvalid = await verifyAdminStatus(params.projectId, userId)
     if (isInvalid?.error) {
+      console.warn("[KYB][Server] Project admin check failed", isInvalid)
       return { success: false, error: isInvalid.error }
     }
   } else if (params.organizationId) {
-    const isInvalid = await verifyOrganizationAdmin(params.organizationId, userId)
+    const isInvalid = await verifyOrganizationAdmin(
+      params.organizationId,
+      userId,
+    )
     if (isInvalid?.error) {
+      console.warn("[KYB][Server] Org admin check failed", isInvalid)
       return { success: false, error: isInvalid.error }
     }
   } else {
+    console.warn("[KYB][Server] Missing projectId/organizationId context")
     return {
       success: false,
       error: "Missing context - projectId or organizationId required",
     }
   }
 
-  const res = await sendKYBReminderEmailForLegalEntity({
-    id: params.legalEntity.id,
-    email: params.legalEntity.email,
-    firstName: params.legalEntity.firstName,
-    lastName: params.legalEntity.lastName,
-    businessName: params.legalEntity.businessName,
-  })
-  return res
+  try {
+    console.debug("[KYB][Server] Sending KYB reminder for legal entity", {
+      id: params.legalEntity.id,
+      email: params.legalEntity.email,
+      firstName: params.legalEntity.firstName,
+      lastName: params.legalEntity.lastName,
+      businessName: params.legalEntity.businessName,
+    })
+    const res = await sendKYBReminderEmailForLegalEntity({
+      id: params.legalEntity.id,
+      email: params.legalEntity.email,
+      firstName: params.legalEntity.firstName,
+      lastName: params.legalEntity.lastName,
+      businessName: params.legalEntity.businessName,
+    })
+    console.debug("[KYB][Server] KYB reminder send result", res)
+    return res
+  } catch (e) {
+    console.error("[KYB][Server] resendKYBForLegalEntity error", e)
+    return { success: false, error: (e as any)?.message || "Unknown error" }
+  }
 }

@@ -10,7 +10,13 @@ import GrantDeliveryAddress from "@/components/projects/grants/grants/kyc-status
 import ProjectStatus from "@/components/projects/grants/grants/kyc-status/ProjectStatus"
 import IndividualStatuses from "@/components/projects/grants/grants/kyc-status/user-status/IndividualStatuses"
 import LegalEntities from "@/components/projects/grants/grants/kyc-status/user-status/LegalEntities"
-import { EmailState, ProjectWithKycTeam } from "@/components/projects/types"
+import {
+  EmailState,
+  ProjectWithKycTeam,
+  KYCUserStatusProps,
+  KYCOrLegal,
+  isLegalEntityContact,
+} from "@/components/projects/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
@@ -161,14 +167,7 @@ const KYCStatusPresenter = ({
 }: {
   status: import("@/components/projects/types").ExtendedPersonaStatus
   address: string
-  users:
-    | {
-        user: KYCUser
-        handleEmailResend: (u: KYCUser) => Promise<void>
-        emailResendBlock: boolean
-        emailState: EmailState
-      }[]
-    | undefined
+  users: import("@/components/projects/types").KYCUserStatusProps[] | undefined
   isLoading: boolean
   kycTeamId?: string
   extraMiddleContent?: ReactNode
@@ -193,70 +192,43 @@ const KYCStatusPresenter = ({
 
   // Load legal entity statuses based on selected LegalEntity for this KYCTeam
   const [legalEntitiesStatuses, setLegalEntitiesStatuses] = useState<
-    typeof users
+    KYCUserStatusProps[]
   >([])
   const [legalSendingState, setLegalSendingState] = useState<
     Record<string, EmailState>
   >({})
+  // Raw legal entity items linked to this KYC team; map to rows separately so
+  // email spinner state updates (SENDING -> SENT) are reflected immediately.
+  type SelectedTeamLegalEntity = {
+    id: string
+    name: string
+    status: import("@prisma/client").KYCStatus | null
+    expiry: Date | string | null
+    controllerFirstName: string
+    controllerLastName: string
+    controllerEmail: string
+  }
+  const [legalItems, setLegalItems] = useState<SelectedTeamLegalEntity[]>([])
 
+  // Fetch raw legal entity items when KYC team changes
   useEffect(() => {
     let cancelled = false
     async function loadLegalEntities() {
       try {
         if (!kycTeamId) {
+          setLegalItems([])
           setLegalEntitiesStatuses([])
           return
         }
-        const items = await getSelectedLegalEntitiesForTeam(kycTeamId)
+        const items = (await getSelectedLegalEntitiesForTeam(
+          kycTeamId,
+        )) as SelectedTeamLegalEntity[]
         if (cancelled) return
-        const mapped = (items || []).map((e: any) => ({
-          user: {
-            id: e.id,
-            email: e.controllerEmail || "",
-            firstName: e.controllerFirstName || "",
-            lastName: e.controllerLastName || "",
-            businessName: e.name,
-            status: e.status,
-            expiry: e.expiry || null,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            kycUserType: "LEGAL_ENTITY",
-            // Unused optional fields for display purposes
-            personaStatus: null,
-            KYCUserTeams: [],
-            EmailNotifications: [],
-          } as unknown as KYCUser,
-          handleEmailResend: async (u: KYCUser) => {
-            try {
-              setLegalSendingState((prev) => ({
-                ...prev,
-                [e.id]: EmailState.SENDING,
-              }))
-              await resendKYBForLegalEntity({
-                projectId: projectId as string | undefined,
-                organizationId: organizationId as string | undefined,
-                legalEntity: {
-                  id: e.id,
-                  email: e.controllerEmail || "",
-                  firstName: e.controllerFirstName || "",
-                  lastName: e.controllerLastName || "",
-                  businessName: e.name,
-                },
-              })
-            } finally {
-              setLegalSendingState((prev) => ({
-                ...prev,
-                [e.id]: EmailState.SENT,
-              }))
-            }
-          },
-          emailResendBlock: e.status === "APPROVED" ? true : false,
-          emailState: legalSendingState[e.id] || EmailState.NOT_SENT,
-        }))
-        setLegalEntitiesStatuses(mapped as any)
+        setLegalItems(items || [])
       } catch (e) {
         if (!cancelled) {
           console.error("Failed to load legal entity statuses", e)
+          setLegalItems([])
         }
       }
     }
@@ -265,6 +237,84 @@ const KYCStatusPresenter = ({
       cancelled = true
     }
   }, [kycTeamId])
+
+  // Map raw items to UI rows; recompute when spinner state or context changes
+  useEffect(() => {
+    const mapped: KYCUserStatusProps[] = (legalItems || []).map((e) => {
+      const contact: import("@/components/projects/types").LegalEntityContact = {
+        id: e.id,
+        email: e.controllerEmail || "",
+        firstName: e.controllerFirstName || "",
+        lastName: e.controllerLastName || "",
+        businessName: e.name,
+        status: e.status ?? undefined,
+        expiry: e.expiry || null,
+        kycUserType: "LEGAL_ENTITY",
+      }
+      return {
+        user: contact,
+        handleEmailResend: async (target: KYCOrLegal) => {
+          console.debug("[LegalEntity][UI] Resend click handler invoked", {
+            target,
+            kycTeamId,
+            projectId,
+            organizationId,
+          })
+          try {
+            setLegalSendingState((prev) => ({
+              ...prev,
+              [e.id]: EmailState.SENDING,
+            }))
+            if (isLegalEntityContact(target)) {
+              console.debug(
+                "[LegalEntity][UI] Calling resendKYBForLegalEntity",
+                {
+                  id: target.id,
+                  email: target.email,
+                  firstName: target.firstName,
+                  lastName: target.lastName,
+                  businessName: target.businessName,
+                  projectId,
+                  organizationId,
+                },
+              )
+              const res = await resendKYBForLegalEntity({
+                projectId: projectId as string | undefined,
+                organizationId: organizationId as string | undefined,
+                legalEntity: {
+                  id: target.id,
+                  email: target.email,
+                  firstName: target.firstName,
+                  lastName: target.lastName,
+                  businessName: target.businessName,
+                },
+              })
+              console.debug(
+                "[LegalEntity][UI] resendKYBForLegalEntity response",
+                res,
+              )
+            } else {
+              console.warn(
+                "[LegalEntity][UI] Email resend handler received a non-legal entity target.",
+                { target },
+              )
+            }
+          } catch (err) {
+            console.error("[LegalEntity][UI] resend handler failed", err)
+          } finally {
+            setLegalSendingState((prev) => ({
+              ...prev,
+              [e.id]: EmailState.SENT,
+            }))
+            console.debug("[LegalEntity][UI] Email state set to SENT for", e.id)
+          }
+        },
+        emailResendBlock: e.status === "APPROVED",
+        emailState: legalSendingState[e.id] || EmailState.NOT_SENT,
+      }
+    })
+    setLegalEntitiesStatuses(mapped)
+  }, [legalItems, legalSendingState, projectId, organizationId, kycTeamId])
   return (
     <>
       <div className="flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
@@ -282,10 +332,7 @@ const KYCStatusPresenter = ({
               />
             )}
             {legalEntitiesStatuses && legalEntitiesStatuses.length > 0 && (
-              <LegalEntities
-                users={legalEntitiesStatuses as any}
-                isAdmin={isAdmin}
-              />
+              <LegalEntities users={legalEntitiesStatuses} isAdmin={isAdmin} />
             )}
             {showEditFooter && isAdmin && (
               <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">
@@ -337,9 +384,10 @@ const ProjectKYCStatusContainer = ({
     projectId: project.id,
   })
 
-  const users = kycUsers?.map((user) => ({
+  const users: KYCUserStatusProps[] | undefined = kycUsers?.map((user) => ({
     user,
-    handleEmailResend,
+    handleEmailResend:
+      handleEmailResend as KYCUserStatusProps["handleEmailResend"],
     emailResendBlock:
       !isAdmin ||
       projectStatus === "project_issue" ||
@@ -480,9 +528,10 @@ const OrganizationKYCTeamCard = ({
     organizationId: kycOrg.organizationId,
   })
 
-  const userMappings = users.map((user) => ({
+  const userMappings: KYCUserStatusProps[] = users.map((user) => ({
     user,
-    handleEmailResend,
+    handleEmailResend:
+      handleEmailResend as KYCUserStatusProps["handleEmailResend"],
     emailResendBlock:
       !isAdmin || status === "project_issue" || user.status === "APPROVED",
     emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
