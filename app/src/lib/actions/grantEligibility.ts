@@ -896,3 +896,99 @@ export async function getExistingLegalEntitiesForForm(formId: string) {
     return { error: "Failed to fetch existing legal entities" }
   }
 }
+
+
+
+export async function getSelectedExistingLegalEntitiesForForm(formId: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    console.warn("getSelectedExistingLegalEntitiesForForm: Unauthorized call", { formId })
+    return { error: "Unauthorized" }
+  }
+
+  try {
+    console.debug("getSelectedExistingLegalEntitiesForForm:start", { formId, userId })
+
+    const form = await prisma.grantEligibility.findUnique({
+      where: { id: formId },
+      include: {
+        project: true,
+        organization: true,
+      },
+    })
+
+    if (!form) {
+      console.warn("getSelectedExistingLegalEntitiesForForm: Form not found", { formId })
+      return { error: "Form not found" }
+    }
+
+    // Verify permissions
+    if (form.projectId) {
+      const isInvalid = await verifyAdminStatus(form.projectId, userId)
+      if (isInvalid?.error) {
+        console.warn(
+          "getSelectedExistingLegalEntitiesForForm: project admin check failed",
+          isInvalid,
+        )
+        return { error: isInvalid.error }
+      }
+    } else if (form.organizationId) {
+      const isInvalid = await verifyOrganizationAdmin(form.organizationId, userId)
+      if (isInvalid?.error) {
+        console.warn(
+          "getSelectedExistingLegalEntitiesForForm: org admin check failed",
+          isInvalid,
+        )
+        return { error: isInvalid.error }
+      }
+    }
+
+    const data = (form.data as any) || {}
+    const ids: string[] = Array.isArray(data.selectedExistingEntityIds)
+      ? data.selectedExistingEntityIds
+      : []
+
+    if (!ids.length) {
+      console.debug(
+        "getSelectedExistingLegalEntitiesForForm:noSelectedIds",
+        { formId },
+      )
+      return { items: [] }
+    }
+
+    const entities = await prisma.legalEntity.findMany({
+      where: { id: { in: ids } },
+      include: { LegalEnitityController: true },
+    })
+
+    // Maintain original ordering based on ids array
+    const byId = new Map(entities.map((e) => [e.id, e]))
+    const ordered = ids
+      .map((id) => byId.get(id))
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+
+    const items = ordered.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.LegalEnitityController?.firstName || "",
+      controllerLastName: e.LegalEnitityController?.lastName || "",
+      controllerEmail: e.LegalEnitityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug(
+      "getSelectedExistingLegalEntitiesForForm:itemsPrepared",
+      { count: items.length },
+    )
+
+    return { items }
+  } catch (error) {
+    console.error(
+      "Error fetching selected existing legal entities for form:",
+      error,
+    )
+    return { error: "Failed to fetch selected existing legal entities" }
+  }
+}
