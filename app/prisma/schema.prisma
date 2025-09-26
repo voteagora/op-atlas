@@ -34,6 +34,7 @@ model User {
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
+  userKYCUsers       UserKYCUser[]
   endorsements       Endorsement[]      @relation("UserEndorsements")
   safeAddresses      UserSafeAddress[]
 
@@ -43,15 +44,18 @@ model User {
 }
 
 model UserEmail {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  userId    String
-  verified  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
+  id                           String    @id @default(uuid())
+  email                        String    @unique
+  userId                       String
+  verified                     Boolean   @default(false)
+  verificationToken            String?   @unique
+  verificationTokenExpiresAt   DateTime?
+  createdAt                    DateTime  @default(now())
+  updatedAt                    DateTime  @updatedAt
+  user                         User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([verificationToken])
 }
 
 model UserInteraction {
@@ -486,8 +490,8 @@ model ContactEmailTags {
 model KYCUser {
   id                 String              @id @default(uuid())
   email              String
-  firstName          String
-  lastName           String
+  firstName          String?
+  lastName           String?
   businessName       String?
   status             KYCStatus           @default(PENDING)
   expiry             DateTime
@@ -497,6 +501,7 @@ model KYCUser {
   kycUserType        KYCUserType         @default(USER)
   KYCUserTeams       KYCUserTeams[]
   EmailNotifications EmailNotification[]
+  UserKYCUsers       UserKYCUser[]
 
   @@index([email])
 }
@@ -544,6 +549,21 @@ model KYCUserTeams {
 
   @@index([kycUserId])
   @@index([kycTeamId])
+}
+
+model UserKYCUser {
+  id        String   @id @default(uuid())
+  kycUserId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kycUser KYCUser @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([kycUserId])
+  @@unique([userId, kycUserId])
 }
 
 model OrganizationKYCTeam {
@@ -1016,6 +1036,7 @@ enum EmailNotificationType {
   KYCB_STARTED
   KYCB_REMINDER
   KYCB_APPROVED
+  KYC_EMAIL_VERIFICATION
 }
 
 enum GrantType {
