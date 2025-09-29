@@ -18,6 +18,7 @@ export const SuperchainGrantCard = ({
   return (
     <TrackedLink
       href={grant.learnMoreUrl}
+      target="_blank"
       eventName="Link Click"
       eventData={{
         source: "home_page",
