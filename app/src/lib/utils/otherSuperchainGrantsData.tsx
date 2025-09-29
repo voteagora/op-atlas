@@ -50,7 +50,7 @@ export const superchainGrantsData: SuperchainGrant[] = [
     description:
       "Supporting innovation, impact, and collaboration on Worldchain.",
     chain: "Worldchain",
-    avatar: "/assets/chain-logos/Worldchain.png",
+    avatar: "/assets/chain-logos/worldchain.png",
     learnMoreUrl: "https://world.org/grants",
   },
   {
@@ -59,7 +59,7 @@ export const superchainGrantsData: SuperchainGrant[] = [
     description:
       "Open calls for applications addressing specific focus areas for Worldchain growth.",
     chain: "Worldchain",
-    avatar: "/assets/chain-logos/Worldchain.png",
+    avatar: "/assets/chain-logos/worldchain.png",
     learnMoreUrl: "https://world.org/rfp",
   },
 ]
