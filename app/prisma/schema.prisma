@@ -498,6 +498,7 @@ model KYCUser {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   personaStatus      PersonaStatus?
+  personaReferenceId String?           @unique
   kycUserType        KYCUserType         @default(USER)
   KYCUserTeams       KYCUserTeams[]
   EmailNotifications EmailNotification[]

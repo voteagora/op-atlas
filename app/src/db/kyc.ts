@@ -23,7 +23,7 @@ export async function updateKYCUserStatus(
       "personaStatus" = ${unparsedPersonaStatus}::"PersonaStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')
-    WHERE id = ${referenceId}
+    WHERE "personaReferenceId" = ${referenceId}
     RETURNING *;
   `
   return result
@@ -372,4 +372,3 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
 
   return kycTeams
 }
-
