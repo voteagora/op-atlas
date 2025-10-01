@@ -13,13 +13,13 @@ interface Signer {
   firstName: string
   lastName: string
   email: string
-  company: string
 }
 
 export default function SignersStep() {
-  const { form, setForm, goToNextStep, setStepControls } = useGrantEligibilityForm()
+  const { form, setForm, goToNextStep, setStepControls } =
+    useGrantEligibilityForm()
   const [isPending, startTransition] = useTransition()
-  
+
   // Initialize signers from form data or with one empty signer
   const getInitialSigners = (): Signer[] => {
     if (form.data && typeof form.data === "object" && "signers" in form.data) {
@@ -29,18 +29,21 @@ export default function SignersStep() {
           firstName: s.firstName || "",
           lastName: s.lastName || "",
           email: s.email || "",
-          company: s.company || ""
         }))
       }
     }
-    return [{ firstName: "", lastName: "", email: "", company: "" }]
+    return [{ firstName: "", lastName: "", email: "" }]
   }
-  
+
   const initialSigners = getInitialSigners()
-  
+
   const [signers, setSigners] = useState<Signer[]>(initialSigners)
 
-  const handleSignerChange = (index: number, field: keyof Signer, value: string) => {
+  const handleSignerChange = (
+    index: number,
+    field: keyof Signer,
+    value: string,
+  ) => {
     const updatedSigners = [...signers]
     updatedSigners[index] = {
       ...updatedSigners[index],
@@ -50,7 +53,7 @@ export default function SignersStep() {
   }
 
   const addSigner = () => {
-    setSigners([...signers, { firstName: "", lastName: "", email: "", company: "" }])
+    setSigners([...signers, { firstName: "", lastName: "", email: "" }])
   }
 
   const removeSigner = (index: number) => {
@@ -61,7 +64,11 @@ export default function SignersStep() {
 
   const validateSigners = (): boolean => {
     for (const signer of signers) {
-      if (!signer.firstName.trim() || !signer.lastName.trim() || !signer.email.trim()) {
+      if (
+        !signer.firstName.trim() ||
+        !signer.lastName.trim() ||
+        !signer.email.trim()
+      ) {
         return false
       }
       // Basic email validation
@@ -74,7 +81,11 @@ export default function SignersStep() {
   }
 
   const isSignerComplete = (signer: Signer): boolean => {
-    if (!signer.firstName.trim() || !signer.lastName.trim() || !signer.email.trim()) {
+    if (
+      !signer.firstName.trim() ||
+      !signer.lastName.trim() ||
+      !signer.email.trim()
+    ) {
       return false
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -90,11 +101,12 @@ export default function SignersStep() {
     startTransition(async () => {
       try {
         // Preserve existing data and add/update signers
-        const existingData = form.data && typeof form.data === "object" ? (form.data as any) : {}
-        
+        const existingData =
+          form.data && typeof form.data === "object" ? (form.data as any) : {}
+
         const result = await updateGrantEligibilityForm({
           formId: form.id,
-          currentStep: Math.max(form.currentStep, 4),  // Never reduce the step
+          currentStep: Math.max(form.currentStep, 4), // Never reduce the step
           data: {
             entities: existingData.entities || [],
             signers: signers,
@@ -120,15 +132,20 @@ export default function SignersStep() {
   useEffect(() => {
     const enabled = validateSigners() && !isPending
 
-    setStepControls({ 
-      enabled, 
-      onNext: handleNext, 
+    setStepControls({
+      enabled,
+      onNext: handleNext,
       nextLabel: isPending ? "Loading" : "Next",
-      isLoading: isPending 
+      isLoading: isPending,
     })
 
     return () => {
-      setStepControls({ enabled: true, onNext: undefined, nextLabel: undefined, isLoading: false })
+      setStepControls({
+        enabled: true,
+        onNext: undefined,
+        nextLabel: undefined,
+        isLoading: false,
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signers, isPending])
@@ -137,18 +154,24 @@ export default function SignersStep() {
     <div className="space-y-8 w-full">
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">
-          Please identify each responsible individual or signer for this wallet. If you are such person, start with yourself.
+          Please identify each responsible individual or signer for this wallet.
+          If you are such person, start with yourself.
         </h2>
         <p className="text-base text-secondary-foreground">
-          Be sure to include email addresses where each person can be notified to complete our mandatory identity verification process (KYC).
+          Be sure to include email addresses where each person can be notified
+          to complete our mandatory identity verification process (KYC).
         </p>
       </div>
 
       <div className="space-y-20">
-        
         {/* Display wallet address */}
         <div>
-          <label htmlFor="grant-address" className="block text-sm font-medium mb-2">Grant delivery address</label>
+          <label
+            htmlFor="grant-address"
+            className="block text-sm font-medium mb-2"
+          >
+            Grant delivery address
+          </label>
           <Input
             id="grant-address"
             type="text"
@@ -178,54 +201,56 @@ export default function SignersStep() {
 
             <div className="space-y-6">
               <div>
-                <label htmlFor={`first-name-${index}`} className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor={`first-name-${index}`}
+                  className="block text-sm font-medium mb-2"
+                >
                   First name<span className="text-destructive">*</span>
                 </label>
                 <Input
                   id={`first-name-${index}`}
                   type="text"
                   value={signer.firstName}
-                  onChange={(e) => handleSignerChange(index, "firstName", e.target.value)}
+                  onChange={(e) =>
+                    handleSignerChange(index, "firstName", e.target.value)
+                  }
                   placeholder="Jane"
                 />
               </div>
 
               <div>
-                <label htmlFor={`last-name-${index}`} className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor={`last-name-${index}`}
+                  className="block text-sm font-medium mb-2"
+                >
                   Last name<span className="text-destructive">*</span>
                 </label>
                 <Input
                   id={`last-name-${index}`}
                   type="text"
                   value={signer.lastName}
-                  onChange={(e) => handleSignerChange(index, "lastName", e.target.value)}
+                  onChange={(e) =>
+                    handleSignerChange(index, "lastName", e.target.value)
+                  }
                   placeholder="Doe"
                 />
               </div>
 
               <div>
-                <label htmlFor={`email-${index}`} className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor={`email-${index}`}
+                  className="block text-sm font-medium mb-2"
+                >
                   Email<span className="text-destructive">*</span>
                 </label>
                 <Input
                   id={`email-${index}`}
                   type="email"
                   value={signer.email}
-                  onChange={(e) => handleSignerChange(index, "email", e.target.value)}
+                  onChange={(e) =>
+                    handleSignerChange(index, "email", e.target.value)
+                  }
                   placeholder="name@example.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor={`company-${index}`} className="block text-sm font-medium mb-2">
-                  Company
-                </label>
-                <Input
-                  id={`company-${index}`}
-                  type="text"
-                  value={signer.company}
-                  onChange={(e) => handleSignerChange(index, "company", e.target.value)}
-                  placeholder="Acme Co."
                 />
               </div>
             </div>
@@ -237,7 +262,11 @@ export default function SignersStep() {
           type="button"
           variant="secondary"
           onClick={addSigner}
-          className={`flex items-center gap-2 ${isSignerComplete(signers[signers.length - 1]) ? "text-secondary-foreground" : "text-gray-400"}`}
+          className={`flex items-center gap-2 ${
+            isSignerComplete(signers[signers.length - 1])
+              ? "text-secondary-foreground"
+              : "text-gray-400"
+          }`}
         >
           <Plus className="h-4 w-4" />
           Add another signer
