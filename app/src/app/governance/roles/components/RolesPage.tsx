@@ -10,6 +10,20 @@ export default function RolesPage({ roles }: { roles: Role[] }) {
     (role) => getRolePhaseStatus(role).isVotingPhase,
   )
 
+  const isInEndorsementPhase = roles.every(
+    (role) => getRolePhaseStatus(role).isEndorsementPhase,
+  )
+
+  const title = () => {
+    if (hasASecurityRole) {
+      if (isInEndorsementPhase) {
+        return "Approval period for candidates"
+      }
+      return "Self-nominate for the Security Council"
+    }
+    return "Self-nominate for a governance role in Season 8 & 9"
+  }
+
   const hideRoles = isInVotingPhase && hasASecurityRole
 
   if (hideRoles) {
@@ -20,7 +34,7 @@ export default function RolesPage({ roles }: { roles: Role[] }) {
     <div className="flex flex-col gap-6">
       <div>
         <h4 className="w-full font-semibold text-[20px] leading-7 align-middle text-text-default">
-          Self-nominate for a governance role in Season 8 & 9
+          {title()}
         </h4>
         {hasASecurityRole && (
           <p className="text-secondary-foreground">
