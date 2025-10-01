@@ -30,7 +30,7 @@ export function GovForumConnection({ userId }: { userId: string }) {
   const [isEditing, setIsEditing] = useState(false)
 
   const isValidGovForumUrl = (url: string) => {
-    const pattern = /^https:\/\/gov\.optimism\.io\/u\/[a-zA-Z0-9-_]+\/summary$/
+    const pattern = /^https:\/\/gov\.optimism\.io\/u\/[a-zA-Z0-9-_.]+\/summary$/
     return pattern.test(url)
   }
 
