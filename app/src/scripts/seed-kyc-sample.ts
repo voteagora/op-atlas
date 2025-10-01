@@ -18,8 +18,6 @@ const USERS = [
   },
 ]
 
-<<<<<<< HEAD
-=======
 // Determine which step to stop at from CLI arguments (support only: --stop=2, --step=2). Default to 5.
 function parseStopAt(argv: string[]): 1 | 2 | 3 | 4 | 5 | undefined {
   for (const a of argv) {
@@ -35,7 +33,6 @@ const resolved = parseStopAt(process.argv.slice(2))
 const STOP_AT: 1 | 2 | 3 | 4 | 5 = (resolved ?? 5) as 1 | 2 | 3 | 4 | 5
 console.log(`Seed KYC script will stop at step: ${STOP_AT} (args: ${process.argv.slice(2).join(" ") || "<none>"})`)
 
->>>>>>> origin/garrett/kyc-phase-1-edits
 function randomGrantType(): GrantType {
   const options: GrantType[] = [
     "RETRO_FUNDING",
@@ -50,10 +47,7 @@ async function ensureGrantEligibility(
   projectId: string,
   suppliedAddress?: string,
   signer?: { email?: string; firstName?: string; lastName?: string },
-<<<<<<< HEAD
-=======
   stopAt: 1 | 2 | 3 | 4 | 5 = 5,
->>>>>>> origin/garrett/kyc-phase-1-edits
 ) {
   // Find latest active draft
   const existing = await prisma.grantEligibility.findFirst({
@@ -174,9 +168,6 @@ async function ensureGrantEligibility(
     })
   }
 
-<<<<<<< HEAD
-  // Upsert signer info from provided user details and advance to final step (Submit)
-=======
   // If we should stop after wallet verification, do so now (before signers)
   if (stopAt === 3) {
     form = await prisma.grantEligibility.update({
@@ -191,7 +182,6 @@ async function ensureGrantEligibility(
   }
 
   // Upsert signer info from provided user details and advance further
->>>>>>> origin/garrett/kyc-phase-1-edits
   const existingData = (form.data as any) || {}
   const existingSigners = Array.isArray(existingData.signers)
     ? existingData.signers
@@ -216,15 +206,6 @@ async function ensureGrantEligibility(
     }
   }
 
-<<<<<<< HEAD
-  form = await prisma.grantEligibility.update({
-    where: { id: form.id },
-    data: {
-      currentStep: 5, // Skip Entities step and go to final Submit step
-      data: {
-        ...existingData,
-        signers: newSigners,
-=======
   const nextStep = stopAt >= 5 ? 5 : 4
   form = await prisma.grantEligibility.update({
     where: { id: form.id },
@@ -234,7 +215,6 @@ async function ensureGrantEligibility(
         ...existingData,
         signers: newSigners,
         // Keep entities as-is; do not auto-fill. If stopAt==5, we still just advance step.
->>>>>>> origin/garrett/kyc-phase-1-edits
         entities: Array.isArray(existingData.entities)
           ? existingData.entities
           : [],
@@ -335,14 +315,6 @@ async function main() {
     // Create a minimal project using ProjectDetailsForm defaults where applicable
     const project = await createProject(user.id)
     if (project?.id) {
-<<<<<<< HEAD
-      await ensureGrantEligibility(project.id, definedUser.address, {
-        email: definedUser.email,
-        firstName: (definedUser as any).firstName,
-        lastName:
-          (definedUser as any).lastName ?? (definedUser as any).LastName,
-      })
-=======
       // Branch behavior based on STOP_AT
       if (STOP_AT === 1) {
         // Only create the project; do not start grant-eligibility
@@ -381,7 +353,6 @@ async function main() {
           5,
         )
       }
->>>>>>> origin/garrett/kyc-phase-1-edits
     }
   }
 }
