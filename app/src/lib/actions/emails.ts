@@ -282,7 +282,51 @@ export const sendKYCReminderEmail = async (
 
 export const sendKYBReminderEmail = async (
   kycUser: KYCUser,
+  context: {
+    projectId?: string
+    organizationId?: string
+    bypassAuth?: boolean
+  },
 ): Promise<EmailResponse> => {
+  // Check authentication and admin permissions unless bypassed
+  if (!context?.bypassAuth) {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      }
+    }
+
+    const userId = session.user.id
+
+    // Verify admin permissions based on context
+    if (context.projectId) {
+      const userRole = await getUserProjectRole(context.projectId, userId)
+      if (userRole !== "admin") {
+        return {
+          success: false,
+          error: "Unauthorized - Project admin access required",
+        }
+      }
+    } else if (context.organizationId) {
+      const userRole = await getUserOrganizationRole(
+        context.organizationId,
+        userId,
+      )
+      if (userRole !== "admin") {
+        return {
+          success: false,
+          error: "Unauthorized - Organization admin access required",
+        }
+      }
+    } else {
+      return {
+        success: false,
+        error: "Missing context - projectId or organizationId required",
+      }
+    }
+  }
   const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
 
   if (!templateId) {
