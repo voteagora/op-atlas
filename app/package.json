@@ -23,7 +23,8 @@
     "studio": "prisma studio",
     "graphql:generate": "pnpm graphql-codegen",
     "process:oso-data": "tsx src/scripts/process-oso-data.ts",
-    "blacklist:project": "tsx src/scripts/blacklist-project.ts"
+    "blacklist:project": "tsx src/scripts/blacklist-project.ts",
+    "seed:kyc-sample": "prisma db push && tsx src/scripts/seed-kyc-sample.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
