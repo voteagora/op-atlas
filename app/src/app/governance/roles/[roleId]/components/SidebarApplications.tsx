@@ -1,7 +1,6 @@
 "use client"
 
 import { Role, RoleApplication } from "@prisma/client"
-import { useMemo } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
@@ -152,7 +151,7 @@ export default function SidebarApplications({
       </div>
       <div className="text-center text-sm text-secondary-foreground">
         <span className="font-medium">Need help? </span>
-        <ExternalLink href="https://discord.gg/opatlas" className="underline">
+        <ExternalLink href="https://discord.gg/fDWeZUNX" className="underline">
           Ask on Discord
         </ExternalLink>
       </div>
