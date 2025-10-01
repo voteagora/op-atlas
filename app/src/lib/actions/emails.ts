@@ -86,7 +86,7 @@ export const sendTransactionEmail = async (
 }
 
 async function trackEmailNotification(params: {
-  kycUserId: string
+  referenceId: string
   type: EmailNotificationType
   emailTo: string
   success: boolean
@@ -137,7 +137,7 @@ export const sendKYCStartedEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.id,
     type: "KYCB_STARTED",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -180,7 +180,7 @@ export const sendKYBStartedEmail = async (
   })
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.id,
     type: "KYCB_STARTED",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -270,7 +270,7 @@ export const sendKYCReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -359,7 +359,7 @@ export const sendKYBReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -383,7 +383,7 @@ export const sendKYCApprovedEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.id,
     type: "KYCB_APPROVED",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -407,9 +407,125 @@ export const sendKYBApprovedEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.id,
     type: "KYCB_APPROVED",
     emailTo: kycUser.email,
+    success: emailResult.success,
+    error: emailResult.error,
+  })
+
+  return emailResult
+}
+
+// Send KYB reminder for a Legal Entity without requiring a KYCUser DB record
+export const sendKYBReminderEmailForLegalEntity = async (params: {
+  id: string // use LegalEntity.id as reference-id
+  email: string
+  firstName: string
+  lastName: string
+  businessName?: string
+}): Promise<EmailResponse> => {
+  const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
+
+  if (!templateId) {
+    return {
+      success: false,
+      error: "Missing required Persona KYB template ID",
+    }
+  }
+
+  // Construct a pseudo KYCUser payload for Persona/reference only
+  const pseudoUser = {
+    id: params.id,
+    email: params.email,
+    firstName: params.firstName,
+    lastName: params.lastName,
+    businessName: params.businessName || null,
+    status: "PENDING",
+    expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    personaStatus: null,
+    KYCUserTeams: [],
+  } as unknown as KYCUser
+
+  const inquiryResult = await createPersonaInquiryLink(pseudoUser, templateId)
+  if (!inquiryResult.success || !inquiryResult.inquiryUrl) {
+    return { success: false, error: inquiryResult.error }
+  }
+
+  const html = getKYBReminderEmailTemplate(pseudoUser, inquiryResult.inquiryUrl)
+
+  const emailParams = {
+    to: params.email,
+    subject: "Reminder: Complete Your KYB to Receive Your Optimism Grant",
+    html,
+  }
+
+  const emailResult = await sendTransactionEmail(emailParams)
+
+  await trackEmailNotification({
+    referenceId: params.id,
+    type: "KYCB_REMINDER",
+    emailTo: params.email,
+    success: emailResult.success,
+    error: emailResult.error,
+  })
+
+  return emailResult
+}
+
+// Send KYB started email for a Legal Entity without requiring a KYCUser DB record
+export const sendKYBStartedEmailForLegalEntity = async (params: {
+  id: string // use LegalEntity.id as reference-id
+  email: string
+  firstName: string
+  lastName: string
+  businessName?: string
+}): Promise<EmailResponse> => {
+  const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
+
+  if (!templateId) {
+    return {
+      success: false,
+      error: "Missing required Persona KYB template ID",
+    }
+  }
+
+  // Construct a pseudo KYCUser payload for Persona/reference only
+  const pseudoUser = {
+    id: params.id,
+    email: params.email,
+    firstName: params.firstName,
+    lastName: params.lastName,
+    businessName: params.businessName || null,
+    status: "PENDING",
+    expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    personaStatus: null,
+    KYCUserTeams: [],
+  } as unknown as import("@prisma/client").KYCUser
+
+  const inquiryResult = await createPersonaInquiryLink(pseudoUser, templateId)
+  if (!inquiryResult.success || !inquiryResult.inquiryUrl) {
+    return { success: false, error: inquiryResult.error }
+  }
+
+  const html = getKYBEmailTemplate(pseudoUser, inquiryResult.inquiryUrl)
+
+  const emailParams = {
+    to: params.email,
+    subject: "Action Required: Complete KYB to Unlock Your Optimism Grant",
+    html,
+  }
+
+  const emailResult = await sendTransactionEmail(emailParams)
+
+  await trackEmailNotification({
+    referenceId: params.id,
+    type: "KYCB_STARTED",
+    emailTo: params.email,
     success: emailResult.success,
     error: emailResult.error,
   })

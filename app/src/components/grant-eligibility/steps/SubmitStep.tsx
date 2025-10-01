@@ -7,7 +7,7 @@ import { GrantType } from "@prisma/client"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { useGrantEligibilityForm } from "@/providers/GrantEligibilityFormProvider"
-import { submitGrantEligibilityForm } from "@/lib/actions/grantEligibility"
+import { submitGrantEligibilityForm, getSelectedExistingLegalEntitiesForForm } from "@/lib/actions/grantEligibility"
 
 const GRANT_TYPE_LABELS: Record<GrantType, string> = {
   RETRO_FUNDING: "Retro Funding",
@@ -30,6 +30,15 @@ interface Entity {
   controllerEmail: string
 }
 
+type SelectedExistingEntity = {
+  id: string
+  businessName: string
+  controllerFirstName: string
+  controllerLastName: string
+  controllerEmail: string
+  expiresAt?: string | Date | null
+}
+
 interface SubmitStepProps {
   onSuccess: () => void
 }
@@ -37,6 +46,11 @@ interface SubmitStepProps {
 export default function SubmitStep({ onSuccess }: SubmitStepProps) {
   const { form, setStepControls } = useGrantEligibilityForm()
   const [isPending, startTransition] = useTransition()
+
+  // Selected existing legal entity details for display on submit
+  const [selectedExistingEntities, setSelectedExistingEntities] = useState<
+    SelectedExistingEntity[]
+  >([])
 
   // Parse data from form
   const signers: Signer[] =
@@ -47,6 +61,14 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
   const entities: Entity[] =
     form.data && typeof form.data === "object" && "entities" in form.data
       ? (form.data as any).entities || []
+      : []
+
+  const selectedExistingEntityIds: string[] =
+    form.data &&
+    typeof form.data === "object" &&
+    "selectedExistingEntityIds" in form.data &&
+    Array.isArray((form.data as any).selectedExistingEntityIds)
+      ? ((form.data as any).selectedExistingEntityIds as string[])
       : []
 
   // Attestation checkboxes state
@@ -121,9 +143,45 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
     return parts.join(", ")
   }
 
+  // Load selected existing entities for display
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        if (!form?.id || selectedExistingEntityIds.length === 0) {
+          setSelectedExistingEntities([])
+          return
+        }
+        const res = await getSelectedExistingLegalEntitiesForForm(form.id)
+        if (!cancelled) {
+          if ((res as any)?.error) {
+            console.error("Failed to fetch selected existing legal entities:", (res as any).error)
+            setSelectedExistingEntities([])
+          } else if (Array.isArray((res as any)?.items)) {
+            setSelectedExistingEntities((res as any).items as SelectedExistingEntity[])
+          }
+        }
+      } catch (e) {
+        if (!cancelled) {
+          console.error("Error loading selected existing legal entities", e)
+          setSelectedExistingEntities([])
+        }
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.id, JSON.stringify(selectedExistingEntityIds)])
+
   // Format entity display
   const formatEntityDisplay = (entity: Entity) => {
     return `${entity.company}, ${entity.controllerFirstName} ${entity.controllerLastName}, ${entity.controllerEmail}`
+  }
+
+  const formatSelectedExistingDisplay = (e: SelectedExistingEntity) => {
+    return `${e.businessName}, ${`${e.controllerFirstName} ${e.controllerLastName}`.trim()}, ${e.controllerEmail}`
   }
 
   return (
@@ -194,13 +252,22 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         )}
 
         {/* Legal Entities */}
-        {entities.length > 0 && (
+        {(selectedExistingEntities.length > 0 || entities.length > 0) && (
           <div>
             <p className="block text-sm font-medium mb-2">Legal entities</p>
             <div className="space-y-2">
+              {selectedExistingEntities.map((e) => (
+                <Input
+                  key={`selected-${e.id}`}
+                  type="text"
+                  value={formatSelectedExistingDisplay(e)}
+                  readOnly
+                  className="cursor-not-allowed"
+                />
+              ))}
               {entities.map((entity, index) => (
                 <Input
-                  key={index}
+                  key={`manual-${index}`}
                   type="text"
                   value={formatEntityDisplay(entity)}
                   readOnly

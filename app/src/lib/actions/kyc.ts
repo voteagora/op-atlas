@@ -17,8 +17,10 @@ import {
 } from "@/lib/persona"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { UserKYCTeam } from "@/lib/types"
+import { KYCStatus } from "@prisma/client"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+import { sendKYBReminderEmailForLegalEntity } from "./emails"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -392,7 +394,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: project.kycTeam.id,
@@ -416,7 +421,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: orgKycTeam.team.id,
@@ -432,4 +440,257 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
   }
 
   return kycTeams
+}
+
+export async function getExistingLegalEntities(kycTeamId: string) {
+  try {
+    if (!kycTeamId) {
+      console.warn("getExistingLegalEntities: missing kycTeamId")
+      return []
+    }
+
+    console.debug("getExistingLegalEntities:start", { kycTeamId })
+
+    const links = await prisma.kYCTeamEntity.findMany({
+      where: { kycTeamId },
+      include: {
+        legalEntity: {
+          include: {
+            LegalEnitityController: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    console.debug("getExistingLegalEntities:linksFetched", {
+      count: links.length,
+    })
+
+    const now = new Date()
+
+    const mapped = links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+
+    const filtered = mapped.filter(
+      (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
+    )
+
+    if (mapped.length !== filtered.length) {
+      const dropped = mapped.length - filtered.length
+      console.debug("getExistingLegalEntities:filteredOut", {
+        total: mapped.length,
+        approvedAndValid: filtered.length,
+        dropped,
+      })
+    }
+
+    const items = filtered.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.LegalEnitityController?.firstName || "",
+      controllerLastName: e.LegalEnitityController?.lastName || "",
+      controllerEmail: e.LegalEnitityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug("getExistingLegalEntities:itemsPrepared", {
+      count: items.length,
+    })
+
+    return items
+  } catch (e) {
+    console.error("getExistingLegalEntities error", e)
+    return []
+  }
+}
+
+// Fetch distinct, approved, unexpired legal entities associated with any KYCTeam
+// linked to the given organization (to populate reusable entities list).
+export async function getAvailableLegalEntitiesForOrganization(
+  organizationId: string,
+) {
+  try {
+    if (!organizationId) {
+      console.warn(
+        "getAvailableLegalEntitiesForOrganization: missing organizationId",
+      )
+      return []
+    }
+    console.debug("getAvailableLegalEntitiesForOrganization:start", {
+      organizationId,
+    })
+
+    // 1) Find all KYCTeams linked to this organization
+    const orgTeams = await prisma.organizationKYCTeam.findMany({
+      where: { organizationId },
+      select: { kycTeamId: true },
+    })
+    const kycTeamIds = orgTeams.map((t) => t.kycTeamId)
+    console.debug("getAvailableLegalEntitiesForOrganization:orgTeamsFetched", {
+      teamCount: kycTeamIds.length,
+    })
+
+    if (kycTeamIds.length === 0) {
+      return []
+    }
+
+    // 2) Fetch all links from those teams to legal entities
+    const links = await prisma.kYCTeamEntity.findMany({
+      where: { kycTeamId: { in: kycTeamIds } },
+      include: {
+        legalEntity: {
+          include: { LegalEnitityController: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+    console.debug("getAvailableLegalEntitiesForOrganization:linksFetched", {
+      count: links.length,
+    })
+
+    const now = new Date()
+
+    // 3) Map links to legal entities, filter approved + not expired, and dedupe by id
+    const approvedValid = links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .filter(
+        (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
+      )
+
+    // Dedupe by id
+    const seen = new Set<string>()
+    const deduped = approvedValid.filter((e) => {
+      if (seen.has(e.id)) return false
+      seen.add(e.id)
+      return true
+    })
+
+    const items = deduped.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.LegalEnitityController?.firstName || "",
+      controllerLastName: e.LegalEnitityController?.lastName || "",
+      controllerEmail: e.LegalEnitityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug("getAvailableLegalEntitiesForOrganization:itemsPrepared", {
+      count: items.length,
+    })
+    return items
+  } catch (e) {
+    console.error("getAvailableLegalEntitiesForOrganization error", e)
+    return []
+  }
+}
+
+// Fetch all selected legal entities for a KYCTeam, regardless of approval/expiry,
+// to drive the Legal Entities status list in the KYC status UI.
+export async function getSelectedLegalEntitiesForTeam(kycTeamId: string) {
+  try {
+    if (!kycTeamId) return []
+
+    const links = await prisma.kYCTeamEntity.findMany({
+      where: { kycTeamId },
+      include: {
+        legalEntity: {
+          include: {
+            LegalEnitityController: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    return links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .map((e) => ({
+        id: e.id,
+        name: e.name,
+        status: e.status,
+        expiry: e.expiry ?? null,
+        controllerFirstName: e.LegalEnitityController?.firstName || "",
+        controllerLastName: e.LegalEnitityController?.lastName || "",
+        controllerEmail: e.LegalEnitityController?.email || "",
+      }))
+  } catch (e) {
+    console.error("getSelectedLegalEntitiesForTeam error", e)
+    return []
+  }
+}
+
+// Resend KYB email for a selected Legal Entity (uses controller info)
+export async function resendKYBForLegalEntity(params: {
+  projectId?: string
+  organizationId?: string
+  legalEntity: {
+    id: string
+    email: string
+    firstName: string
+    lastName: string
+    businessName?: string
+  }
+}) {
+  console.debug("[KYB][Server] resendKYBForLegalEntity:start", {
+    hasProjectId: Boolean(params.projectId),
+    hasOrganizationId: Boolean(params.organizationId),
+    legalEntityId: params.legalEntity?.id,
+    legalEntityEmail: params.legalEntity?.email,
+  })
+  const session = await auth()
+  const userId = session?.user?.id
+  if (!userId) {
+    console.warn("[KYB][Server] Unauthorized resendKYBForLegalEntity call")
+    return { success: false, error: "Unauthorized" }
+  }
+
+  // Verify admin permissions based on context
+  if (params.projectId) {
+    const isInvalid = await verifyAdminStatus(params.projectId, userId)
+    if (isInvalid?.error) {
+      console.warn("[KYB][Server] Project admin check failed", isInvalid)
+      return { success: false, error: isInvalid.error }
+    }
+  } else if (params.organizationId) {
+    const isInvalid = await verifyOrganizationAdmin(
+      params.organizationId,
+      userId,
+    )
+    if (isInvalid?.error) {
+      console.warn("[KYB][Server] Org admin check failed", isInvalid)
+      return { success: false, error: isInvalid.error }
+    }
+  } else {
+    console.warn("[KYB][Server] Missing projectId/organizationId context")
+    return {
+      success: false,
+      error: "Missing context - projectId or organizationId required",
+    }
+  }
+
+  try {
+    console.debug("[KYB][Server] Sending KYB reminder for legal entity", {
+      id: params.legalEntity.id,
+      email: params.legalEntity.email,
+      firstName: params.legalEntity.firstName,
+      lastName: params.legalEntity.lastName,
+      businessName: params.legalEntity.businessName,
+    })
+    const res = await sendKYBReminderEmailForLegalEntity({
+      id: params.legalEntity.id,
+      email: params.legalEntity.email,
+      firstName: params.legalEntity.firstName,
+      lastName: params.legalEntity.lastName,
+      businessName: params.legalEntity.businessName,
+    })
+    console.debug("[KYB][Server] KYB reminder send result", res)
+    return res
+  } catch (e) {
+    console.error("[KYB][Server] resendKYBForLegalEntity error", e)
+    return { success: false, error: (e as any)?.message || "Unknown error" }
+  }
 }

@@ -34,7 +34,6 @@ model User {
   passports          UserPassport[]
   projects           UserProjects[]
   worldId            UserWorldId?
-  userKYCUsers       UserKYCUser[]
   endorsements       Endorsement[]      @relation("UserEndorsements")
   safeAddresses      UserSafeAddress[]
 
@@ -44,18 +43,15 @@ model User {
 }
 
 model UserEmail {
-  id                           String    @id @default(uuid())
-  email                        String    @unique
-  userId                       String
-  verified                     Boolean   @default(false)
-  verificationToken            String?   @unique
-  verificationTokenExpiresAt   DateTime?
-  createdAt                    DateTime  @default(now())
-  updatedAt                    DateTime  @updatedAt
-  user                         User      @relation(fields: [userId], references: [id])
+  id        String   @id @default(uuid())
+  email     String   @unique
+  userId    String
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
-  @@index([verificationToken])
 }
 
 model UserInteraction {
@@ -328,6 +324,46 @@ model ImpactStatement {
   @@index([categoryId])
 }
 
+// Reusable business identity
+model LegalEntity {
+  id                       String                  @id @default(uuid())
+  name                     String
+  status                   KYCStatus               @default(PENDING) // APPROVED | REJECTED | PENDING
+  expiry                   DateTime? // valid-through; APPROVED & expiry>now() => reusable
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  teamLinks                KYCTeamEntity[]
+  LegalEnitityController   LegalEnitityController? @relation(fields: [legalEnitityControllerId], references: [id])
+  legalEnitityControllerId String?
+
+  @@index([name])
+}
+
+// Used for collecting POC / Controller of legal entity
+model LegalEnitityController {
+  id            String        @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  legalEntities LegalEntity[]
+
+  @@index([email])
+}
+
+// Which entity was used by a given KYCTeam (one per GrantEligibility attempt)
+model KYCTeamEntity {
+  kycTeamId     String
+  legalEntityId String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  team          KYCTeam     @relation(fields: [kycTeamId], references: [id])
+  legalEntity   LegalEntity @relation(fields: [legalEntityId], references: [id])
+
+  @@id([kycTeamId, legalEntityId])
+}
+
 model ImpactStatementAnswer {
   id                String          @id @default(uuid())
   applicationId     String
@@ -490,34 +526,29 @@ model ContactEmailTags {
 model KYCUser {
   id                 String              @id @default(uuid())
   email              String
-  firstName          String?
-  lastName           String?
+  firstName          String
+  lastName           String
   businessName       String?
   status             KYCStatus           @default(PENDING)
   expiry             DateTime
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   personaStatus      PersonaStatus?
-  kycUserType        KYCUserType         @default(USER)
   KYCUserTeams       KYCUserTeams[]
-  EmailNotifications EmailNotification[]
-  UserKYCUsers       UserKYCUser[]
 
   @@index([email])
 }
 
 model EmailNotification {
-  id        String                @id @default(uuid())
-  kycUserId String
-  type      EmailNotificationType
-  sentAt    DateTime              @default(now())
-  emailTo   String // Store the actual email used
-  success   Boolean               @default(true)
-  error     String? // Store any error messages
+  id          String                @id @default(uuid())
+  referenceId String               @map("ReferenceId")
+  type        EmailNotificationType
+  sentAt      DateTime              @default(now())
+  emailTo     String // Store the actual email used
+  success     Boolean               @default(true)
+  error       String? // Store any error messages
 
-  kycUser KYCUser @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
-
-  @@index([kycUserId])
+  @@index([referenceId])
   @@index([type])
   @@index([sentAt])
 }
@@ -534,6 +565,7 @@ model KYCTeam {
   projects             Project[]
   rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
+  KYCTeamEntity        KYCTeamEntity[]
 
   @@index([walletAddress])
 }
@@ -549,21 +581,6 @@ model KYCUserTeams {
 
   @@index([kycUserId])
   @@index([kycTeamId])
-}
-
-model UserKYCUser {
-  id        String   @id @default(uuid())
-  kycUserId String
-  userId    String
-  createdAt DateTime @default(now())
-
-  // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  kycUser KYCUser @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([kycUserId])
-  @@unique([userId, kycUserId])
 }
 
 model OrganizationKYCTeam {
@@ -980,10 +997,6 @@ view pg_stat_statements {
   @@ignore
 }
 
-enum KYCUserType {
-  USER
-  LEGAL_ENTITY
-}
 
 enum KYCStatus {
   PENDING
@@ -1036,7 +1049,6 @@ enum EmailNotificationType {
   KYCB_STARTED
   KYCB_REMINDER
   KYCB_APPROVED
-  KYC_EMAIL_VERIFICATION
 }
 
 enum GrantType {
