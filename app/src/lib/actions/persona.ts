@@ -2,7 +2,7 @@
 
 import { randomBytes } from "crypto"
 
-import { KYCUser } from "@prisma/client"
+import { KYCUser, LegalEntity } from "@prisma/client"
 
 import { prisma } from "@/db/client"
 
@@ -16,8 +16,12 @@ export interface PersonaInquiryLinkResponse {
 const PERSONA_VERIFICATION_URL =
   "https://inquiry.withpersona.com/verify"
 
+type PersonaEntity =
+  | { type: 'kycUser', entity: KYCUser }
+  | { type: 'legalEntity', entity: LegalEntity }
+
 export const createPersonaInquiryLink = async (
-  kycUser: KYCUser,
+  personaEntity: PersonaEntity,
   templateId: string,
 ): Promise<PersonaInquiryLinkResponse> => {
   try {
@@ -27,18 +31,28 @@ export const createPersonaInquiryLink = async (
         error: "Persona template ID not configured",
       }
     }
-    let referenceId = kycUser.personaReferenceId ?? undefined
+
+    const { type, entity } = personaEntity
+    let referenceId = entity.personaReferenceId ?? undefined
 
     if (!referenceId) {
       const newReferenceId = randomBytes(16).toString("hex")
 
-      const updatedUser = await prisma.kYCUser.update({
-        where: { id: kycUser.id },
-        data: { personaReferenceId: newReferenceId },
-        select: { personaReferenceId: true },
-      })
-
-      referenceId = updatedUser.personaReferenceId ?? newReferenceId
+      if (type === 'kycUser') {
+        const updatedUser = await prisma.kYCUser.update({
+          where: { id: entity.id },
+          data: { personaReferenceId: newReferenceId },
+          select: { personaReferenceId: true },
+        })
+        referenceId = updatedUser.personaReferenceId ?? newReferenceId
+      } else {
+        const updatedEntity = await prisma.legalEntity.update({
+          where: { id: entity.id },
+          data: { personaReferenceId: newReferenceId },
+          select: { personaReferenceId: true },
+        })
+        referenceId = updatedEntity.personaReferenceId ?? newReferenceId
+      }
     }
 
     if (!referenceId) {

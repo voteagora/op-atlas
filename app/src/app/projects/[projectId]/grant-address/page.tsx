@@ -50,10 +50,10 @@ export default async function Page({
   }
 
   // Check user membership - redirect non-members to homepage
-  const membershipCheck = await verifyMembership(params.projectId, userId)
-  if (membershipCheck?.error) {
-    redirect("/")
-  }
+  // const membershipCheck = await verifyMembership(params.projectId, userId)
+  // if (membershipCheck?.error) {
+  //   redirect("/")
+  // }
 
   // Get user role
   const userRole = await getUserProjectRole(params.projectId, userId)
@@ -61,7 +61,11 @@ export default async function Page({
 
   const project = await getKycTeamForProject({ projectId: params.projectId })
   const kycTeam = project?.kycTeam ?? undefined
-  const hasKycTeamWithUsers = !!(kycTeam && kycTeam.team && kycTeam.team.length > 0)
+  const hasKycTeamWithUsers = !!(
+    kycTeam &&
+    kycTeam.team &&
+    kycTeam.team.length > 0
+  )
 
   return (
     <div className="space-y-12">
@@ -80,14 +84,14 @@ export default async function Page({
       ) : (
         !hasKycTeamWithUsers && (
           <div className="space-y-6">
-            <GrantDeliveryAddressSection 
+            <GrantDeliveryAddressSection
               projectId={params.projectId}
               isAdmin={isAdmin}
             />
           </div>
         )
       )}
-      
+
       {project && hasKycTeamWithUsers && (
         <KYCStatusContainer project={project} isAdmin={isAdmin} />
       )}

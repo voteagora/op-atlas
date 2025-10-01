@@ -225,16 +225,21 @@ export function getFindMyKYCVerificationTemplate(verificationCode: string): stri
 // =============================================================================
 
 // Template for business KYB users
-export function getKYBEmailTemplate(kycUser: KYCUserWithRelations, kycLink: string): string {
+export function getKYBEmailTemplate(params: {
+  firstName: string
+  businessName: string
+  kycLink: string
+}): string {
+  const displayName = params.firstName || 'Optimist'
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)},<br>Congratulations on applying for your Optimism Grant! 🎉</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName},<br>Congratulations on applying for your Optimism Grant! 🎉</h1>
 
-    <p style="font-size: 16px; margin-bottom: 40px;">To receive your OP tokens, we need you to complete a quick KYB (Know Your Business) verification for <strong>${kycUser.businessName}</strong>. This is a standard security procedure that helps us ensure proper distribution of rewards.</p>
+    <p style="font-size: 16px; margin-bottom: 40px;">To receive your OP tokens, we need you to complete a quick KYB (Know Your Business) verification for <strong>${params.businessName}</strong>. This is a standard security procedure that helps us ensure proper distribution of rewards.</p>
 
     <p style="font-size: 16px;">Complete your verification in 3 easy steps:</p>
     <ol style="font-size: 16px; padding-left: 0; margin-left: 0; list-style-position: inside;">
@@ -246,7 +251,7 @@ export function getKYBEmailTemplate(kycUser: KYCUserWithRelations, kycLink: stri
     <p style="font-size: 16px; margin-bottom: 40px;">Most users complete this process in under 10 minutes. Your information is securely handled according to our privacy policy.</p>
 
     <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${kycLink}" style="background-color: #FF0420; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Complete KYB Verification Now</a>
+        <a href="${params.kycLink}" style="background-color: #FF0420; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Complete KYB Verification Now</a>
     </div>
 
     <p style="text-align: center; font-size: 16px; margin-bottom: 40px;">Link expires in 7 days.</p>
@@ -264,17 +269,18 @@ export function getKYBEmailTemplate(kycUser: KYCUserWithRelations, kycLink: stri
 }
 
 // Template for KYB reminder email
-export function getKYBReminderEmailTemplate(
-  kycUser: KYCUserWithRelations,
-  kycLink: string,
-): string {
+export function getKYBReminderEmailTemplate(params: {
+  firstName: string
+  kycLink: string
+}): string {
+  const displayName = params.firstName || 'Optimist'
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)},<br>You haven't completed KYB verification for your Optimism grant yet</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName},<br>You haven't completed KYB verification for your Optimism grant yet</h1>
 
     <p style="font-size: 16px;">Your verification is just a few steps away:</p>
 
@@ -287,7 +293,7 @@ export function getKYBReminderEmailTemplate(
     <p style="font-size: 16px; margin-bottom: 40px;">Your information is securely handled according to our privacy policy.</p>
 
     <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${kycLink}" style="background-color: #FF0420; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Complete KYB Verification Now</a>
+        <a href="${params.kycLink}" style="background-color: #FF0420; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Complete KYB Verification Now</a>
     </div>
 
     <p style="text-align: center; font-size: 16px; margin-bottom: 40px;">Link expires in 7 days.</p>
@@ -304,7 +310,8 @@ export function getKYBReminderEmailTemplate(
     `
 }
 
-export function getKYBApprovedEmailTemplate(kycUser: KYCUserWithRelations): string {
+export function getKYBApprovedEmailTemplate(firstName: string): string {
+  const displayName = firstName || 'Optimist'
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">

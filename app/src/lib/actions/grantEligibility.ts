@@ -1,21 +1,26 @@
 "use server"
 
+import { GrantType, KYCUser, Prisma } from "@prisma/client"
+import { revalidatePath } from "next/cache"
+
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { GrantType, Prisma, KYCUser } from "@prisma/client"
-import { revalidatePath } from "next/cache"
-import { sendKYCStartedEmail, sendKYBStartedEmail } from "./emails"
-
+import {
+  getGrantEligibilityExpiration,
+  getLatestDraftForm,
+} from "@/db/grantEligibility"
+import { withChangelogTracking } from "@/lib/utils/changelog"
 import {
   getGrantEligibilityFormStatus,
   GrantEligibilityFormStatus,
 } from "@/lib/utils/grantEligibilityFormStatus"
-import { withChangelogTracking } from "@/lib/utils/changelog"
-import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+
 import {
-  getLatestDraftForm,
-  getGrantEligibilityExpiration,
-} from "@/db/grantEligibility"
+  sendKYBStartedEmail,
+  sendKYCStartedEmail,
+} from "./emails"
+import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+import { getExistingLegalEntities, getAvailableLegalEntitiesForOrganization } from "./kyc"
 
 export interface CreateGrantEligibilityFormParams {
   projectId?: string
@@ -43,6 +48,7 @@ export interface UpdateGrantEligibilityFormParams {
       controllerLastName: string
       controllerEmail: string
     }>
+    selectedExistingEntityIds?: string[]
   }
 }
 
@@ -266,6 +272,29 @@ export async function getGrantEligibilityForm(formId: string) {
   }
 }
 
+async function createLegalEntity(
+  tx: Prisma.TransactionClient,
+  params: {
+    name: string
+    controllerFirstName: string
+    controllerLastName: string
+    controllerEmail: string
+  },
+) {
+  return await tx.legalEntity.create({
+    data: {
+      name: params.name,
+      LegalEnitityController: {
+        create: {
+          firstName: params.controllerFirstName,
+          lastName: params.controllerLastName,
+          email: params.controllerEmail.toLowerCase(),
+        },
+      },
+    },
+  })
+}
+
 export async function submitGrantEligibilityForm(params: {
   formId: string
   finalAttestations: Record<string, boolean>
@@ -325,6 +354,8 @@ export async function submitGrantEligibilityForm(params: {
     const formData = (existingForm.data as any) || {}
     const signers = formData.signers || []
     const entities = formData.entities || []
+    const selectedExistingEntityIds: string[] =
+      formData.selectedExistingEntityIds || []
     const kycTeamId: string = existingForm.kycTeamId as string
 
     // Do ONLY database work inside the transaction
@@ -363,7 +394,13 @@ export async function submitGrantEligibilityForm(params: {
         }
 
         const kycTargets: KYCUser[] = []
-        const kybTargets: KYCUser[] = []
+        const kybTargets: Array<{
+          id: string
+          email: string
+          firstName: string
+          lastName: string
+          businessName?: string
+        }> = []
 
         // Process signers (individual KYC)
         for (const signer of signers) {
@@ -373,7 +410,7 @@ export async function submitGrantEligibilityForm(params: {
           }
 
           let kycUser = await tx.kYCUser.findFirst({
-            where: { email: signer.email.toLowerCase(), kycUserType: "USER" },
+            where: { email: signer.email.toLowerCase() },
           })
 
           let isNewUser = false
@@ -385,7 +422,6 @@ export async function submitGrantEligibilityForm(params: {
                 email: signer.email.toLowerCase(),
                 firstName: signer.firstName,
                 lastName: signer.lastName,
-                kycUserType: "USER",
                 status: "PENDING",
                 expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
               },
@@ -420,85 +456,88 @@ export async function submitGrantEligibilityForm(params: {
           }
         }
 
-        // Process entities (business KYB)
-      for (const entity of entities) {
-        if (!entity.controllerEmail || !entity.controllerFirstName || !entity.controllerLastName || !entity.company) {
-          console.warn("Skipping entity with incomplete data:", entity)
-          continue
+        // Link selected existing legal entities to KYC team (no creation/email)
+        for (const legalEntityId of selectedExistingEntityIds) {
+          try {
+            const existingEntity = await tx.legalEntity.findUnique({
+              where: { id: legalEntityId },
+            })
+            if (!existingEntity) {
+              console.warn("Selected legal entity not found:", legalEntityId)
+              continue
+            }
+            const existingTeamLink = await tx.kYCTeamEntity.findUnique({
+              where: { kycTeamId_legalEntityId: { kycTeamId, legalEntityId } },
+            })
+            if (!existingTeamLink) {
+              await tx.kYCTeamEntity.create({
+                data: { kycTeamId, legalEntityId },
+              })
+            }
+          } catch (e) {
+            console.error(
+              "Failed linking existing legal entity:",
+              legalEntityId,
+              e,
+            )
+          }
         }
 
-        // For KYB case, check organization along with email and user type
-        // If form is tied to a project (no organization), always create new KYC user
-        // If form is tied to an organization, check if KYC user exists for same email, type, and organization
-        let kycUser = null
-        if (existingForm.organizationId) {
-          kycUser = await tx.kYCUser.findFirst({
-            where: {
-              email: entity.controllerEmail.toLowerCase(),
-              kycUserType: "LEGAL_ENTITY",
-              KYCUserTeams: {
-                some: {
-                  team: {
-                    OrganizationKYCTeams: {
-                      some: {
-                        organizationId: existingForm.organizationId,
-                        deletedAt: null
-                      }
-                    }
-                  }
-                }
-              }
+        // Process entities (business KYB): create LegalEntity + Controller and link to KYC team only
+        for (const entity of entities) {
+          if (
+            !entity.controllerEmail ||
+            !entity.controllerFirstName ||
+            !entity.controllerLastName ||
+            !entity.company
+          ) {
+            console.warn("Skipping entity with incomplete data:", entity)
+            continue
+          }
+
+          const legalEntity = await tx.legalEntity.create({
+            data: {
+              name: entity.company,
+              LegalEnitityController: {
+                create: {
+                  firstName: entity.controllerFirstName,
+                  lastName: entity.controllerLastName,
+                  email: entity.controllerEmail.toLowerCase(),
+                },
+              },
             },
           })
-        }
-        // If form is tied to project (no organization), we always create new KYC user, so kycUser stays null
 
-        let isNewUser = false
-
-        // If user doesn't exist or is expired, create/recreate them
-        if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
-          kycUser = await tx.kYCUser.create({
+          // Link legal entity to KYC team
+          await tx.kYCTeamEntity.create({
             data: {
-              email: entity.controllerEmail.toLowerCase(),
-              firstName: entity.controllerFirstName,
-              lastName: entity.controllerLastName,
-              businessName: entity.company,
-              kycUserType: "LEGAL_ENTITY",
-              status: "PENDING",
-              expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-            },
-          })
-          isNewUser = true
-        }
-
-        const existingLink = await tx.kYCUserTeams.findFirst({
-          where: {
-            kycUserId: kycUser.id,
-            kycTeamId,
-          },
-        })
-
-        if (!existingLink) {
-          await tx.kYCUserTeams.create({
-            data: {
-              kycUserId: kycUser.id,
               kycTeamId,
+              legalEntityId: legalEntity.id,
             },
           })
+
+          // Queue KYB email for this new legal entity using controller info
+          kybTargets.push({
+            id: legalEntity.id,
+            email: entity.controllerEmail.toLowerCase(),
+            firstName: entity.controllerFirstName,
+            lastName: entity.controllerLastName,
+            businessName: entity.company,
+          })
+
+          // Note: We no longer create a KYCUser for legal entities here.
         }
 
-        // Only send email if this is a new user
-        if (isNewUser) {
-          kybTargets.push(kycUser)
+        return {
+          updatedForm: updated,
+          kycEmailTargets: kycTargets,
+          kybEmailTargets: kybTargets,
         }
-      }
-
-      return { updatedForm: updated, kycEmailTargets: kycTargets, kybEmailTargets: kybTargets }
-    })
+      })
 
     const emailPromises: Array<
       Promise<{
-        type: "KYC" | "KYB"
+        type: "KYC"
         user?: string
         email: string
         company?: string
@@ -549,42 +588,34 @@ export async function submitGrantEligibilityForm(params: {
       )
     }
 
-    for (const user of kybEmailTargets) {
+    // Also send KYB emails for newly created legal entities using controller info
+    for (const le of kybEmailTargets) {
       emailPromises.push(
         (async () => {
           try {
-            // Re-fetch user with relations for email template
-            const userWithRelations = await prisma.kYCUser.findUnique({
-              where: { id: user.id },
+            // Fetch the LegalEntity with its controller to pass to sendKYBStartedEmail
+            const legalEntity = await prisma.legalEntity.findUnique({
+              where: { id: le.id },
               include: {
-                KYCUserTeams: true,
-                UserKYCUsers: {
-                  include: {
-                    user: true
-                  }
-                }
-              }
+                LegalEnitityController: true,
+              },
             })
 
-            if (!userWithRelations) {
-              throw new Error("KYC user not found")
+            if (!legalEntity || !legalEntity.LegalEnitityController) {
+              throw new Error("Legal entity or controller not found")
             }
 
-            const res = await sendKYBStartedEmail(userWithRelations)
+            const res = await sendKYBStartedEmail(legalEntity as any)
             return {
-              type: "KYB" as const,
-              user: `${user.firstName} ${user.lastName}`,
-              email: user.email,
-              company: user.businessName ?? undefined,
+              type: "KYC" as const, // keep aggregation simple; label not used elsewhere
+              email: le.email,
               success: res.success,
               error: res.error,
             }
           } catch (e: any) {
             return {
-              type: "KYB" as const,
-              user: `${user.firstName} ${user.lastName}`,
-              email: user.email,
-              company: user.businessName ?? undefined,
+              type: "KYC" as const,
+              email: le.email,
               success: false,
               error: e?.message || "Unknown error",
             }
@@ -818,5 +849,193 @@ export async function clearGrantEligibilityForm(formId: string) {
       return { error: error.message }
     }
     return { error: "Failed to clear form" }
+  }
+}
+
+// Fetch existing reusable legal entities for a given GrantEligibility form
+export async function getExistingLegalEntitiesForForm(formId: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    console.warn("getExistingLegalEntitiesForForm: Unauthorized call", { formId })
+    return { error: "Unauthorized" }
+  }
+
+  try {
+    console.debug("getExistingLegalEntitiesForForm:start", { formId, userId })
+
+    // Load the form to validate access and read KYCTeamId/currentStep
+    const form = await prisma.grantEligibility.findUnique({
+      where: { id: formId },
+      include: {
+        project: true,
+        organization: true,
+      },
+    })
+
+    if (!form) {
+      console.warn("getExistingLegalEntitiesForForm: Form not found", { formId })
+      return { error: "Form not found" }
+    }
+
+    console.debug("getExistingLegalEntitiesForForm:loadedForm", {
+      formId: form.id,
+      projectId: form.projectId,
+      organizationId: form.organizationId,
+      kycTeamId: form.kycTeamId,
+      currentStep: form.currentStep,
+    })
+
+    // Verify permissions
+    if (form.projectId) {
+      const isInvalid = await verifyAdminStatus(form.projectId, userId)
+      if (isInvalid?.error) {
+        console.warn("getExistingLegalEntitiesForForm: project admin check failed", isInvalid)
+        return { error: isInvalid.error }
+      }
+    } else if (form.organizationId) {
+      const isInvalid = await verifyOrganizationAdmin(
+        form.organizationId,
+        userId,
+      )
+      if (isInvalid?.error) {
+        console.warn("getExistingLegalEntitiesForForm: org admin check failed", isInvalid)
+        return { error: isInvalid.error }
+      }
+    } else {
+      console.warn("getExistingLegalEntitiesForForm: no projectId or organizationId on form", { formId })
+    }
+
+    // Only fetch if user has progressed to/ beyond step 3
+    if ((form.currentStep ?? 1) < 3) {
+      console.debug("getExistingLegalEntitiesForForm:guardNotMet", {
+        hasKycTeamId: Boolean(form.kycTeamId),
+        currentStep: form.currentStep ?? 1,
+      })
+      return { items: [] }
+    }
+
+    // If we have an organization context, aggregate across all its KYCTeams
+    if (form.organizationId) {
+      const items = await getAvailableLegalEntitiesForOrganization(form.organizationId)
+      console.debug("getExistingLegalEntitiesForForm:itemsFetchedByOrg", {
+        organizationId: form.organizationId,
+        count: Array.isArray(items) ? items.length : null,
+      })
+      return { items }
+    }
+
+    // Fallback: use the current form's kycTeamId if present
+    if (form.kycTeamId) {
+      const items = await getExistingLegalEntities(form.kycTeamId)
+      console.debug("getExistingLegalEntitiesForForm:itemsFetchedByTeam", {
+        kycTeamId: form.kycTeamId,
+        count: Array.isArray(items) ? items.length : null,
+      })
+      return { items }
+    }
+
+    console.debug("getExistingLegalEntitiesForForm:noContextToFetch", { formId })
+    return { items: [] }
+  } catch (error) {
+    console.error("Error fetching existing legal entities for form:", error)
+    return { error: "Failed to fetch existing legal entities" }
+  }
+}
+
+
+
+export async function getSelectedExistingLegalEntitiesForForm(formId: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    console.warn("getSelectedExistingLegalEntitiesForForm: Unauthorized call", { formId })
+    return { error: "Unauthorized" }
+  }
+
+  try {
+    console.debug("getSelectedExistingLegalEntitiesForForm:start", { formId, userId })
+
+    const form = await prisma.grantEligibility.findUnique({
+      where: { id: formId },
+      include: {
+        project: true,
+        organization: true,
+      },
+    })
+
+    if (!form) {
+      console.warn("getSelectedExistingLegalEntitiesForForm: Form not found", { formId })
+      return { error: "Form not found" }
+    }
+
+    // Verify permissions
+    if (form.projectId) {
+      const isInvalid = await verifyAdminStatus(form.projectId, userId)
+      if (isInvalid?.error) {
+        console.warn(
+          "getSelectedExistingLegalEntitiesForForm: project admin check failed",
+          isInvalid,
+        )
+        return { error: isInvalid.error }
+      }
+    } else if (form.organizationId) {
+      const isInvalid = await verifyOrganizationAdmin(form.organizationId, userId)
+      if (isInvalid?.error) {
+        console.warn(
+          "getSelectedExistingLegalEntitiesForForm: org admin check failed",
+          isInvalid,
+        )
+        return { error: isInvalid.error }
+      }
+    }
+
+    const data = (form.data as any) || {}
+    const ids: string[] = Array.isArray(data.selectedExistingEntityIds)
+      ? data.selectedExistingEntityIds
+      : []
+
+    if (!ids.length) {
+      console.debug(
+        "getSelectedExistingLegalEntitiesForForm:noSelectedIds",
+        { formId },
+      )
+      return { items: [] }
+    }
+
+    const entities = await prisma.legalEntity.findMany({
+      where: { id: { in: ids } },
+      include: { LegalEnitityController: true },
+    })
+
+    // Maintain original ordering based on ids array
+    const byId = new Map(entities.map((e) => [e.id, e]))
+    const ordered = ids
+      .map((id) => byId.get(id))
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+
+    const items = ordered.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.LegalEnitityController?.firstName || "",
+      controllerLastName: e.LegalEnitityController?.lastName || "",
+      controllerEmail: e.LegalEnitityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug(
+      "getSelectedExistingLegalEntitiesForForm:itemsPrepared",
+      { count: items.length },
+    )
+
+    return { items }
+  } catch (error) {
+    console.error(
+      "Error fetching selected existing legal entities for form:",
+      error,
+    )
+    return { error: "Failed to fetch selected existing legal entities" }
   }
 }

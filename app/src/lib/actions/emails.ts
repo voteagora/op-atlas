@@ -1,7 +1,7 @@
 "use server"
 
 import mailchimp from "@mailchimp/mailchimp_transactional"
-import { EmailNotificationType, KYCUser } from "@prisma/client"
+import { EmailNotificationType, KYCUser, LegalEntity } from "@prisma/client"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
@@ -90,7 +90,7 @@ export const sendTransactionEmail = async (
 }
 
 async function trackEmailNotification(params: {
-  kycUserId: string
+  referenceId: string
   type: EmailNotificationType
   emailTo: string
   success: boolean
@@ -118,7 +118,10 @@ export const sendKYCStartedEmail = async (
     }
   }
 
-  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+  const inquiryResult = await createPersonaInquiryLink(
+    { type: 'kycUser', entity: kycUser },
+    templateId
+  )
 
   if (!inquiryResult.success) {
     return { success: false }
@@ -141,7 +144,7 @@ export const sendKYCStartedEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.personaReferenceId || kycUser.id,
     type: "KYCB_STARTED",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -152,7 +155,7 @@ export const sendKYCStartedEmail = async (
 }
 
 export const sendKYBStartedEmail = async (
-  kycUser: KYCUser,
+  legalEntity: LegalEntity & { LegalEnitityController: { firstName: string, lastName: string, email: string } },
 ): Promise<EmailResponse> => {
   const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
 
@@ -163,7 +166,10 @@ export const sendKYBStartedEmail = async (
     }
   }
 
-  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+  const inquiryResult = await createPersonaInquiryLink(
+    { type: 'legalEntity', entity: legalEntity },
+    templateId
+  )
 
   if (!inquiryResult.success) {
     return { success: false }
@@ -175,18 +181,22 @@ export const sendKYBStartedEmail = async (
 
   const kycLink = inquiryResult.inquiryUrl
 
-  const html = getKYBEmailTemplate(kycUser, kycLink)
+  const html = getKYBEmailTemplate({
+    firstName: legalEntity.LegalEnitityController.firstName,
+    businessName: legalEntity.name,
+    kycLink,
+  })
 
   const emailResult = await sendTransactionEmail({
-    to: kycUser.email,
+    to: legalEntity.LegalEnitityController.email,
     subject: "Action Required: Complete KYB to Unlock Your Optimism Grant",
     html,
   })
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: legalEntity.personaReferenceId || legalEntity.id,
     type: "KYCB_STARTED",
-    emailTo: kycUser.email,
+    emailTo: legalEntity.LegalEnitityController.email,
     success: emailResult.success,
     error: emailResult.error,
   })
@@ -246,7 +256,7 @@ export const sendKYCReminderEmail = async (
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
   const recentReminder = await prisma.emailNotification.findFirst({
     where: {
-      kycUserId: kycUser.id,
+      referenceId: kycUser.personaReferenceId || kycUser.id,
       type: "KYCB_REMINDER",
       sentAt: {
         gte: twentyFourHoursAgo,
@@ -274,7 +284,10 @@ export const sendKYCReminderEmail = async (
     }
   }
 
-  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+  const inquiryResult = await createPersonaInquiryLink(
+    { type: 'kycUser', entity: kycUser },
+    templateId
+  )
 
   if (!inquiryResult.success) {
     return { success: false }
@@ -297,7 +310,7 @@ export const sendKYCReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.personaReferenceId || kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -308,7 +321,7 @@ export const sendKYCReminderEmail = async (
 }
 
 export const sendKYBReminderEmail = async (
-  kycUser: KYCUser,
+  legalEntity: LegalEntity & { LegalEnitityController: { firstName: string, lastName: string, email: string } },
 ): Promise<EmailResponse> => {
   const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
 
@@ -319,7 +332,10 @@ export const sendKYBReminderEmail = async (
     }
   }
 
-  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+  const inquiryResult = await createPersonaInquiryLink(
+    { type: 'legalEntity', entity: legalEntity },
+    templateId
+  )
 
   if (!inquiryResult.success) {
     return { success: false }
@@ -331,10 +347,13 @@ export const sendKYBReminderEmail = async (
 
   const kycLink = inquiryResult.inquiryUrl
 
-  const html = getKYBReminderEmailTemplate(kycUser, kycLink)
+  const html = getKYBReminderEmailTemplate({
+    firstName: legalEntity.LegalEnitityController.firstName,
+    kycLink,
+  })
 
   const emailParams = {
-    to: kycUser.email,
+    to: legalEntity.LegalEnitityController.email,
     subject: "Reminder: Complete Your KYB to Receive Your Optimism Grant",
     html,
   }
@@ -342,9 +361,9 @@ export const sendKYBReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: legalEntity.personaReferenceId || legalEntity.id,
     type: "KYCB_REMINDER",
-    emailTo: kycUser.email,
+    emailTo: legalEntity.LegalEnitityController.email,
     success: emailResult.success,
     error: emailResult.error,
   })
@@ -366,7 +385,7 @@ export const sendKYCApprovedEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.personaReferenceId || kycUser.id,
     type: "KYCB_APPROVED",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -377,12 +396,14 @@ export const sendKYCApprovedEmail = async (
 }
 
 export const sendKYBApprovedEmail = async (
-  kycUser: KYCUser,
+  firstName: string,
+  email: string,
+  referenceId: string,
 ): Promise<EmailResponse> => {
-  const html = getKYBApprovedEmailTemplate(kycUser)
+  const html = getKYBApprovedEmailTemplate(firstName)
 
   const emailParams = {
-    to: kycUser.email,
+    to: email,
     subject: "Verification complete!",
     html,
   }
@@ -390,9 +411,9 @@ export const sendKYBApprovedEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId,
     type: "KYCB_APPROVED",
-    emailTo: kycUser.email,
+    emailTo: email,
     success: emailResult.success,
     error: emailResult.error,
   })
@@ -455,7 +476,7 @@ export const sendPersonalKYCReminderEmail = async (
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
   const recentReminder = await prisma.emailNotification.findFirst({
     where: {
-      kycUserId: kycUser.id,
+      referenceId: kycUser.personaReferenceId || kycUser.id,
       type: "KYCB_REMINDER",
       sentAt: {
         gte: twentyFourHoursAgo,
@@ -484,7 +505,10 @@ export const sendPersonalKYCReminderEmail = async (
     }
   }
 
-  const inquiryResult = await createPersonaInquiryLink(kycUser, templateId)
+  const inquiryResult = await createPersonaInquiryLink(
+    { type: 'kycUser', entity: kycUser },
+    templateId
+  )
 
   if (!inquiryResult.success) {
     return { success: false, error: inquiryResult.error }
@@ -507,7 +531,7 @@ export const sendPersonalKYCReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId: kycUser.id,
+    referenceId: kycUser.personaReferenceId || kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -534,7 +558,7 @@ export const sendKYCEmailVerificationEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    kycUserId,
+    referenceId: kycUserId,
     type: "KYC_EMAIL_VERIFICATION",
     emailTo: email,
     success: emailResult.success,
@@ -642,7 +666,7 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
     // Track email notification if we found an orphaned KYC user
     if (orphanedKYCUser) {
       await trackEmailNotification({
-        kycUserId: orphanedKYCUser.id,
+        referenceId: orphanedKYCUser.personaReferenceId || orphanedKYCUser.id,
         type: "KYC_EMAIL_VERIFICATION",
         emailTo: email.toLowerCase(),
         success: emailResult.success,
