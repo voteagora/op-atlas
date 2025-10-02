@@ -9,7 +9,7 @@ import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 
 export const EmailConnection = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId, enabled: true })
-  const { linkEmail, updateEmail, unlinkEmail } = usePrivyEmail(userId)
+  const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { user: privyUser } = usePrivy()
 
   const email = user?.emails[0]?.email || privyUser?.email?.address
@@ -37,12 +37,6 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
       >
         {email ? "Update" : "Add email"}
       </Button>
-
-      {email && (
-        <Button variant="secondary" onClick={unlinkEmail}>
-          Delete
-        </Button>
-      )}
     </div>
   )
 }
