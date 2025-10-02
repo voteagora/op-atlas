@@ -170,23 +170,9 @@ export default function EntitiesStep() {
       return
     }
 
-    // entities.length === 1
-    if (existingEntities.length > 0) {
-      // When there are verified entities available, allow removing the last manual entity entirely
-      setEntities([])
-      setShowManualForm(false)
-      return
-    }
-
-    // No verified entities available: keep one empty row as a guard
-    setEntities([
-      {
-        company: "",
-        controllerFirstName: "",
-        controllerLastName: "",
-        controllerEmail: "",
-      },
-    ])
+    // entities.length === 1 - always allow removing the last entity
+    setEntities([])
+    setShowManualForm(false)
   }
 
   const isEntityComplete = (entity: Entity): boolean => {
@@ -354,7 +340,7 @@ export default function EntitiesStep() {
           }`}
         >
           <Plus className="h-4 w-4" />
-          Add another entity
+          {entities.length === 0 ? "Add entity" : "Add another entity"}
         </Button>
       </div>
     </div>

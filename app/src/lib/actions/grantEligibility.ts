@@ -360,180 +360,184 @@ export async function submitGrantEligibilityForm(params: {
 
     // Do ONLY database work inside the transaction
     const { updatedForm, kycEmailTargets, kybEmailTargets } =
-      await withChangelogTracking(async (tx) => {
-        const updated = await tx.grantEligibility.update({
-          where: { id: formId },
-          data: {
-            submittedAt: new Date(),
-            attestations: {
-              ...((existingForm.attestations as any) || {}),
-              ...finalAttestations,
-            },
-            expiresAt: getGrantEligibilityExpiration(),
-          },
-        })
-
-        const addUserKYCUser = async (user: any, kycUserId: string) => {
-          const userByEmail = await tx.userEmail.findFirst({
-            where: {
-              email: user.email.toLowerCase(),
-            },
-          })
-          // If we find an associated user, link them to the KYC user
-          if (userByEmail) {
-            const UserKYCUser = await tx.userKYCUser.create({
-              data: {
-                userId: userByEmail.userId,
-                kycUserId: kycUserId,
+      await withChangelogTracking(
+        async (tx) => {
+          const updated = await tx.grantEligibility.update({
+            where: { id: formId },
+            data: {
+              submittedAt: new Date(),
+              attestations: {
+                ...((existingForm.attestations as any) || {}),
+                ...finalAttestations,
               },
-            })
-            if (!UserKYCUser) {
-              throw new Error("KYC user not Created")
-            }
-          }
-        }
-
-        const kycTargets: KYCUser[] = []
-        const kybTargets: Array<{
-          id: string
-          email: string
-          firstName: string
-          lastName: string
-          businessName?: string
-        }> = []
-
-        // Process signers (individual KYC)
-        for (const signer of signers) {
-          if (!signer.email || !signer.firstName || !signer.lastName) {
-            console.warn("Skipping signer with incomplete data:", signer)
-            continue
-          }
-
-          let kycUser = await tx.kYCUser.findFirst({
-            where: { email: signer.email.toLowerCase() },
-          })
-
-          let isNewUser = false
-
-          // If user doesn't exist or is expired, create/recreate them
-          if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
-            kycUser = await tx.kYCUser.create({
-              data: {
-                email: signer.email.toLowerCase(),
-                firstName: signer.firstName,
-                lastName: signer.lastName,
-                status: "PENDING",
-                expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-              },
-            })
-            isNewUser = true
-            try {
-              await addUserKYCUser(signer, kycUser.id)
-            } catch (e) {
-              console.error("Error creating UserKYCUser:", e)
-            }
-          }
-
-          const existingLink = await tx.kYCUserTeams.findFirst({
-            where: {
-              kycUserId: kycUser.id,
-              kycTeamId,
+              expiresAt: getGrantEligibilityExpiration(),
             },
           })
 
-          if (!existingLink) {
-            await tx.kYCUserTeams.create({
-              data: {
-                kycUserId: kycUser.id,
-                kycTeamId,
-              },
-            })
-          }
+          const kycTargets: KYCUser[] = []
+          const kybTargets: Array<{
+            id: string
+            email: string
+            firstName: string
+            lastName: string
+            businessName?: string
+          }> = []
+          const kycUserTeamLinks: Array<{ kycUserId: string; kycTeamId: string }> = []
+          const userKycUserLinks: Array<{ userId: string; kycUserId: string }> = []
 
-          // Only send email if this is a new user
-          if (isNewUser) {
-            kycTargets.push(kycUser)
-          }
-        }
+          // Fetch all existing KYC users for signers in one query
+          const signerEmails = signers
+            .filter((s: any) => s.email && s.firstName && s.lastName)
+            .map((s: any) => s.email.toLowerCase())
 
-        // Link selected existing legal entities to KYC team (no creation/email)
-        for (const legalEntityId of selectedExistingEntityIds) {
-          try {
-            const existingEntity = await tx.legalEntity.findUnique({
-              where: { id: legalEntityId },
-            })
-            if (!existingEntity) {
-              console.warn("Selected legal entity not found:", legalEntityId)
+          const existingKycUsers = signerEmails.length > 0
+            ? await tx.kYCUser.findMany({
+                where: { email: { in: signerEmails } },
+              })
+            : []
+
+          const kycUsersByEmail = new Map(existingKycUsers.map(u => [u.email, u]))
+
+          // Fetch all UserEmails for signers in one query
+          const userEmailsByEmail = signerEmails.length > 0
+            ? await tx.userEmail.findMany({
+                where: { email: { in: signerEmails } },
+              }).then(emails => new Map(emails.map(e => [e.email, e])))
+            : new Map()
+
+          // Process signers (individual KYC)
+          for (const signer of signers) {
+            if (!signer.email || !signer.firstName || !signer.lastName) {
+              console.warn("Skipping signer with incomplete data:", signer)
               continue
             }
-            const existingTeamLink = await tx.kYCTeamEntity.findUnique({
-              where: { kycTeamId_legalEntityId: { kycTeamId, legalEntityId } },
-            })
-            if (!existingTeamLink) {
-              await tx.kYCTeamEntity.create({
-                data: { kycTeamId, legalEntityId },
+
+            const email = signer.email.toLowerCase()
+            let kycUser = kycUsersByEmail.get(email)
+            let isNewUser = false
+
+            // If user doesn't exist or is expired, create/recreate them
+            if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
+              kycUser = await tx.kYCUser.create({
+                data: {
+                  email,
+                  firstName: signer.firstName,
+                  lastName: signer.lastName,
+                  status: "PENDING",
+                  expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                },
               })
+              isNewUser = true
+
+              // Check if we can link to an existing user account
+              const userEmail = userEmailsByEmail.get(email)
+              if (userEmail) {
+                userKycUserLinks.push({
+                  userId: userEmail.userId,
+                  kycUserId: kycUser.id,
+                })
+              }
             }
-          } catch (e) {
-            console.error(
-              "Failed linking existing legal entity:",
-              legalEntityId,
-              e,
-            )
-          }
-        }
 
-        // Process entities (business KYB): create LegalEntity + Controller and link to KYC team only
-        for (const entity of entities) {
-          if (
-            !entity.controllerEmail ||
-            !entity.controllerFirstName ||
-            !entity.controllerLastName ||
-            !entity.company
-          ) {
-            console.warn("Skipping entity with incomplete data:", entity)
-            continue
+            // Collect link to create later
+            kycUserTeamLinks.push({
+              kycUserId: kycUser.id,
+              kycTeamId,
+            })
+
+            // Only send email if this is a new user
+            if (isNewUser) {
+              kycTargets.push(kycUser)
+            }
           }
 
-          const legalEntity = await tx.legalEntity.create({
-            data: {
-              name: entity.company,
-              LegalEnitityController: {
-                create: {
-                  firstName: entity.controllerFirstName,
-                  lastName: entity.controllerLastName,
-                  email: entity.controllerEmail.toLowerCase(),
+          // Create all UserKYCUser links in one batch
+          if (userKycUserLinks.length > 0) {
+            await tx.userKYCUser.createMany({
+              data: userKycUserLinks,
+              skipDuplicates: true,
+            })
+          }
+
+          // Create all KYC user team links in one batch
+          if (kycUserTeamLinks.length > 0) {
+            await tx.kYCUserTeams.createMany({
+              data: kycUserTeamLinks,
+              skipDuplicates: true,
+            })
+          }
+
+          // Link selected existing legal entities to KYC team (no creation/email)
+          // Use createMany with skipDuplicates for efficiency
+          if (selectedExistingEntityIds.length > 0) {
+            try {
+              await tx.kYCTeamEntity.createMany({
+                data: selectedExistingEntityIds.map(legalEntityId => ({
+                  kycTeamId,
+                  legalEntityId,
+                })),
+                skipDuplicates: true,
+              })
+            } catch (e) {
+              console.error("Failed linking existing legal entities:", e)
+            }
+          }
+
+          // Process entities (business KYB): create LegalEntity + Controller and link to KYC team only
+          for (const entity of entities) {
+            if (
+              !entity.controllerEmail ||
+              !entity.controllerFirstName ||
+              !entity.controllerLastName ||
+              !entity.company
+            ) {
+              console.warn("Skipping entity with incomplete data:", entity)
+              continue
+            }
+
+            const legalEntity = await tx.legalEntity.create({
+              data: {
+                name: entity.company,
+                LegalEnitityController: {
+                  create: {
+                    firstName: entity.controllerFirstName,
+                    lastName: entity.controllerLastName,
+                    email: entity.controllerEmail.toLowerCase(),
+                  },
                 },
               },
-            },
-          })
+            })
 
-          // Link legal entity to KYC team
-          await tx.kYCTeamEntity.create({
-            data: {
-              kycTeamId,
-              legalEntityId: legalEntity.id,
-            },
-          })
+            // Link legal entity to KYC team
+            await tx.kYCTeamEntity.create({
+              data: {
+                kycTeamId,
+                legalEntityId: legalEntity.id,
+              },
+            })
 
-          // Queue KYB email for this new legal entity using controller info
-          kybTargets.push({
-            id: legalEntity.id,
-            email: entity.controllerEmail.toLowerCase(),
-            firstName: entity.controllerFirstName,
-            lastName: entity.controllerLastName,
-            businessName: entity.company,
-          })
+            // Queue KYB email for this new legal entity using controller info
+            kybTargets.push({
+              id: legalEntity.id,
+              email: entity.controllerEmail.toLowerCase(),
+              firstName: entity.controllerFirstName,
+              lastName: entity.controllerLastName,
+              businessName: entity.company,
+            })
 
-          // Note: We no longer create a KYCUser for legal entities here.
-        }
+            // Note: We no longer create a KYCUser for legal entities here.
+          }
 
-        return {
-          updatedForm: updated,
-          kycEmailTargets: kycTargets,
-          kybEmailTargets: kybTargets,
-        }
-      })
+          return {
+            updatedForm: updated,
+            kycEmailTargets: kycTargets,
+            kybEmailTargets: kybTargets,
+          }
+      },
+      {
+        timeout: 20_000,
+      },
+    )
 
     const emailPromises: Array<
       Promise<{

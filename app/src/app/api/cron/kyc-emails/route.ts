@@ -6,8 +6,8 @@ import {
   sendKYBReminderEmail,
   sendKYCApprovedEmail,
   sendKYBApprovedEmail,
+  sendKYCReminderEmail,
 } from "@/lib/actions/emails"
-import { sendKYCReminderEmail } from "@/lib/actions/emails"
 
 export const maxDuration = 300
 export const dynamic = "force-dynamic"
@@ -25,12 +25,13 @@ async function handleKYCEmailsCron(request: NextRequest) {
   }
 
   try {
-    console.log("🔍 Processing KYC/KYB reminder emails...")
+    console.log("🔍 Processing KYC reminder emails...")
 
     const threshold = new Date()
     threshold.setDate(threshold.getDate() - 7)
 
-    const reminderCandidates = await prisma.kYCUser.findMany({
+    // Process KYC (individual) reminders
+    const kycReminderCandidates = await prisma.kYCUser.findMany({
       where: {
         status: "PENDING",
         personaStatus: { in: ["created", "pending", "needs_review"] },
@@ -38,7 +39,6 @@ async function handleKYCEmailsCron(request: NextRequest) {
           lte: threshold,
           gte: EMAIL_START_DATE,
         },
-        // EmailNotifications relation removed; filtering handled below via separate lookup
       },
       include: {
         KYCUserTeams: true,
@@ -51,47 +51,96 @@ async function handleKYCEmailsCron(request: NextRequest) {
       take: 500
     })
 
-    console.log(`Found ${reminderCandidates.length} reminder candidates`)
+    console.log(`Found ${kycReminderCandidates.length} KYC reminder candidates`)
 
-    for (const user of reminderCandidates) {
+    for (const user of kycReminderCandidates) {
       try {
         // Double-check to prevent race conditions
         const alreadySent = await prisma.emailNotification.findFirst({
-          where: { referenceId: user.id, type: "KYCB_REMINDER" },
+          where: { referenceId: user.personaReferenceId || user.id, type: "KYCB_REMINDER" },
         })
 
         if (!alreadySent) {
-          const isKYB = !!user.businessName
+          console.log(`Sending KYC reminder to ${user.email}`)
 
-          console.log(
-            `Sending ${isKYB ? "KYB" : "KYC"} reminder to ${user.email}`,
-          )
-
-          const result = isKYB
-            ? await sendKYBReminderEmail(user)
-            : await sendKYCReminderEmail(user, { bypassAuth: true })
+          const result = await sendKYCReminderEmail(user, { bypassAuth: true })
 
           if (result.success) {
             results.remindersSent++
           } else {
             results.errors.push(
-              `Reminder failed for ${user.email}: ${result.error}`,
+              `KYC reminder failed for ${user.email}: ${result.error}`,
             )
           }
         }
       } catch (error) {
         results.errors.push(
-          `Reminder error for ${user.email}: ${
+          `KYC reminder error for ${user.email}: ${
             error instanceof Error ? error.message : "Unknown error"
           }`,
         )
       }
     }
 
-    // Process approval notifications
-    console.log("🔍 Processing KYC/KYB approval notifications...")
+    // Process KYB (business/legal entity) reminders
+    console.log("🔍 Processing KYB reminder emails...")
 
-    const approvalCandidates = await prisma.kYCUser.findMany({
+    const kybReminderCandidates = await prisma.legalEntity.findMany({
+      where: {
+        status: "PENDING",
+        createdAt: {
+          lte: threshold,
+          gte: EMAIL_START_DATE,
+        },
+      },
+      include: {
+        LegalEnitityController: true,
+      },
+      take: 500
+    })
+
+    console.log(`Found ${kybReminderCandidates.length} KYB reminder candidates`)
+
+    for (const entity of kybReminderCandidates) {
+      try {
+        if (!entity.LegalEnitityController) {
+          console.warn(`Skipping legal entity ${entity.id} - no controller`)
+          continue
+        }
+
+        // Double-check to prevent race conditions
+        const alreadySent = await prisma.emailNotification.findFirst({
+          where: { referenceId: entity.personaReferenceId || entity.id, type: "KYCB_REMINDER" },
+        })
+
+        if (!alreadySent) {
+          console.log(`Sending KYB reminder to ${entity.LegalEnitityController.email} for ${entity.name}`)
+
+          const result = await sendKYBReminderEmail(entity as any, {
+            bypassAuth: true,
+          })
+
+          if (result.success) {
+            results.remindersSent++
+          } else {
+            results.errors.push(
+              `KYB reminder failed for ${entity.name}: ${result.error}`,
+            )
+          }
+        }
+      } catch (error) {
+        results.errors.push(
+          `KYB reminder error for ${entity.name}: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+        )
+      }
+    }
+
+    // Process KYC approval notifications
+    console.log("🔍 Processing KYC approval notifications...")
+
+    const kycApprovalCandidates = await prisma.kYCUser.findMany({
       where: {
         status: "APPROVED",
         createdAt: {
@@ -109,37 +158,87 @@ async function handleKYCEmailsCron(request: NextRequest) {
       take: 500
     })
 
-    console.log(`Found ${approvalCandidates.length} approval candidates`)
+    console.log(`Found ${kycApprovalCandidates.length} KYC approval candidates`)
 
-    for (const user of approvalCandidates) {
+    for (const user of kycApprovalCandidates) {
       try {
         // Double-check to prevent race conditions
         const alreadySent = await prisma.emailNotification.findFirst({
-          where: { referenceId: user.id, type: "KYCB_APPROVED" },
+          where: { referenceId: user.personaReferenceId || user.id, type: "KYCB_APPROVED" },
         })
 
         if (!alreadySent) {
-          const isKYB = !!user.businessName
+          console.log(`Sending KYC approval to ${user.email}`)
 
-          console.log(
-            `Sending ${isKYB ? "KYB" : "KYC"} approval to ${user.email}`,
-          )
-
-          const result = isKYB
-            ? await sendKYBApprovedEmail(user)
-            : await sendKYCApprovedEmail(user)
+          const result = await sendKYCApprovedEmail(user)
 
           if (result.success) {
             results.approvalsSent++
           } else {
             results.errors.push(
-              `Approval failed for ${user.email}: ${result.error}`,
+              `KYC approval failed for ${user.email}: ${result.error}`,
             )
           }
         }
       } catch (error) {
         results.errors.push(
-          `Approval error for ${user.email}: ${
+          `KYC approval error for ${user.email}: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
+        )
+      }
+    }
+
+    // Process KYB approval notifications
+    console.log("🔍 Processing KYB approval notifications...")
+
+    const kybApprovalCandidates = await prisma.legalEntity.findMany({
+      where: {
+        status: "APPROVED",
+        createdAt: {
+          gte: EMAIL_START_DATE,
+        },
+      },
+      include: {
+        LegalEnitityController: true,
+      },
+      take: 500
+    })
+
+    console.log(`Found ${kybApprovalCandidates.length} KYB approval candidates`)
+
+    for (const entity of kybApprovalCandidates) {
+      try {
+        if (!entity.LegalEnitityController) {
+          console.warn(`Skipping legal entity ${entity.id} - no controller`)
+          continue
+        }
+
+        // Double-check to prevent race conditions
+        const alreadySent = await prisma.emailNotification.findFirst({
+          where: { referenceId: entity.personaReferenceId || entity.id, type: "KYCB_APPROVED" },
+        })
+
+        if (!alreadySent) {
+          console.log(`Sending KYB approval to ${entity.LegalEnitityController.email} for ${entity.name}`)
+
+          const result = await sendKYBApprovedEmail(
+            entity.LegalEnitityController.firstName,
+            entity.LegalEnitityController.email,
+            entity.personaReferenceId || entity.id
+          )
+
+          if (result.success) {
+            results.approvalsSent++
+          } else {
+            results.errors.push(
+              `KYB approval failed for ${entity.name}: ${result.error}`,
+            )
+          }
+        }
+      } catch (error) {
+        results.errors.push(
+          `KYB approval error for ${entity.name}: ${
             error instanceof Error ? error.message : "Unknown error"
           }`,
         )

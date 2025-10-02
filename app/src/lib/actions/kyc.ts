@@ -4,7 +4,12 @@ import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { deleteKycTeam, updateKYCUserStatus, getUserKycTeamSources } from "@/db/kyc"
+import {
+  deleteKycTeam,
+  updateKYCUserStatus,
+  getUserKycTeamSources,
+  updateLegalEntityStatus,
+} from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
@@ -20,7 +25,6 @@ import { UserKYCTeam } from "@/lib/types"
 import { KYCStatus } from "@prisma/client"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
-import { sendKYBReminderEmail } from "./emails"
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -213,6 +217,7 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
       const {
         attributes: {
           "updated-at": updatedAt,
+          "reference-id": caseReferenceId,
           // The Case.status takes precedence over the Inquiry.status whenever the Inquiriy
           // is associated with a Case.
           status,
@@ -221,6 +226,34 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           inquiries: { data: inquiries },
         },
       } = c
+
+      const parsedStatus =
+        caseStatusMap[status as keyof typeof caseStatusMap]
+
+      if (!parsedStatus) {
+        console.warn(`Unknown case status: ${status} for case ${c.id}`)
+        return
+      }
+
+      const personaStatus = mapCaseStatusToPersonaStatus(status)
+      const updatedAtDate = new Date(updatedAt)
+
+      if (!caseReferenceId) {
+        console.warn(`Missing case reference id for case ${c.id}`)
+      } else {
+        try {
+          await updateLegalEntityStatus(
+            parsedStatus,
+            updatedAtDate,
+            caseReferenceId,
+          )
+        } catch (error) {
+          console.error(
+            `Failed to update legal entity status for case ${c.id}`,
+            error,
+          )
+        }
+      }
 
       for (const inquiryRef of inquiries) {
         const inquiryId = inquiryRef.id
@@ -237,16 +270,10 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           continue
         }
         if (inquiry.attributes["reference-id"]) {
-          const parsedStatus =
-            caseStatusMap[status as keyof typeof caseStatusMap]
-          // The persona status value of a Case is slightly different from the status value of an Inquiry.
-          // Adjust Case statues like "Waiting on UBOs" to Pending for now.
-          const personaStatus = mapCaseStatusToPersonaStatus(status)
-
           await updateKYCUserStatus(
             parsedStatus,
             personaStatus,
-            new Date(updatedAt),
+            updatedAtDate,
             inquiry.attributes["reference-id"],
             inquiry.attributes["expires-at"]
               ? new Date(inquiry.attributes["expires-at"])
@@ -552,12 +579,12 @@ export async function getAvailableLegalEntitiesForOrganization(
 
     const now = new Date()
 
-    // 3) Map links to legal entities, filter approved + not expired, and dedupe by id
+    // 3) Map links to legal entities, filter out rejected + expired, and dedupe by id
     const approvedValid = links
       .map((l) => l.legalEntity)
       .filter((e): e is NonNullable<typeof e> => Boolean(e))
       .filter(
-        (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
+        (e) => e.status !== KYCStatus.REJECTED && (!e.expiry || e.expiry > now),
       )
 
     // Dedupe by id
@@ -620,84 +647,5 @@ export async function getSelectedLegalEntitiesForTeam(kycTeamId: string) {
   } catch (e) {
     console.error("getSelectedLegalEntitiesForTeam error", e)
     return []
-  }
-}
-
-// Resend KYB email for a selected Legal Entity (uses controller info)
-export async function resendKYBForLegalEntity(params: {
-  projectId?: string
-  organizationId?: string
-  legalEntity: {
-    id: string
-    email: string
-    firstName: string
-    lastName: string
-    businessName?: string
-  }
-}) {
-  console.debug("[KYB][Server] resendKYBForLegalEntity:start", {
-    hasProjectId: Boolean(params.projectId),
-    hasOrganizationId: Boolean(params.organizationId),
-    legalEntityId: params.legalEntity?.id,
-    legalEntityEmail: params.legalEntity?.email,
-  })
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
-    console.warn("[KYB][Server] Unauthorized resendKYBForLegalEntity call")
-    return { success: false, error: "Unauthorized" }
-  }
-
-  // Verify admin permissions based on context
-  if (params.projectId) {
-    const isInvalid = await verifyAdminStatus(params.projectId, userId)
-    if (isInvalid?.error) {
-      console.warn("[KYB][Server] Project admin check failed", isInvalid)
-      return { success: false, error: isInvalid.error }
-    }
-  } else if (params.organizationId) {
-    const isInvalid = await verifyOrganizationAdmin(
-      params.organizationId,
-      userId,
-    )
-    if (isInvalid?.error) {
-      console.warn("[KYB][Server] Org admin check failed", isInvalid)
-      return { success: false, error: isInvalid.error }
-    }
-  } else {
-    console.warn("[KYB][Server] Missing projectId/organizationId context")
-    return {
-      success: false,
-      error: "Missing context - projectId or organizationId required",
-    }
-  }
-
-  try {
-    console.debug("[KYB][Server] Sending KYB reminder for legal entity", {
-      id: params.legalEntity.id,
-      email: params.legalEntity.email,
-      firstName: params.legalEntity.firstName,
-      lastName: params.legalEntity.lastName,
-      businessName: params.legalEntity.businessName,
-    })
-
-    // Fetch the LegalEntity with its controller
-    const legalEntity = await prisma.legalEntity.findUnique({
-      where: { id: params.legalEntity.id },
-      include: {
-        LegalEnitityController: true,
-      },
-    })
-
-    if (!legalEntity || !legalEntity.LegalEnitityController) {
-      return { success: false, error: "Legal entity or controller not found" }
-    }
-
-    const res = await sendKYBReminderEmail(legalEntity as any)
-    console.debug("[KYB][Server] KYB reminder send result", res)
-    return res
-  } catch (e) {
-    console.error("[KYB][Server] resendKYBForLegalEntity error", e)
-    return { success: false, error: (e as any)?.message || "Unknown error" }
   }
 }

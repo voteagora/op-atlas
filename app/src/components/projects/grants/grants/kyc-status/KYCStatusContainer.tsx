@@ -4,6 +4,7 @@ import { KYCUser, Organization } from "@prisma/client"
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ReactNode, useCallback } from "react"
+import { toast } from "sonner"
 
 import ConnectedOrganizationProjects from "@/components/projects/grants/grants/kyc-status/ConnctedOrganizationProjects"
 import GrantDeliveryAddress from "@/components/projects/grants/grants/kyc-status/GrantDeliveryAddress"
@@ -20,13 +21,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
-import { sendKYCReminderEmail } from "@/lib/actions/emails"
+import { sendKYCReminderEmail, sendKYBReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import {
-  getSelectedLegalEntitiesForTeam,
-  resendKYBForLegalEntity,
-} from "@/lib/actions/kyc"
+import { getSelectedLegalEntitiesForTeam } from "@/lib/actions/kyc"
 
 const KYCStatusContainer = ({
   project,
@@ -138,13 +136,26 @@ const useKYCEmailResend = (context: {
       }))
       try {
         const response = await sendKYCReminderEmail(kycUser, context)
+        if (!response.success) {
+          toast.error(response.error || "Failed to send reminder email")
+          setSendingEmailUsers((prev) => ({
+            ...prev,
+            [kycUser.id]: EmailState.NOT_SENT,
+          }))
+          return
+        }
+
         console.log("Email resend success:", response)
-      } catch (error) {
-        console.error("Failed to send email:", error)
-      } finally {
         setSendingEmailUsers((prev) => ({
           ...prev,
           [kycUser.id]: EmailState.SENT,
+        }))
+      } catch (error) {
+        console.error("Failed to send email:", error)
+        toast.error("Failed to send reminder email")
+        setSendingEmailUsers((prev) => ({
+          ...prev,
+          [kycUser.id]: EmailState.NOT_SENT,
         }))
       }
     },
@@ -260,53 +271,58 @@ const KYCStatusPresenter = ({
             projectId,
             organizationId,
           })
-          try {
+          setLegalSendingState((prev) => ({
+            ...prev,
+            [e.id]: EmailState.SENDING,
+          }))
+
+          if (!isLegalEntityContact(target)) {
+            console.warn(
+              "[LegalEntity][UI] Email resend handler received a non-legal entity target.",
+              { target },
+            )
             setLegalSendingState((prev) => ({
               ...prev,
-              [e.id]: EmailState.SENDING,
+              [e.id]: EmailState.NOT_SENT,
             }))
-            if (isLegalEntityContact(target)) {
-              console.debug(
-                "[LegalEntity][UI] Calling resendKYBForLegalEntity",
-                {
-                  id: target.id,
-                  email: target.email,
-                  firstName: target.firstName,
-                  lastName: target.lastName,
-                  businessName: target.businessName,
-                  projectId,
-                  organizationId,
-                },
-              )
-              const res = await resendKYBForLegalEntity({
+            return
+          }
+
+          try {
+            console.debug("[LegalEntity][UI] Calling sendKYBReminderEmail", {
+              id: target.id,
+              projectId,
+              organizationId,
+            })
+            const res = await sendKYBReminderEmail(
+              { id: target.id },
+              {
                 projectId: projectId as string | undefined,
                 organizationId: organizationId as string | undefined,
-                legalEntity: {
-                  id: target.id,
-                  email: target.email,
-                  firstName: target.firstName,
-                  lastName: target.lastName,
-                  businessName: target.businessName,
-                },
-              })
-              console.debug(
-                "[LegalEntity][UI] resendKYBForLegalEntity response",
-                res,
-              )
-            } else {
-              console.warn(
-                "[LegalEntity][UI] Email resend handler received a non-legal entity target.",
-                { target },
-              )
+              },
+            )
+            console.debug("[LegalEntity][UI] sendKYBReminderEmail response", res)
+
+            if (!res.success) {
+              toast.error(res.error || "Failed to send reminder email")
+              setLegalSendingState((prev) => ({
+                ...prev,
+                [e.id]: EmailState.NOT_SENT,
+              }))
+              return
             }
-          } catch (err) {
-            console.error("[LegalEntity][UI] resend handler failed", err)
-          } finally {
+
             setLegalSendingState((prev) => ({
               ...prev,
               [e.id]: EmailState.SENT,
             }))
-            console.debug("[LegalEntity][UI] Email state set to SENT for", e.id)
+          } catch (err) {
+            console.error("[LegalEntity][UI] resend handler failed", err)
+            toast.error("Failed to send reminder email")
+            setLegalSendingState((prev) => ({
+              ...prev,
+              [e.id]: EmailState.NOT_SENT,
+            }))
           }
         },
         emailResendBlock: e.status === "APPROVED",

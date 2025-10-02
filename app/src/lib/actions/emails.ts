@@ -40,6 +40,14 @@ export interface EmailResponse {
   message?: string
 }
 
+type LegalEntityWithController = LegalEntity & {
+  LegalEnitityController: {
+    firstName: string
+    lastName: string
+    email: string
+  } | null
+}
+
 export const sendTransactionEmail = async (
   emailData: EmailData,
 ): Promise<EmailResponse> => {
@@ -127,13 +135,20 @@ export const sendKYCStartedEmail = async (
     return { success: false }
   }
 
-  if (!inquiryResult.inquiryUrl) {
+  const personaReferenceId =
+    inquiryResult.referenceId ?? kycUser.personaReferenceId ?? undefined
+
+  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
     return { success: false }
   }
 
   const kycLink = inquiryResult.inquiryUrl
+  const kycUserWithReference = {
+    ...kycUser,
+    personaReferenceId,
+  }
 
-  const html = getKYCEmailTemplate(kycUser, kycLink)
+  const html = getKYCEmailTemplate(kycUserWithReference, kycLink)
 
   const emailParams = {
     to: kycUser.email,
@@ -144,7 +159,7 @@ export const sendKYCStartedEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    referenceId: kycUser.personaReferenceId || kycUser.id,
+    referenceId: personaReferenceId,
     type: "KYCB_STARTED",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -175,7 +190,10 @@ export const sendKYBStartedEmail = async (
     return { success: false }
   }
 
-  if (!inquiryResult.inquiryUrl) {
+  const personaReferenceId =
+    inquiryResult.referenceId ?? legalEntity.personaReferenceId ?? undefined
+
+  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
     return { success: false }
   }
 
@@ -194,7 +212,7 @@ export const sendKYBStartedEmail = async (
   })
 
   await trackEmailNotification({
-    referenceId: legalEntity.personaReferenceId || legalEntity.id,
+    referenceId: personaReferenceId,
     type: "KYCB_STARTED",
     emailTo: legalEntity.LegalEnitityController.email,
     success: emailResult.success,
@@ -293,13 +311,20 @@ export const sendKYCReminderEmail = async (
     return { success: false }
   }
 
-  if (!inquiryResult.inquiryUrl) {
+  const personaReferenceId =
+    inquiryResult.referenceId ?? kycUser.personaReferenceId ?? undefined
+
+  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
     return { success: false }
   }
 
   const kycLink = inquiryResult.inquiryUrl
+  const kycUserWithReference = {
+    ...kycUser,
+    personaReferenceId,
+  }
 
-  const html = getKYCReminderEmailTemplate(kycUser, kycLink)
+  const html = getKYCReminderEmailTemplate(kycUserWithReference, kycLink)
 
   const emailParams = {
     to: kycUser.email,
@@ -310,7 +335,7 @@ export const sendKYCReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    referenceId: kycUser.personaReferenceId || kycUser.id,
+    referenceId: personaReferenceId,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -321,8 +346,111 @@ export const sendKYCReminderEmail = async (
 }
 
 export const sendKYBReminderEmail = async (
-  legalEntity: LegalEntity & { LegalEnitityController: { firstName: string, lastName: string, email: string } },
+  legalEntityInput: LegalEntityWithController | { id: string },
+  context: {
+    projectId?: string
+    organizationId?: string
+    bypassAuth?: boolean
+  } = {},
 ): Promise<EmailResponse> => {
+  const { bypassAuth, projectId, organizationId } = context ?? {}
+
+  if (!bypassAuth) {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Unauthorized",
+      }
+    }
+
+    const userId = session.user.id
+
+    if (projectId) {
+      const userRole = await getUserProjectRole(projectId, userId)
+      if (userRole !== "admin") {
+        return {
+          success: false,
+          error: "Unauthorized - Project admin access required",
+        }
+      }
+    } else if (organizationId) {
+      const userRole = await getUserOrganizationRole(organizationId, userId)
+      if (userRole !== "admin") {
+        return {
+          success: false,
+          error: "Unauthorized - Organization admin access required",
+        }
+      }
+    } else {
+      return {
+        success: false,
+        error: "Missing context - projectId or organizationId required",
+      }
+    }
+  }
+
+  const legalEntityId = legalEntityInput.id
+  let legalEntity: LegalEntityWithController | null =
+    "LegalEnitityController" in legalEntityInput
+      ? (legalEntityInput as LegalEntityWithController)
+      : null
+
+  if (!legalEntity?.LegalEnitityController) {
+    legalEntity = (await prisma.legalEntity.findUnique({
+      where: { id: legalEntityId },
+      include: {
+        LegalEnitityController: true,
+      },
+    })) as LegalEntityWithController | null
+  }
+
+  if (!legalEntity) {
+    return {
+      success: false,
+      error: "Legal entity not found",
+    }
+  }
+
+  if (!legalEntity.LegalEnitityController) {
+    return {
+      success: false,
+      error: "Legal entity controller not found",
+    }
+  }
+
+  if (legalEntity.status === "APPROVED") {
+    return {
+      success: false,
+      error: "Cannot resend email for already approved verification",
+    }
+  }
+
+  const referenceId = legalEntity.personaReferenceId || legalEntity.id
+
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  const recentReminder = await prisma.emailNotification.findFirst({
+    where: {
+      referenceId,
+      type: "KYCB_REMINDER",
+      sentAt: {
+        gte: twentyFourHoursAgo,
+      },
+      success: true,
+    },
+    orderBy: {
+      sentAt: "desc",
+    },
+  })
+
+  if (recentReminder) {
+    return {
+      success: false,
+      error:
+        "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
+    }
+  }
+
   const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
 
   if (!templateId) {
@@ -333,15 +461,18 @@ export const sendKYBReminderEmail = async (
   }
 
   const inquiryResult = await createPersonaInquiryLink(
-    { type: 'legalEntity', entity: legalEntity },
-    templateId
+    { type: "legalEntity", entity: legalEntity },
+    templateId,
   )
 
   if (!inquiryResult.success) {
     return { success: false }
   }
 
-  if (!inquiryResult.inquiryUrl) {
+  const personaReferenceId =
+    inquiryResult.referenceId ?? legalEntity.personaReferenceId ?? undefined
+
+  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
     return { success: false }
   }
 
@@ -361,7 +492,7 @@ export const sendKYBReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    referenceId: legalEntity.personaReferenceId || legalEntity.id,
+    referenceId: personaReferenceId,
     type: "KYCB_REMINDER",
     emailTo: legalEntity.LegalEnitityController.email,
     success: emailResult.success,
@@ -514,13 +645,20 @@ export const sendPersonalKYCReminderEmail = async (
     return { success: false, error: inquiryResult.error }
   }
 
-  if (!inquiryResult.inquiryUrl) {
+  const personaReferenceId =
+    inquiryResult.referenceId ?? kycUser.personaReferenceId ?? undefined
+
+  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
     return { success: false, error: "Failed to generate verification link" }
   }
 
   const kycLink = inquiryResult.inquiryUrl
+  const kycUserWithReference = {
+    ...kycUser,
+    personaReferenceId,
+  }
 
-  const html = getKYCReminderEmailTemplate(kycUser, kycLink)
+  const html = getKYCReminderEmailTemplate(kycUserWithReference, kycLink)
 
   const emailParams = {
     to: kycUser.email,
@@ -531,7 +669,7 @@ export const sendPersonalKYCReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    referenceId: kycUser.personaReferenceId || kycUser.id,
+    referenceId: personaReferenceId,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,

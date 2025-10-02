@@ -29,6 +29,30 @@ export async function updateKYCUserStatus(
   return result
 }
 
+export async function updateLegalEntityStatus(
+  parsedStatus: string,
+  updatedAt: Date,
+  referenceId?: string,
+  expiresAt?: Date | string | null,
+) {
+  if (!referenceId) {
+    throw new Error(
+      "Reference ID is required for legal entity status update",
+    )
+  }
+
+  const result = await prisma.$queryRaw`
+    UPDATE "LegalEntity" SET
+      "status" = ${parsedStatus}::"KYCStatus",
+      "updatedAt" = ${updatedAt},
+      "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')
+    WHERE "personaReferenceId" = ${referenceId}
+    RETURNING *;
+  `
+
+  return result
+}
+
 export async function getProjectKycTeam(projectId: string) {
   const project = await prisma.project.findUnique({
     where: {

@@ -10,6 +10,7 @@ export interface PersonaInquiryLinkResponse {
   success: boolean
   inquiryId?: string
   inquiryUrl?: string
+  referenceId?: string
   error?: string
 }
 
@@ -61,12 +62,13 @@ export const createPersonaInquiryLink = async (
 
     const searchParams = new URLSearchParams({
       "inquiry-template-id": templateId,
-      reference_id: referenceId,
+      "reference-id": referenceId,
     })
 
     return {
       success: true,
       inquiryUrl: `${PERSONA_VERIFICATION_URL}?${searchParams.toString()}`,
+      referenceId,
     }
   } catch (error) {
     console.error("Error creating Persona inquiry:", error)

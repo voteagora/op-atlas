@@ -46,7 +46,6 @@ export default function PersonalKYCForm() {
           firstName: formData.firstName.trim(),
           lastName: formData.lastName.trim(),
           email: formData.email.trim(),
-          businessName: formData.businessName.trim() || undefined,
         })
 
         if (result.error) {

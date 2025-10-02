@@ -10,7 +10,6 @@ export interface CreateUserKYCParams {
   firstName?: string
   lastName?: string
   email: string
-  businessName?: string
 }
 
 export interface UserKYCStatus {
@@ -46,7 +45,7 @@ export async function createUserKYC(params: CreateUserKYCParams) {
     return { error: "Unauthorized" }
   }
 
-  const { firstName, lastName, email, businessName } = params
+  const { firstName, lastName, email } = params
 
   // Email is always required
   if (!email.trim()) {
@@ -76,11 +75,10 @@ export async function createUserKYC(params: CreateUserKYCParams) {
       return { error: "You already have an active KYC verification. Please check your status." }
     }
 
-    // Check if email is already used for an active KYC of type USER
+    // Check if email is already used for an active KYC
     const existingKycUser = await prisma.kYCUser.findFirst({
       where: {
         email: email.toLowerCase(),
-        kycUserType: "USER",
         expiry: {
           gt: new Date(),
         },
@@ -97,8 +95,6 @@ export async function createUserKYC(params: CreateUserKYCParams) {
           email: email.toLowerCase(),
           firstName: firstName?.trim() || null,
           lastName: lastName?.trim() || null,
-          businessName: businessName?.trim() || null,
-          kycUserType: businessName?.trim() ? "LEGAL_ENTITY" : "USER",
           status: "PENDING",
           expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
         },
