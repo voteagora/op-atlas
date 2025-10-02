@@ -13,7 +13,6 @@ interface Signer {
   firstName: string
   lastName: string
   email: string
-  company: string
 }
 
 export default function SignersStep() {
@@ -28,12 +27,11 @@ export default function SignersStep() {
         return signers.map((s: any) => ({
           firstName: s.firstName || "",
           lastName: s.lastName || "",
-          email: s.email || "",
-          company: s.company || ""
+          email: s.email || ""
         }))
       }
     }
-    return [{ firstName: "", lastName: "", email: "", company: "" }]
+    return [{ firstName: "", lastName: "", email: "" }]
   }
   
   const initialSigners = getInitialSigners()
@@ -50,7 +48,7 @@ export default function SignersStep() {
   }
 
   const addSigner = () => {
-    setSigners([...signers, { firstName: "", lastName: "", email: "", company: "" }])
+    setSigners([...signers, { firstName: "", lastName: "", email: "" }])
   }
 
   const removeSigner = (index: number) => {
@@ -216,18 +214,6 @@ export default function SignersStep() {
                 />
               </div>
 
-              <div>
-                <label htmlFor={`company-${index}`} className="block text-sm font-medium mb-2">
-                  Company
-                </label>
-                <Input
-                  id={`company-${index}`}
-                  type="text"
-                  value={signer.company}
-                  onChange={(e) => handleSignerChange(index, "company", e.target.value)}
-                  placeholder="Acme Co."
-                />
-              </div>
             </div>
           </div>
         ))}
