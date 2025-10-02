@@ -196,6 +196,30 @@ const SafeWalletsMenuItems = ({
 // Wrapper component that handles conditional hook usage
 const AccountContent = () => {
   // Always call hooks - they will be mocked by the TestModeProvider when in test mode
+  const isLinking = useRef(false)
+  const isLoggingIn = useRef(false)
+
+  const { data: session, status: authStatus } = useSession()
+  const { user, invalidate: invalidateUser } = useUser({
+    id: session?.user?.id || "",
+    enabled: !!session?.user,
+  })
+
+  const username = useUsername(user)
+
+  // Safe wallet integration
+  const {
+    currentAddress,
+    currentContext,
+    signerWallet,
+    selectedSafeWallet,
+    availableSafeWallets,
+    switchToSafe,
+    switchToEOA,
+    isLoadingSafeWallets,
+  } = useWallet()
+
+  // Privy hooks (kept after refs/session/wallet for clarity; production path only)
   const { user: privyUser, getAccessToken } = usePrivy()
   const { login: privyLogin } = useLogin({
     onComplete: (params) => {
@@ -224,29 +248,6 @@ const AccountContent = () => {
       signOut()
     },
   })
-
-  const isLinking = useRef(false)
-  const isLoggingIn = useRef(false)
-
-  const { data: session, status: authStatus } = useSession()
-  const { user, invalidate: invalidateUser } = useUser({
-    id: session?.user?.id || "",
-    enabled: !!session?.user,
-  })
-
-  const username = useUsername(user)
-
-  // Safe wallet integration
-  const {
-    currentAddress,
-    currentContext,
-    signerWallet,
-    selectedSafeWallet,
-    availableSafeWallets,
-    switchToSafe,
-    switchToEOA,
-    isLoadingSafeWallets,
-  } = useWallet()
 
   const prevAuthStatus = usePrevious(authStatus)
 

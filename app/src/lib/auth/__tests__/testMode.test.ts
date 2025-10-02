@@ -94,7 +94,8 @@ describe("Test Mode Functions", () => {
     })
     expect(user.name).toBe("Custom Test User")
     expect(user.email).toBe("custom@test.com")
-    expect(user.id).toMatch(/^test-user-\d+$/)
+    // IDs now include a timestamp and random suffix for uniqueness
+    expect(user.id).toMatch(/^test-user-/)
   })
 
   it("should require test mode for test functions", () => {
