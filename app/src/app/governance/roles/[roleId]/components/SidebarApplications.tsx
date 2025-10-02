@@ -20,6 +20,7 @@ import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { formatMMMd } from "@/lib/utils/date"
 import { getRolePhaseStatus } from "@/lib/utils/roles"
+import { SC_ALLOW_APPROVAL_DURING_NOMINATION } from "@/lib/constants"
 
 export default function SidebarApplications({
   role,
@@ -33,8 +34,11 @@ export default function SidebarApplications({
   endorsementEndAt: Date | null
 }) {
   const { data: t100, isLoading: loadingTop } = useIsTop100()
-  const { isVotingPhase, isEndorsementPhase } = getRolePhaseStatus(role)
-  const withinWindow = isEndorsementPhase
+  const { isVotingPhase, isEndorsementPhase, isNominationPhase } =
+    getRolePhaseStatus(role)
+  const withinWindow =
+    isEndorsementPhase ||
+    (SC_ALLOW_APPROVAL_DURING_NOMINATION && isNominationPhase)
   const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
     enabled: isEndorsementPhase,
   })
