@@ -1,6 +1,12 @@
-# EAS Indexer
+# EAS Indexing 
 
-A [Ponder](https://ponder.sh) indexer for Ethereum Attestation Service (EAS) attestations on Optimism.
+Agora maintains two indexing techniques for picking up EAS attestations relevant to Atlas.
+
+One set that polls the chain every second, using Ponder.  One that streams data using Flink managed by Goldsky.
+
+# EAS Indexing Using Ponder
+
+A [Ponder](https://ponder.sh) indexer for Ethereum Attestation Service (EAS) is deployed to the Agora Production Railway infrastructure.  It's for Atlas-Centric Attestations Eg. Badgholders, Citizens, as well as Citizen House Votes. 
 
 ## Overview
 
@@ -155,3 +161,68 @@ Response:
   ]
 }
 ```
+
+# EAS Indexing Using Goldsky
+
+A goldsky pipeline named `eas-attestations-v1` is deployed to the Agora Goldsky Production environment. It indexes all the `Attested` and `Revoked` events published by [Curia Labs](https://github.com/CuriaLab/dynamic_attestation_mvp)'s top-100 delegates data set.
+
+## Overview
+
+A YAML expresses Flink steps which read from Goldsky's data sources (raw event logs), events are filtered and streamed into Agora's Blockchain DB.  Read Replicas and FDWs are used to fan out the dataset to applications (like Atlas and vote.optimism.io).  
+
+## How it Works
+
+1. **Schema Configuration**
+   - This is fully managed by Goldsky on pipeline deployment.  No code exists for this.
+
+2. **Event Processing**
+   - Events are written to the DB within 100s of ms of them landing on chaing.
+   - There is no decoding needed for the current sole use-case.
+
+3. **Database Structure**
+   - FDWs reach into the blockchain DB from the Atlas DB
+   - A materialized view snaps the top-100 list daily.
+
+
+## Setup
+
+See goldsky docs to setup local CLI tool.
+
+## Development
+
+This is all you'll need for 99% of interation...
+
+`goldsky pipeline apply goldsky/eas-attestations.yaml`
++
+`goldsky pipeline start eas-attestations`
++
+`goldsky pipeline delete eas-attestations`
+
+### Adding New Schemas
+
+Schema is fully managed by Goldsky + manual change management for the views.
+
+### Adding New Networks
+
+1. Add a new "source"
+
+Eg.
+
+```
+WHERE ((topics like '%0xf930a6e2523c9cc298691873087a740550b8fc85a0680830414c148ed927f615%');
+```
+becomes...
+```
+WHERE ((topics like '%0xf930a6e2523c9cc298691873087a740550b8fc85a0680830414c148ed927f615%') OR (topics like '%0x8bf46bf4cfd674fa735a3d63ec1c9ad4153f033c290341f3a588b75685141b35%'));
+```
+## Redeployment
+
+`goldsky pipeline apply goldsky/eas-attestations.yaml`
+
+...will pick up new attestations going forward.
+
+Delete the pipeline, and re-process the chain. Dupes will be handled by goldsky.  Should take minutes for years.
+
+## DB Views
+
+See `public.TopDelegates` materialized view.  
