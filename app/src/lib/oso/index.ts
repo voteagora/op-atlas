@@ -98,8 +98,10 @@ export const getDeployedContractsServer = cache(
   ): Promise<OsoDeployerContractsReturnType> {
     const variables = {
       where: {
-        rootDeployerAddress: { _eq: deployer.toLowerCase() },
-        factoryAddress: { _eq: "" },
+        _or: [
+          { rootDeployerAddress: { _eq: deployer.toLowerCase() } },
+          { originatingAddress: { _eq: deployer.toLowerCase() } },
+        ],
       },
     }
 
@@ -297,6 +299,10 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     trustedDevelopersCount,
     topProjects,
     tvlResults,
+    activeAddresses,
+    gasFees,
+    transactions,
+    tvl,
   ] = await Promise.all([
     getProjectEligibility(projectId),
     getProjectMetricsFromDB(projectId),
@@ -305,9 +311,6 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getTrustedDevelopersCount(projectId),
     getTopProjects(projectId),
     getTvl(projectId),
-  ])
-
-  const [activeAddresses, gasFees, transactions, tvl] = await Promise.all([
     queryMetrics([osoId], "activeAddresses"),
     queryMetrics([osoId], "gasFees"),
     queryMetrics([osoId], "transactions"),
@@ -573,7 +576,19 @@ export async function getParsedDeployedContracts(
 }
 
 function osoNamespaceToChainId(namespace: string) {
-  return supportedMappings[namespace as keyof typeof supportedMappings]
+  const normalized = namespace.toUpperCase().replace(/[-_\s]/g, "")
+  const synonyms: Record<string, string> = {
+    OP: "OPTIMISM",
+    OPMAINNET: "OPTIMISM",
+    WORLD: "WORLDCHAIN",
+    WORLDCHAINMAINNET: "WORLDCHAIN",
+    ZORAMAINNET: "ZORA",
+    ARENAZMAINNET: "ARENAZ",
+    POLYNOMIALMAINNET: "POLYNOMIAL",
+    UNICHAINMAINNET: "UNICHAIN",
+  }
+  const key = synonyms[normalized] ?? normalized
+  return supportedMappings[key as keyof typeof supportedMappings]
 }
 
 export function parseOsoDeployerContract(

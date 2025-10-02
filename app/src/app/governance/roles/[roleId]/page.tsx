@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import ReactMarkdown from "react-markdown"
+import { Role } from "@prisma/client"
 
 import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/components/AnalyticsTracker"
 import { Sidebar } from "@/app/governance/roles/[roleId]/components/Sidebar"
@@ -17,6 +18,7 @@ import { formatMMMd } from "@/lib/utils/date"
 import { RoleDates } from "./components/RoleDates"
 import { Metadata } from "next"
 import { sharedMetadata } from "@/app/shared-metadata"
+import { getRolePhaseStatus } from "@/lib/utils/roles"
 
 export async function generateMetadata({
   params,
@@ -37,19 +39,17 @@ export async function generateMetadata({
 }
 
 export default async function Page({ params }: { params: { roleId: string } }) {
-  const role = await getRoleById(parseInt(params.roleId))
-  const applications = await getRoleApplications(parseInt(params.roleId))
+  const [role, applications] = await Promise.all([
+    getRoleById(parseInt(params.roleId)),
+    getRoleApplications(parseInt(params.roleId)),
+  ])
 
   if (!role) {
-    notFound()
+    return notFound()
   }
 
-  const voteSchedule =
-    role?.voteStartAt && role?.voteEndAt
-      ? `Vote ${formatMMMd(new Date(role.voteStartAt!))} - ${formatMMMd(
-          new Date(role.voteEndAt!),
-        )}`
-      : null
+  const isSecurityRole = role.isSecurityRole
+  const { isNominationPhase } = getRolePhaseStatus(role)
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -131,9 +131,14 @@ export default async function Page({ params }: { params: { roleId: string } }) {
           </div>
         </div>
         <div className="flex flex-col gap-6 w-full lg:w-[304px] lg:flex-shrink-0">
-          <Sidebar role={role} />
-          {applications && applications.length > 0 && (
-            <SidebarApplications applications={applications} />
+          {(!isSecurityRole || isNominationPhase) && <Sidebar role={role} />}
+          {((applications && applications.length > 0) || isSecurityRole) && (
+            <SidebarApplications
+              role={role}
+              applications={applications}
+              isSecurityRole={isSecurityRole}
+              endorsementEndAt={role.endorsementEndAt}
+            />
           )}
         </div>
       </div>

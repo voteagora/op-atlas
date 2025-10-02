@@ -71,6 +71,7 @@ export const useUserByAddress = (address: string | null) => {
 
 export const useUserByContext = () => {
   const { currentAddress } = useWallet()
-  const { citizen, isLoading, isSuccess, isError } = useUserByAddress(currentAddress)
+  const { citizen, isLoading, isSuccess, isError } =
+    useUserByAddress(currentAddress)
   return { citizen, isLoading, isSuccess, isError }
 }

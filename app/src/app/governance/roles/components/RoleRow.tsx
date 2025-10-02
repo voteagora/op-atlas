@@ -10,17 +10,50 @@ import ProposalCard, {
   ProposalTextContent,
 } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { formatMMMd } from "@/lib/utils/date"
+import { getRolePhaseStatus } from "@/lib/utils/roles"
 
-export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
-  const isActive =
-    role.startAt &&
-    role.endAt &&
-    new Date() >= new Date(role.startAt) &&
-    new Date() <= new Date(role.endAt)
-  const isUpcoming = role.startAt && new Date() < new Date(role.startAt)
+export function RoleRow({ role }: { role: Role }) {
+  const { isUpcoming, isNominationPhase, isEndorsementPhase, isVotingPhase } =
+    getRolePhaseStatus(role)
+  const isActive = isNominationPhase || isEndorsementPhase || isVotingPhase
+
+  const phaseDates = (() => {
+    if (isEndorsementPhase) {
+      return {
+        start: role.endorsementStartAt ?? role.startAt,
+        end: role.endorsementEndAt ?? role.endAt,
+      }
+    }
+
+    if (isNominationPhase || isUpcoming) {
+      return {
+        start: role.startAt,
+        end: role.endAt,
+      }
+    }
+
+    if (isVotingPhase) {
+      return {
+        start: role.voteStartAt ?? role.endorsementEndAt ?? role.startAt,
+        end: role.voteEndAt ?? role.endAt,
+      }
+    }
+
+    return {
+      start: role.startAt,
+      end:
+        role.voteEndAt ?? role.endorsementEndAt ?? role.endAt ?? role.startAt,
+    }
+  })()
+
+  const formatDate = (value: Date | null | undefined) =>
+    formatMMMd(value ?? new Date())
+
+  const startDate = formatDate(phaseDates.start)
+  const endDate = formatDate(phaseDates.end)
 
   return (
-    <ProposalCard rounded={rounded} href={`/governance/roles/${role.id}`}>
+    <ProposalCard href={`/governance/roles/${role.id}`}>
       <ProposalBadge
         type={
           isActive
@@ -32,10 +65,7 @@ export function RoleRow({ role, rounded }: { role: Role; rounded: boolean }) {
       />
       <ProposalTextContent title={role.title} />
       <div className="hidden md:block">
-        <ProposalDates
-          startDate={formatMMMd(role.startAt || new Date())}
-          endDate={formatMMMd(role.endAt || new Date())}
-        />
+        <ProposalDates startDate={startDate} endDate={endDate} />
       </div>
       <ProposalArrow
         href={`/governance/roles/${role.id}`}
