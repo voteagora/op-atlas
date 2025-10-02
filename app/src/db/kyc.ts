@@ -42,7 +42,7 @@ export async function updateLegalEntityStatus(
   }
 
   const result = await prisma.$queryRaw`
-    UPDATE "LegalEntity" SET
+    UPDATE "KYCLegalEntity" SET
       "status" = ${parsedStatus}::"KYCStatus",
       "updatedAt" = ${updatedAt},
       "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')

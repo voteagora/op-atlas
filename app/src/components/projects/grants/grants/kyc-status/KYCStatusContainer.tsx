@@ -265,7 +265,7 @@ const KYCStatusPresenter = ({
       return {
         user: contact,
         handleEmailResend: async (target: KYCOrLegal) => {
-          console.debug("[LegalEntity][UI] Resend click handler invoked", {
+          console.debug("[KYCLegalEntity][UI] Resend click handler invoked", {
             target,
             kycTeamId,
             projectId,
@@ -278,7 +278,7 @@ const KYCStatusPresenter = ({
 
           if (!isLegalEntityContact(target)) {
             console.warn(
-              "[LegalEntity][UI] Email resend handler received a non-legal entity target.",
+              "[KYCLegalEntity][UI] Email resend handler received a non-legal entity target.",
               { target },
             )
             setLegalSendingState((prev) => ({
@@ -289,7 +289,7 @@ const KYCStatusPresenter = ({
           }
 
           try {
-            console.debug("[LegalEntity][UI] Calling sendKYBReminderEmail", {
+            console.debug("[KYCLegalEntity][UI] Calling sendKYBReminderEmail", {
               id: target.id,
               projectId,
               organizationId,
@@ -301,7 +301,7 @@ const KYCStatusPresenter = ({
                 organizationId: organizationId as string | undefined,
               },
             )
-            console.debug("[LegalEntity][UI] sendKYBReminderEmail response", res)
+            console.debug("[KYCLegalEntity][UI] sendKYBReminderEmail response", res)
 
             if (!res.success) {
               toast.error(res.error || "Failed to send reminder email")
@@ -317,7 +317,7 @@ const KYCStatusPresenter = ({
               [e.id]: EmailState.SENT,
             }))
           } catch (err) {
-            console.error("[LegalEntity][UI] resend handler failed", err)
+            console.error("[KYCLegalEntity][UI] resend handler failed", err)
             toast.error("Failed to send reminder email")
             setLegalSendingState((prev) => ({
               ...prev,

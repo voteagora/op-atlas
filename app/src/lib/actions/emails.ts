@@ -1,7 +1,7 @@
 "use server"
 
 import mailchimp from "@mailchimp/mailchimp_transactional"
-import { EmailNotificationType, KYCUser, LegalEntity } from "@prisma/client"
+import { EmailNotificationType, KYCUser, KYCLegalEntity } from "@prisma/client"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
@@ -40,8 +40,8 @@ export interface EmailResponse {
   message?: string
 }
 
-type LegalEntityWithController = LegalEntity & {
-  LegalEnitityController: {
+type LegalEntityWithController = KYCLegalEntity & {
+  kycLegalEntityController: {
     firstName: string
     lastName: string
     email: string
@@ -170,7 +170,7 @@ export const sendKYCStartedEmail = async (
 }
 
 export const sendKYBStartedEmail = async (
-  legalEntity: LegalEntity & { LegalEnitityController: { firstName: string, lastName: string, email: string } },
+  legalEntity: KYCLegalEntity & { kycLegalEntityController: { firstName: string, lastName: string, email: string } },
 ): Promise<EmailResponse> => {
   const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
 
@@ -200,13 +200,13 @@ export const sendKYBStartedEmail = async (
   const kycLink = inquiryResult.inquiryUrl
 
   const html = getKYBEmailTemplate({
-    firstName: legalEntity.LegalEnitityController.firstName,
+    firstName: legalEntity.kycLegalEntityController.firstName,
     businessName: legalEntity.name,
     kycLink,
   })
 
   const emailResult = await sendTransactionEmail({
-    to: legalEntity.LegalEnitityController.email,
+    to: legalEntity.kycLegalEntityController.email,
     subject: "Action Required: Complete KYB to Unlock Your Optimism Grant",
     html,
   })
@@ -214,7 +214,7 @@ export const sendKYBStartedEmail = async (
   await trackEmailNotification({
     referenceId: personaReferenceId,
     type: "KYCB_STARTED",
-    emailTo: legalEntity.LegalEnitityController.email,
+    emailTo: legalEntity.kycLegalEntityController.email,
     success: emailResult.success,
     error: emailResult.error,
   })
@@ -392,15 +392,15 @@ export const sendKYBReminderEmail = async (
 
   const legalEntityId = legalEntityInput.id
   let legalEntity: LegalEntityWithController | null =
-    "LegalEnitityController" in legalEntityInput
+    "kycLegalEntityController" in legalEntityInput
       ? (legalEntityInput as LegalEntityWithController)
       : null
 
-  if (!legalEntity?.LegalEnitityController) {
-    legalEntity = (await prisma.legalEntity.findUnique({
+  if (!legalEntity?.kycLegalEntityController) {
+    legalEntity = (await prisma.kYCLegalEntity.findUnique({
       where: { id: legalEntityId },
       include: {
-        LegalEnitityController: true,
+        kycLegalEntityController: true,
       },
     })) as LegalEntityWithController | null
   }
@@ -412,7 +412,7 @@ export const sendKYBReminderEmail = async (
     }
   }
 
-  if (!legalEntity.LegalEnitityController) {
+  if (!legalEntity.kycLegalEntityController) {
     return {
       success: false,
       error: "Legal entity controller not found",
@@ -479,12 +479,12 @@ export const sendKYBReminderEmail = async (
   const kycLink = inquiryResult.inquiryUrl
 
   const html = getKYBReminderEmailTemplate({
-    firstName: legalEntity.LegalEnitityController.firstName,
+    firstName: legalEntity.kycLegalEntityController.firstName,
     kycLink,
   })
 
   const emailParams = {
-    to: legalEntity.LegalEnitityController.email,
+    to: legalEntity.kycLegalEntityController.email,
     subject: "Reminder: Complete Your KYB to Receive Your Optimism Grant",
     html,
   }
@@ -494,7 +494,7 @@ export const sendKYBReminderEmail = async (
   await trackEmailNotification({
     referenceId: personaReferenceId,
     type: "KYCB_REMINDER",
-    emailTo: legalEntity.LegalEnitityController.email,
+    emailTo: legalEntity.kycLegalEntityController.email,
     success: emailResult.success,
     error: emailResult.error,
   })

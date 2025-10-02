@@ -2,7 +2,7 @@
 
 import { randomBytes } from "crypto"
 
-import { KYCUser, LegalEntity } from "@prisma/client"
+import { KYCUser, KYCLegalEntity } from "@prisma/client"
 
 import { prisma } from "@/db/client"
 
@@ -19,7 +19,7 @@ const PERSONA_VERIFICATION_URL =
 
 type PersonaEntity =
   | { type: 'kycUser', entity: KYCUser }
-  | { type: 'legalEntity', entity: LegalEntity }
+  | { type: 'legalEntity', entity: KYCLegalEntity }
 
 export const createPersonaInquiryLink = async (
   personaEntity: PersonaEntity,
@@ -47,7 +47,7 @@ export const createPersonaInquiryLink = async (
         })
         referenceId = updatedUser.personaReferenceId ?? newReferenceId
       } else {
-        const updatedEntity = await prisma.legalEntity.update({
+        const updatedEntity = await prisma.kYCLegalEntity.update({
           where: { id: entity.id },
           data: { personaReferenceId: newReferenceId },
           select: { personaReferenceId: true },

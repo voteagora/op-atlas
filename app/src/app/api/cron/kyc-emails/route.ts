@@ -85,7 +85,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     // Process KYB (business/legal entity) reminders
     console.log("🔍 Processing KYB reminder emails...")
 
-    const kybReminderCandidates = await prisma.legalEntity.findMany({
+    const kybReminderCandidates = await prisma.kYCLegalEntity.findMany({
       where: {
         status: "PENDING",
         createdAt: {
@@ -94,7 +94,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
         },
       },
       include: {
-        LegalEnitityController: true,
+        kycLegalEntityController: true,
       },
       take: 500
     })
@@ -103,7 +103,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
 
     for (const entity of kybReminderCandidates) {
       try {
-        if (!entity.LegalEnitityController) {
+        if (!entity.kycLegalEntityController) {
           console.warn(`Skipping legal entity ${entity.id} - no controller`)
           continue
         }
@@ -114,7 +114,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
         })
 
         if (!alreadySent) {
-          console.log(`Sending KYB reminder to ${entity.LegalEnitityController.email} for ${entity.name}`)
+          console.log(`Sending KYB reminder to ${entity.kycLegalEntityController.email} for ${entity.name}`)
 
           const result = await sendKYBReminderEmail(entity as any, {
             bypassAuth: true,
@@ -192,7 +192,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     // Process KYB approval notifications
     console.log("🔍 Processing KYB approval notifications...")
 
-    const kybApprovalCandidates = await prisma.legalEntity.findMany({
+    const kybApprovalCandidates = await prisma.kYCLegalEntity.findMany({
       where: {
         status: "APPROVED",
         createdAt: {
@@ -200,7 +200,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
         },
       },
       include: {
-        LegalEnitityController: true,
+        kycLegalEntityController: true,
       },
       take: 500
     })
@@ -209,7 +209,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
 
     for (const entity of kybApprovalCandidates) {
       try {
-        if (!entity.LegalEnitityController) {
+        if (!entity.kycLegalEntityController) {
           console.warn(`Skipping legal entity ${entity.id} - no controller`)
           continue
         }
@@ -220,11 +220,11 @@ async function handleKYCEmailsCron(request: NextRequest) {
         })
 
         if (!alreadySent) {
-          console.log(`Sending KYB approval to ${entity.LegalEnitityController.email} for ${entity.name}`)
+          console.log(`Sending KYB approval to ${entity.kycLegalEntityController.email} for ${entity.name}`)
 
           const result = await sendKYBApprovedEmail(
-            entity.LegalEnitityController.firstName,
-            entity.LegalEnitityController.email,
+            entity.kycLegalEntityController.firstName,
+            entity.kycLegalEntityController.email,
             entity.personaReferenceId || entity.id
           )
 

@@ -281,10 +281,10 @@ async function createLegalEntity(
     controllerEmail: string
   },
 ) {
-  return await tx.legalEntity.create({
+  return await tx.kYCLegalEntity.create({
     data: {
       name: params.name,
-      LegalEnitityController: {
+      kycLegalEntityController: {
         create: {
           firstName: params.controllerFirstName,
           lastName: params.controllerLastName,
@@ -471,7 +471,7 @@ export async function submitGrantEligibilityForm(params: {
           // Use createMany with skipDuplicates for efficiency
           if (selectedExistingEntityIds.length > 0) {
             try {
-              await tx.kYCTeamEntity.createMany({
+              await tx.kYCLegalEntityTeams.createMany({
                 data: selectedExistingEntityIds.map(legalEntityId => ({
                   kycTeamId,
                   legalEntityId,
@@ -483,7 +483,7 @@ export async function submitGrantEligibilityForm(params: {
             }
           }
 
-          // Process entities (business KYB): create LegalEntity + Controller and link to KYC team only
+          // Process entities (business KYB): create KYCLegalEntity + Controller and link to KYC team only
           for (const entity of entities) {
             if (
               !entity.controllerEmail ||
@@ -495,10 +495,10 @@ export async function submitGrantEligibilityForm(params: {
               continue
             }
 
-            const legalEntity = await tx.legalEntity.create({
+            const legalEntity = await tx.kYCLegalEntity.create({
               data: {
                 name: entity.company,
-                LegalEnitityController: {
+                kycLegalEntityController: {
                   create: {
                     firstName: entity.controllerFirstName,
                     lastName: entity.controllerLastName,
@@ -509,7 +509,7 @@ export async function submitGrantEligibilityForm(params: {
             })
 
             // Link legal entity to KYC team
-            await tx.kYCTeamEntity.create({
+            await tx.kYCLegalEntityTeams.create({
               data: {
                 kycTeamId,
                 legalEntityId: legalEntity.id,
@@ -597,15 +597,15 @@ export async function submitGrantEligibilityForm(params: {
       emailPromises.push(
         (async () => {
           try {
-            // Fetch the LegalEntity with its controller to pass to sendKYBStartedEmail
-            const legalEntity = await prisma.legalEntity.findUnique({
+            // Fetch the KYCLegalEntity with its controller to pass to sendKYBStartedEmail
+            const legalEntity = await prisma.kYCLegalEntity.findUnique({
               where: { id: le.id },
               include: {
-                LegalEnitityController: true,
+                kycLegalEntityController: true,
               },
             })
 
-            if (!legalEntity || !legalEntity.LegalEnitityController) {
+            if (!legalEntity || !legalEntity.kycLegalEntityController) {
               throw new Error("Legal entity or controller not found")
             }
 
@@ -1009,9 +1009,9 @@ export async function getSelectedExistingLegalEntitiesForForm(formId: string) {
       return { items: [] }
     }
 
-    const entities = await prisma.legalEntity.findMany({
+    const entities = await prisma.kYCLegalEntity.findMany({
       where: { id: { in: ids } },
-      include: { LegalEnitityController: true },
+      include: { kycLegalEntityController: true },
     })
 
     // Maintain original ordering based on ids array
@@ -1023,9 +1023,9 @@ export async function getSelectedExistingLegalEntitiesForForm(formId: string) {
     const items = ordered.map((e) => ({
       id: e.id,
       businessName: e.name,
-      controllerFirstName: e.LegalEnitityController?.firstName || "",
-      controllerLastName: e.LegalEnitityController?.lastName || "",
-      controllerEmail: e.LegalEnitityController?.email || "",
+      controllerFirstName: e.kycLegalEntityController?.firstName || "",
+      controllerLastName: e.kycLegalEntityController?.lastName || "",
+      controllerEmail: e.kycLegalEntityController?.email || "",
       expiresAt: e.expiry ?? null,
     }))
 

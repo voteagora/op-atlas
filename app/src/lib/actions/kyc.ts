@@ -478,12 +478,12 @@ export async function getExistingLegalEntities(kycTeamId: string) {
 
     console.debug("getExistingLegalEntities:start", { kycTeamId })
 
-    const links = await prisma.kYCTeamEntity.findMany({
+    const links = await prisma.kYCLegalEntityTeams.findMany({
       where: { kycTeamId },
       include: {
         legalEntity: {
           include: {
-            LegalEnitityController: true,
+            kycLegalEntityController: true,
           },
         },
       },
@@ -516,9 +516,9 @@ export async function getExistingLegalEntities(kycTeamId: string) {
     const items = filtered.map((e) => ({
       id: e.id,
       businessName: e.name,
-      controllerFirstName: e.LegalEnitityController?.firstName || "",
-      controllerLastName: e.LegalEnitityController?.lastName || "",
-      controllerEmail: e.LegalEnitityController?.email || "",
+      controllerFirstName: e.kycLegalEntityController?.firstName || "",
+      controllerLastName: e.kycLegalEntityController?.lastName || "",
+      controllerEmail: e.kycLegalEntityController?.email || "",
       expiresAt: e.expiry ?? null,
     }))
 
@@ -564,11 +564,11 @@ export async function getAvailableLegalEntitiesForOrganization(
     }
 
     // 2) Fetch all links from those teams to legal entities
-    const links = await prisma.kYCTeamEntity.findMany({
+    const links = await prisma.kYCLegalEntityTeams.findMany({
       where: { kycTeamId: { in: kycTeamIds } },
       include: {
         legalEntity: {
-          include: { LegalEnitityController: true },
+          include: { kycLegalEntityController: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -598,9 +598,9 @@ export async function getAvailableLegalEntitiesForOrganization(
     const items = deduped.map((e) => ({
       id: e.id,
       businessName: e.name,
-      controllerFirstName: e.LegalEnitityController?.firstName || "",
-      controllerLastName: e.LegalEnitityController?.lastName || "",
-      controllerEmail: e.LegalEnitityController?.email || "",
+      controllerFirstName: e.kycLegalEntityController?.firstName || "",
+      controllerLastName: e.kycLegalEntityController?.lastName || "",
+      controllerEmail: e.kycLegalEntityController?.email || "",
       expiresAt: e.expiry ?? null,
     }))
 
@@ -620,12 +620,12 @@ export async function getSelectedLegalEntitiesForTeam(kycTeamId: string) {
   try {
     if (!kycTeamId) return []
 
-    const links = await prisma.kYCTeamEntity.findMany({
+    const links = await prisma.kYCLegalEntityTeams.findMany({
       where: { kycTeamId },
       include: {
         legalEntity: {
           include: {
-            LegalEnitityController: true,
+            kycLegalEntityController: true,
           },
         },
       },
@@ -640,9 +640,9 @@ export async function getSelectedLegalEntitiesForTeam(kycTeamId: string) {
         name: e.name,
         status: e.status,
         expiry: e.expiry ?? null,
-        controllerFirstName: e.LegalEnitityController?.firstName || "",
-        controllerLastName: e.LegalEnitityController?.lastName || "",
-        controllerEmail: e.LegalEnitityController?.email || "",
+        controllerFirstName: e.kycLegalEntityController?.firstName || "",
+        controllerLastName: e.kycLegalEntityController?.lastName || "",
+        controllerEmail: e.kycLegalEntityController?.email || "",
       }))
   } catch (e) {
     console.error("getSelectedLegalEntitiesForTeam error", e)

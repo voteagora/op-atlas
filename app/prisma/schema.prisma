@@ -329,7 +329,7 @@ model ImpactStatement {
 }
 
 // Reusable business identity
-model LegalEntity {
+model KYCLegalEntity {
   id                       String                  @id @default(uuid())
   name                     String
   status                   KYCStatus               @default(PENDING) // APPROVED | REJECTED | PENDING
@@ -337,34 +337,34 @@ model LegalEntity {
   createdAt                DateTime                @default(now())
   updatedAt                DateTime                @updatedAt
   personaReferenceId       String?                 @unique
-  teamLinks                KYCTeamEntity[]
-  LegalEnitityController   LegalEnitityController? @relation(fields: [legalEnitityControllerId], references: [id])
-  legalEnitityControllerId String?
+  teamLinks                KYCLegalEntityTeams[]
+  kycLegalEntityController KYCLegalEntityController? @relation(fields: [kycLegalEntityControllerId], references: [id])
+  kycLegalEntityControllerId String?
 
   @@index([name])
 }
 
 // Used for collecting POC / Controller of legal entity
-model LegalEnitityController {
+model KYCLegalEntityController {
   id            String        @id @default(uuid())
   firstName     String
   lastName      String
   email         String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  legalEntities LegalEntity[]
+  legalEntities KYCLegalEntity[]
 
   @@index([email])
 }
 
 // Which entity was used by a given KYCTeam (one per GrantEligibility attempt)
-model KYCTeamEntity {
+model KYCLegalEntityTeams {
   kycTeamId     String
   legalEntityId String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   team          KYCTeam     @relation(fields: [kycTeamId], references: [id])
-  legalEntity   LegalEntity @relation(fields: [legalEntityId], references: [id])
+  legalEntity   KYCLegalEntity @relation(fields: [legalEntityId], references: [id])
 
   @@id([kycTeamId, legalEntityId])
 }
@@ -548,7 +548,7 @@ model KYCUser {
 
 model EmailNotification {
   id          String                @id @default(uuid())
-  referenceId String               @map("ReferenceId")
+  referenceId String
   type        EmailNotificationType
   sentAt      DateTime              @default(now())
   emailTo     String // Store the actual email used
@@ -572,7 +572,7 @@ model KYCTeam {
   projects             Project[]
   rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
-  KYCTeamEntity        KYCTeamEntity[]
+  KYCLegalEntityTeams  KYCLegalEntityTeams[]
 
   @@index([walletAddress])
 }

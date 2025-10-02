@@ -1809,21 +1809,21 @@ export async function addKYCTeamMembers({
         KYCUserTeams: true,
       },
     }),
-    prisma.legalEntity.findMany({
+    prisma.kYCLegalEntity.findMany({
       where: {
-        LegalEnitityController: {
+        kycLegalEntityController: {
           email: { in: businessControllerEmails },
         },
       },
       include: {
-        LegalEnitityController: true,
+        kycLegalEntityController: true,
         teamLinks: true,
       },
     }),
     prisma.kYCUserTeams.findMany({
       where: { kycTeamId, team: { deletedAt: null } },
     }),
-    prisma.kYCTeamEntity.findMany({
+    prisma.kYCLegalEntityTeams.findMany({
       where: { kycTeamId },
     }),
   ])
@@ -1832,7 +1832,7 @@ export async function addKYCTeamMembers({
     existingUsers.map((u) => [u.email, u]),
   )
   const existingBusinessEntityMap = new Map(
-    existingEntities.map((e) => [e.LegalEnitityController?.email, e]),
+    existingEntities.map((e) => [e.kycLegalEntityController?.email, e]),
   )
 
   const newIndividuals = individuals.filter(
@@ -1857,7 +1857,7 @@ export async function addKYCTeamMembers({
   const entitiesToRemove = [
     ...existingEntities
       .filter((e) => e.teamLinks.some((t) => t.kycTeamId === kycTeamId))
-      .filter((e) => !businesses.some((b) => b.email === e.LegalEnitityController?.email))
+      .filter((e) => !businesses.some((b) => b.email === e.kycLegalEntityController?.email))
       .map((e) => ({ kycTeamId, legalEntityId: e.id })),
     ...currentEntityTeam
       .filter((t) => !existingEntities.some((e) => e.id === t.legalEntityId))
@@ -1872,7 +1872,7 @@ export async function addKYCTeamMembers({
   // Add existing entities not yet in the team
   const entitiesToAdd = existingEntities
     .filter((e) => e.teamLinks.every((t) => t.kycTeamId !== kycTeamId))
-    .filter((e) => !newBusinesses.some((b) => b.email === e.LegalEnitityController?.email))
+    .filter((e) => !newBusinesses.some((b) => b.email === e.kycLegalEntityController?.email))
 
   await prisma.$transaction(async (tx) => {
     // Create new individual KYC users
@@ -1888,10 +1888,10 @@ export async function addKYCTeamMembers({
     // Create new business legal entities with controllers
     const createdEntities = []
     for (const b of newBusinesses) {
-      const entity = await tx.legalEntity.create({
+      const entity = await tx.kYCLegalEntity.create({
         data: {
           name: b.companyName,
-          LegalEnitityController: {
+          kycLegalEntityController: {
             create: {
               firstName: b.firstName,
               lastName: b.lastName,
@@ -1900,7 +1900,7 @@ export async function addKYCTeamMembers({
           },
         },
         include: {
-          LegalEnitityController: true,
+          kycLegalEntityController: true,
         },
       })
       createdEntities.push(entity)
@@ -1926,7 +1926,7 @@ export async function addKYCTeamMembers({
     // Link entities to team
     const allEntitiesToLink = [...entitiesToAdd, ...createdEntities]
     if (allEntitiesToLink.length > 0) {
-      await tx.kYCTeamEntity.createMany({
+      await tx.kYCLegalEntityTeams.createMany({
         data: allEntitiesToLink.map((e) => ({
           kycTeamId,
           legalEntityId: e.id,
@@ -1945,7 +1945,7 @@ export async function addKYCTeamMembers({
 
     if (entitiesToRemove.length > 0) {
       for (const { kycTeamId: teamId, legalEntityId } of entitiesToRemove) {
-        await tx.kYCTeamEntity.delete({
+        await tx.kYCLegalEntityTeams.delete({
           where: {
             kycTeamId_legalEntityId: { kycTeamId: teamId, legalEntityId },
           },
