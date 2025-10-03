@@ -40,7 +40,7 @@ export default function SidebarApplications({
     isEndorsementPhase ||
     (SC_ALLOW_APPROVAL_DURING_NOMINATION && isNominationPhase)
   const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
-    enabled: isEndorsementPhase,
+    enabled: withinWindow,
   })
 
   const isTop100 = Boolean(t100?.top100)
@@ -122,7 +122,7 @@ export default function SidebarApplications({
                   showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
                   count={
-                    isEndorsementPhase
+                    withinWindow
                       ? counts?.find(
                           (c) => c.nomineeApplicationId === application.id,
                         )?.count || 0
@@ -136,7 +136,7 @@ export default function SidebarApplications({
                   showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
                   count={
-                    isEndorsementPhase
+                    withinWindow
                       ? counts?.find(
                           (c) => c.nomineeApplicationId === application.id,
                         )?.count || 0
