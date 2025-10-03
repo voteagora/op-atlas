@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { UserProjectsWithDetails } from "@/lib/types"
+import { useMemo } from "react"
 
 interface Project {
   project: {
@@ -50,6 +51,25 @@ export const ProjectSelectionModal = ({
     }
   }
 
+  const allProjects = useMemo(() => {
+    const direct = userProjects?.projects ?? []
+    const orgProjects =
+      userProjects?.organizations?.flatMap(
+        (org) => org.organization?.projects ?? [],
+      ) ?? []
+
+    // Dedupe by project.project.id
+    const byId = new Map<string, Project>()
+    ;[...direct, ...orgProjects].forEach((p: any) => {
+      const id = p?.project?.id
+      if (id && !byId.has(id)) {
+        byId.set(id, p as Project)
+      }
+    })
+
+    return Array.from(byId.values())
+  }, [userProjects])
+
   const triggerButton = (
     <button className="flex items-center gap-1 font-medium text-sm text-foreground focus:outline-none">
       <CheckboxLine className="w-4 h-4" />
@@ -60,7 +80,7 @@ export const ProjectSelectionModal = ({
 
   const dialogContent = (
     <DialogContent className="border-tertiary rounded-xl p-0 max-w-[458px]">
-      {userProjects?.projects && userProjects.projects.length > 0 ? (
+      {allProjects.length > 0 ? (
         // Modal with projects
         <>
           <DialogHeader className="p-6 pb-4 text-center">
@@ -69,7 +89,7 @@ export const ProjectSelectionModal = ({
             </DialogTitle>
           </DialogHeader>
           <div className="px-6 pb-2 flex flex-col gap-2">
-            {userProjects.projects.map((project) => {
+            {allProjects.map((project) => {
               const isSelected = selectedProjects.some(
                 (p) => p.project.id === project.project.id,
               )
