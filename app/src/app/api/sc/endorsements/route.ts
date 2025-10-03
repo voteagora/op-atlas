@@ -10,6 +10,7 @@ import {
   getEndorsementCountsByRole,
 } from "@/db/endorsements"
 import { isTop100Delegate } from "@/lib/services/top100"
+import { SC_ALLOW_APPROVAL_DURING_NOMINATION } from "@/lib/constants"
 
 const payloadSchema = z.object({
   context: z.string().min(1),
@@ -38,6 +39,8 @@ export async function POST(req: NextRequest) {
     select: {
       endorsementStartAt: true,
       endorsementEndAt: true,
+      startAt: true,
+      endAt: true,
     },
   })
 
@@ -45,14 +48,26 @@ export async function POST(req: NextRequest) {
   start = roleWindow.endorsementStartAt ?? null
   end = roleWindow.endorsementEndAt ?? null
 
-  // Require explicit endorsement window; if missing, treat as closed
-  if (!start || !end) {
-    return new Response("Window closed", { status: 403 })
-  }
-
   const now = new Date()
-  if ((start && now < start) || (end && now > end)) {
-    return new Response("Window closed", { status: 403 })
+
+  // If feature flag is enabled, allow during nomination window as well
+  if (SC_ALLOW_APPROVAL_DURING_NOMINATION) {
+    const nominationStart = roleWindow.startAt ?? null
+    const nominationEnd = roleWindow.endAt ?? null
+    const withinNomination = Boolean(
+      nominationEnd && (!nominationStart || now >= nominationStart) && now <= nominationEnd,
+    )
+    const withinEndorsement = Boolean(
+      end && (!start || now >= start) && now <= end,
+    )
+    if (!withinNomination && !withinEndorsement) {
+      return new Response("Window closed", { status: 403 })
+    }
+  } else {
+    // Require explicit endorsement window; if missing or outside, treat as closed
+    if (!start || !end || now < start || now > end) {
+      return new Response("Window closed", { status: 403 })
+    }
   }
 
   const [userWallets, safeWallets] = await Promise.all([
