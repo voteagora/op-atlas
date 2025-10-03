@@ -113,8 +113,8 @@ function ProfileProjects({ projects }: { projects: ProjectWithDetailsLite[] }) {
             className="text-sm hover:underline text-left pt-3 "
           >
             {showAll
-              ? `Hide ${filteredProjects.length - 5} more`
-              : `Show ${filteredProjects.length - 5} more`}
+              ? `Hide ${projects.length - 5} more`
+              : `Show ${projects.length - 5} more`}
             <ArrowDownS
               className={cn(
                 "w-4 h-4 ml-1 transition-transform duration-300 inline-block",
