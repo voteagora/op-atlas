@@ -1,7 +1,7 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
-import { Mail } from "lucide-react"
+import { CircleCheck } from "lucide-react"
 
 import { Button } from "@/components/common/Button"
 import { useUser } from "@/hooks/db/useUser"
@@ -21,8 +21,8 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
     <div className="flex space-x-1.5">
       {email && (
         <div className={`input-container ${isSyncing ? "opacity-50" : ""}`}>
-          <Mail size={16} fill="#0F111A" color="#fff" />
-          <span>{email}</span>
+          <CircleCheck size={16} className="text-success-strong" />
+          <span className="text-secondary-foreground">{email}</span>
         </div>
       )}
       <Button

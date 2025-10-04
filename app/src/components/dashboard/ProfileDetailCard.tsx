@@ -92,7 +92,7 @@ const ProfileDetailCard = ({
         </button>
       )}
 
-      <div className="flex flex-col">
+      <div className="flex flex-col justify-center">
         <div className="text-2xl font-semibold flex items-center gap-x-2">
           {username || ""}
           {isBadgeholder && (
