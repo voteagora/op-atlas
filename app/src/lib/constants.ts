@@ -242,3 +242,7 @@ export const TOP100_QUERY_KEY = ["sc-top100"] as const
 
 export const SAFE_OPMAINET_TRANSACTION_URL =
   "https://safe-transaction-optimism.safe.global/api"
+
+// Temporary feature flag to allow SC approvals during nomination window
+export const SC_ALLOW_APPROVAL_DURING_NOMINATION =
+  process.env.NEXT_PUBLIC_SC_ALLOW_APPROVAL_DURING_NOMINATION === "true"

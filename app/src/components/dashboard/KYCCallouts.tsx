@@ -62,7 +62,7 @@ interface KYCVerifiedCalloutProps {
 
 function KYCVerifiedCallout({ kycTeam, onDismiss }: KYCVerifiedCalloutProps) {
   const linkPath = kycTeam.projectId
-    ? `/project/${kycTeam.projectId}/grant-address`
+    ? `/projects/${kycTeam.projectId}/grant-address`
     : `/profile/organizations/${kycTeam.organizationId}/grant-address`
 
   return (
