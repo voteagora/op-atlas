@@ -133,7 +133,7 @@ export default function CodeInput({
           onBlur={handleBlur}
           disabled={disabled}
           className={cn(
-            "h-12 w-full min-w-0 text-center text-lg font-semibold rounded-lg border-2 border-gray-300 focus:border-red-500 focus:ring-0 focus:outline-none transition-colors",
+            "h-12 w-full min-w-0 text-center text-lg font-semibold rounded-lg border border-gray-300 focus:border-red-500 focus:ring-0 focus:outline-none transition-colors",
             digit && "border-gray-400 bg-gray-50",
             focusedIndex === index && "border-red-500",
             disabled && "opacity-50 cursor-not-allowed",

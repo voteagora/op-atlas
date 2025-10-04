@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { Check, Loader2, X } from "lucide-react"
+import { useEffect, useRef, useState, useTransition } from "react"
+import { Check, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
@@ -34,6 +34,7 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
   const [verificationCode, setVerificationCode] = useState("")
   const [error, setError] = useState("")
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const resetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const currentUserEmail = findMyKYCData?.email || "[name@email.com]"
 
@@ -127,16 +128,39 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
     })
   }
 
-  const handleDismiss = () => {
-    onOpenChange(false)
-    // Reset state when dialog closes
-    setTimeout(() => {
-      setState(FindMyKYCState.INITIAL)
-      setEmail("")
-      setVerificationCode("")
-      setError("")
-    }, 300)
+  const resetState = () => {
+    setState(FindMyKYCState.INITIAL)
+    setEmail("")
+    setVerificationCode("")
+    setError("")
+    setIsTransitioning(false)
   }
+
+  const handleDialogOpenChange = (isOpen: boolean) => {
+    onOpenChange(isOpen)
+
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current)
+      resetTimeoutRef.current = null
+    }
+
+    if (!isOpen) {
+      resetTimeoutRef.current = setTimeout(() => {
+        resetState()
+        resetTimeoutRef.current = null
+      }, 300)
+    }
+  }
+
+  const handleDismiss = () => {
+    handleDialogOpenChange(false)
+  }
+
+  useEffect(() => () => {
+    if (resetTimeoutRef.current) {
+      clearTimeout(resetTimeoutRef.current)
+    }
+  }, [])
 
 
   const renderContent = () => {
@@ -145,7 +169,7 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
         return (
           <div className="flex flex-col text-center">
             <div className="font-semibold text-xl">
-              Within the last year, did you complete KYC using a different email from [{currentUserEmail}]?
+              Within the last year, did you complete KYC using a different email from {currentUserEmail}?
             </div>
 
             <div className="text-base text-secondary-foreground mt-2">
@@ -173,8 +197,9 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
 
               <Button
                 onClick={handleEmailSubmit}
+                size={"lg"}
                 disabled={isPending || !validateEmail(email.trim())}
-                className="w-full bg-red-500 hover:bg-red-600"
+                className="w-full bg-red-500 hover:bg-red-600 text-base"
               >
                 {isPending ? (
                   <>
@@ -195,7 +220,7 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
             <div className="font-semibold text-xl">Confirm your email</div>
 
             <div className="text-base text-secondary-foreground mt-2">
-              Check [{email}] for an email from compliance@optimism.io and enter your code below.
+              Check {email} for an email from compliance@optimism.io and enter your code below.
             </div>
 
             <div className="mt-6 space-y-2">
@@ -212,8 +237,9 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
 
               <Button
                 onClick={handleCodeSubmit}
+                size={"lg"}
                 disabled={isPending || verificationCode.length !== 6}
-                className="w-full bg-red-500 hover:bg-red-600"
+                className="w-full bg-red-500 hover:bg-red-600 text-base"
               >
                 {isPending ? (
                   <>
@@ -237,7 +263,7 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
 
             <div className="mt-6">
               <div className="font-semibold text-xl">
-                We&apos;re checking our KYC records for [{email}]
+                We&apos;re checking our KYC records for {email}
               </div>
               <div className="text-base text-secondary-foreground mt-2">
                 This could take a few minutes.
@@ -257,12 +283,13 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
 
             <div className="mt-6">
               <div className="font-semibold text-xl">
-                Success, we found a KYC record for [{email}]
+                Success, we found a KYC record for {email}
               </div>
 
               <Button
                 onClick={handleDismiss}
-                className="w-full bg-red-500 hover:bg-red-600 mt-6"
+                size={"lg"}
+                className="w-full bg-red-500 hover:bg-red-600 mt-6 text-base"
               >
                 Dismiss
               </Button>
@@ -274,12 +301,13 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
         return (
           <div className="flex flex-col text-center py-4">
             <div className="font-semibold text-xl">
-              Sorry, but no record of KYC exists for [{email}]
+              Sorry, but no record of KYC exists for {email}
             </div>
 
             <Button
               onClick={handleDismiss}
-              className="w-full bg-red-500 hover:bg-red-600 mt-6"
+              size={"lg"}
+              className="w-full bg-red-500 hover:bg-red-600 mt-6 text-base"
             >
               Dismiss
             </Button>
@@ -289,18 +317,8 @@ export default function FindMyKYCDialog({ open, onOpenChange }: DialogProps<obje
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="max-w-md">
-        <div className="absolute right-4 top-4">
-          <button
-            onClick={handleDismiss}
-            className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </button>
-        </div>
-
         <div className={cn(
           "transition-opacity duration-150 ease-in-out",
           isTransitioning ? "opacity-0" : "opacity-100"

@@ -27,7 +27,7 @@ function KYCEmailVerificationDialog({ open, onOpenChange }: DialogProps<object>)
           <div className="text-base text-muted-foreground mb-6">
             {kycData?.isNewUser ? (
               <>
-                A message from compliance@optimism.io has been sent to [{kycData.email}]. Please complete KYC via the link provided and allow 48 hours for your status to update.
+                A message from compliance@optimism.io has been sent to {kycData.email}. Please complete KYC via the link provided and allow 48 hours for your status to update.
               </>
             ) : (
               <>

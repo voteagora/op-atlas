@@ -1,4 +1,5 @@
-import { AlertTriangle, Check, Clock, Loader2, X } from "lucide-react"
+import { AlertTriangle, Loader2, X } from "lucide-react"
+import Image from "next/image"
 
 import {
   EmailState,
@@ -14,11 +15,20 @@ interface StatusIconProps {
 }
 
 const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
+  const sizeInPx = size * 4 // Convert size units to pixels (5 -> 20px)
+
   switch (status) {
     case "PENDING":
       return <Loader2 className={cn(`h-${size} w-${size}`, "animate-spin")} />
     case "APPROVED":
-      return <Check className={cn(`h-${size} w-${size}`, "text-green-500")} />
+      return (
+        <Image
+          src="/assets/icons/circle-check-green.svg"
+          height={16.67}
+          width={16.67}
+          alt="Verified"
+        />
+      )
     case "REJECTED":
       return <X className={cn(`h-${size} w-${size}`, "text-red-500")} />
     case "project_issue":
@@ -128,7 +138,12 @@ const EmailSendButton = ({
       return (
         <div className="flex flex-row items-center gap-2" title="Email sent">
           <p className="text-green-900 text-xs font-light">Email sent</p>
-          <Check className={cn(`h-4 w-4`, "text-green-900")} />
+          <Image
+            src="/assets/icons/circle-check-green.svg"
+            height={16.67}
+            width={16.67}
+            alt="Email sent"
+          />
         </div>
       )
   }

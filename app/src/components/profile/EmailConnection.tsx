@@ -1,7 +1,7 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
-import { CircleCheck } from "lucide-react"
+import Image from "next/image"
 
 import { Button } from "@/components/common/Button"
 import { useUser } from "@/hooks/db/useUser"
@@ -18,11 +18,17 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
     privyUser?.email?.address?.toLowerCase()
 
   return (
-    <div className="flex space-x-1.5">
+    <div className="flex">
       {email && (
-        <div className={`input-container ${isSyncing ? "opacity-50" : ""}`}>
-          <CircleCheck size={16} className="text-success-strong" />
-          <span className="text-secondary-foreground">{email}</span>
+        <div className={`flex flex-row gap-2 min-w-0 flex-1 input-container ${isSyncing ? "opacity-50" : ""}`}>
+          <Image
+            src="/assets/icons/circle-check-green.svg"
+            height={16.67}
+            width={16.67}
+            alt="Verified"
+            className="mr-1"
+          />
+          <span className="text-secondary-foreground text-sm font-[Inter]">{email}</span>
         </div>
       )}
       <Button

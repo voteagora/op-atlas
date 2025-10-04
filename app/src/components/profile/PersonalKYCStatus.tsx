@@ -1,13 +1,14 @@
 "use client"
 
 import { KYCUser } from "@prisma/client"
-import { Check, Loader2, TriangleAlert } from "lucide-react"
+import { Loader2, TriangleAlert } from "lucide-react"
+import Image from "next/image"
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
 import { StatusIcon } from "@/components/projects/grants/grants/kyc-status/user-status/StatusComponents"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/common/Badge"
 import { ExtendedPersonaStatus, EmailState } from "@/components/projects/types"
 import { sendPersonalKYCReminderEmail } from "@/lib/actions/emails"
 
@@ -24,28 +25,25 @@ const PersonalKYCUserRow = ({ kycUser }: { kycUser: KYCUser }) => {
   ].filter(Boolean)
 
   return (
-    <div className="flex flex-row w-full max-w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rounded-[6px] border border-border bg-background">
+    <div className="flex flex-row w-full max-w-[664px] h-[40px] pt-[8px] pr-[12px] pb-[8px] pl-[12px] gap-[8px] rounded-[6px] border border-border bg-background">
       <div className="flex flex-row justify-between items-center w-full">
         <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
-          <StatusIcon status={kycUser.status as ExtendedPersonaStatus} />
-          <div className="flex flex-row gap-2 min-w-0 flex-1">
-            <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-text-foreground truncate">
-              {values.join(", ")}
-            </p>
-          </div>
-          <div className="flex flex-row gap-2 flex-shrink-0">
-            {kycUser.status === "APPROVED" && kycUser.expiry && (
-              <Badge variant="secondary">
-                {`Verified until ${new Date(
-                  kycUser.expiry,
-                ).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}`}
-              </Badge>
-            )}
-          </div>
+          <StatusIcon status={kycUser.status as ExtendedPersonaStatus} size={4} />
+          <p className="font-[Inter] font-normal text-sm text-text-foreground truncate">
+            {values.join(", ")}
+          </p>
+          {kycUser.status === "APPROVED" && kycUser.expiry && (
+            <Badge
+              text={`Verified until ${new Date(
+                kycUser.expiry,
+              ).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}`}
+              className="bg-secondary text-secondary-foreground px-2 py-1 flex-shrink-0"
+            />
+          )}
         </div>
       </div>
     </div>
@@ -87,7 +85,12 @@ export default function PersonalKYCStatus({ kycUser }: PersonalKYCStatusProps) {
           {emailState === EmailState.SENT ? (
             <div className="flex items-center gap-2">
               <span className="text-green-900 text-xs font-light">Email sent</span>
-              <Check className="h-4 w-4 text-green-900" />
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16.67}
+                width={16.67}
+                alt="Email sent"
+              />
             </div>
           ) : (
             <Button
