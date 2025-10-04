@@ -40,7 +40,7 @@ export function getKYCEmailTemplate(kycUser: KYCUserWithRelations, kycLink: stri
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)},<br>${isOrphanedKYCUser(kycUser) ? 'please complete the following steps to verify your identity' : 'Congratulations on applying for your Optimism Grant! 🎉'}</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)}, ${isOrphanedKYCUser(kycUser) ? 'please complete the following steps to verify your identity' : 'Congratulations on applying for your Optimism Grant! 🎉'}</h1>
 
     <p style="font-size: 16px; margin-bottom: 40px;">${isOrphanedKYCUser(kycUser) ? 'To verify your identity within Optimism Atlas, please complete this quick KYC (Know Your Customer) process.' : 'To receive your OP tokens, we need you to complete a quick KYC (Know Your Customer) verification for your project. This is a standard security procedure that helps us ensure proper distribution of rewards.'}</p>
 
@@ -61,11 +61,11 @@ export function getKYCEmailTemplate(kycUser: KYCUserWithRelations, kycLink: stri
 
     <p style="font-size: 16px;">Questions or need assistance? Contact our support team via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>.</p>
 
-    <p style="font-size: 16px;">Stay Optimistic,<br>The Optimism Team</p>
+    <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `
@@ -82,7 +82,7 @@ export function getKYCReminderEmailTemplate(
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)},<br>${isOrphanedKYCUser(kycUser) ? "you haven't completed your KYC verification yet" : "You haven't completed KYC verification for your Optimism grant yet"}</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)}, ${isOrphanedKYCUser(kycUser) ? "you haven't completed your KYC verification yet" : "You haven't completed KYC verification for your Optimism grant yet"}</h1>
 
     <p style="font-size: 16px;">Your verification is just a few steps away:</p>
 
@@ -102,11 +102,11 @@ export function getKYCReminderEmailTemplate(
 
     <p style="font-size: 16px;">Need help? Check KYC <a href="https://kyc.optimism.io/faq" style="color: black; text-decoration: underline;">FAQs</a>. Our support team are also happy to assist you. If you have any questions or run into issues, feel free to reach out to us via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>. We are happy to help!</p>
 
-    <p style="font-size: 16px;">Stay Optimistic,<br>The Optimism Team</p>
+    <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `
@@ -135,7 +135,7 @@ export function getKYCApprovedEmailTemplate(kycUser: KYCUserWithRelations): stri
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `
@@ -149,7 +149,7 @@ export function getKYCEmailVerificationTemplate(firstName: string, verificationL
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName},<br>Verify your email to link your KYC verification</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName}, Verify your email to link your KYC verification</h1>
 
     <p style="font-size: 16px; margin-bottom: 40px;">We found an existing KYC verification associated with this email address. To link it to your Optimism Atlas account, please verify that you own this email address.</p>
 
@@ -165,11 +165,11 @@ export function getKYCEmailVerificationTemplate(firstName: string, verificationL
 
     <p style="font-size: 16px;">Questions or need assistance? Contact our support team via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>.</p>
 
-    <p style="font-size: 16px;">Stay Optimistic,<br>The Optimism Team</p>
+    <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `
@@ -210,11 +210,11 @@ export function getFindMyKYCVerificationTemplate(verificationCode: string): stri
 
     <p style="font-size: 16px;">Questions or need assistance? Contact our support team via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>.</p>
 
-    <p style="font-size: 16px;">Stay Optimistic,<br>The Optimism Team</p>
+    <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `
@@ -237,7 +237,7 @@ export function getKYBEmailTemplate(params: {
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName},<br>Congratulations on applying for your Optimism Grant! 🎉</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName}, Congratulations on applying for your Optimism Grant! 🎉</h1>
 
     <p style="font-size: 16px; margin-bottom: 40px;">To receive your OP tokens, we need you to complete a quick KYB (Know Your Business) verification for <strong>${params.businessName}</strong>. This is a standard security procedure that helps us ensure proper distribution of rewards.</p>
 
@@ -258,11 +258,11 @@ export function getKYBEmailTemplate(params: {
 
     <p style="font-size: 16px;">Questions or need assistance? Contact our support team via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>.</p>
 
-    <p style="font-size: 16px;">Stay Optimistic,<br>The Optimism Team</p>
+    <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `
@@ -280,7 +280,7 @@ export function getKYBReminderEmailTemplate(params: {
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName},<br>You haven't completed KYB verification for your Optimism grant yet</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName}, You haven't completed KYB verification for your Optimism grant yet</h1>
 
     <p style="font-size: 16px;">Your verification is just a few steps away:</p>
 
@@ -300,11 +300,11 @@ export function getKYBReminderEmailTemplate(params: {
 
     <p style="font-size: 16px;">Need help? Check KYB <a href="https://kyc.optimism.io/faq" style="color: black; text-decoration: underline;">FAQs</a>. Our support team are also happy to assist you. If you have any questions or run into issues, feel free to reach out to us via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>. We are happy to help!</p>
 
-    <p style="font-size: 16px;">Stay Optimistic,<br>The Optimism Team</p>
+    <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `
@@ -334,7 +334,7 @@ export function getKYBApprovedEmailTemplate(firstName: string): string {
 
     <div style="padding-bottom: 48px; margin-top: 18px; border-top: 1px solid #e0e0e0;"></div>
     <div style="text-align: center;">
-        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 264px; height: auto;"/>
+        <img src="https://atlas.optimism.io/assets/icons/optimism_logo_email.png" alt="OP Atlas Logo" style="width: 132px; height: auto;"/>
     </div>
 </div>
     `

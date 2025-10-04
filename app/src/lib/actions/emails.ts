@@ -57,6 +57,7 @@ export const sendTransactionEmail = async (
       text: emailData.text || emailData.html.replace(/<[^>]*>/g, ""),
       subject: emailData.subject,
       from_email: "compliance@optimism.io",
+      from_name: "Optimism",
       to: [{ email: emailData.to, type: "to" as const }],
       reply_to: "compliance@optimism.io.",
     }
