@@ -21,10 +21,10 @@ function KYCEmailVerificationDialog({ open, onOpenChange }: DialogProps<object>)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
-        <div className="flex flex-col gap-6 text-center">
-          <div className="font-semibold text-lg">Check your email</div>
+        <div className="flex flex-col text-center">
+          <div className="font-semibold text-xl mb-2">Check your email</div>
 
-          <div className="text-sm text-muted-foreground">
+          <div className="text-base text-muted-foreground mb-6">
             {kycData?.isNewUser ? (
               <>
                 A message from compliance@optimism.io has been sent to [{kycData.email}]. Please complete KYC via the link provided and allow 48 hours for your status to update.
@@ -39,7 +39,8 @@ function KYCEmailVerificationDialog({ open, onOpenChange }: DialogProps<object>)
           <Button
             onClick={handleDismiss}
             variant="destructive"
-            className="w-full"
+            size={"lg"}
+            className="w-full text-base"
           >
             Dismiss
           </Button>
