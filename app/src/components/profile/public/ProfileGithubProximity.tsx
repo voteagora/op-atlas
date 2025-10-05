@@ -143,7 +143,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
                 </a>{" "}
                 and{" "}
                 <a
-                  href="https://docs.opensource.observer/docs/projects/"
+                  href="https://docs.oso.xyz/docs/projects/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-500 underline hover:text-gray-700"
