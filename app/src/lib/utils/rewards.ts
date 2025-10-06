@@ -1,6 +1,7 @@
 import { Prisma, SuperfluidStream } from "@prisma/client"
 import { formatUnits, keccak256, parseUnits } from "viem"
 
+import { SEASON_TRANCHES } from "@/lib/constants/rewards"
 import { isKycStreamTeamVerified } from "@/lib/utils/kyc"
 
 import {
@@ -62,8 +63,16 @@ export async function processStream(
   streams: StreamWithKYCTeam[],
   currentTeam: KYCStreamTeam,
   roundId: string,
+  season: number,
   streamId?: string,
-) {
+): Promise<{
+  id: string
+  projectIds: string[]
+  projectNames: string[]
+  wallets: string[]
+  KYCStatusCompleted: boolean
+  amounts: string[]
+} | null> {
   const orderedStreams = streams.sort(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(), // Sort by createdAt ascending
   )
@@ -81,6 +90,26 @@ export async function processStream(
     (project) => project.recurringRewards.length > 0,
   )
 
+  const calculatedAmounts = calculateRewardAmounts(projectsWithRewards)
+  
+  // Get active tranches for this season/round combination
+  const seasonKey = `${season}-${roundId}` as keyof typeof SEASON_TRANCHES
+  const activeTranches = SEASON_TRANCHES[seasonKey] || []
+  
+  // Map only the active tranches
+  const amounts = activeTranches.map(trancheNum =>
+    calculatedAmounts[trancheNum - 1] ?? "0"
+  )
+
+  // Filter out streams where all amounts are zero/null
+  const hasNonZeroAmounts = amounts.some(amount =>
+    amount && amount !== "0" && amount !== "0.0"
+  )
+
+  if (!hasNonZeroAmounts) {
+    return null
+  }
+
   return {
     id:
       streamId ??
@@ -92,13 +121,7 @@ export async function processStream(
     projectNames: projectsWithRewards.map((project) => project.name),
     wallets,
     KYCStatusCompleted: isKycStreamTeamVerified(currentTeam),
-    amounts: [
-      calculateRewardAmounts(projectsWithRewards)[0],
-      calculateRewardAmounts(projectsWithRewards)[1],
-      calculateRewardAmounts(projectsWithRewards)[2],
-      calculateRewardAmounts(projectsWithRewards)[3],
-      calculateRewardAmounts(projectsWithRewards)[4],
-    ],
+    amounts,
   }
 }
 

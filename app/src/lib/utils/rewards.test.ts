@@ -2,6 +2,8 @@ import { KYCStreamTeam, StreamWithKYCTeam } from "../types"
 import { processStream } from "./rewards"
 
 describe("processStream", () => {
+  const season = 7
+  const round = "7"
   const createMockTeam = (
     walletAddress: string,
     deletedAt: Date | null,
@@ -35,6 +37,8 @@ describe("processStream", () => {
         businessName: string | null
         status: "PENDING" | "APPROVED" | "REJECTED"
         expiry: Date
+        personaStatus: null
+        kycUserType: "USER"
       }
     }> = [],
   ): KYCStreamTeam => ({
@@ -104,10 +108,12 @@ describe("processStream", () => {
       businessName: null,
       status,
       expiry: new Date(),
+      personaStatus: null,
+      kycUserType: "USER" as const,
     },
   })
 
-  it("should generate consistent stream ID regardless of project order", () => {
+  it("should generate consistent stream ID regardless of project order", async () => {
     const projects = [
       {
         id: "project1",
@@ -124,13 +130,14 @@ describe("processStream", () => {
     const team1 = createMockTeam("wallet1", null, projects)
     const team2 = createMockTeam("wallet1", null, [...projects].reverse())
 
-    const result1 = processStream([], team1, "round-id")
-    const result2 = processStream([], team2, "round-id")
-
-    expect(result1.id).toBe(result2.id)
+    const result1 = await processStream([], team1, round, season)
+    const result2 = await processStream([], team2, round, season)
+    expect(result1).not.toBeNull()
+    expect(result2).not.toBeNull()
+    expect(result1!.id).toBe(result2!.id)
   })
 
-  it("should order wallets based on stream creation time", () => {
+  it("should order wallets based on stream creation time", async () => {
     const now = new Date()
     const firstCreated = new Date(now.getTime() - 2000)
     const secondCreated = new Date(now.getTime() - 1000)
@@ -139,13 +146,19 @@ describe("processStream", () => {
       createMockStream("wallet1", firstCreated),
       createMockStream("wallet2", secondCreated),
     ]
-    const currentTeam = createMockTeam("wallet3", null, [])
+    const minimalProject = {
+      id: "p1",
+      name: "P1",
+      recurringRewards: [createMockReward(1, "1", "p1")],
+    }
+    const currentTeam = createMockTeam("wallet3", null, [minimalProject])
 
-    const result = processStream(streams, currentTeam, "round-id")
-    expect(result.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
+    const result = await processStream(streams, currentTeam, round, season)
+    expect(result).not.toBeNull()
+    expect(result!.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
   })
 
-  it("should handle streams with reward stream relationships", () => {
+  it("should handle streams with reward stream relationships", async () => {
     const now = new Date()
     const firstCreated = new Date(now.getTime() - 2000)
     const secondCreated = new Date(now.getTime() - 1000)
@@ -156,29 +169,42 @@ describe("processStream", () => {
       createMockStream("wallet1", firstCreated, rewardStreamId),
       createMockStream("wallet2", secondCreated, rewardStreamId),
     ]
-    const currentTeam = createMockTeam("wallet3", null, [])
+    const minimalProject = {
+      id: "p1",
+      name: "P1",
+      recurringRewards: [createMockReward(1, "1", "p1")],
+    }
+    const currentTeam = createMockTeam("wallet3", null, [minimalProject])
 
-    const result = processStream(streams, currentTeam, "round-id")
+    const result = await processStream(streams, currentTeam, round, season)
 
     // Should include all wallets in order of stream creation
-    expect(result.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
+    expect(result).not.toBeNull()
+    expect(result!.wallets).toEqual(["wallet1", "wallet2", "wallet3"])
   })
 
-  it("should correctly calculate KYCStatusCompleted", () => {
+  it("should correctly calculate KYCStatusCompleted", async () => {
     const now = new Date()
     const streams = [createMockStream("wallet1", now)]
     const currentTeam = createMockTeam(
       "wallet2",
       null,
-      [],
+      [
+        {
+          id: "p1",
+          name: "P1",
+          recurringRewards: [createMockReward(1, "1", "p1")],
+        },
+      ],
       [createMockTeamMember("PENDING")],
     )
 
-    const result = processStream(streams, currentTeam, "round-id")
-    expect(result.KYCStatusCompleted).toBe(false)
+    const result = await processStream(streams, currentTeam, round, season)
+    expect(result).not.toBeNull()
+    expect(result!.KYCStatusCompleted).toBe(false)
   })
 
-  it("should correctly calculate amounts for different tranches", () => {
+  it("should correctly calculate amounts for different tranches", async () => {
     const projects = [
       {
         id: "project1",
@@ -199,22 +225,26 @@ describe("processStream", () => {
     ]
 
     const currentTeam = createMockTeam("wallet1", null, projects)
-    const result = processStream([], currentTeam, "round-id")
+    const result = await processStream([], currentTeam, round, season)
 
     // Tranche 1: 100 + 300 = 400
     // Tranche 2: 200
     // Tranche 3: 400
-    expect(result.amounts).toEqual(["400", "200", "400"])
+    expect(result).not.toBeNull()
+    expect(result!.amounts).toEqual(["400", "200", "400", "0", "0", "0"])
   })
 
-  it("should use provided streamId when available", () => {
-    const currentTeam = createMockTeam("wallet1", null, [])
+  it("should use provided streamId when available", async () => {
+    const currentTeam = createMockTeam("wallet1", null, [
+      { id: "p1", name: "P1", recurringRewards: [createMockReward(1, "1", "p1")] },
+    ])
     const customStreamId = "custom-stream-id"
-    const result = processStream([], currentTeam, "round-id", customStreamId)
-    expect(result.id).toBe(customStreamId)
+    const result = await processStream([], currentTeam, round, season, customStreamId)
+    expect(result).not.toBeNull()
+    expect(result!.id).toBe(customStreamId)
   })
 
-  it("should filter out projects without recurring rewards", () => {
+  it("should filter out projects without recurring rewards", async () => {
     const projects = [
       {
         id: "project1",
@@ -229,9 +259,10 @@ describe("processStream", () => {
     ]
 
     const currentTeam = createMockTeam("wallet1", null, projects)
-    const result = processStream([], currentTeam, "round-id")
+    const result = await processStream([], currentTeam, round, season)
 
-    expect(result.projectIds).toEqual(["project1"])
-    expect(result.projectNames).toEqual(["Project 1"])
+    expect(result).not.toBeNull()
+    expect(result!.projectIds).toEqual(["project1"])
+    expect(result!.projectNames).toEqual(["Project 1"])
   })
 })

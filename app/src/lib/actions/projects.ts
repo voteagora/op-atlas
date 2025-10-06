@@ -14,10 +14,12 @@ import {
   CreateProjectParams,
   deleteProject,
   deleteProjectKycTeams,
+  detachProjectsFromKycTeam,
   getAllApplicationsForRound,
   getAllPublishedUserProjects,
   getKycTeamForProject,
   getProjectContracts,
+  getProjectMetadata,
   getProjectsForKycTeam,
   getProjectTeam,
   getPublicProject,
@@ -36,7 +38,7 @@ import {
 import { getUserById } from "@/db/users"
 
 import { createEntityAttestation } from "../eas/serverOnly"
-import { TeamRole } from "../types"
+import { ProjectWithDetails, TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import {
   verifyAdminStatus,
@@ -77,7 +79,14 @@ export const getAdminProjects = async (userId: string, roundId?: string) => {
   const filteredTeamProjects = teamProjects.filter(
     ({ id }) => !organizationProjectIds.includes(id),
   )
-  return [...filteredTeamProjects, ...organizationProjects]
+  // Only allow published (snapshotted) projects in application flows
+  const hasSnapshots = (p: ProjectWithDetails) =>
+    Array.isArray(p.snapshots) && p.snapshots.length > 0
+
+  const publishedTeamProjects = filteredTeamProjects.filter(hasSnapshots)
+  const publishedOrgProjects = organizationProjects.filter(hasSnapshots)
+
+  return [...publishedTeamProjects, ...publishedOrgProjects]
 }
 
 export const getApplications = async (userId: string) => {
@@ -524,6 +533,30 @@ export const deleteProjectKYCTeamsAction = async ({
   return await deleteProjectKycTeams({ projectIds, kycTeamId })
 }
 
+export const detachProjectsFromKycTeamAction = async ({
+  projectIds,
+  kycTeamId,
+}: {
+  projectIds: string[]
+  kycTeamId: string
+}) => {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    throw new Error("Unauthorized")
+  }
+
+  projectIds.forEach(async (projectId) => {
+    const isInvalid = await verifyMembership(projectId, userId)
+    if (isInvalid?.error) {
+      throw new Error(isInvalid.error)
+    }
+  })
+
+  return await detachProjectsFromKycTeam({ projectIds, kycTeamId })
+}
+
 export const getProjectsForKycTeamAction = async (kycTeamId: string) => {
   const session = await auth()
 
@@ -570,6 +603,14 @@ export const getPublicProjectAction = async ({
   if (!rawProject) return null
 
   return rawProject
+}
+
+export const getProjectMetadataAction = async ({
+  projectId,
+}: {
+  projectId: string
+}) => {
+  return await getProjectMetadata(projectId)
 }
 
 export const checkWalletAddressExistsAction = async (walletAddress: string) => {

@@ -52,7 +52,7 @@ const VoteButton = ({
     sm: "w-[64px] h-[34px] py-[8px] px-[12px] text-sm md:w-[60px] md:h-[32px]",
     default: "w-[84px] h-[42px] py-[10px] px-[16px] md:w-[80px] md:h-[40px]",
     lg: "w-[104px] h-[50px] py-[12px] px-[20px] text-lg md:w-[100px] md:h-[48px]",
-    veto: "w-[256px] h-[2.5rem] py-[10px] px-[16px]",
+    veto: "w-[124px] h-[2.5rem] py-[10px] px-[16px]",
   }
 
   return (

@@ -46,7 +46,6 @@ export default function Header() {
                 <p className="text-secondary-foreground">{detail}</p>
               </div>
             ))}
-            {mission?.subDetails && mission?.subDetails}
             {mission?.callout && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
                 {mission.callout.map((callout, index) => (
@@ -55,6 +54,13 @@ export default function Header() {
                   </div>
                 ))}
               </div>
+            )}
+            {(mission?.pageName === "retro-funding-dev-tooling" ||
+              mission?.pageName === "retro-funding-onchain-builders") && (
+              <p className="text-secondary-foreground">
+                Any projects enrolled in the previous season of Retro Funding
+                will automatically roll over to this season.
+              </p>
             )}
           </div>
         </div>

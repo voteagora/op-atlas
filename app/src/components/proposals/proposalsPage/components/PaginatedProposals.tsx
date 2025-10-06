@@ -4,8 +4,10 @@ import { Loader2 } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { fetchMoreProposals } from "@/lib/actions/proposals"
+
 import Proposals from "./Proposals"
 import { StandardProposalProps } from "./Proposals"
+import { Role } from "@prisma/client"
 
 interface PaginationMetadata {
   has_next: boolean
@@ -17,12 +19,14 @@ interface PaginatedProposalsProps {
   initialProposals: StandardProposalProps[]
   initialPagination: PaginationMetadata
   userId?: string
+  securityRoles?: Role[]
 }
 
 const PaginatedProposals = ({
   initialProposals,
   initialPagination,
   userId,
+  securityRoles = [],
 }: PaginatedProposalsProps) => {
   const [proposals, setProposals] =
     useState<StandardProposalProps[]>(initialProposals)
@@ -91,7 +95,7 @@ const PaginatedProposals = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <Proposals proposals={proposals} />
+      <Proposals proposals={proposals} securityRoles={securityRoles} />
 
       {pagination.has_next && (
         <div ref={observerRef} className="flex justify-center mt-4 py-4">

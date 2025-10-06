@@ -117,14 +117,18 @@ export const syncPrivyUser = async (
 
   //  Add new or update existing email
   if (privyEmail && privyEmail !== dbEmail) {
-    await updateUserEmail({
-      id: existingUser.id,
-      email: privyEmail,
-      verified: true,
-    })
     try {
-      // TODO: Andrei - verify that emails are properly added to mailing list
-      await addContactToList({ email: privyEmail })
+      await updateUserEmail({
+        id: existingUser.id,
+        email: privyEmail,
+        verified: true,
+      })
+      try {
+        // TODO: Andrei - verify that emails are properly added to mailing list
+        await addContactToList({ email: privyEmail })
+      } catch (error) {
+        console.error("Failed to update email:", error)
+      }
     } catch (error) {
       console.error("Failed to update email:", error)
     }

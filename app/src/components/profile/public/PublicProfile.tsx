@@ -16,7 +16,6 @@ const PublicUserProfile = ({
   organizations,
   projects,
 }: {
-  className?: string
   user: UserWithAddresses
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
