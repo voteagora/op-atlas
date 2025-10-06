@@ -23,21 +23,19 @@ const PublicUserProfile = ({
 
   return (
     <div className={"w-full overflow-x-hidden pb-12"}>
-      <div className="w-full lg:max-w-6xl lg:mx-auto pt-12 pb-12 lg:px-0 px-6 lg:grid lg:grid-cols-3 lg:gap-x-12">
-
-        <div className="lg:col-span-1">
-          <div className="sticky top-0">
+      <div className="w-full lg:max-w-6xl lg:mx-auto pt-20 pb-12 lg:px-0 px-6 lg:grid lg:grid-cols-3 lg:gap-x-12">
+        <div className="lg:col-span-1 max-w-[340px] lg:h-screen lg:overflow-y-auto">
+          <div className="sticky top-0 pt-4 pb-6 z-10">
             <ProfileHeader user={user} />
             <ProfileOrganizations organizations={organizations} />
           </div>
         </div>
 
-
-        <div className="lg:col-span-2 space-y-12 mt-12 lg:mt-0">
+        <div className="lg:col-span-2 space-y-12 mt-12 lg:mt-0 max-w-[712px]">
           <RoleApplication user={user} />
           <ProfileRoles user={user} />
+          {projects.length > 0 && <ProfileProjects projects={projects} />}
           <ProfileGithubProximity user={user} />
-          <ProfileProjects projects={projects} />
         </div>
       </div>
     </div>

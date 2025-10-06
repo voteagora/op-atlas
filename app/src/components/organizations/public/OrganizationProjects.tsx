@@ -1,4 +1,4 @@
-import ProjectWithLink from "@/components/profile/public/ProjectWithLink"
+import ProjectWithLink from "@/components/organizations/public/ProjectWithLink"
 import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
