@@ -1,0 +1,59 @@
+FROM node:21-bullseye AS base
+
+# Test-specific build arguments
+ARG NODE_ENV=test
+ARG PORT=3000
+ARG HOSTNAME=0.0.0.0
+
+# Install dependencies
+FROM base AS deps
+RUN apt-get update && apt-get install -y \
+    libc6 \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /workspace
+
+COPY package.json pnpm-lock.yaml* ./
+COPY app/package.json app/package.json
+RUN npm install -g pnpm
+RUN pnpm install --frozen-lockfile
+
+# Test image
+FROM base AS test
+WORKDIR /workspace
+
+# Create non-root user
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 nextjs
+
+# Set test environment variables
+ENV NODE_ENV=test
+ENV ATLAS_TEST_MODE=true
+ENV USE_TEST_AUTH=true
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Mock external service credentials for testing
+ENV NEXT_PUBLIC_PRIVY_APP_ID=test-app-id
+ENV PRIVY_APP_ID=test-app-id
+ENV PRIVY_APP_SECRET=test-app-secret
+ENV NEXTAUTH_SECRET=test-nextauth-secret
+ENV NEXTAUTH_URL=http://localhost:3000
+
+# Disable external services in test mode
+ENV MOCK_EXTERNAL_SERVICES=true
+
+# Copy dependencies and source
+COPY --from=deps /workspace/node_modules ./node_modules
+COPY . .
+
+# Install pnpm and set permissions
+RUN npm install -g pnpm
+RUN chown -R nextjs:nodejs /workspace
+USER nextjs
+
+# Expose port
+EXPOSE ${PORT}
+ENV PORT=${PORT}
+ENV HOSTNAME=${HOSTNAME}
+
+# Default command for testing
+CMD ["pnpm", "--filter", "op-atlas", "test:e2e"]

@@ -226,6 +226,7 @@ export function AnalyticsProvider({ children }: PropsWithChildren) {
   const farcasterId = session?.user?.farcasterId
   const previousUserId = usePrevious(session?.user?.farcasterId)
   const pathname = usePathname()
+  
   const privyUser = useUser()
 
   const basePropsRef = useRef<BaseEventProps>({})
