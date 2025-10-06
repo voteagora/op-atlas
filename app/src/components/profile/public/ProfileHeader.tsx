@@ -47,10 +47,10 @@ const ProfileHeader = ({
   const isSelf = session?.user?.id === user.id
 
   return (
-    <div className={cn("flex gap-x-4 pb-6 w-full", className)}>
+    <div className={cn("flex w-full flex-col", className)}>
       <div className="flex flex-col space-y-6">
         {user.imageUrl && (
-          <Avatar className="relative w-20 h-20 my-0.5">
+          <Avatar className="relative w-20 h-20 my-0.5 ml-3">
             <AvatarImage src={user.imageUrl} className="object-cover" />
             {isSelf && (
               <Link href="/profile/details">
@@ -69,7 +69,7 @@ const ProfileHeader = ({
               {isVerified && <VerifiedBadge />}
             </div>
           </div>
-          <div className="text-sm text-muted-foreground">{user.bio}</div>
+          <div className="text-sm text-muted-foreground ml-3">{user.bio}</div>
           <ProfileHeaderLinks user={user} />
         </div>
       </div>

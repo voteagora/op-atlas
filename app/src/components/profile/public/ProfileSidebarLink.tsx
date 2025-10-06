@@ -4,7 +4,7 @@ export default function ProfileSidebarLink({ href, icon, text }: { href: string,
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-row gap-2 items-center hover:bg-secondary pl-[10px] py-[5px] rounded-md mx-[-10px]"
+            className="flex flex-row gap-2 items-center hover:bg-secondary pl-[12px] rounded-md h-8 group"
         >
             {icon}
             <div className="text-sm text-secondary-foreground">{text}</div>

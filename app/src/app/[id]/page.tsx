@@ -10,6 +10,8 @@ import { getUserByUsername } from "@/db/users"
 import { getAllPublishedProjects } from "@/lib/actions/projects"
 import { getKYCUserStatus } from "@/db/userKyc"
 
+import ProfileNotFound from "./profile-not-found"
+
 export default async function PublicProfile({
   params,
 }: {
@@ -28,7 +30,7 @@ export default async function PublicProfile({
   const user = await getUserByUsername(params.id)
 
   if (!user) {
-    notFound()
+    return <ProfileNotFound params={params} />
   }
 
   const [organizations, projects, kycStatus] = await Promise.all([
