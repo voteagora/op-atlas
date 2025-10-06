@@ -22,9 +22,7 @@ type PersonaEntity =
   | { type: "legalEntity"; entity: KYCLegalEntity }
 
 export const createPersonaInquiryLink = async (
-  input:
-    | PersonaEntity
-    | { templateId?: string; referenceId?: string },
+  input: PersonaEntity | { templateId?: string; referenceId?: string },
   templateIdOverride?: string,
 ): Promise<PersonaInquiryLinkResponse> => {
   try {
@@ -38,7 +36,9 @@ export const createPersonaInquiryLink = async (
       // Backward-compatible path using a KYC/KYB entity
       const { type, entity } = input as PersonaEntity
       // Prefer explicit override if provided; otherwise pick sensible default per entity type
-      templateId = templateIdOverride ?? (type === "kycUser" ? defaultKYCTemplateId : defaultKYBTemplateId)
+      templateId =
+        templateIdOverride ??
+        (type === "kycUser" ? defaultKYCTemplateId : defaultKYBTemplateId)
       referenceId = entity.personaReferenceId ?? undefined
 
       if (!referenceId) {
@@ -64,7 +64,8 @@ export const createPersonaInquiryLink = async (
       // Simple path using provided template/reference
       const simple = input as { templateId?: string; referenceId?: string }
       // For simple path, prefer explicit override, then provided templateId, then fall back to KYB default (historic behavior)
-      templateId = templateIdOverride ?? simple.templateId ?? defaultKYBTemplateId
+      templateId =
+        templateIdOverride ?? simple.templateId ?? defaultKYBTemplateId
       referenceId = simple.referenceId
 
       if (!referenceId) {
@@ -108,9 +109,15 @@ export const createPersonaInquiry = async ({
 }: {
   templateId?: string
   referenceId?: string
-}): Promise<{ success: boolean; inquiryId?: string; referenceId?: string; error?: string }> => {
+}): Promise<{
+  success: boolean
+  inquiryId?: string
+  referenceId?: string
+  error?: string
+}> => {
   try {
-    const resolvedTemplateId = templateId ?? process.env.PERSONA_INQUIRY_KYB_TEMPLATE
+    const resolvedTemplateId =
+      templateId ?? process.env.PERSONA_INQUIRY_KYB_TEMPLATE
     if (!PERSONA_API_KEY) {
       return { success: false, error: "Persona API key not configured" }
     }
