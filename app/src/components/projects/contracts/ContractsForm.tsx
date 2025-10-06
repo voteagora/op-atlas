@@ -288,7 +288,7 @@ export function ContractsForm({ project }: ContractsFormProps) {
             However, if you&apos;ve lost your deployer keys, you can complete
             this step by{" "}
             <ExternalLink
-              href="https://www.oso.xyz"
+              href="https://docs.oso.xyz/docs/projects/"
               className="underline"
             >
               adding your project to Open Source Observer.
