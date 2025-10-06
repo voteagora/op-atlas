@@ -84,7 +84,7 @@ class InstrumentedGraphQLClient extends GraphQLClient {
 }
 
 export const osoClient = new InstrumentedGraphQLClient(
-  "https://www.opensource.observer/api/v1/graphql",
+  "https://www.oso.xyz/api/v1/graphql",
   {
     headers: {
       Authorization: `Bearer ${process.env.OSO_AUTH_TOKEN}`,
