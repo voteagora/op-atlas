@@ -7,8 +7,14 @@ import { Button } from "@/components/common/Button"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
+import { useApproversForNominee } from "@/hooks/db/useTop100"
 import {
   useApproveNominee,
   useEndorsementCounts,
@@ -17,10 +23,12 @@ import {
   useRemoveEndorsement,
 } from "@/hooks/db/useTop100"
 import { useUser } from "@/hooks/db/useUser"
+import { useEnsName } from "@/hooks/useEnsName"
 import { useUsername } from "@/hooks/useUsername"
+import { SC_ALLOW_APPROVAL_DURING_NOMINATION } from "@/lib/constants"
 import { formatMMMd } from "@/lib/utils/date"
 import { getRolePhaseStatus } from "@/lib/utils/roles"
-import { SC_ALLOW_APPROVAL_DURING_NOMINATION } from "@/lib/constants"
+import { truncateAddress } from "@/lib/utils/string"
 
 export default function SidebarApplications({
   role,
@@ -39,8 +47,9 @@ export default function SidebarApplications({
   const withinWindow =
     isEndorsementPhase ||
     (SC_ALLOW_APPROVAL_DURING_NOMINATION && isNominationPhase)
+  // Siempre obtenemos los conteos para poder mostrar el número y el overlay
   const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
-    enabled: withinWindow,
+    enabled: true,
   })
 
   const isTop100 = Boolean(t100?.top100)
@@ -85,14 +94,16 @@ export default function SidebarApplications({
   }
 
   const renderFooter = () => {
-    if (isSecurityRole && role.proposalId && isVotingPhase) {
+    const proposalId = (role as unknown as { proposalId?: string | null })
+      ?.proposalId
+    if (isSecurityRole && proposalId && isVotingPhase) {
       return (
         <div className="mx-4 mb-6">
           <Button
             className="w-full"
             onClick={() =>
               window.open(
-                `${process.env.NEXT_PUBLIC_AGORA_API_URL}proposals/${role.proposalId}`,
+                `${process.env.NEXT_PUBLIC_AGORA_API_URL}proposals/${proposalId}`,
                 "_blank",
               )
             }
@@ -121,13 +132,13 @@ export default function SidebarApplications({
                   application={application}
                   showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
-                  count={
-                    withinWindow
-                      ? counts?.find(
-                          (c) => c.nomineeApplicationId === application.id,
-                        )?.count || 0
-                      : false
-                  }
+                  count={(() => {
+                    const value =
+                      counts?.find(
+                        (c) => c.nomineeApplicationId === application.id,
+                      )?.count || 0
+                    return value > 0 ? value : false
+                  })()}
                 />
               ) : (
                 <OrgCandidate
@@ -135,13 +146,13 @@ export default function SidebarApplications({
                   application={application}
                   showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
-                  count={
-                    withinWindow
-                      ? counts?.find(
-                          (c) => c.nomineeApplicationId === application.id,
-                        )?.count || 0
-                      : false
-                  }
+                  count={(() => {
+                    const value =
+                      counts?.find(
+                        (c) => c.nomineeApplicationId === application.id,
+                      )?.count || 0
+                    return value > 0 ? value : false
+                  })()}
                 />
               ),
             )}
@@ -225,9 +236,11 @@ const OrgCandidate = ({
       </div>
       <div className="flex items-center gap-2">
         {count !== false && (
-          <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
-            {count}
-          </div>
+          <ApproversHover
+            count={count as number}
+            nomineeId={application.id}
+            context={`role-${roleId}`}
+          />
         )}
         {showApprove && !isEndorsed && (
           <button
@@ -335,9 +348,11 @@ const UserCandidate = ({
       </div>
       <div className="flex items-center gap-2">
         {count !== false && (
-          <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
-            {count}
-          </div>
+          <ApproversHover
+            count={count as number}
+            nomineeId={application.id}
+            context={`role-${roleId}`}
+          />
         )}
         {showApprove && !isEndorsed && (
           <button
@@ -385,5 +400,92 @@ const CandidateSkeleton = () => {
       <Skeleton className="w-[20px] h-[20px] rounded-full" />
       <Skeleton className="h-4 flex-1" />
     </div>
+  )
+}
+
+const ApproversHover = ({
+  count,
+  nomineeId,
+  context,
+}: {
+  count: number
+  nomineeId: number
+  context: string
+}) => {
+  const { data } = useApproversForNominee(nomineeId, context)
+  return (
+    <HoverCard openDelay={100} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <div
+          className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8] cursor-default"
+          aria-label={`${count} approvers`}
+        >
+          {count}
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent className="p-0 w-[320px]">
+        <div className="text-sm font-semibold px-3 py-2 border-b">
+          Approvers
+        </div>
+        <div className="max-h-[300px] overflow-y-auto">
+          {(data || []).map((item, idx) => (
+            <ApproverItem key={`${item.address}-${idx}`} item={item} />
+          ))}
+          {(!data || data.length === 0) && (
+            <div className="px-3 py-3 text-sm text-secondary-foreground">
+              No approvers yet
+            </div>
+          )}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  )
+}
+
+type ApproverItemProps = {
+  item: {
+    address: string
+    user: {
+      username: string | null
+      name: string | null
+      imageUrl: string | null
+    } | null
+  }
+}
+
+const ApproverItem = ({ item }: ApproverItemProps) => {
+  const address = item.address?.startsWith("0x")
+    ? (item.address as `0x${string}`)
+    : undefined
+  const { data: ensName } = useEnsName(address)
+  const username = item.user?.username || null
+  const isLink = Boolean(username) || Boolean(address)
+  const href = username ? `/${username}` : address ? `/u/${address}` : undefined
+
+  return (
+    <button
+      className={
+        "w-full flex items-center justify-between px-3 py-2 text-left " +
+        (isLink ? "hover:bg-secondary" : "opacity-60 cursor-not-allowed")
+      }
+      onClick={(e) => {
+        if (!isLink) return
+        e.preventDefault()
+        e.stopPropagation()
+        window.open(href!, "_blank")
+      }}
+      aria-disabled={!isLink}
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <UserAvatar imageUrl={item.user?.imageUrl || undefined} size={"20px"} />
+        <span className="truncate">
+          {item.user?.name ||
+            username ||
+            ensName ||
+            truncateAddress(item.address)}
+        </span>
+      </div>
+      {isLink && <ArrowRightS className="w-4 h-4" />}
+    </button>
   )
 }

@@ -141,3 +141,61 @@ export async function getEndorsedNomineeIdsForAddressesByRole({
   })
   return Array.from(new Set(rows.map((r) => r.nomineeApplicationId)))
 }
+
+export async function getApproversForNominee({
+  context,
+  nomineeApplicationId,
+}: {
+  context: string
+  nomineeApplicationId: number
+}) {
+  // Fetch endorsements with direct relation to endorser user if available
+  const endorsements = await prisma.endorsement.findMany({
+    where: { context, nomineeApplicationId },
+    include: {
+      endorserUser: {
+        select: { username: true, name: true, imageUrl: true, addresses: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  })
+
+  // Collect any addresses that didn't resolve a user to attempt a fallback map
+  const unresolvedAddresses = endorsements
+    .filter((e) => !e.endorserUser)
+    .map((e) => e.endorserAddress.toLowerCase())
+
+  const addressToUser = new Map<string, { username: string | null; name: string | null; imageUrl: string | null }>()
+
+  if (unresolvedAddresses.length > 0) {
+    const users = await prisma.user.findMany({
+      where: {
+        addresses: {
+          some: { address: { in: unresolvedAddresses } },
+        },
+      },
+      select: { username: true, name: true, imageUrl: true, addresses: true },
+    })
+    for (const user of users) {
+      for (const addr of user.addresses) {
+        const lower = addr.address.toLowerCase()
+        addressToUser.set(lower, {
+          username: user.username ?? null,
+          name: user.name ?? null,
+          imageUrl: user.imageUrl ?? null,
+        })
+      }
+    }
+  }
+
+  return endorsements.map((e) => ({
+    address: e.endorserAddress.toLowerCase(),
+    user: e.endorserUser
+      ? {
+          username: e.endorserUser.username ?? null,
+          name: e.endorserUser.name ?? null,
+          imageUrl: e.endorserUser.imageUrl ?? null,
+        }
+      : addressToUser.get(e.endorserAddress.toLowerCase()) || null,
+  }))
+}
