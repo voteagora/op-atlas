@@ -110,11 +110,19 @@ export function useApproversForNominee(nomineeId: number, context: string) {
       if (!res.ok)
         return [] as {
           address: string
-          user: { username: string | null; name: string | null; imageUrl: string | null } | null
+          user: {
+            username: string | null
+            name: string | null
+            imageUrl: string | null
+          } | null
         }[]
       return (await res.json()) as {
         address: string
-        user: { username: string | null; name: string | null; imageUrl: string | null } | null
+        user: {
+          username: string | null
+          name: string | null
+          imageUrl: string | null
+        } | null
       }[]
     },
     staleTime: 10_000,

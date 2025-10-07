@@ -23,6 +23,7 @@ import {
   useRemoveEndorsement,
 } from "@/hooks/db/useTop100"
 import { useUser } from "@/hooks/db/useUser"
+import { useEnsName } from "@/hooks/useEnsName"
 import { useUsername } from "@/hooks/useUsername"
 import { SC_ALLOW_APPROVAL_DURING_NOMINATION } from "@/lib/constants"
 import { formatMMMd } from "@/lib/utils/date"
@@ -428,32 +429,7 @@ const ApproversHover = ({
         </div>
         <div className="max-h-[300px] overflow-y-auto">
           {(data || []).map((item, idx) => (
-            <button
-              key={`${item.address}-${idx}`}
-              className="w-full flex items-center justify-between px-3 py-2 hover:bg-secondary text-left"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                const username = item.user?.username
-                const href = username
-                  ? `/${username}`
-                  : `https://optimistic.etherscan.io/address/${item.address}`
-                window.open(href, "_blank")
-              }}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <UserAvatar
-                  imageUrl={item.user?.imageUrl || undefined}
-                  size={"20px"}
-                />
-                <span className="truncate">
-                  {item.user?.name ||
-                    item.user?.username ||
-                    truncateAddress(item.address)}
-                </span>
-              </div>
-              <ArrowRightS className="w-4 h-4" />
-            </button>
+            <ApproverItem key={`${item.address}-${idx}`} item={item} />
           ))}
           {(!data || data.length === 0) && (
             <div className="px-3 py-3 text-sm text-secondary-foreground">
@@ -463,5 +439,53 @@ const ApproversHover = ({
         </div>
       </HoverCardContent>
     </HoverCard>
+  )
+}
+
+type ApproverItemProps = {
+  item: {
+    address: string
+    user: {
+      username: string | null
+      name: string | null
+      imageUrl: string | null
+    } | null
+  }
+}
+
+const ApproverItem = ({ item }: ApproverItemProps) => {
+  const address = item.address?.startsWith("0x")
+    ? (item.address as `0x${string}`)
+    : undefined
+  const { data: ensName } = useEnsName(address)
+  const username = item.user?.username || null
+  const isLink = Boolean(username) || Boolean(address)
+  const href = username ? `/${username}` : address ? `/u/${address}` : undefined
+
+  return (
+    <button
+      className={
+        "w-full flex items-center justify-between px-3 py-2 text-left " +
+        (isLink ? "hover:bg-secondary" : "opacity-60 cursor-not-allowed")
+      }
+      onClick={(e) => {
+        if (!isLink) return
+        e.preventDefault()
+        e.stopPropagation()
+        window.open(href!, "_blank")
+      }}
+      aria-disabled={!isLink}
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <UserAvatar imageUrl={item.user?.imageUrl || undefined} size={"20px"} />
+        <span className="truncate">
+          {item.user?.name ||
+            username ||
+            ensName ||
+            truncateAddress(item.address)}
+        </span>
+      </div>
+      {isLink && <ArrowRightS className="w-4 h-4" />}
+    </button>
   )
 }
