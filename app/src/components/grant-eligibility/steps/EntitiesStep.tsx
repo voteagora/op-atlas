@@ -210,9 +210,8 @@ export default function EntitiesStep() {
     return isEntityComplete(lastEntity)
   }
 
-  const handleNext = () => {
-    // Allow skipping if no entities or all entities are empty
-    if (hasAnyIncompleteData()) {
+  const handleSubmit = ({ skip = false }: { skip?: boolean } = {}) => {
+    if (!skip && hasAnyIncompleteData()) {
       toast.error(
         "Please complete all fields for entities you've started or remove them",
       )
@@ -221,26 +220,20 @@ export default function EntitiesStep() {
 
     startTransition(async () => {
       try {
-        // Preserve existing data and add/update entities
         const existingData =
           form.data && typeof form.data === "object" ? (form.data as any) : {}
 
-        // Filter out completely empty entities before saving
-        const entitiesToSave = entities.filter(
-          (entity) =>
-            entity.company ||
-            entity.controllerFirstName ||
-            entity.controllerLastName ||
-            entity.controllerEmail,
-        )
+        const entitiesToSave = skip
+          ? []
+          : entities.filter((entity) => isEntityComplete(entity))
 
         const result = await updateGrantEligibilityForm({
           formId: form.id,
-          currentStep: Math.max(form.currentStep, 5), // Never reduce the step
+          currentStep: Math.max(form.currentStep, 5),
           data: {
             signers: existingData.signers || [],
             entities: entitiesToSave,
-            selectedExistingEntityIds: selectedExistingIds,
+            selectedExistingEntityIds: skip ? [] : selectedExistingIds,
           },
         })
 
@@ -270,7 +263,7 @@ export default function EntitiesStep() {
 
     setStepControls({
       enabled,
-      onNext: handleNext,
+      onNext: () => handleSubmit(),
       nextLabel: isPending ? "Loading" : nextLabel,
       isLoading: isPending,
     })
@@ -303,8 +296,15 @@ export default function EntitiesStep() {
           we can contact to complete the mandatory verification process (KYB).
         </p>
         <p className="text-base text-secondary-foreground">
-          If no organizations or legal entities are involved in your grant, then
-          skip this step.
+          If no organizations or legal entities are involved in your grant, then{" "}
+          <button
+            type="button"
+            onClick={() => handleSubmit({ skip: true })}
+            className="ml-1 underline text-primary"
+          >
+            skip this step
+          </button>
+          .
         </p>
       </div>
 
@@ -381,7 +381,7 @@ const EntitiesFormList = ({
                 htmlFor={`company-${index}`}
                 className="block text-sm font-medium mb-2"
               >
-                Company<span className="text-destructive">*</span>
+                Company
               </label>
               <Input
                 id={`company-${index}`}
@@ -398,7 +398,6 @@ const EntitiesFormList = ({
                 className="block text-sm font-medium mb-2"
               >
                 Controller first name
-                <span className="text-destructive">*</span>
               </label>
               <Input
                 id={`controller-first-name-${index}`}
@@ -417,7 +416,6 @@ const EntitiesFormList = ({
                 className="block text-sm font-medium mb-2"
               >
                 Controller last name
-                <span className="text-destructive">*</span>
               </label>
               <Input
                 id={`controller-last-name-${index}`}
@@ -435,7 +433,7 @@ const EntitiesFormList = ({
                 htmlFor={`controller-email-${index}`}
                 className="block text-sm font-medium mb-2"
               >
-                Controller email<span className="text-destructive">*</span>
+                Controller email
               </label>
               <Input
                 id={`controller-email-${index}`}
