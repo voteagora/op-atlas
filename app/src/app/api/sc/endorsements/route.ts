@@ -6,6 +6,7 @@ import { prisma } from "@/db/client"
 import {
   createEndorsement,
   deleteEndorsementsForAddresses,
+  getApproversForNominee,
   getEndorsementCounts,
   getEndorsementCountsByRole,
 } from "@/db/endorsements"
@@ -104,8 +105,18 @@ export async function GET(req: NextRequest) {
   const context = searchParams.get("context")
   const roleId = Number(searchParams.get("roleId"))
   const nomineeIds = searchParams.getAll("nomineeId").map((x) => Number(x))
+  const approversFor = Number(searchParams.get("approversFor"))
 
   if (!context) return new Response("Bad Request", { status: 400 })
+
+  // Return full approver list for a specific nominee id
+  if (Number.isFinite(approversFor) && approversFor > 0) {
+    const approvers = await getApproversForNominee({
+      context,
+      nomineeApplicationId: approversFor,
+    })
+    return NextResponse.json(approvers)
+  }
 
   if (Number.isFinite(roleId) && roleId > 0) {
     const map = await getEndorsementCountsByRole({ context, roleId })
