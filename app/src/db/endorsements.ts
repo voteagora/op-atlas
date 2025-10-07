@@ -141,3 +141,76 @@ export async function getEndorsedNomineeIdsForAddressesByRole({
   })
   return Array.from(new Set(rows.map((r) => r.nomineeApplicationId)))
 }
+
+export async function getApproversForNominee({
+  context,
+  nomineeApplicationId,
+}: {
+  context: string
+  nomineeApplicationId: number
+}) {
+  // Fetch endorsements for this nominee
+  const endorsements = await prisma.endorsement.findMany({
+    where: { context, nomineeApplicationId },
+    select: {
+      endorserAddress: true,
+      endorserUserId: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  })
+
+  const addresses = Array.from(
+    new Set(endorsements.map((e) => e.endorserAddress.toLowerCase())),
+  )
+
+  if (addresses.length === 0) return [] as {
+    address: string
+    user:
+      | {
+          username: string | null
+          name: string | null
+          imageUrl: string | null
+        }
+      | null
+  }[]
+
+  // Find users matching any of the endorser addresses
+  const users = await prisma.user.findMany({
+    where: {
+      addresses: {
+        some: {
+          address: { in: addresses },
+        },
+      },
+    },
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      imageUrl: true,
+      addresses: true,
+    },
+  })
+
+  const addressToUser = new Map<string, {
+    username: string | null
+    name: string | null
+    imageUrl: string | null
+  }>()
+
+  for (const user of users) {
+    for (const addr of user.addresses) {
+      addressToUser.set(addr.address.toLowerCase(), {
+        username: user.username ?? null,
+        name: user.name ?? null,
+        imageUrl: user.imageUrl ?? null,
+      })
+    }
+  }
+
+  return endorsements.map((e) => ({
+    address: e.endorserAddress.toLowerCase(),
+    user: addressToUser.get(e.endorserAddress.toLowerCase()) || null,
+  }))
+}
