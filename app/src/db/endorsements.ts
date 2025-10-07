@@ -149,68 +149,53 @@ export async function getApproversForNominee({
   context: string
   nomineeApplicationId: number
 }) {
-  // Fetch endorsements for this nominee
+  // Fetch endorsements with direct relation to endorser user if available
   const endorsements = await prisma.endorsement.findMany({
     where: { context, nomineeApplicationId },
-    select: {
-      endorserAddress: true,
-      endorserUserId: true,
-      createdAt: true,
+    include: {
+      endorserUser: {
+        select: { username: true, name: true, imageUrl: true, addresses: true },
+      },
     },
     orderBy: { createdAt: "desc" },
   })
 
-  const addresses = Array.from(
-    new Set(endorsements.map((e) => e.endorserAddress.toLowerCase())),
-  )
+  // Collect any addresses that didn't resolve a user to attempt a fallback map
+  const unresolvedAddresses = endorsements
+    .filter((e) => !e.endorserUser)
+    .map((e) => e.endorserAddress.toLowerCase())
 
-  if (addresses.length === 0) return [] as {
-    address: string
-    user:
-      | {
-          username: string | null
-          name: string | null
-          imageUrl: string | null
-        }
-      | null
-  }[]
+  const addressToUser = new Map<string, { username: string | null; name: string | null; imageUrl: string | null }>()
 
-  // Find users matching any of the endorser addresses
-  const users = await prisma.user.findMany({
-    where: {
-      addresses: {
-        some: {
-          address: { in: addresses },
+  if (unresolvedAddresses.length > 0) {
+    const users = await prisma.user.findMany({
+      where: {
+        addresses: {
+          some: { address: { in: unresolvedAddresses } },
         },
       },
-    },
-    select: {
-      id: true,
-      username: true,
-      name: true,
-      imageUrl: true,
-      addresses: true,
-    },
-  })
-
-  const addressToUser = new Map<string, {
-    username: string | null
-    name: string | null
-    imageUrl: string | null
-  }>()
-
-  for (const user of users) {
-    for (const addr of user.addresses) {
-      addressToUser.set(addr.address.toLowerCase(), {
-        username: user.username ?? null,
-        name: user.name ?? null,
-        imageUrl: user.imageUrl ?? null,
-      })
+      select: { username: true, name: true, imageUrl: true, addresses: true },
+    })
+    for (const user of users) {
+      for (const addr of user.addresses) {
+        const lower = addr.address.toLowerCase()
+        addressToUser.set(lower, {
+          username: user.username ?? null,
+          name: user.name ?? null,
+          imageUrl: user.imageUrl ?? null,
+        })
+      }
     }
   }
 
   return endorsements.map((e) => ({
     address: e.endorserAddress.toLowerCase(),
-    user: addressToUser.get(e.endorserAddress.toLowerCase()) || null,
+    user: e.endorserUser
+      ? {
+          username: e.endorserUser.username ?? null,
+          name: e.endorserUser.name ?? null,
+          imageUrl: e.endorserUser.imageUrl ?? null,
+        }
+      : addressToUser.get(e.endorserAddress.toLowerCase()) || null,
   }))
 }
