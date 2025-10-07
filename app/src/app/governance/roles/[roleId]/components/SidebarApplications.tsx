@@ -46,8 +46,9 @@ export default function SidebarApplications({
   const withinWindow =
     isEndorsementPhase ||
     (SC_ALLOW_APPROVAL_DURING_NOMINATION && isNominationPhase)
+  // Siempre obtenemos los conteos para poder mostrar el número y el overlay
   const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
-    enabled: withinWindow,
+    enabled: true,
   })
 
   const isTop100 = Boolean(t100?.top100)
@@ -92,14 +93,16 @@ export default function SidebarApplications({
   }
 
   const renderFooter = () => {
-    if (isSecurityRole && role.proposalId && isVotingPhase) {
+    const proposalId = (role as unknown as { proposalId?: string | null })
+      ?.proposalId
+    if (isSecurityRole && proposalId && isVotingPhase) {
       return (
         <div className="mx-4 mb-6">
           <Button
             className="w-full"
             onClick={() =>
               window.open(
-                `${process.env.NEXT_PUBLIC_AGORA_API_URL}proposals/${role.proposalId}`,
+                `${process.env.NEXT_PUBLIC_AGORA_API_URL}proposals/${proposalId}`,
                 "_blank",
               )
             }
@@ -128,13 +131,13 @@ export default function SidebarApplications({
                   application={application}
                   showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
-                  count={
-                    withinWindow
-                      ? counts?.find(
-                          (c) => c.nomineeApplicationId === application.id,
-                        )?.count || 0
-                      : false
-                  }
+                  count={(() => {
+                    const value =
+                      counts?.find(
+                        (c) => c.nomineeApplicationId === application.id,
+                      )?.count || 0
+                    return value > 0 ? value : false
+                  })()}
                 />
               ) : (
                 <OrgCandidate
@@ -142,13 +145,13 @@ export default function SidebarApplications({
                   application={application}
                   showApprove={!loadingTop && isTop100 && withinWindow}
                   roleId={role.id}
-                  count={
-                    withinWindow
-                      ? counts?.find(
-                          (c) => c.nomineeApplicationId === application.id,
-                        )?.count || 0
-                      : false
-                  }
+                  count={(() => {
+                    const value =
+                      counts?.find(
+                        (c) => c.nomineeApplicationId === application.id,
+                      )?.count || 0
+                    return value > 0 ? value : false
+                  })()}
                 />
               ),
             )}
