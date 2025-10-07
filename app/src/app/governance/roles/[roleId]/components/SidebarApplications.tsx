@@ -7,8 +7,14 @@ import { Button } from "@/components/common/Button"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useOrganization } from "@/hooks/db/useOrganization"
+import { useApproversForNominee } from "@/hooks/db/useTop100"
 import {
   useApproveNominee,
   useEndorsementCounts,
@@ -18,9 +24,10 @@ import {
 } from "@/hooks/db/useTop100"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
+import { SC_ALLOW_APPROVAL_DURING_NOMINATION } from "@/lib/constants"
 import { formatMMMd } from "@/lib/utils/date"
 import { getRolePhaseStatus } from "@/lib/utils/roles"
-import { SC_ALLOW_APPROVAL_DURING_NOMINATION } from "@/lib/constants"
+import { truncateAddress } from "@/lib/utils/string"
 
 export default function SidebarApplications({
   role,
@@ -225,9 +232,11 @@ const OrgCandidate = ({
       </div>
       <div className="flex items-center gap-2">
         {count !== false && (
-          <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
-            {count}
-          </div>
+          <ApproversHover
+            count={count as number}
+            nomineeId={application.id}
+            context={`role-${roleId}`}
+          />
         )}
         {showApprove && !isEndorsed && (
           <button
@@ -335,9 +344,11 @@ const UserCandidate = ({
       </div>
       <div className="flex items-center gap-2">
         {count !== false && (
-          <div className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8]">
-            {count}
-          </div>
+          <ApproversHover
+            count={count as number}
+            nomineeId={application.id}
+            context={`role-${roleId}`}
+          />
         )}
         {showApprove && !isEndorsed && (
           <button
@@ -385,5 +396,69 @@ const CandidateSkeleton = () => {
       <Skeleton className="w-[20px] h-[20px] rounded-full" />
       <Skeleton className="h-4 flex-1" />
     </div>
+  )
+}
+
+const ApproversHover = ({
+  count,
+  nomineeId,
+  context,
+}: {
+  count: number
+  nomineeId: number
+  context: string
+}) => {
+  const { data } = useApproversForNominee(nomineeId, context)
+  return (
+    <HoverCard openDelay={100} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <div
+          className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8] cursor-default"
+          aria-label={`${count} approvers`}
+        >
+          {count}
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent className="p-0 w-[320px]">
+        <div className="text-sm font-semibold px-3 py-2 border-b">
+          Approvers
+        </div>
+        <div className="max-h-[300px] overflow-y-auto">
+          {(data || []).map((item, idx) => (
+            <button
+              key={`${item.address}-${idx}`}
+              className="w-full flex items-center justify-between px-3 py-2 hover:bg-secondary text-left"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                const username = item.user?.username
+                const href = username
+                  ? `/${username}`
+                  : `https://optimistic.etherscan.io/address/${item.address}`
+                window.open(href, "_blank")
+              }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <UserAvatar
+                  imageUrl={item.user?.imageUrl || undefined}
+                  size={"20px"}
+                />
+                <span className="truncate">
+                  {item.user?.name ||
+                    item.user?.username ||
+                    truncateAddress(item.address)}
+                </span>
+              </div>
+              <ArrowRightS className="w-4 h-4" />
+            </button>
+          ))}
+          {(!data || data.length === 0) && (
+            <div className="px-3 py-3 text-sm text-secondary-foreground">
+              No approvers yet
+            </div>
+          )}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   )
 }
