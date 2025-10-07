@@ -417,16 +417,15 @@ const ApproversHover = ({
     <HoverCard openDelay={100} closeDelay={100}>
       <HoverCardTrigger asChild>
         <div
-          className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8] cursor-default"
+          className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8] cursor-pointer"
           aria-label={`${count} approvers`}
         >
           {count}
         </div>
       </HoverCardTrigger>
-      <HoverCardContent className="p-0 w-[320px]">
-        <div className="text-sm font-semibold px-3 py-2 border-b">
-          Approvers
-        </div>
+      <HoverCardContent className="p-[6px] w-[277px]" align="end">
+        <div className="font-semibold px-2 py-[6px]">Approvers</div>
+        <div className="border-b my-1"></div>
         <div className="max-h-[300px] overflow-y-auto">
           {(data || []).map((item, idx) => (
             <ApproverItem key={`${item.address}-${idx}`} item={item} />
@@ -465,8 +464,8 @@ const ApproverItem = ({ item }: ApproverItemProps) => {
   return (
     <button
       className={
-        "w-full flex items-center justify-between px-3 py-2 text-left " +
-        (isLink ? "hover:bg-secondary" : "opacity-60 cursor-not-allowed")
+        "w-full flex items-center justify-between px-2 py-[6px] text-left rounded-[6px] text-sm hover:bg-secondary" +
+        (isLink ? "" : "opacity-60 cursor-not-allowed")
       }
       onClick={(e) => {
         if (!isLink) return
@@ -477,15 +476,13 @@ const ApproverItem = ({ item }: ApproverItemProps) => {
       aria-disabled={!isLink}
     >
       <div className="flex items-center gap-2 min-w-0">
-        <UserAvatar imageUrl={item.user?.imageUrl || undefined} size={"20px"} />
-        <span className="truncate">
+        <span className="truncate text-secondary-foreground">
           {item.user?.name ||
             username ||
             ensName ||
             truncateAddress(item.address)}
         </span>
       </div>
-      {isLink && <ArrowRightS className="w-4 h-4" />}
     </button>
   )
 }
