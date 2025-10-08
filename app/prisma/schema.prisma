@@ -337,11 +337,14 @@ model KYCLegalEntity {
   createdAt                DateTime                @default(now())
   updatedAt                DateTime                @updatedAt
   personaReferenceId       String?                 @unique
+  personaInquiryId         String?                 @unique
+  inquiryCreatedAt         DateTime?
   teamLinks                KYCLegalEntityTeams[]
   kycLegalEntityController KYCLegalEntityController? @relation(fields: [kycLegalEntityControllerId], references: [id])
   kycLegalEntityControllerId String?
 
   @@index([name])
+  @@index([personaInquiryId])
 }
 
 // Used for collecting POC / Controller of legal entity
@@ -540,10 +543,13 @@ model KYCUser {
   updatedAt          DateTime            @updatedAt
   personaStatus      PersonaStatus?
   personaReferenceId String?           @unique
+  personaInquiryId   String?           @unique
+  inquiryCreatedAt   DateTime?
   KYCUserTeams       KYCUserTeams[]
   UserKYCUsers       UserKYCUser[]
 
   @@index([email])
+  @@index([personaInquiryId])
 }
 
 model EmailNotification {

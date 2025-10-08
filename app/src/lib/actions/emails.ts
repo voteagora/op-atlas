@@ -6,7 +6,7 @@ import { EmailNotificationType, KYCUser, KYCLegalEntity } from "@prisma/client"
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
 import { revalidatePath } from "next/cache"
-import { createPersonaInquiryLink } from "./persona"
+import { generateKYCToken } from "@/lib/utils/kycToken"
 import { getUserProjectRole, getUserOrganizationRole } from "./utils"
 import {
   getKYCEmailTemplate,
@@ -21,9 +21,14 @@ import {
 
 const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
 
-// TODO change this to "https://atlas.optimism.io"
-const baseUrlForAssets =
-  "https://op-atlas-git-kyc-1b-testing-voteagora.vercel.app"
+// Base URL for the application
+const BASE_URL = (() => {
+  const url = process.env.NEXT_PUBLIC_VERCEL_URL
+  if (!url) return "https://atlas.optimism.io"
+  if (url.startsWith('http')) return url
+  if (url.includes('localhost')) return `http://${url}`
+  return `https://${url}`
+})()
 
 export interface EmailData {
   to: string
@@ -117,110 +122,99 @@ async function trackEmailNotification(params: {
 export const sendKYCStartedEmail = async (
   kycUser: KYCUser,
 ): Promise<EmailResponse> => {
-  const templateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
+  try {
+    // Generate secure token for KYC verification gateway
+    const token = await generateKYCToken("kycUser", kycUser.id, kycUser.email)
+    const kycLink = `${BASE_URL}/kyc/verify/${token}`
 
-  if (!templateId) {
+    const html = getKYCEmailTemplate(kycUser, kycLink)
+
+    const emailParams = {
+      to: kycUser.email,
+      subject: "Action Required: Complete KYC to Unlock Your Optimism Grant",
+      html,
+    }
+
+    const emailResult = await sendTransactionEmail(emailParams)
+
+    await trackEmailNotification({
+      referenceId: kycUser.personaReferenceId || kycUser.id,
+      type: "KYCB_STARTED",
+      emailTo: kycUser.email,
+      success: emailResult.success,
+      error: emailResult.error,
+    })
+
+    return emailResult
+  } catch (error) {
+    console.error("Error sending KYC started email:", error)
+    const errorMessage = error instanceof Error ? error.message : "Failed to send email"
+
+    await trackEmailNotification({
+      referenceId: kycUser.personaReferenceId || kycUser.id,
+      type: "KYCB_STARTED",
+      emailTo: kycUser.email,
+      success: false,
+      error: errorMessage,
+    })
+
     return {
       success: false,
-      error:
-        "Missing required Persona KYC template ID. Look this up in Persona dashboard.",
+      error: errorMessage,
     }
   }
-
-  const inquiryResult = await createPersonaInquiryLink(
-    { type: 'kycUser', entity: kycUser },
-    templateId
-  )
-
-  if (!inquiryResult.success) {
-    return { success: false }
-  }
-
-  const personaReferenceId =
-    inquiryResult.referenceId ?? kycUser.personaReferenceId ?? undefined
-
-  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
-    return { success: false }
-  }
-
-  const kycLink = inquiryResult.inquiryUrl
-  const kycUserWithReference = {
-    ...kycUser,
-    personaReferenceId,
-  }
-
-  const html = getKYCEmailTemplate(kycUserWithReference, kycLink)
-
-  const emailParams = {
-    to: kycUser.email,
-    subject: "Action Required: Complete KYC to Unlock Your Optimism Grant",
-    html,
-  }
-
-  const emailResult = await sendTransactionEmail(emailParams)
-
-  await trackEmailNotification({
-    referenceId: personaReferenceId,
-    type: "KYCB_STARTED",
-    emailTo: kycUser.email,
-    success: emailResult.success,
-    error: emailResult.error,
-  })
-
-  return emailResult
 }
 
 export const sendKYBStartedEmail = async (
   legalEntity: KYCLegalEntity & { kycLegalEntityController: { firstName: string, lastName: string, email: string } },
 ): Promise<EmailResponse> => {
-  const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
+  try {
+    // Generate secure token for KYB verification gateway
+    const token = await generateKYCToken(
+      "legalEntity",
+      legalEntity.id,
+      legalEntity.kycLegalEntityController.email
+    )
+    const kycLink = `${BASE_URL}/kyc/verify/${token}`
 
-  if (!templateId) {
+    const html = getKYBEmailTemplate({
+      firstName: legalEntity.kycLegalEntityController.firstName,
+      businessName: legalEntity.name,
+      kycLink,
+    })
+
+    const emailResult = await sendTransactionEmail({
+      to: legalEntity.kycLegalEntityController.email,
+      subject: "Action Required: Complete KYB to Unlock Your Optimism Grant",
+      html,
+    })
+
+    await trackEmailNotification({
+      referenceId: legalEntity.personaReferenceId || legalEntity.id,
+      type: "KYCB_STARTED",
+      emailTo: legalEntity.kycLegalEntityController.email,
+      success: emailResult.success,
+      error: emailResult.error,
+    })
+
+    return emailResult
+  } catch (error) {
+    console.error("Error sending KYB started email:", error)
+    const errorMessage = error instanceof Error ? error.message : "Failed to send email"
+
+    await trackEmailNotification({
+      referenceId: legalEntity.personaReferenceId || legalEntity.id,
+      type: "KYCB_STARTED",
+      emailTo: legalEntity.kycLegalEntityController.email,
+      success: false,
+      error: errorMessage,
+    })
+
     return {
       success: false,
-      error: "Missing required Persona KYB template ID",
+      error: errorMessage,
     }
   }
-
-  const inquiryResult = await createPersonaInquiryLink(
-    { type: 'legalEntity', entity: legalEntity },
-    templateId
-  )
-
-  if (!inquiryResult.success) {
-    return { success: false }
-  }
-
-  const personaReferenceId =
-    inquiryResult.referenceId ?? legalEntity.personaReferenceId ?? undefined
-
-  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
-    return { success: false }
-  }
-
-  const kycLink = inquiryResult.inquiryUrl
-
-  const html = getKYBEmailTemplate({
-    firstName: legalEntity.kycLegalEntityController.firstName,
-    businessName: legalEntity.name,
-    kycLink,
-  })
-
-  const emailResult = await sendTransactionEmail({
-    to: legalEntity.kycLegalEntityController.email,
-    subject: "Action Required: Complete KYB to Unlock Your Optimism Grant",
-    html,
-  })
-
-  await trackEmailNotification({
-    referenceId: personaReferenceId,
-    type: "KYCB_STARTED",
-    emailTo: legalEntity.kycLegalEntityController.email,
-    success: emailResult.success,
-    error: emailResult.error,
-  })
-
-  return emailResult
 }
 
 export const sendKYCReminderEmail = async (
@@ -293,39 +287,11 @@ export const sendKYCReminderEmail = async (
       error: "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
     }
   }
-  const templateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
+  // Generate secure token for KYC verification gateway
+  const token = await generateKYCToken("kycUser", kycUser.id, kycUser.email)
+  const kycLink = `${BASE_URL}/kyc/verify/${token}`
 
-  if (!templateId) {
-    return {
-      success: false,
-      error:
-        "Missing required Persona KYC template ID. Look this up in Persona dashboard.",
-    }
-  }
-
-  const inquiryResult = await createPersonaInquiryLink(
-    { type: 'kycUser', entity: kycUser },
-    templateId
-  )
-
-  if (!inquiryResult.success) {
-    return { success: false }
-  }
-
-  const personaReferenceId =
-    inquiryResult.referenceId ?? kycUser.personaReferenceId ?? undefined
-
-  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
-    return { success: false }
-  }
-
-  const kycLink = inquiryResult.inquiryUrl
-  const kycUserWithReference = {
-    ...kycUser,
-    personaReferenceId,
-  }
-
-  const html = getKYCReminderEmailTemplate(kycUserWithReference, kycLink)
+  const html = getKYCReminderEmailTemplate(kycUser, kycLink)
 
   const emailParams = {
     to: kycUser.email,
@@ -336,7 +302,7 @@ export const sendKYCReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    referenceId: personaReferenceId,
+    referenceId: kycUser.personaReferenceId || kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -452,32 +418,13 @@ export const sendKYBReminderEmail = async (
     }
   }
 
-  const templateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
-
-  if (!templateId) {
-    return {
-      success: false,
-      error: "Missing required Persona KYB template ID",
-    }
-  }
-
-  const inquiryResult = await createPersonaInquiryLink(
-    { type: "legalEntity", entity: legalEntity },
-    templateId,
+  // Generate secure token for KYB verification gateway
+  const token = await generateKYCToken(
+    "legalEntity",
+    legalEntity.id,
+    legalEntity.kycLegalEntityController.email
   )
-
-  if (!inquiryResult.success) {
-    return { success: false }
-  }
-
-  const personaReferenceId =
-    inquiryResult.referenceId ?? legalEntity.personaReferenceId ?? undefined
-
-  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
-    return { success: false }
-  }
-
-  const kycLink = inquiryResult.inquiryUrl
+  const kycLink = `${BASE_URL}/kyc/verify/${token}`
 
   const html = getKYBReminderEmailTemplate({
     firstName: legalEntity.kycLegalEntityController.firstName,
@@ -493,7 +440,7 @@ export const sendKYBReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    referenceId: personaReferenceId,
+    referenceId: legalEntity.personaReferenceId || legalEntity.id,
     type: "KYCB_REMINDER",
     emailTo: legalEntity.kycLegalEntityController.email,
     success: emailResult.success,
@@ -627,39 +574,11 @@ export const sendPersonalKYCReminderEmail = async (
     }
   }
 
-  const templateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
+  // Generate secure token for KYC verification gateway
+  const token = await generateKYCToken("kycUser", kycUser.id, kycUser.email)
+  const kycLink = `${BASE_URL}/kyc/verify/${token}`
 
-  if (!templateId) {
-    return {
-      success: false,
-      error:
-        "Missing required Persona KYC template ID. Look this up in Persona dashboard.",
-    }
-  }
-
-  const inquiryResult = await createPersonaInquiryLink(
-    { type: 'kycUser', entity: kycUser },
-    templateId
-  )
-
-  if (!inquiryResult.success) {
-    return { success: false, error: inquiryResult.error }
-  }
-
-  const personaReferenceId =
-    inquiryResult.referenceId ?? kycUser.personaReferenceId ?? undefined
-
-  if (!inquiryResult.inquiryUrl || !personaReferenceId) {
-    return { success: false, error: "Failed to generate verification link" }
-  }
-
-  const kycLink = inquiryResult.inquiryUrl
-  const kycUserWithReference = {
-    ...kycUser,
-    personaReferenceId,
-  }
-
-  const html = getKYCReminderEmailTemplate(kycUserWithReference, kycLink)
+  const html = getKYCReminderEmailTemplate(kycUser, kycLink)
 
   const emailParams = {
     to: kycUser.email,
@@ -670,7 +589,7 @@ export const sendPersonalKYCReminderEmail = async (
   const emailResult = await sendTransactionEmail(emailParams)
 
   await trackEmailNotification({
-    referenceId: personaReferenceId,
+    referenceId: kycUser.personaReferenceId || kycUser.id,
     type: "KYCB_REMINDER",
     emailTo: kycUser.email,
     success: emailResult.success,
@@ -706,8 +625,6 @@ export const sendKYCEmailVerificationEmail = async (
 
   return emailResult
 }
-
-
 
 export async function sendFindMyKYCVerificationCode(email: string): Promise<EmailResponse> {
   const session = await auth()

@@ -29,15 +29,15 @@ export async function updateKYCUserStatus(
   return result
 }
 
-export async function updateLegalEntityStatus(
+export async function updateLegalEntityStatusByInquiryId(
   parsedStatus: string,
   updatedAt: Date,
-  referenceId?: string,
-  expiresAt?: Date | string | null,
+  inquiryId: string,
+  expiresAt: Date,
 ) {
-  if (!referenceId) {
+  if (!inquiryId) {
     throw new Error(
-      "Reference ID is required for legal entity status update",
+      "Inquiry ID is required for legal entity status update",
     )
   }
 
@@ -45,8 +45,8 @@ export async function updateLegalEntityStatus(
     UPDATE "KYCLegalEntity" SET
       "status" = ${parsedStatus}::"KYCStatus",
       "updatedAt" = ${updatedAt},
-      "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')
-    WHERE "personaReferenceId" = ${referenceId}
+      "expiry" = ${expiresAt}
+    WHERE "personaInquiryId" = ${inquiryId}
     RETURNING *;
   `
 

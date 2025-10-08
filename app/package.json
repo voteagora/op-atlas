@@ -106,6 +106,7 @@
     "graphql-request": "^7.1.0",
     "graphql-tag": "^2.12.6",
     "html2canvas": "^1.4.1",
+    "jose": "^6.1.0",
     "lucide-react": "^0.363.0",
     "mixpanel-browser": "^2.50.0",
     "motion": "^12.23.9",

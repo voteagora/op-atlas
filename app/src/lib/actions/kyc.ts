@@ -8,7 +8,7 @@ import {
   deleteKycTeam,
   updateKYCUserStatus,
   getUserKycTeamSources,
-  updateLegalEntityStatus,
+  updateLegalEntityStatusByInquiryId,
 } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
@@ -25,6 +25,40 @@ import { UserKYCTeam } from "@/lib/types"
 import { KYCStatus } from "@prisma/client"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+
+/**
+ * Calculate KYC/KYB expiry date based on Persona inquiry attributes
+ * @param expiresAt - Optional expires-at from Persona inquiry
+ * @param completedAt - Optional completed-at from Persona inquiry
+ * @param parsedStatus - The KYC status (APPROVED, PENDING, etc)
+ * @param fallbackDate - Optional fallback date to use for default calculation
+ * @returns Calculated expiry date, or null if no expires-at and not approved
+ */
+function calculateExpiryDate(
+  expiresAt: string | undefined,
+  completedAt: string | undefined,
+  parsedStatus: string,
+  fallbackDate?: Date
+): Date | null {
+  if (expiresAt) {
+    return new Date(expiresAt)
+  }
+
+  if (parsedStatus === "APPROVED" && completedAt) {
+    const date = new Date(completedAt)
+    date.setFullYear(date.getFullYear() + 1)
+    return date
+  }
+
+  if (fallbackDate) {
+    const date = new Date(fallbackDate)
+    date.setFullYear(date.getFullYear() + 1)
+    return date
+  }
+
+  // Return null to let SQL handle default (updatedAt + 1 year)
+  return null
+}
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -174,6 +208,8 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
         attributes: {
           "updated-at": updatedAt,
           "reference-id": referenceId,
+          "expires-at": expiresAt,
+          "completed-at": completedAt,
           status,
         },
       } = inquiry
@@ -188,19 +224,21 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
 
       if (!referenceId) {
         console.warn(
-          `Missing the required referecedId for inquiry ${inquiry.id}`,
+          `Missing the required referenceId for inquiry ${inquiry.id}`,
         )
         return
       }
 
+      const updatedAtDate = new Date(updatedAt)
+      const expiryDate = calculateExpiryDate(expiresAt, completedAt, parsedStatus)
+
+      // Only updates KYCUsers with matching personaReferenceId (not null)
       await updateKYCUserStatus(
         parsedStatus,
         status,
-        new Date(updatedAt),
+        updatedAtDate,
         referenceId,
-        inquiry.attributes["expires-at"]
-          ? new Date(inquiry.attributes["expires-at"])
-          : null,
+        expiryDate,
       )
     }),
   )
@@ -218,8 +256,6 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
         attributes: {
           "updated-at": updatedAt,
           "reference-id": caseReferenceId,
-          // The Case.status takes precedence over the Inquiry.status whenever the Inquiriy
-          // is associated with a Case.
           status,
         },
         relationships: {
@@ -235,26 +271,16 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
         return
       }
 
-      const personaStatus = mapCaseStatusToPersonaStatus(status)
-      const updatedAtDate = new Date(updatedAt)
-
+      // Only update LegalEntities that have a caseReferenceId
       if (!caseReferenceId) {
-        console.warn(`Missing case reference id for case ${c.id}`)
-      } else {
-        try {
-          await updateLegalEntityStatus(
-            parsedStatus,
-            updatedAtDate,
-            caseReferenceId,
-          )
-        } catch (error) {
-          console.error(
-            `Failed to update legal entity status for case ${c.id}`,
-            error,
-          )
-        }
+        console.warn(`Missing case reference id for case ${c.id}, skipping`)
+        return
       }
 
+      const updatedAtDate = new Date(updatedAt)
+
+      // New flow: Match LegalEntity by personaInquiryId from the case's inquiry relationships
+      // Complete separation: Cases only update LegalEntities, never KYCUsers
       for (const inquiryRef of inquiries) {
         const inquiryId = inquiryRef.id
         if (!inquiryId) {
@@ -262,22 +288,60 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           continue
         }
 
-        const inquiry: PersonaInquiry | null =
-          await personaClient.getInquiryById(inquiryId)
+        try {
+          // Fetch the full inquiry to get expires-at and completed-at
+          const inquiry: PersonaInquiry | null =
+            await personaClient.getInquiryById(inquiryId)
 
-        if (!inquiry) {
-          console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
-          continue
-        }
-        if (inquiry.attributes["reference-id"]) {
-          await updateKYCUserStatus(
+          if (!inquiry) {
+            console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
+            continue
+          }
+
+          // Verify that this LegalEntity has both the matching inquiryId AND caseReferenceId
+          const legalEntity = await prisma.kYCLegalEntity.findFirst({
+            where: {
+              personaInquiryId: inquiryId,
+              personaReferenceId: caseReferenceId,
+            },
+          })
+
+          if (!legalEntity) {
+            console.log(
+              `No LegalEntity found with inquiryId ${inquiryId} and referenceId ${caseReferenceId} for case ${c.id}`,
+            )
+            continue
+          }
+
+          const expiryDate = calculateExpiryDate(
+            inquiry.attributes["expires-at"],
+            inquiry.attributes["completed-at"],
             parsedStatus,
-            personaStatus,
+            updatedAtDate
+          )
+
+          if (!expiryDate) {
+            console.warn(
+              `Could not calculate expiry date for inquiry ${inquiryId} in case ${c.id}, skipping`,
+            )
+            continue
+          }
+
+          // Update the LegalEntity status using the new inquiry-based function
+          await updateLegalEntityStatusByInquiryId(
+            parsedStatus,
             updatedAtDate,
-            inquiry.attributes["reference-id"],
-            inquiry.attributes["expires-at"]
-              ? new Date(inquiry.attributes["expires-at"])
-              : null,
+            inquiryId,
+            expiryDate,
+          )
+
+          console.log(
+            `Updated LegalEntity ${legalEntity.id} for inquiry ${inquiryId} to status ${parsedStatus}, expiry ${expiryDate.toISOString()}`,
+          )
+        } catch (error) {
+          console.error(
+            `Failed to update legal entity for inquiry ${inquiryId} in case ${c.id}`,
+            error,
           )
         }
       }
