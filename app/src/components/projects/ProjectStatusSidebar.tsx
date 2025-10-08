@@ -264,7 +264,7 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
   if (projectStatus == "APPROVED") return null
   return (
     <div className="flex items-center justify-center bg-red-200 w-[80px] h-5 rotate-[0deg] opacity-100 rounded-full py-[2px] px-2">
-      <p className="text-red-600 font-inter font-medium text-[12px] leading-[16px] tracking-[0%] text-center">
+      <p className="text-red-600 font-riforma font-medium text-[12px] leading-[16px] tracking-[0%] text-center">
         Incomplete
       </p>
     </div>
