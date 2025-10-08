@@ -320,15 +320,23 @@ class PersonaClient {
 
 export const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
 
+type PersonaPaginatedMethod = {
+  [K in keyof PersonaClient]: PersonaClient[K] extends (
+    nextUrl?: string,
+  ) => Promise<PersonaResponse<any>>
+    ? K
+    : never
+}[keyof PersonaClient]
+
 async function* fetchGenerator<T>(
   client: PersonaClient,
-  path: keyof PersonaClient,
+  path: PersonaPaginatedMethod,
   nextUrl?: string,
 ): AsyncGenerator<T[]> {
   let currentUrl = nextUrl
 
   do {
-    const response = (await client[path as keyof PersonaClient](
+    const response = (await client[path](
       currentUrl || "",
     )) as PersonaResponse<T>
 
