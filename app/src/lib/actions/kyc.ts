@@ -298,21 +298,6 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
             continue
           }
 
-          // Verify that this LegalEntity has both the matching inquiryId AND caseReferenceId
-          const legalEntity = await prisma.kYCLegalEntity.findFirst({
-            where: {
-              personaInquiryId: inquiryId,
-              personaReferenceId: caseReferenceId,
-            },
-          })
-
-          if (!legalEntity) {
-            console.log(
-              `No LegalEntity found with inquiryId ${inquiryId} and referenceId ${caseReferenceId} for case ${c.id}`,
-            )
-            continue
-          }
-
           const expiryDate = calculateExpiryDate(
             inquiry.attributes["expires-at"],
             inquiry.attributes["completed-at"],
@@ -327,16 +312,24 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
             continue
           }
 
-          // Update the LegalEntity status using the new inquiry-based function
-          await updateLegalEntityStatusByInquiryId(
+          // Update the LegalEntity status - if no entity matches both inquiryId and referenceId,
+          // the update will return empty array
+          const updateResult = await updateLegalEntityStatusByInquiryId(
             parsedStatus,
             updatedAtDate,
             inquiryId,
             expiryDate,
           )
 
+          if (Array.isArray(updateResult) && updateResult.length === 0) {
+            console.log(
+              `No LegalEntity found with inquiryId ${inquiryId} and referenceId ${caseReferenceId} for case ${c.id}`,
+            )
+            continue
+          }
+
           console.log(
-            `Updated LegalEntity ${legalEntity.id} for inquiry ${inquiryId} to status ${parsedStatus}, expiry ${expiryDate.toISOString()}`,
+            `Updated LegalEntity for inquiry ${inquiryId} to status ${parsedStatus}, expiry ${expiryDate.toISOString()}`,
           )
         } catch (error) {
           console.error(
