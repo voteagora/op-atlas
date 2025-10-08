@@ -71,7 +71,7 @@ export const ProjectSelectionModal = ({
   }, [userProjects])
 
   const triggerButton = (
-    <button className="flex items-center gap-1 font-medium text-sm text-foreground focus:outline-none">
+    <button className="flex items-center gap-1 font-normal text-sm text-foreground focus:outline-none">
       <CheckboxLine className="w-4 h-4" />
       <span>{triggerText}</span>
       <ArrowRightS className="w-4 h-4" />
@@ -84,7 +84,7 @@ export const ProjectSelectionModal = ({
         // Modal with projects
         <>
           <DialogHeader className="p-6 pb-4 text-center">
-            <DialogTitle className="text-xl font-semibold text-foreground leading-[28px]">
+            <DialogTitle className="text-xl font-normal text-foreground leading-[28px]">
               Choose the projects that demonstrate your expertise
             </DialogTitle>
           </DialogHeader>
@@ -130,14 +130,14 @@ export const ProjectSelectionModal = ({
           </div>
           <div className="p-6 pt-0 flex flex-col gap-2">
             <Button
-              className="bg-brand-primary text-foreground w-full py-2.5 px-6 rounded-md font-medium text-base"
+              className="bg-brand-primary text-foreground w-full py-2.5 px-6 rounded-md font-normal text-base"
               onClick={() => onOpenChange(false)}
             >
               Choose
             </Button>
             <Button
               variant="outline"
-              className="border-tertiary text-foreground w-full py-2.5 px-6 rounded-md font-medium text-base"
+              className="border-tertiary text-foreground w-full py-2.5 px-6 rounded-md font-normal text-base"
               onClick={handleAddProject}
             >
               Add project
@@ -148,7 +148,7 @@ export const ProjectSelectionModal = ({
         // Modal with no projects
         <>
           <DialogHeader className="p-6 pb-4 text-center">
-            <DialogTitle className="text-xl font-semibold text-foreground leading-[28px] mb-2">
+            <DialogTitle className="text-xl font-normal text-foreground leading-[28px] mb-2">
               You haven&apos;t added or joined any projects in Atlas
             </DialogTitle>
             <div className="text-base font-normal text-secondary-foreground leading-[24px]">
@@ -159,7 +159,7 @@ export const ProjectSelectionModal = ({
           </DialogHeader>
           <div className="px-6 pb-6">
             <Button
-              className="bg-brand-primary text-foreground w-full py-2.5 px-6 rounded-md font-medium text-base"
+              className="bg-brand-primary text-foreground w-full py-2.5 px-6 rounded-md font-normal text-base"
               onClick={handleAddProject}
             >
               Add project

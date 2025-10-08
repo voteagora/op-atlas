@@ -157,7 +157,7 @@ export default function SelectKYCProjectDialog({
     return (
       <Dialog open>
         <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
-          <DialogTitle className="text-center leading-7 font-semibold text-xl">
+          <DialogTitle className="text-center leading-7 font-normal text-xl">
             Choose the projects that will use this grant delivery address
           </DialogTitle>
           <div className="space-y-6 z-50 w-full h-full">
@@ -178,7 +178,7 @@ export default function SelectKYCProjectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         {availableProjects?.length !== 0 && (
-          <DialogTitle className="text-center leading-7 font-semibold text-xl">
+          <DialogTitle className="text-center leading-7 font-normal text-xl">
             Choose the projects that will use this grant delivery address
           </DialogTitle>
         )}
@@ -226,7 +226,7 @@ export default function SelectKYCProjectDialog({
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="text-orange-600 mt-0.5" size={16} />
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-orange-800">
+                    <p className="text-sm font-normal text-orange-800">
                       Project Reassignment Warning
                     </p>
                     <p className="text-sm text-orange-700">
@@ -236,7 +236,7 @@ export default function SelectKYCProjectDialog({
                       {conflictingProjects.map(conflict => (
                         <li key={conflict.projectId} className="flex items-center gap-2">
                           <span className="w-1 h-1 bg-orange-600 rounded-full" />
-                          <span className="font-medium">{conflict.projectName}</span>
+                          <span className="font-normal">{conflict.projectName}</span>
                           <span>from</span>
                           <span className="font-mono text-xs bg-orange-100 px-1 py-0.5 rounded">
                             {conflict.currentWalletAddress.slice(0, 6)}...{conflict.currentWalletAddress.slice(-4)}

@@ -33,13 +33,13 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-foreground font-medium text-sm">
+      <div className="text-foreground font-normal text-sm">
         Photo, display name, username and bio.
       </div>
       <div className="border border-border rounded-xl p-10">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Photo</div>
+            <div className="text-foreground font-normal text-sm">Photo</div>
             <Avatar className="!w-20 !h-20">
               <AvatarImage src={imageUrl || ""} alt="avatar" />
               <AvatarFallback>{username}</AvatarFallback>
@@ -47,17 +47,17 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Name</div>
+            <div className="text-foreground font-normal text-sm">Name</div>
             <Input value={username ?? ""} disabled />
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Username</div>
+            <div className="text-foreground font-normal text-sm">Username</div>
             <Input value={username ? `@${username}` : ""} disabled />
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Bio</div>
+            <div className="text-foreground font-normal text-sm">Bio</div>
             <Input value={bio} disabled />
           </div>
 

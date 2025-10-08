@@ -352,7 +352,7 @@ export const GrantsForm = ({
         className="flex flex-col gap-y-12 w-full"
       >
         <div className="flex flex-col gap-y-6">
-          <h2 className="text-2xl font-semibold text-text-default">
+          <h2 className="text-2xl font-normal text-text-default">
             Pricing, grants, and investment
           </h2>
           <p className="text-text-secondary">
@@ -364,7 +364,7 @@ export const GrantsForm = ({
             text="This information is required for some missions"
           />
           <div className="flex flex-col gap-y-2">
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-sm font-normal text-foreground">
               Which best describes your project’s pricing model?
               <span className="text-destructive">*</span>
             </p>
@@ -389,7 +389,7 @@ export const GrantsForm = ({
           </div>
           <div className="flex flex-col gap-y-1.5">
             <div>
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-sm font-normal text-foreground">
                 What kinds of grants and investment have you received?
               </p>
               <p className="text-sm font-normal text-secondary-foreground">
@@ -411,7 +411,7 @@ export const GrantsForm = ({
         <div className="flex flex-col gap-y-12">
           {pricingModel && pricingModel !== "free" && (
             <div className="flex flex-col gap-y-6 ">
-              <p className="text-lg font-semibold text-text-default">Pricing</p>
+              <p className="text-lg font-normal text-text-default">Pricing</p>
               <div className="flex flex-col gap-y-6 p-6 border rounded-xl">
                 <FormField
                   control={form.control}
@@ -440,7 +440,7 @@ export const GrantsForm = ({
 
           {grantsFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold text-text-default">
+              <h3 className="text-lg font-normal text-text-default">
                 Optimism Grants (since Jan 2023)
               </h3>
               {grantsFields.map((field, index) => (
@@ -456,7 +456,7 @@ export const GrantsForm = ({
                 type="button"
                 variant="secondary"
                 onClick={() => onAddFundingType("grants")}
-                className="w-fit text-sm font-medium text-foreground"
+                className="w-fit text-sm font-normal text-foreground"
               >
                 <Plus size={16} className="mr-2.5" /> Add Optimism Grant
               </Button>
@@ -464,7 +464,7 @@ export const GrantsForm = ({
           ) : null}
           {retroFundingFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold text-text-default">
+              <h3 className="text-lg font-normal text-text-default">
                 Optimism Retro Funding
               </h3>
               {retroFundingFields.map((field, index) => (
@@ -479,7 +479,7 @@ export const GrantsForm = ({
                 type="button"
                 variant="secondary"
                 onClick={() => onAddFundingType("retroFunding")}
-                className="w-fit text-sm font-medium text-foreground"
+                className="w-fit text-sm font-normal text-foreground"
               >
                 <Plus size={16} className="mr-2.5" /> Add Retro Funding
               </Button>
@@ -487,7 +487,7 @@ export const GrantsForm = ({
           ) : null}
           {investmentFields.length > 0 ? (
             <div className="flex flex-col gap-y-6">
-              <h3 className="text-lg font-semibold text-text-default">
+              <h3 className="text-lg font-normal text-text-default">
                 Investment (since Jan 2020)
               </h3>
               {investmentFields.map((field, index) => (
@@ -502,7 +502,7 @@ export const GrantsForm = ({
                 type="button"
                 variant="secondary"
                 onClick={() => onAddFundingType("venture")}
-                className="w-fit text-sm font-medium text-foreground"
+                className="w-fit text-sm font-normal text-foreground"
               >
                 <Plus size={16} className="mr-2.5" /> Add investment
               </Button>
@@ -559,7 +559,7 @@ const FundingTypeOption = ({
         className="mt-0.5"
       />
       <div className="flex flex-col">
-        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-sm font-normal text-foreground">{label}</p>
         {description && (
           <p className="text-sm text-secondary-foreground">{description}</p>
         )}
@@ -582,7 +582,7 @@ const PricingModelTypeOption = ({
     <div className={cn("group flex gap-x-2 p-4 border rounded-xl", className)}>
       <RadioGroupItem value={type} id="r1" className="mt-0.5" />
       <div className="flex flex-col">
-        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-sm font-normal text-foreground">{label}</p>
         {description && (
           <p className="text-sm text-secondary-foreground">{description}</p>
         )}

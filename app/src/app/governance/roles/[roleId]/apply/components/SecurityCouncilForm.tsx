@@ -14,7 +14,7 @@ import { ProjectSelectionModal } from "./ProjectSelectionModal"
 
 const firstSecurityRoleTerm = (
   <div>
-    <p className="font-medium text-base text-foreground">
+    <p className="font-normal text-base text-foreground">
       Please verify that you understand you may be removed from this role via
       the Representative Removal proposal type in the{" "}
       <ExternalLink
@@ -170,12 +170,12 @@ export const SecurityCouncilForm = ({
     <div className="flex flex-col gap-20 w-full">
       {/* Personal Statement Section */}
       <div className="flex flex-col gap-6">
-        <div className="text-xl font-semibold text-foreground">
+        <div className="text-xl font-normal text-foreground">
           Personal statement
         </div>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col leading-6">
-            <div className="font-medium text-base text-foreground">
+            <div className="font-normal text-base text-foreground">
               Why are you interested in being a {role.title}?
             </div>
             <div className="text-secondary-foreground text-base">
@@ -206,7 +206,7 @@ export const SecurityCouncilForm = ({
 
       {/* Relevant Projects Section */}
       <div className="flex flex-col gap-6">
-        <div className="text-xl font-semibold text-foreground">
+        <div className="text-xl font-normal text-foreground">
           Relevant projects
         </div>
         <div className="text-secondary-foreground text-base">
@@ -249,7 +249,7 @@ export const SecurityCouncilForm = ({
         {/* Atlas Projects Selection */}
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            <div className="font-medium text-sm text-foreground">
+            <div className="font-normal text-sm text-foreground">
               Projects in Atlas
             </div>
             <ProjectSelectionModal
@@ -332,7 +332,7 @@ export const SecurityCouncilForm = ({
 
         {/* External Links Section */}
         <div className="flex flex-col gap-2 w-full">
-          <div className="font-medium text-sm text-foreground">Links</div>
+          <div className="font-normal text-sm text-foreground">Links</div>
           {externalLinks.length === 0 && (
             <div className="border border-tertiary rounded-xl p-6 flex flex-col gap-2 w-full">
               <Input
@@ -421,11 +421,11 @@ export const SecurityCouncilForm = ({
       {/* Disclosures Section */}
       <div className="flex flex-col gap-12">
         <div className="flex flex-col gap-6">
-          <div className="text-xl font-semibold text-foreground">
+          <div className="text-xl font-normal text-foreground">
             Disclosures
           </div>
           <div className="flex flex-col leading-6">
-            <div className="font-medium text-base text-foreground">
+            <div className="font-normal text-base text-foreground">
               Please disclose any anticipated conflicts of interest, or verify
               that you have no conflicts of interest
             </div>
@@ -469,7 +469,7 @@ export const SecurityCouncilForm = ({
         {/* Security Council Terms */}
         {SECURITY_ROLE_TERMS.map((term, index) => (
           <div key={index} className="flex flex-col gap-6">
-            <div className="font-medium text-base text-foreground">
+            <div className="font-normal text-base text-foreground">
               {term}
               {index === 2 && (
                 <div className="font-normal text-secondary-foreground mt-1">

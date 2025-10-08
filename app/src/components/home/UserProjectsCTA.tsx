@@ -17,13 +17,13 @@ export const UserProjectsCTA = () => {
   const [isLoggingInWithClick, setIsLoggingInWithClick] = useState(false)
 
   let content = (
-    <div className="justify-center text-[#0f111a] text-base font-semibold leading-normal group-hover:underline">
+    <div className="justify-center text-[#0f111a] text-base font-normal leading-normal group-hover:underline">
       Add your first project
     </div>
   )
   if (isAuthenticated) {
     content = (
-      <div className="justify-center text-[#0f111a] text-base font-semibold leading-normal group-hover:underline">
+      <div className="justify-center text-[#0f111a] text-base font-normal leading-normal group-hover:underline">
         View your dashboard
       </div>
     )

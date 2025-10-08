@@ -45,7 +45,7 @@ export function DeployersFormField({
         <h3 className="text-xl">Verified contracts</h3>
         <p>
           {"Verify ownership of your  "}
-          <span className="font-semibold">deployer address</span>
+          <span className="font-normal">deployer address</span>
           {
             " and OP Atlas will find your contracts. If you've deployed a factory, its contracts will be attributed to you. (Contracts deployed within 24 hours may not appear)."
           }

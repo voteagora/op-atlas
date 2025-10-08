@@ -38,7 +38,7 @@ function ProfileProjects({ projects }: { projects: ProjectWithDetailsLite[] }) {
 
   return (
     <div className="flex flex-col space-y-6">
-      <h2 className="text-xl font-medium">Projects</h2>
+      <h2 className="text-xl font-normal">Projects</h2>
       <div className="flex flex-col space-y-3">
         {filteredProjects.map((project) => (
           <div
@@ -93,7 +93,7 @@ function ProfileProjects({ projects }: { projects: ProjectWithDetailsLite[] }) {
                         width={14}
                         height={14}
                       />
-                      <span className="text-center text-sm font-medium">
+                      <span className="text-center text-sm font-normal">
                         {formatNumber(
                           Number(reward.amount.toFixed(0)),
                           0,

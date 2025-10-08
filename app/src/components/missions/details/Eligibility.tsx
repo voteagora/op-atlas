@@ -132,7 +132,7 @@ export const Eligibility = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-xl font-semibold">Check your eligibility</p>
+      <p className="text-xl font-normal">Check your eligibility</p>
       <Callout
         type="info"
         showIcon={false}
@@ -156,7 +156,7 @@ export const Eligibility = () => {
                 style={{ width: barWidth }}
               />
             </div>
-            <p className={cn("text-base font-semibold mt-4", textColor)}>
+            <p className={cn("text-base font-normal mt-4", textColor)}>
               {message}
             </p>
           </div>

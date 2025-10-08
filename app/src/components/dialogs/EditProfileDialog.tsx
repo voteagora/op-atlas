@@ -34,7 +34,7 @@ function EditProfileDialog({ open, onOpenChange }: DialogProps<object>) {
             <AvatarFallback>{session?.user?.name}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-1">
-            <DialogTitle className="text-center text-lg font-semibold text-text-default">
+            <DialogTitle className="text-center text-lg font-normal text-text-default">
               Edit your profile
             </DialogTitle>
             <DialogDescription className="text-center text-base font-normal text-text-secondary mt-1 flex flex-col gap-6">

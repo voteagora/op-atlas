@@ -33,7 +33,7 @@ export default function RolesPage({ roles }: { roles: Role[] }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h4 className="w-full font-semibold text-[20px] leading-7 align-middle text-text-default">
+        <h4 className="w-full font-normal text-[20px] leading-7 align-middle text-text-default">
           {title()}
         </h4>
         {hasASecurityRole && (

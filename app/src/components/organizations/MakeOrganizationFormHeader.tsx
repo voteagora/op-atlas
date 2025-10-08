@@ -40,7 +40,7 @@ const MakeOrganizationFormHeader = ({
 
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-foreground text-2xl font-semibold">
+      <h2 className="text-foreground text-2xl font-normal">
         {organization?.name}
       </h2>
       {!!organization && isAdmin && (

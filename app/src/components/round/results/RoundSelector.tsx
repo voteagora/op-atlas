@@ -69,12 +69,12 @@ const RoundSelector = ({
   }
 
   return (
-    <h1 className="text-xl font-semibold mt-10">
+    <h1 className="text-xl font-normal mt-10">
       <span className="text-muted-foreground">
         {totalCount} {totalCount === 1 ? "project" : "projects"} rewarded in{" "}
       </span>
       <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center gap-1 font-semibold outline-none ring-0">
+        <DropdownMenuTrigger className="inline-flex items-center gap-1 font-normal outline-none ring-0">
           {getRoundsText()} <ChevronDown className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>

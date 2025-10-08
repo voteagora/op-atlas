@@ -27,7 +27,7 @@ export default function MetricCard({
       className="flex flex-col justify-between p-6 bg-background rounded-xl border"
     >
       <div className="w-full flex items-center justify-between space-x-1">
-        <p className="font-semibold text-base">{formattedValue}</p>
+        <p className="font-normal text-base">{formattedValue}</p>
       </div>
       <p className="text-base leading-6 text-secondary-foreground flex items-start space-x-2">
         <span>{title}</span>

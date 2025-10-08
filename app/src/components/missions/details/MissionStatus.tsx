@@ -40,7 +40,7 @@ const StatusRow: React.FC<StatusRowProps> = ({ type, count, isLoading }) => (
     >
       <div
         className={cn(
-          "self-stretch text-center justify-start text-base font-semibold",
+          "self-stretch text-center justify-start text-base font-normal",
           statusDescription[type].color,
         )}
       >
@@ -48,7 +48,7 @@ const StatusRow: React.FC<StatusRowProps> = ({ type, count, isLoading }) => (
       </div>
     </div>
     <div className="flex-1 inline-flex flex-col justify-start items-start">
-      <div className="self-stretch justify-start text-foreground text-base font-medium">
+      <div className="self-stretch justify-start text-foreground text-base font-normal">
         {statusDescription[type].label}
       </div>
       <div className="self-stretch justify-start text-secondary-foreground text-base font-normal">
@@ -76,7 +76,7 @@ export function MissionStatus() {
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold text-foreground">
+        <h3 className="text-xl font-normal text-foreground">
           Status of missions
         </h3>
       </div>

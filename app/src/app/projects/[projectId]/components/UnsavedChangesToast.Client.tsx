@@ -63,7 +63,7 @@ const UnsavedChangesToastClient = ({
                 {`Your recent edits haven't been published onchain`}
               </p>
               <button
-                className="bg-red-500 text-white font-medium rounded-md px-3 py-2 w-[100px] ml-2 text-sm"
+                className="bg-red-500 text-white font-normal rounded-md px-3 py-2 w-[100px] ml-2 text-sm"
                 onClick={() => {
                   onPublish()
                   toast.dismiss(toastId)

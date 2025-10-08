@@ -108,7 +108,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
     return (
       <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
         <div className="flex flex-col gap-2">
-          <div className="font-semibold text-secondary-foreground">
+          <div className="font-normal text-secondary-foreground">
             Loading...
           </div>
           <div className="text-sm text-secondary-foreground">
@@ -123,7 +123,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
     return (
       <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
         <div className="flex flex-col gap-2">
-          <div className="font-semibold text-secondary-foreground">
+          <div className="font-normal text-secondary-foreground">
             Self-nominate
           </div>
           <div className="text-sm text-secondary-foreground">
@@ -140,7 +140,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
   return (
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
       <div className="flex flex-col gap-2">
-        <div className="font-semibold text-secondary-foreground">
+        <div className="font-normal text-secondary-foreground">
           {hasAppliedThisSeason
             ? hasAppliedForThisRole
               ? "You're a candidate!"

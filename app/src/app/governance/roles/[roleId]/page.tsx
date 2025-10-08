@@ -72,7 +72,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
 
             <div className="flex flex-col gap-y-8 mt-12">
               <div className="flex flex-col gap-4">
-                <div className="text-3xl font-semibold">{role.title}</div>
+                <div className="text-3xl font-normal">{role.title}</div>
                 {role.startAt && role.endAt && <RoleDates role={role} />}
               </div>
 
@@ -86,12 +86,12 @@ export default async function Page({ params }: { params: { roleId: string } }) {
                         <p className="mb-6 last:mb-0">{children}</p>
                       ),
                       h1: ({ children }) => (
-                        <h1 className="text-4xl font-semibold my-6">
+                        <h1 className="text-4xl font-normal my-6">
                           {children}
                         </h1>
                       ),
                       h2: ({ children }) => (
-                        <h2 className="text-3xl font-semibold my-6">
+                        <h2 className="text-3xl font-normal my-6">
                           {children}
                         </h2>
                       ),

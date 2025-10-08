@@ -78,7 +78,7 @@ const ProjectsList = ({
                 <div className="ml-4">
                   <Tooltip>
                     <TooltipTrigger>
-                      <h5 className="text-xs sm:text-base font-semibold text-text-default text-left group-hover:underline">
+                      <h5 className="text-xs sm:text-base font-normal text-text-default text-left group-hover:underline">
                         {truncateString(project?.project?.name, 64, "...")}
                       </h5>
                     </TooltipTrigger>
@@ -96,7 +96,7 @@ const ProjectsList = ({
                   width={24}
                   height={24}
                 />
-                <span className="ml-2 text-xs sm:text-base font-medium text-foreground">
+                <span className="ml-2 text-xs sm:text-base font-normal text-foreground">
                   {formatNumber(Number(project?.amount), 1)}
                 </span>
               </div>

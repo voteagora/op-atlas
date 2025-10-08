@@ -100,11 +100,11 @@ export function MissionApplicationTabs({
       </TabsList>
       <div className="mt-12">
         <TabsContent value="details">
-          <p className="text-2xl font-bold mb-5">Choose projects</p>
+          <p className="text-2xl font-normal mb-5">Choose projects</p>
 
           {!isOpenForEnrollment && (
             <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
-              <p className="font-bold">
+              <p className="font-normal">
                 {"Not open for enrollment-coming soon"}
               </p>
               {viewMissionDetailsBtn}
@@ -143,11 +143,11 @@ export function MissionApplicationTabs({
                 </>
               ) : isLoadingProjects ? (
                 <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
-                  <p className="font-bold">{"Loading your projects..."}</p>
+                  <p className="font-normal">{"Loading your projects..."}</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center gap-y-5 p-10 border border-2 border-grey-900 rounded-xl">
-                  <p className="font-bold">
+                  <p className="font-normal">
                     {"You haven't added or joined any projects"}
                   </p>
 

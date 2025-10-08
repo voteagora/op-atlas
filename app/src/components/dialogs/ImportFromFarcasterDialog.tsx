@@ -53,7 +53,7 @@ function ImportFromFarcasterDialog({ open, onOpenChange }: DialogProps<object>) 
                         </div>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <DialogTitle className="text-center text-lg font-semibold text-default">
+                        <DialogTitle className="text-center text-lg font-normal text-default">
                             Import your photo from Farcaster
                         </DialogTitle>
                         <DialogDescription className="text-center text-muted-foreground flex flex-col gap-6">

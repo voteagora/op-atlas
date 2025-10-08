@@ -31,11 +31,11 @@ function KYCInProgressCallout({ kycTeam }: KYCInProgressCalloutProps) {
             height={20}
           />
           <div className="ml-2">
-            <span className="text-sm font-medium text-blue-800">
+            <span className="text-sm font-normal text-blue-800">
               Your grant address is being verified. Rewards can&apos;t be streamed until this is complete.{" "}
             </span>
             <TrackedLink
-              className="text-sm font-medium text-blue-800 underline"
+              className="text-sm font-normal text-blue-800 underline"
               href={linkPath}
               eventName="Link Click"
               eventData={{
@@ -78,11 +78,11 @@ function KYCVerifiedCallout({ kycTeam, onDismiss }: KYCVerifiedCalloutProps) {
             height={20}
           />
           <div className="ml-2">
-            <span className="text-sm font-medium text-blue-800">
+            <span className="text-sm font-normal text-blue-800">
               Your grant address verification is complete.{" "}
             </span>
             <TrackedLink
-              className="text-sm font-medium text-blue-800 underline"
+              className="text-sm font-normal text-blue-800 underline"
               href={linkPath}
               eventName="Link Click"
               eventData={{
@@ -102,7 +102,7 @@ function KYCVerifiedCallout({ kycTeam, onDismiss }: KYCVerifiedCalloutProps) {
         <div className="flex items-center gap-2 ml-auto shrink-0">
           <button
             onClick={onDismiss}
-            className="text-sm font-medium text-blue-800 hover:text-blue-900 cursor-pointer"
+            className="text-sm font-normal text-blue-800 hover:text-blue-900 cursor-pointer"
           >
             Dismiss
           </button>

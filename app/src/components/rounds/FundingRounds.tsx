@@ -54,7 +54,7 @@ export const FundingRounds = ({
     return (
       <div className="flex flex-col gap-y-4">
         <div className="h-8">
-          <h3 className="text-xl font-semibold text-foreground">
+          <h3 className="text-xl font-normal text-foreground">
             {status === "open" ? "Open for applications" : titlecase(status)}
           </h3>
         </div>
@@ -152,7 +152,7 @@ function FundingRoundContent({
           <div className="flex justify-between">
             <div className="w-full flex flex-col justify-between gap-y-1">
               <div className="w-full flex justify-between space-x-2">
-                <h2 className="text-base font-semibold text-text-default text-start">
+                <h2 className="text-base font-normal text-text-default text-start">
                   Round {fundingRound.number}
                   {fundingRound.number > 3 ? ": " + fundingRound.name : ""}
                 </h2>
@@ -160,7 +160,7 @@ function FundingRoundContent({
                   !fundingRound.endsAt ||
                   fundingRound.endsAt >= new Date()) && (
                   <Badge
-                    className={`text-xs font-medium text-foreground ${
+                    className={`text-xs font-normal text-foreground ${
                       fundingRound.status === "open"
                         ? "bg-callout-foreground hover:bg-callout-foreground text-white"
                         : "bg-secondary"
@@ -199,7 +199,7 @@ function FundingRoundContent({
           )}
 
           {fundingRound.status === "open" && (
-            <div className="flex justify-between text-secondary-foreground text-sm font-medium">
+            <div className="flex justify-between text-secondary-foreground text-sm font-normal">
               <div className="items-center flex gap-2 pr-4 ">
                 <Image
                   src="/assets/icons/op-icon.svg"
@@ -207,7 +207,7 @@ function FundingRoundContent({
                   width={24}
                   alt="Optimism"
                 />
-                <div className="text-sm font-medium text-secondary-foreground">
+                <div className="text-sm font-normal text-secondary-foreground">
                   {fundingRound.funding?.op && (
                     <span>{fundingRound.funding.op}</span>
                   )}{" "}
@@ -220,7 +220,7 @@ function FundingRoundContent({
 
         {fundingRound.status === "past" && (
           <div className="flex flex-row items-center gap-4">
-            <div className="flex flex-row items-center gap-2 text-sm font-medium text-secondary-foreground">
+            <div className="flex flex-row items-center gap-2 text-sm font-normal text-secondary-foreground">
               {fundingRound.funding?.op && (
                 <Image
                   src="/assets/icons/op-icon.svg"

@@ -134,7 +134,7 @@ export default function SignersStep() {
   return (
     <div className="space-y-8 w-full">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-xl font-normal">
           Please identify each responsible individual or signer for this wallet. If you are such person, start with yourself.
         </h2>
         <p className="text-base text-secondary-foreground">
@@ -146,7 +146,7 @@ export default function SignersStep() {
         
         {/* Display wallet address */}
         <div>
-          <label htmlFor="grant-address" className="block text-sm font-medium mb-2">Grant delivery address</label>
+          <label htmlFor="grant-address" className="block text-sm font-normal mb-2">Grant delivery address</label>
           <Input
             id="grant-address"
             type="text"
@@ -160,7 +160,7 @@ export default function SignersStep() {
         {signers.map((signer, index) => (
           <div key={index} className="space-y-6 relative group">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Person {index + 1}</h3>
+              <h3 className="text-lg font-normal">Person {index + 1}</h3>
               {index > 0 && (
                 <Button
                   type="button"
@@ -176,7 +176,7 @@ export default function SignersStep() {
 
             <div className="space-y-6">
               <div>
-                <label htmlFor={`first-name-${index}`} className="block text-sm font-medium mb-2">
+                <label htmlFor={`first-name-${index}`} className="block text-sm font-normal mb-2">
                   First name<span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -189,7 +189,7 @@ export default function SignersStep() {
               </div>
 
               <div>
-                <label htmlFor={`last-name-${index}`} className="block text-sm font-medium mb-2">
+                <label htmlFor={`last-name-${index}`} className="block text-sm font-normal mb-2">
                   Last name<span className="text-destructive">*</span>
                 </label>
                 <Input
@@ -202,7 +202,7 @@ export default function SignersStep() {
               </div>
 
               <div>
-                <label htmlFor={`email-${index}`} className="block text-sm font-medium mb-2">
+                <label htmlFor={`email-${index}`} className="block text-sm font-normal mb-2">
                   Email<span className="text-destructive">*</span>
                 </label>
                 <Input

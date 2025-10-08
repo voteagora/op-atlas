@@ -51,7 +51,7 @@ export default function GrantEligibilitySuccess({
             Form submitted successfully!
           </h1>
           
-          <p className="font-semibold max-w-xl mx-auto text-xl">
+          <p className="font-normal max-w-xl mx-auto text-xl">
             An email has been sent to each person declared in the grant eligibility 
             form. To receive your grant, they must complete KYC/KYB via the link 
             provided.

@@ -18,21 +18,21 @@ export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       {/* {!data && (
-        <div className="z-10 w-full py-3 text-center text-background text-sm font-medium bg-accent-foreground">
+        <div className="z-10 w-full py-3 text-center text-background text-sm font-normal bg-accent-foreground">
           The results are in! Sign in to see your Retro Funding 6 rewards.
         </div>
       )} */}
       {/* Main content */}
       <div className="mt-4 bg-background flex flex-col py-20 px-16 w-full max-w-6xl rounded-3xl z-10">
         <div className="flex flex-col w-full">
-          <h1 className="text-4xl font-semibold">Retro Funding Missions</h1>
+          <h1 className="text-4xl font-normal">Retro Funding Missions</h1>
         </div>
 
         <div className="mt-10 flex flex-1 gap-x-10">
           <div className="flex flex-col flex-1 gap-y-12">
             <FundingRounds fundingRounds={MISSIONS_AND_ROUNDS} />
             <div className="flex flex-col">
-              <h2 className="text-xl font-semibold text-text-default">
+              <h2 className="text-xl font-normal text-text-default">
                 About Retro Funding
               </h2>
               <p className="mt-6 text-base font-normal text-text-secondary">

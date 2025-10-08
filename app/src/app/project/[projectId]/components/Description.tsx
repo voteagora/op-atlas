@@ -64,7 +64,7 @@ export default function Description({
           <div className="flex items-start space-x-3">
             <Tooltip>
               <TooltipTrigger>
-                <h3 className="font-semibold text-2xl text-left">
+                <h3 className="font-normal text-2xl text-left">
                   {truncateString(name, 64, "...")}
                 </h3>
               </TooltipTrigger>
@@ -78,7 +78,7 @@ export default function Description({
                     key={i}
                     className="px-2.5 py-1 rounded-full border-[1px] border-[#E0E2EB]"
                   >
-                    <span className="text-sm font-medium">{tag}</span>
+                    <span className="text-sm font-normal">{tag}</span>
                   </li>
                 ))}
             </ul>

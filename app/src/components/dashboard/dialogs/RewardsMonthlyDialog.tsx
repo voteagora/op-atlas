@@ -26,7 +26,7 @@ function RewardsMonthlyDialog({ open, onOpenChange }: DialogProps<object>) {
             alt="Calendar"
           />
           <div className="flex flex-col gap-2">
-            <DialogTitle className="text-center text-lg font-semibold text-text-default">
+            <DialogTitle className="text-center text-lg font-normal text-text-default">
               Come back at the end of the month to view your rewards
             </DialogTitle>
             <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">

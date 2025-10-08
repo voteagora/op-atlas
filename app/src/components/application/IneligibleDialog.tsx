@@ -30,7 +30,7 @@ function IneligibleDialog({ open, onOpenChange }: DialogProps<object>) {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <DialogTitle className="text-center text-lg font-semibold text-text-default">
+            <DialogTitle className="text-center text-lg font-normal text-text-default">
               Your project is missing data required for this round of Retro
               Funding
             </DialogTitle>

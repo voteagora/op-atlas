@@ -87,7 +87,7 @@ const RewardAccordion = ({
     <div className="w-full flex flex-col gap-2">
       <div className="flex flex-col space-y-2">
         <div>
-          <p className="font-medium text-foreground text-sm">
+          <p className="font-normal text-foreground text-sm">
             {REWARDS_NAMES[rewardRoundId].name}
           </p>
           <span className="text-secondary-foreground font-normal text-sm">
@@ -107,7 +107,7 @@ const RewardAccordion = ({
             {reward.claim?.address && (
               <button
                 type="button"
-                className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                className="text-secondary-foreground text-xs font-normal bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
                 onClick={() => handleCopyAddress(reward.claim?.address ?? "")}
               >
                 To: {truncateAddress(reward.claim?.address)}
@@ -134,7 +134,7 @@ const RewardAccordion = ({
       <div className="flex flex-col gap-6">
         {reward.claim?.tokenStreamClaimableAt && (
           <div className="flex flex-col gap-2 w-full">
-            <div className="font-medium text-sm text-foreground">
+            <div className="font-normal text-sm text-foreground">
               Token stream
             </div>
             <div className="flex items-center gap-x-1.5">

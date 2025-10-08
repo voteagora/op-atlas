@@ -289,7 +289,7 @@ const ApplicationFormTabs = ({
                     I agree to the{" "}
                     <ExternalLink
                       href="https://www.optimism.io/data-privacy-policy"
-                      className="font-medium"
+                      className="font-normal"
                     >
                       Optimism Foundation&apos;s Privacy Policy
                     </ExternalLink>

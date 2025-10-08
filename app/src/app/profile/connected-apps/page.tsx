@@ -28,14 +28,14 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
-      <h2 className="text-foreground text-2xl font-semibold">Connected apps</h2>
+      <h2 className="text-foreground text-2xl font-normal">Connected apps</h2>
 
       <div className="flex flex-col gap-12">
         {/* Farcaster */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
             <Farcaster className="w-5 h-5" />
-            <h3 className="font-semibold text-foreground">Farcaster</h3>
+            <h3 className="font-normal text-foreground">Farcaster</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
             Connect your farcaster account to import your username, bio and
@@ -50,7 +50,7 @@ export default async function Page() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
             <Discord className="w-5 h-5" />
-            <h3 className="font-semibold text-foreground">Discord</h3>
+            <h3 className="font-normal text-foreground">Discord</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
             Connect your account so anyone can find you on Discord.
@@ -62,7 +62,7 @@ export default async function Page() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
             <Github className="w-5 h-5" />
-            <h3 className="font-semibold text-foreground">Github</h3>
+            <h3 className="font-normal text-foreground">Github</h3>
           </div>
           <div className="text-secondary-foreground mb-4">
             Connect your GitHub account to show your code contributions to the
@@ -75,7 +75,7 @@ export default async function Page() {
         <div className="flex flex-col gap-1">
           <div className="flex items-center space-x-1.5">
             <Optimism className="w-5 h-5" fill="#FF0000" />
-            <h3 className="font-semibold text-foreground">
+            <h3 className="font-normal text-foreground">
               Collective Governance Forum
             </h3>
           </div>
