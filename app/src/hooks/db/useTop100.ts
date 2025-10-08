@@ -97,6 +97,38 @@ export function useMyEndorsements(roleId: number, context: string) {
   })
 }
 
+export function useApproversForNominee(nomineeId: number, context: string) {
+  return useQuery({
+    queryKey: ["sc-approvers", nomineeId, context],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/sc/endorsements?approversFor=${nomineeId}&context=${encodeURIComponent(
+          context,
+        )}`,
+        { cache: "no-store" },
+      )
+      if (!res.ok)
+        return [] as {
+          address: string
+          user: {
+            username: string | null
+            name: string | null
+            imageUrl: string | null
+          } | null
+        }[]
+      return (await res.json()) as {
+        address: string
+        user: {
+          username: string | null
+          name: string | null
+          imageUrl: string | null
+        } | null
+      }[]
+    },
+    staleTime: 10_000,
+  })
+}
+
 export function useRemoveEndorsement() {
   const qc = useQueryClient()
   return useMutation({

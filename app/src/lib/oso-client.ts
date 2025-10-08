@@ -15,7 +15,7 @@ class OsoClient {
   private headers: Record<string, string>
 
   private constructor(
-    endpoint: string = "https://www.opensource.observer/api/v1/graphql",
+    endpoint: string = "https://www.oso.xyz/api/v1/graphql",
   ) {
     this.endpoint = endpoint
     this.headers = {
