@@ -204,7 +204,7 @@ export function AddGrantDeliveryAddressDialog({
             </p>
           </div>
           <div className="flex flex-col self-stretch gap-1">
-            <div className="text-sm font-medium">Chain</div>
+            <div className="text-sm font-normal">Chain</div>
             <Input
               className="text-secondary-foreground text-sm"
               readOnly
@@ -213,14 +213,14 @@ export function AddGrantDeliveryAddressDialog({
             />
           </div>
           <div className="flex flex-col self-stretch gap-1">
-            <div className="text-sm font-medium">Message to sign</div>
+            <div className="text-sm font-normal">Message to sign</div>
             <Textarea readOnly value={messageToSign} className="resize-none cursor-text text-secondary-foreground" />
             <Button type="button" onClick={handleCopy} variant="secondary">
               Copy
             </Button>
           </div>
           <div className="flex flex-col self-stretch gap-1">
-            <div className="text-sm font-medium">Signature hash</div>
+            <div className="text-sm font-normal">Signature hash</div>
             <Controller
               control={control}
               name="signature"
@@ -229,7 +229,7 @@ export function AddGrantDeliveryAddressDialog({
               )}
             />
             {errors.signature && (
-              <p className="text-destructive text-sm font-medium">
+              <p className="text-destructive text-sm font-normal">
                 {errors.signature.message}
               </p>
             )}

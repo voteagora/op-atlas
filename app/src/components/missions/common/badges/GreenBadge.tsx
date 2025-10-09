@@ -11,7 +11,7 @@ export const GreenBadge = ({
 }) => {
   return (
     <Badge
-      className={`text-sm font-medium text-green-800 border-0 bg-green-100 flex gap-1`}
+      className={`text-sm font-normal text-green-800 border-0 bg-green-100 flex gap-1`}
       variant={"outline"}
     >
       {showIcon && <Check width={12} height={12} />}

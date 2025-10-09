@@ -42,7 +42,7 @@ export function RewardsSection({
     if (claimedRewards.length) {
       return (
         <div className="flex flex-col space-y-4">
-          <h4 className="font-semibold text-text-default text-xl">Claimed</h4>
+          <h4 className="font-normal text-text-default text-xl">Claimed</h4>
           <ul className="space-y-3">
             {claimedRewards.map((reward) => (
               <li key={reward.id}>
@@ -59,7 +59,7 @@ export function RewardsSection({
     if (expiredRewards.length) {
       return (
         <div className="flex flex-col space-y-4">
-          <h4 className="font-semibold text-text-default text-xl">Expired</h4>
+          <h4 className="font-normal text-text-default text-xl">Expired</h4>
           <ul className="space-y-3">
             {expiredRewards.map((reward) => (
               <li key={reward.id}>
@@ -75,7 +75,7 @@ export function RewardsSection({
   const renderInProgressRewards = () => {
     return (
       <div className="flex flex-col space-y-4">
-        <h4 className="font-semibold text-text-default text-xl">Unclaimed</h4>
+        <h4 className="font-normal text-text-default text-xl">Unclaimed</h4>
         {inProgressRewards.length || recurringRewards.length ? (
           <ul className="space-y-3">
             {recurringRewards.map((reward) => {
@@ -107,7 +107,7 @@ export function RewardsSection({
   return (
     <div className="flex flex-col space-y-12">
       <div className="space-y-6">
-        <h2 className="text-2xl text-text-default font-semibold">Rewards</h2>
+        <h2 className="text-2xl text-text-default font-normal">Rewards</h2>
         <p className="text-secondary-foreground text-base font-normal">
           {hasRewards
             ? "Grant recipients have one year to claim their Retro Funding rewards. Unclaimed tokens will no longer be available after their expiration date."

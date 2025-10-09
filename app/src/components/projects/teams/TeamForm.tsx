@@ -106,7 +106,7 @@ export default function AddTeamDetailsForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <p className="text-foreground text-sm font-medium">Contributors</p>
+          <p className="text-foreground text-sm font-normal">Contributors</p>
           {team.map(({ user, role, organizationId }) => (
             <TeamMemberCard
               key={user.id}
@@ -133,7 +133,7 @@ export default function AddTeamDetailsForm({
             }}
             type="button"
             variant="secondary"
-            className="w-fit font-medium"
+            className="w-fit font-normal"
           >
             <Plus size={16} className="mr-2.5" /> Add contributors
           </Button>

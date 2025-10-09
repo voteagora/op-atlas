@@ -73,7 +73,7 @@ const ApplicationBanner = ({
           height={67}
         />
         <div className="flex flex-col">
-          <p className="font-medium">Retro Funding Round 4: Onchain Builders</p>
+          <p className="font-normal">Retro Funding Round 4: Onchain Builders</p>
           {application ? (
             <div className="flex items-center gap-1">
               <Image

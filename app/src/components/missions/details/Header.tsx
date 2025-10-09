@@ -36,7 +36,7 @@ export default function Header() {
             <div className="text-[#B80018] text-sm">Closed</div>
           </div>
         )}
-        <h1 className="text-4xl mb-6 font-semibold text-text-default leading-[44px]">
+        <h1 className="text-4xl mb-6 font-normal text-text-default leading-[44px]">
           {missioName}
         </h1>
         <div className="flex gap-2">

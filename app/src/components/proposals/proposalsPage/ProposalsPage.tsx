@@ -30,7 +30,7 @@ const ProposalsPage = async ({
       <div className="flex flex-col items-center justify-center gap-4">
         <Scale className="w-48 h-48 text-muted" />
         <div className="text-center">
-          <h3 className="text-xl font-medium text-gray-400 mb-2">
+          <h3 className="text-xl font-normal text-gray-400 mb-2">
             There are currently no governance proposals available.
           </h3>
         </div>

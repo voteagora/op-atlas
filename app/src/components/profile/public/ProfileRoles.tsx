@@ -28,14 +28,14 @@ function ProfileRoles({ user }: { user: UserWithAddresses }) {
 
   return (
     <div className="flex flex-col space-y-3 w-full">
-      <h2 className="text-xl font-medium">Roles</h2>
+      <h2 className="text-xl font-normal">Roles</h2>
       <div className="grid grid-cols-1 gap-3 justify-between">
         {visibleAttestations.map((attestation) => (
           <div
             key={attestation.id}
             className="rounded-xl border border-gray-200 p-4 bg-background group/card flex flex-row gap-x-1.5 items-center justify-between hover:bg-[#F2F3F8] hover:cursor-pointer"
           >
-            <div className="text-md font-medium flex gap-x-1.5 items-center">
+            <div className="text-md font-normal flex gap-x-1.5 items-center">
               <div className="mr-0.5">
                 <CheckIconRed />
               </div>

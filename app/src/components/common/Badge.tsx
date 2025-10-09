@@ -50,7 +50,7 @@ const ButtonBadge = ({
       )}
       <p
         className={cn(
-          "font-medium",
+          "font-normal",
           size === "lg" ? "text-sm" : "text-xs",
           accent ? "text-background" : "text-secondary-foreground",
           textClassName,
@@ -104,7 +104,7 @@ const LabelBadge = ({
       )}
       <p
         className={cn(
-          "font-medium",
+          "font-normal",
           size === "lg" ? "text-sm" : "text-xs",
           accent ? "text-background" : "text-secondary-foreground",
           textClassName,

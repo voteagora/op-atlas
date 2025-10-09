@@ -176,7 +176,7 @@ export default function WalletStep() {
   return (
     <div className="space-y-8 w-full">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-xl font-normal">
           Input the wallet where you would like the grant to be sent.
         </h2>
         <p className="text-base text-secondary-foreground">
@@ -187,7 +187,7 @@ export default function WalletStep() {
 
       <div className="space-y-8">
         <div className="space-y-2">
-          <label htmlFor="wallet-address" className="block text-sm font-medium">
+          <label htmlFor="wallet-address" className="block text-sm font-normal">
             Grant delivery address<span className="text-destructive">*</span>
           </label>
           <Input

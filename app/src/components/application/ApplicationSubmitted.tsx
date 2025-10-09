@@ -89,7 +89,7 @@ export const ApplicationSubmitted = ({
           width={124}
         />
         <h2 className="text-center">Application Submitted!</h2>
-        <p className="text-center text-lg font-semibold">
+        <p className="text-center text-lg font-normal">
           You&apos;ll receive an email{" "}
           {email ? (
             <>
@@ -120,21 +120,21 @@ export const ApplicationSubmitted = ({
 
       {/* Expectations */}
       <div className="flex flex-col gap-y-6">
-        <h3 className="text-lg font-semibold">What to expect</h3>
+        <h3 className="text-lg font-normal">What to expect</h3>
 
         <ul className="list-disc text-secondary-foreground space-y-4 pl-5">
           <li>
-            <span className="font-medium">
+            <span className="font-normal">
               All applications are reviewed before approval:
             </span>{" "}
             Check your email for updates regarding your application status.
           </li>
           <li>
-            <span className="font-medium"> Voting starts on Oct 28:</span>{" "}
+            <span className="font-normal"> Voting starts on Oct 28:</span>{" "}
             Badgeholders will evaluate the impact of your project(s).
           </li>
           <li>
-            <span className="font-medium"> Results will be shared Nov 19:</span>{" "}
+            <span className="font-normal"> Results will be shared Nov 19:</span>{" "}
             If you receive rewards, you will get instructions on how to claim
             them via email.
           </li>
@@ -143,7 +143,7 @@ export const ApplicationSubmitted = ({
 
       {/* Social share */}
       <div className="flex flex-col justify-center items-center gap-y-6 p-10 bg-background border rounded-2xl ">
-        <h3 className="text-xl font-semibold">Share with your community</h3>
+        <h3 className="text-xl font-normal">Share with your community</h3>
         <div className="w-full h-[356px] relative">
           <Image
             src="/assets/images/round_6_success.png"
@@ -185,7 +185,7 @@ export const ApplicationSubmitted = ({
 
       {/* Join the conversation */}
       <div className="flex flex-col gap-y-6">
-        <h3 className="text-lg font-semibold">Join the conversation</h3>
+        <h3 className="text-lg font-normal">Join the conversation</h3>
         <div className="grid grid-cols-4 gap-2">
           {SOCIALS.map(({ name, icon, link }, index) => (
             <ExternalLink
@@ -194,7 +194,7 @@ export const ApplicationSubmitted = ({
               className="flex flex-col items-center justify-center gap-y-2 h-[96px] w-[172px] rounded-xl cursor-pointer bg-secondary hover:opacity-80"
             >
               {icon}
-              <p className="text-sm font-semibold">{name}</p>
+              <p className="text-sm font-normal">{name}</p>
             </ExternalLink>
           ))}
         </div>

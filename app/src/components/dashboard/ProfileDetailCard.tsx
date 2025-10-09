@@ -60,7 +60,7 @@ const ProfileDetailCard = ({
       return (
         <div>
           Email{" "}
-          <span className="font-medium text-secondary-foreground">{email}</span>
+          <span className="font-normal text-secondary-foreground">{email}</span>
         </div>
       )
     } else {
@@ -81,7 +81,7 @@ const ProfileDetailCard = ({
     if (user.username && user.farcasterId) {
       return (
         <span className="text-secondary-foreground">
-          Username: <span className="font-medium">{user.username}</span>
+          Username: <span className="font-normal">{user.username}</span>
         </span>
       )
     } else {
@@ -131,7 +131,7 @@ const ProfileDetailCard = ({
       )}
 
       <div className="flex flex-col">
-        <div className="text-2xl font-semibold flex items-center gap-x-2">
+        <div className="text-2xl font-normal flex items-center gap-x-2">
           {username || ""}
           {isCitizen && <CitizenshipBadge />}
           {isBadgeholder && (

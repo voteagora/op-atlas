@@ -66,7 +66,7 @@ export default async function Page({ params }: { params: { roleId: string } }) {
 
           <div className="flex flex-col gap-y-4 mt-12">
             <div className="flex flex-col gap-4">
-              <div className="text-3xl font-semibold">{`Self-nominate for ${role.title}`}</div>
+              <div className="text-3xl font-normal">{`Self-nominate for ${role.title}`}</div>
               {role.startAt && role.endAt && (
                 <div className="text-muted-foreground flex flex-row gap-2">
                   <div>

@@ -385,7 +385,7 @@ export function VerifySafeAddressDialog({
                   autoComplete="off"
                 />
                 {safeAddressInput && !safeAddress && (
-                  <p className="text-xs font-medium text-destructive">
+                  <p className="text-xs font-normal text-destructive">
                     Enter a valid Safe address
                   </p>
                 )}
@@ -422,7 +422,7 @@ export function VerifySafeAddressDialog({
             </div>
 
             {error && (
-              <p className="text-destructive text-sm font-medium">{error}</p>
+              <p className="text-destructive text-sm font-normal">{error}</p>
             )}
           </>
         )}
@@ -461,7 +461,7 @@ export function VerifySafeAddressDialog({
                 className="resize-none"
               />
               {error && (
-                <p className="text-destructive text-sm font-medium">{error}</p>
+                <p className="text-destructive text-sm font-normal">{error}</p>
               )}
             </div>
 

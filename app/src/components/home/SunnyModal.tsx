@@ -343,7 +343,7 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
   const renderHeader = () => (
     <>
       <div className="flex flex-col justify-start items-center gap-2">
-        <div className="self-stretch text-center text-[#0f111a] text-xl font-semibold leading-7">
+        <div className="self-stretch text-center text-[#0f111a] text-xl font-normal leading-7">
           {currentNode.title}
           <br />
           {currentNode.question}
@@ -365,7 +365,7 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
           onClick={handleStartOver}
           className="px-4 py-2.5 rounded-md inline-flex justify-center items-center gap-2 hover:bg-[#F2F3F8] transition-colors"
         >
-          <div className="justify-start text-secondary-foreground text-sm font-medium leading-tight">
+          <div className="justify-start text-secondary-foreground text-sm font-normal leading-tight">
             Start over
           </div>
         </button>
@@ -402,7 +402,7 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
 
     return (
       <div className="inline-flex justify-center items-center gap-2 text-secondary-foreground">
-        <div className="justify-start text-xs font-medium leading-none">
+        <div className="justify-start text-xs font-normal leading-none">
           Was this helpful?
         </div>
         <div className="flex justify-start items-start gap-1">
@@ -415,7 +415,7 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
               if (e.key === "Enter" || e.key === " ") handleToast(true)
             }}
           >
-            <div className="justify-start text-xs font-medium leading-none">
+            <div className="justify-start text-xs font-normal leading-none">
               Yes
             </div>
           </div>
@@ -428,7 +428,7 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
               if (e.key === "Enter" || e.key === " ") handleToast(false)
             }}
           >
-            <div className="justify-start text-xs font-medium leading-none">
+            <div className="justify-start text-xs font-normal leading-none">
               No
             </div>
           </div>
@@ -468,7 +468,7 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
                   <div className="self-stretch inline-flex justify-start items-center gap-4">
                     {program.icon}
                     <div className="flex-1 inline-flex flex-col text-base leading-normal">
-                      <div className="text-[#0F111A] font-medium group-hover:underline">
+                      <div className="text-[#0F111A] font-normal group-hover:underline">
                         {program.name}
                       </div>
                       <div className="text-secondary-foreground">
@@ -497,7 +497,7 @@ export const SunnyModal = ({ open, onOpenChange }: DialogProps) => {
                   onClick={() => handleOptionClick(optionKey, nextNode)}
                   className="self-stretch px-6 py-4 bg-contrast-foreground rounded-md outline outline-1 outline-offset-[-1px] outline-[#e0e2eb] inline-flex justify-between items-center hover:bg-[#f5f6fa] transition-colors cursor-pointer"
                 >
-                  <div className="justify-start text-[#0f111a] text-base font-medium leading-normal">
+                  <div className="justify-start text-[#0f111a] text-base font-normal leading-normal">
                     {optionKey}
                   </div>
                   <ArrowRight className="w-6 h-6" />

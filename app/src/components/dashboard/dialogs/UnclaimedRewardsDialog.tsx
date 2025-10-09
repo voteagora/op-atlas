@@ -37,7 +37,7 @@ function UnclaimedRewardsDialog({
             alt="Sunny face"
           />
           <div className="flex flex-col gap-2">
-            <DialogTitle className="text-center text-lg font-semibold text-text-default">
+            <DialogTitle className="text-center text-lg font-normal text-text-default">
               You received rewards!
             </DialogTitle>
           </div>
@@ -79,7 +79,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
           alt="Project thumbnail"
         />
       )}
-      <div className="font-semibold flex-1 min-w-0 text-nowrap overflow-hidden overflow-ellipsis mr-8">
+      <div className="font-normal flex-1 min-w-0 text-nowrap overflow-hidden overflow-ellipsis mr-8">
         {project.name}
       </div>
       <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
           width={24}
           alt="Optimism"
         />
-        <div className="font-semibold">
+        <div className="font-normal">
           {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
           {formatNumber(project.rewards[0].amount)}
         </div>

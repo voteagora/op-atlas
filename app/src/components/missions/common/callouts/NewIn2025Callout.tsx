@@ -20,7 +20,7 @@ export function NewIn2025Callout() {
           />
 
           <div>
-            <span className="font-semibold pr-1">New in 2025:</span>
+            <span className="font-normal pr-1">New in 2025:</span>
             <span className="pr-1">
               The Retro Funding program is transitioning from annual rounds to
               ongoing impact evaluation and regular rewards, offering builders

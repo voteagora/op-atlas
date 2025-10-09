@@ -142,7 +142,7 @@ const AddTeamMemberDialog = ({
               <AvatarFallback>{avatar}</AvatarFallback>
             </Avatar>
           )}
-          <DialogTitle className="text-center text-lg font-semibold">
+          <DialogTitle className="text-center text-lg font-normal">
             {title ?? "Add contributors"}
           </DialogTitle>
           <DialogDescription className="text-center text-base text-secondary-foreground font-normal mt-1">

@@ -32,7 +32,7 @@ function MetadataPublishedConfirmationDialog({
             alt="application announcement"
           />
           <div className="flex flex-col gap-2">
-            <DialogTitle className="text-center text-xl font-semibold text-text-default">
+            <DialogTitle className="text-center text-xl font-normal text-text-default">
               Now that your metadata is published onchain, you can use this
               project to apply for Retro Funding
             </DialogTitle>

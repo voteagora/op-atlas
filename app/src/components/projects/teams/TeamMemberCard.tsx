@@ -54,7 +54,7 @@ export const TeamMemberCard = memo(function TeamMemberCard({
         {organizationName && (
           <Badge
             variant="secondary"
-            className="text-xs font-medium text-secondary-foreground"
+            className="text-xs font-normal text-secondary-foreground"
           >
             {organizationName}
           </Badge>

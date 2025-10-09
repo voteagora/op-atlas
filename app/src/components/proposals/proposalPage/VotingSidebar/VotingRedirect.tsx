@@ -25,12 +25,12 @@ const VotingRedirect = ({
   return (
     <div className="flex flex-col gap-0.5 w-[304px] justify-center items-center text-sm text-secondary-foreground">
       {isCitizenHouseOnly ? (
-        <div className="font-medium text-center">
+        <div className="font-normal text-center">
           Only the Citizen House can vote on this proposal.
         </div>
       ) : (
         <div className="flex flex-row gap-2 items-center">
-          <div className="font-medium">Are you a delegate?</div>
+          <div className="font-normal">Are you a delegate?</div>
 
           <Link
             className="underline"
@@ -44,7 +44,7 @@ const VotingRedirect = ({
       )}
 
       <div className="flex flex-row gap-2 items-center">
-        <div className="font-medium">Need help?</div>
+        <div className="font-normal">Need help?</div>
 
         {showTelegramLink ? (
           <Link

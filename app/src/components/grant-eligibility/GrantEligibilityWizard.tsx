@@ -105,7 +105,7 @@ export default function GrantEligibilityWizard({
       <div className="min-h-screen">
         {/* Header */}
         <div className="max-w-[712px] mx-auto px-6 py-4 mb-8">
-          <h1 className="text-4xl font-semibold text-center">Grant Eligibility Form</h1>
+          <h1 className="text-4xl font-normal text-center">Grant Eligibility Form</h1>
         </div>
 
         {/* Step Indicator */}

@@ -34,14 +34,14 @@ function MissionContainer({
           <div className="flex items-center space-x-4">
             <div className="flex flex-col justify-between">
               <div className="flex items-center space-x-2">
-                <h4 className="text-xl leading-7 font-semibold text-foreground">
+                <h4 className="text-xl leading-7 font-normal text-foreground">
                   <Link href={getMissionLink(type)} className="hover:underline">
                     {type === "on-chain"
                       ? "Retro Funding: Onchain Builders"
                       : "Retro Funding: Dev Tooling"}
                   </Link>
                 </h4>
-                <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-medium">
+                <span className="px-2 py-1 bg-callout text-callout-foreground rounded-full text-xs font-normal">
                   In Progress
                 </span>
               </div>

@@ -15,7 +15,7 @@ const ConfirmTeamCheckbox = ({
     />
     <label
       htmlFor="team-confirmed"
-      className="text-sm font-medium text-foreground"
+      className="text-sm font-normal text-foreground"
     >
       Done adding team members
     </label>

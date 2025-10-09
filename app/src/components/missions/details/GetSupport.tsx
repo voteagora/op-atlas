@@ -64,7 +64,7 @@ export function GetSupport() {
 
   return (
     <div className="w-full flex flex-col gap-6">
-      <h2 className="text-xl font-semibold">Get support</h2>
+      <h2 className="text-xl font-normal">Get support</h2>
       <div
         className={`grid grid-cols-1 ${
           supportOptions.length > 1 ? "md:grid-cols-2" : ""
@@ -77,7 +77,7 @@ export function GetSupport() {
           >
             <div className="flex justify-between items-start gap-6">
               <div className="flex-1 flex flex-col">
-                <h3 className="text-base font-semibold">{option.title}</h3>
+                <h3 className="text-base font-normal">{option.title}</h3>
                 <p className="text-secondary-foreground text-base">
                   {option.description}
                 </p>

@@ -37,7 +37,7 @@ export function MissionApplicationTerms({
 
   return (
     <>
-      <p className="text-2xl font-bold mb-5">Agree and apply</p>
+      <p className="text-2xl font-normal mb-5">Agree and apply</p>
 
       <div className="flex flex-col gap-y-4 ml-px">
         {TERMS.map((term, idx) => (
@@ -61,7 +61,7 @@ export function MissionApplicationTerms({
             I agree to the{" "}
             <ExternalLink
               href="https://www.optimism.io/data-privacy-policy"
-              className="font-medium"
+              className="font-normal"
             >
               Optimism Foundation&apos;s Privacy Policy
             </ExternalLink>

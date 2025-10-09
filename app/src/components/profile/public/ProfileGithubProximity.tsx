@@ -38,7 +38,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
 
   return (
     <div className="flex flex-col space-y-4">
-      <h2 className="text-xl font-medium flex items-center gap-x-2">
+      <h2 className="text-xl font-normal flex items-center gap-x-2">
         OP Stack Proximity
         <span className="text-xs text-secondary-foreground bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-1">
           Experimental
@@ -47,7 +47,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
 
       <div className="bg-background rounded-xl border border-gray-200 p-6">
         <div className="flex lg:flex-row flex-col-reverse">
-          <div className="font-semibold">
+          <div className="font-normal">
             <div>
               {user.name} ranks in the top{" "}
               {Math.max(Math.round((1 - data.percentile) * 100), 1)}% of
@@ -93,7 +93,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center mt-5">
-                <span className="text-4xl font-extrabold">
+                <span className="text-4xl font-normal">
                   {Math.round(data.percentile * 100)}
                   <span className="text-lg font-normal">th</span>
                 </span>
@@ -104,7 +104,7 @@ function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
               <div className="w-full flex items-center justify-center">
                 <Badge
                   variant="destructive"
-                  className="text-xs font-medium px-2 py-1 rounded-full text-white space-x-1 w-fit"
+                  className="text-xs font-normal px-2 py-1 rounded-full text-white space-x-1 w-fit"
                 >
                   <span className="text-white">{label.emoji}</span>{" "}
                   <span className="text-white font-normal whitespace-nowrap">

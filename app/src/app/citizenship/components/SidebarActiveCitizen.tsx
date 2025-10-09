@@ -85,7 +85,7 @@ export const SidebarActiveCitizen = ({
       )}
 
       <div className="flex flex-col gap-2">
-        <div className="text-sm font-semibold text-secondary-foreground">
+        <div className="text-sm font-normal text-secondary-foreground">
           {citizenTitle} is a citizen!
         </div>
 

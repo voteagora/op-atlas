@@ -74,7 +74,7 @@ export default function SidebarApplications({
       return (
         <div className="text-center p-6 border-b border-border-secondary">
           <div className="flex flex-col gap-2">
-            <div className="font-semibold text-secondary-foreground">
+            <div className="font-normal text-secondary-foreground">
               {primaryText}
             </div>
             <div className="text-sm text-secondary-foreground">
@@ -86,7 +86,7 @@ export default function SidebarApplications({
     }
 
     return (
-      <div className="text-secondary-foreground text-sm font-semibold p-6">
+      <div className="text-secondary-foreground text-sm font-normal p-6">
         {applications?.length ?? 0} candidate
         {(applications?.length ?? 0) > 1 ? "s" : ""} so far
       </div>
@@ -121,7 +121,7 @@ export default function SidebarApplications({
         {renderHeader()}
         {applications && applications.length > 0 ? (
           <div className="flex flex-col p-6">
-            <div className="text-secondary-foreground text-sm font-semibold mb-2">
+            <div className="text-secondary-foreground text-sm font-normal mb-2">
               {applications.length} candidate
               {applications.length > 1 ? "s" : ""}
             </div>
@@ -158,14 +158,14 @@ export default function SidebarApplications({
             )}
           </div>
         ) : (
-          <div className="text-center p-6 border-border-secondary text-sm font-medium">
+          <div className="text-center p-6 border-border-secondary text-sm font-normal">
             No candidates yet
           </div>
         )}
         {renderFooter()}
       </div>
       <div className="text-center text-sm text-secondary-foreground">
-        <span className="font-medium">Need help? </span>
+        <span className="font-normal">Need help? </span>
         <ExternalLink href="https://discord.gg/fDWeZUNX" className="underline">
           Ask on Discord
         </ExternalLink>
@@ -244,16 +244,16 @@ const OrgCandidate = ({
         )}
         {showApprove && !isEndorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-medium"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-normal"
             onClick={onApprove}
             disabled={approve.isPending}
           >
-            <span className="font-medium text-xs leading-4">Approve</span>
+            <span className="font-normal text-xs leading-4">Approve</span>
           </button>
         )}
         {showApprove && isEndorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-normal"
             onClick={(e) => {
               e.stopPropagation()
               void toast.promise(
@@ -273,7 +273,7 @@ const OrgCandidate = ({
             }}
             disabled={remove.isPending}
           >
-            <span className="font-medium text-xs leading-4">Approved</span>
+            <span className="font-normal text-xs leading-4">Approved</span>
           </button>
         )}
         <ArrowRightS className="w-4 h-4" />
@@ -356,16 +356,16 @@ const UserCandidate = ({
         )}
         {showApprove && !isEndorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-medium"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-background text-[#0F111A] border-border hover:bg-[#D6FFDA] hover:border-[#7AF088] hover:text-[#006117] font-normal"
             onClick={onApprove}
             disabled={approve.isPending}
           >
-            <span className="font-medium text-xs leading-4">Approve</span>
+            <span className="font-normal text-xs leading-4">Approve</span>
           </button>
         )}
         {showApprove && isEndorsed && (
           <button
-            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-medium"
+            className="w-[72px] h-6 px-2 py-1 gap-2 flex items-center justify-center rounded-md border transition-all duration-200 bg-success text-[#006117] border-green-400 font-normal"
             onClick={(e) => {
               e.stopPropagation()
               void toast.promise(
@@ -385,7 +385,7 @@ const UserCandidate = ({
             }}
             disabled={remove.isPending}
           >
-            <span className="font-medium text-xs leading-4">Approved</span>
+            <span className="font-normal text-xs leading-4">Approved</span>
           </button>
         )}
         <ArrowRightS className="w-4 h-4" />
@@ -417,14 +417,14 @@ const ApproversHover = ({
     <HoverCard openDelay={100} closeDelay={100}>
       <HoverCardTrigger asChild>
         <div
-          className="text-xs px-1 rounded text-center text-secondary-foreground font-medium bg-[#f2f3f8] cursor-pointer"
+          className="text-xs px-1 rounded text-center text-secondary-foreground font-normal bg-[#f2f3f8] cursor-pointer"
           aria-label={`${count} approvers`}
         >
           {count}
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="p-[6px] w-[277px]" align="end">
-        <div className="font-semibold px-2 py-[6px]">Approvers</div>
+        <div className="font-normal px-2 py-[6px]">Approvers</div>
         <div className="border-b my-1"></div>
         <div className="max-h-[300px] overflow-y-auto">
           {(data || []).map((item, idx) => (

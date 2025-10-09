@@ -21,7 +21,7 @@ export const Snapshot = ({ snapshot }: { snapshot: ProjectSnapshot }) => {
 
       <ExternalLink
         href={`${EAS_URL_PREFIX}${snapshot.attestationId}`}
-        className="ml-auto text-sm font-medium  shrink-0 text-text"
+        className="ml-auto text-sm font-normal  shrink-0 text-text"
       >
         View attestation
       </ExternalLink>

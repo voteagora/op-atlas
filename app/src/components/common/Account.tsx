@@ -96,7 +96,7 @@ const EOAWalletMenuItem = ({
           }`}
         />
         <div className="flex flex-col">
-          <span className="text-sm font-medium">EOA Wallet</span>
+          <span className="text-sm font-normal">EOA Wallet</span>
           <span className="text-xs text-muted-foreground">
             {signerWallet?.address
               ? `${signerWallet.address.slice(
@@ -146,7 +146,7 @@ const SafeWalletsMenuItems = ({
 
   return (
     <>
-      <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+      <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">
         Safe Wallets {isLoadingSafeWallets && "(Loading...)"}
       </DropdownMenuLabel>
       {safesToRender.map((safeWallet: any) => (
@@ -170,7 +170,7 @@ const SafeWalletsMenuItems = ({
               }`}
             />
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Safe Wallet</span>
+              <span className="text-sm font-normal">Safe Wallet</span>
               <span className="text-xs text-muted-foreground">
                 {`${safeWallet.address.slice(
                   0,
@@ -346,7 +346,7 @@ const AccountContent = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className={`focus:outline-none focus:opacity-80`}>
           <div
-            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${"bg-background hover:bg-secondary"} h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative`}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${"bg-background hover:bg-secondary"} h-10 px-4 py-2 gap-x-2.5 text-sm font-normal relative`}
           >
             <>
               <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />
@@ -592,7 +592,7 @@ const TestModeAccount = () => {
       <DropdownMenu>
         <DropdownMenuTrigger className={`focus:outline-none focus:opacity-80`}>
           <div
-            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${"bg-background hover:bg-secondary"} h-10 px-4 py-2 gap-x-2.5 text-sm font-medium relative`}
+            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input ${"bg-background hover:bg-secondary"} h-10 px-4 py-2 gap-x-2.5 text-sm font-normal relative`}
           >
             <>
               <UserAvatar imageUrl={user?.imageUrl} size={"sm"} />

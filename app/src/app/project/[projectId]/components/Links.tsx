@@ -22,7 +22,7 @@ export default function Links({ links }: LinksProps) {
 
   return (
     <div className="w-full space-y-6">
-      <h4 className="font-semibold text-xl">Links</h4>
+      <h4 className="font-normal text-xl">Links</h4>
       <ul className="space-y-2 pl-6">
         {loadedLinks.map((link, index) => (
           <li key={index} className="flex space-x-2 items-center">
@@ -34,7 +34,7 @@ export default function Links({ links }: LinksProps) {
         ))}
       </ul>
       <button
-        className="flex items-center space-x-2 text-secondary-foreground font-medium text-sm"
+        className="flex items-center space-x-2 text-secondary-foreground font-normal text-sm"
         onClick={() => {
           setLoadedLinks(links.slice(0, loadedLinks.length + loadMoreCount))
         }}

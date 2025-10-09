@@ -27,7 +27,7 @@ export default async function Page() {
   }
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
-      <h2 className="text-foreground text-2xl font-semibold">
+      <h2 className="text-foreground text-2xl font-normal">
         New organization
       </h2>
       <MakeOrganizationForm user={user} />

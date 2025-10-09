@@ -163,7 +163,7 @@ export const ProjectApplication = ({
                   alt=""
                 />
                 <div className="flex flex-col text-start">
-                  <h5 className="font-semibold text-primary truncate w-96">
+                  <h5 className="font-normal text-primary truncate w-96">
                     {project.name}
                   </h5>
                   {project.organization?.organization.name && (
@@ -177,7 +177,7 @@ export const ProjectApplication = ({
           </AccordionTrigger>
 
           <AccordionContent className="pl-10 pt-5">
-            <p className="font-bold pb-2">Project Setup</p>
+            <p className="font-normal pb-2">Project Setup</p>
 
             {Object.entries(isSectionsCriteriaMet).map(([key, value]) => {
               let icon
@@ -202,7 +202,7 @@ export const ProjectApplication = ({
               )
             })}
 
-            <p className="font-bold pt-5 pb-2">Eligibility Criteria</p>
+            <p className="font-normal pt-5 pb-2">Eligibility Criteria</p>
 
             {round!.applicationPageEligibility.map(
               (

@@ -23,7 +23,7 @@ export default async function Page() {
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
       <div className="mt-4 bg-background flex flex-col px-6 py-12 lg:px-0 w-full max-w-6xl gap-12">
         <div className="flex flex-col w-full">
-          <h1 className="text-[36px] leading-[44px] tracking-[0%] font-semibold text-text-default">
+          <h1 className="text-[36px] leading-[44px] tracking-[0%] font-normal text-text-default">
             Governance
           </h1>
         </div>

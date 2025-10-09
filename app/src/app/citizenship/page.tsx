@@ -70,7 +70,7 @@ export default async function Page({
             <AnalyticsTracker qualification={qualification} />
 
             <div className="flex flex-col gap-y-8 mt-12">
-              <div className="text-[36px] font-semibold text-foreground">
+              <div className="text-[36px] font-normal text-foreground">
                 Citizenship Registration
               </div>
               <div className="border-b border-border-secondary w-full"></div>
@@ -84,22 +84,22 @@ export default async function Page({
                   <ul className="list-disc list-inside">
                     <li>
                       Elect the{" "}
-                      <span className="font-semibold">
+                      <span className="font-normal">
                         Developer Advisory Board
                       </span>
                       , tasked with reviewing{" "}
-                      <span className="font-semibold">Protocol Upgrades</span>
+                      <span className="font-normal">Protocol Upgrades</span>
                     </li>
                     <li>
                       Have the opportunity to
-                      <span className="font-semibold"> override </span>
+                      <span className="font-normal"> override </span>
                       Protocol Upgrades
                     </li>
                     <li>
                       Approve the{" "}
-                      <span className="font-semibold">Collective Intent</span>{" "}
+                      <span className="font-normal">Collective Intent</span>{" "}
                       as well as{" "}
-                      <span className="font-semibold">
+                      <span className="font-normal">
                         Retroactive Public Goods Funding mission budgets
                       </span>
                     </li>
@@ -157,7 +157,7 @@ export default async function Page({
                       {isCitizenshipLimitReached ? (
                         <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
                           <div className="flex flex-col gap-2">
-                            <div className="font-semibold text-secondary-foreground">
+                            <div className="font-normal text-secondary-foreground">
                               Registration has closed
                             </div>
                             <div className="text-sm text-secondary-foreground">

@@ -101,7 +101,7 @@ const CandidateCards = ({
   return (
     <>
       <div className="align-left w-full p-2">
-        <p className="h-5 font-medium text-[16px] leading-6 md:text-[14px] md:leading-5 text-foreground align-middle">
+        <p className="h-5 font-normal text-[16px] leading-6 md:text-[14px] md:leading-5 text-foreground align-middle">
           {candidates.length} candidates
         </p>
       </div>

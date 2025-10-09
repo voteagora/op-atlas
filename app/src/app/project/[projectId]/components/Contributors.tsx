@@ -38,7 +38,7 @@ export default function Contributors({ contributors }: ContributorsProps) {
 
   return (
     <div className="w-full space-y-6">
-      <h4 className="font-semibold text-xl">Contributors</h4>
+      <h4 className="font-normal text-xl">Contributors</h4>
       <div className="pl-6 w-full grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
         {loadedContributors.map((contributor, index) => {
           const profileHref = `/${contributor.username || contributor.id || ""}`
@@ -63,7 +63,7 @@ export default function Contributors({ contributors }: ContributorsProps) {
       </div>
       {loadedContributors.length >= contributors.length ? null : (
         <button
-          className="flex items-center space-x-2 text-secondary-foreground font-medium text-sm"
+          className="flex items-center space-x-2 text-secondary-foreground font-normal text-sm"
           onClick={() => {
             setLoadedContributors(
               contributors.slice(0, loadedContributors.length + loadMoreCount),

@@ -128,7 +128,7 @@ export const supportedChains: ChainInfo[] = [
 export function SupportedNetworks() {
   return (
     <div className="bg-secondary/20 rounded-xl">
-      <h3 className="text-xl font-semibold mb-6">Supported chains</h3>
+      <h3 className="text-xl font-normal mb-6">Supported chains</h3>
       <div className="flex flex-wrap gap-y-2 gap-x-1.5">
         {supportedChains.map((chain) => (
           <Link

@@ -20,7 +20,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
-      <h2 className="text-foreground text-2xl font-semibold">
+      <h2 className="text-foreground text-2xl font-normal">
         Verified addresses
       </h2>
       <div className="text-secondary-foreground">

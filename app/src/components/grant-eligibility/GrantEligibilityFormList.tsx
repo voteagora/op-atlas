@@ -41,9 +41,9 @@ export function GrantEligibilityFormList({ title, forms, variant, defaultOpen = 
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex items-center gap-3">
-          <span className="font-medium">{title}</span>
+          <span className="font-normal">{title}</span>
           <span className={cn(
-            "px-2 py-0.5 text-xs font-medium rounded-full",
+            "px-2 py-0.5 text-xs font-normal rounded-full",
             variant === "expired" 
               ? "bg-orange-100 text-orange-600" 
               : "bg-green-100 text-green-600"
@@ -60,12 +60,12 @@ export function GrantEligibilityFormList({ title, forms, variant, defaultOpen = 
             <table className="w-full">
               <thead>
                 <tr className="border-b bg-muted/30">
-                  <th className="px-4 py-3 text-left text-sm font-medium">Grant Type</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Wallet Address</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">
+                  <th className="px-4 py-3 text-left text-sm font-normal">Grant Type</th>
+                  <th className="px-4 py-3 text-left text-sm font-normal">Wallet Address</th>
+                  <th className="px-4 py-3 text-left text-sm font-normal">
                     {variant === "expired" ? "Expired At" : "Submitted At"}
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Created At</th>
+                  <th className="px-4 py-3 text-left text-sm font-normal">Created At</th>
                 </tr>
               </thead>
               <tbody>

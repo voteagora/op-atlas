@@ -21,7 +21,7 @@ export default function GrantDeliveryAddress({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="font-medium text-sm text-foreground">
+      <div className="font-normal text-sm text-foreground">
         Grant delivery address
       </div>
       <div className="input-container flex items-center justify-between">
@@ -29,7 +29,7 @@ export default function GrantDeliveryAddress({
           <span className="text-sm text-foreground">
             {shortenAddress(kycTeam.walletAddress)}
           </span>
-          <div className="px-2 py-1 bg-success text-success-foreground font-medium text-xs rounded-full flex space-x-1 items-center">
+          <div className="px-2 py-1 bg-success text-success-foreground font-normal text-xs rounded-full flex space-x-1 items-center">
             <CheckIcon size={12} />
             <span>Valid until {getValidUntil(kycTeam.createdAt)}</span>
           </div>

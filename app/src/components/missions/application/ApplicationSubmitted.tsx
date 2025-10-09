@@ -112,7 +112,7 @@ export const ApplicationSubmitted = ({
             Your application to{" "}
             {
               <>
-                <span className="font-semibold">
+                <span className="font-normal">
                   {" "}
                   Retro Funding: {mission?.name}
                 </span>{" "}
@@ -156,7 +156,7 @@ export const ApplicationSubmitted = ({
                   />
                 )}
 
-                <p className="font-semibold">{application.name}</p>
+                <p className="font-normal">{application.name}</p>
               </div>
 
               <GreenBadge />
@@ -168,7 +168,7 @@ export const ApplicationSubmitted = ({
       {/* Expectations */}
       <div className="flex flex-col gap-y-6 text-center">
         <div>
-          <p className="font-semibold">All projects are reviewed</p>
+          <p className="font-normal">All projects are reviewed</p>
           <p className="text-secondary-foreground">
             {
               "If there's an issue with your application, we'll reach out via email."
@@ -177,7 +177,7 @@ export const ApplicationSubmitted = ({
         </div>
 
         <div>
-          <p className="font-semibold">Rewards are paid out monthly</p>
+          <p className="font-normal">Rewards are paid out monthly</p>
           <p className="text-secondary-foreground">
             Impact evaluation starts at the beginning of each month.
           </p>
@@ -206,7 +206,7 @@ export const ApplicationSubmitted = ({
 
       {/* Social share */}
       {/* <div className="flex flex-col justify-center items-center gap-y-6 p-10 bg-background border rounded-2xl ">
-        <h3 className="text-xl font-semibold">Share with your community</h3>
+        <h3 className="text-xl font-normal">Share with your community</h3>
         <div className="w-full h-[356px] relative">
           <Image
             src="/assets/images/round_6_success.png"
@@ -248,7 +248,7 @@ export const ApplicationSubmitted = ({
 
       {/* Join the conversation */}
       <div className="flex flex-col gap-y-6">
-        <h3 className="text-lg font-semibold">Join the conversation</h3>
+        <h3 className="text-lg font-normal">Join the conversation</h3>
         <div className="grid grid-cols-4 gap-2">
           {SOCIALS.map(({ name, icon, link }, index) => (
             <ExternalLink
@@ -257,7 +257,7 @@ export const ApplicationSubmitted = ({
               className="flex flex-col items-center justify-center gap-y-2 h-[96px] w-[172px] rounded-xl cursor-pointer bg-secondary hover:opacity-80"
             >
               {icon}
-              <p className="text-sm font-semibold">{name}</p>
+              <p className="text-sm font-normal">{name}</p>
             </ExternalLink>
           ))}
         </div>
@@ -266,7 +266,7 @@ export const ApplicationSubmitted = ({
       <p className="text-sm text-secondary-foreground text-center">
         Need support?
         <ExternalLink
-          className="font-bold"
+          className="font-normal"
           href="https://discord.com/invite/optimism"
         >
           {" "}

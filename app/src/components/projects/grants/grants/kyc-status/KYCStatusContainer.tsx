@@ -351,7 +351,7 @@ const OrganizationKYCStatusContainer = ({
       {/* Verified Addresses Section */}
       {verifiedTeams.length > 0 && (
         <div className="space-y-6">
-          <h4 className="font-semibold text-xl leading-6 text-text-default">
+          <h4 className="font-normal text-xl leading-6 text-text-default">
             Verified
           </h4>
           {verifiedTeams.map((team) => (
@@ -370,7 +370,7 @@ const OrganizationKYCStatusContainer = ({
       {/* In Progress Addresses Section */}
       {inProgressTeams.length > 0 && (
         <div className="space-y-6">
-          <h4 className="font-semibold text-xl leading-6 text-text-default">
+          <h4 className="font-normal text-xl leading-6 text-text-default">
             In Progress
           </h4>
           {inProgressTeams.map((team) => (

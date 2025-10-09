@@ -136,7 +136,7 @@ function CitizenshipApplicationDialog({
           {!citizen?.timeCommitment &&
           qualification?.type === CITIZEN_TYPES.user ? (
             <>
-              <div className="font-semibold text-center">
+              <div className="font-normal text-center">
                 How many hours per week would you like to spend on governance?
               </div>
               <Select
@@ -168,7 +168,7 @@ function CitizenshipApplicationDialog({
             <div>
               {isAttesting && !isAttestSuccess && (
                 <div className="flex flex-col gap-4 min-h-[150px] justify-center">
-                  <div className="text-lg font-semibold text-center">
+                  <div className="text-lg font-normal text-center">
                     Issuing citizen badge
                   </div>
                   <div className="text-muted-foreground text-center">
@@ -181,7 +181,7 @@ function CitizenshipApplicationDialog({
 
               {!isAttesting && isAttestSuccess && (
                 <div className="flex flex-col gap-4 min-h-[150px] justify-center items-center">
-                  <div className="text-lg font-semibold">
+                  <div className="text-lg font-normal">
                     Citizen badge issued
                   </div>
                   <div className="text-muted-foreground">
@@ -193,7 +193,7 @@ function CitizenshipApplicationDialog({
 
               {!isAttesting && !isAttestSuccess && (
                 <div className="flex flex-col gap-5">
-                  <div className="font-semibold text-center">
+                  <div className="font-normal text-center">
                     Please agree to the Citizens&apos; House rules
                   </div>
                   <div className="flex flex-col gap-4">

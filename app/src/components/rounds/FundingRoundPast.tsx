@@ -14,7 +14,7 @@ export function FundingRoundPast({
   return (
     <div className="flex justify-between items-center w-full p-10">
       <div className="flex flex-col gap-y-1">
-        <h2 className="text-base font-semibold text-text-default text-start">
+        <h2 className="text-base font-normal text-text-default text-start">
           {fundingRound.name}
         </h2>
         <span className="font-normal text-secondary-foreground">
@@ -26,7 +26,7 @@ export function FundingRoundPast({
         <Link href={fundingRound.resultsLink}>
           <Button
             variant="secondary"
-            className="text-sm font-medium text-foreground"
+            className="text-sm font-normal text-foreground"
           >
             View results
           </Button>

@@ -46,13 +46,13 @@ export const CalloutDeleteAndReplaceMe = memo(function Callout({
       )}
 
       {rightHandSide}
-      <p className={cn("mr-5 text-sm font-medium", showIcon && "ml-2")}>
+      <p className={cn("mr-5 text-sm font-normal", showIcon && "ml-2")}>
         {text}
       </p>
       {linkText && (
         <ExternalLink
           href={linkHref ?? "#"}
-          className="ml-auto text-sm font-medium shrink-0"
+          className="ml-auto text-sm font-normal shrink-0"
         >
           {linkText}
         </ExternalLink>

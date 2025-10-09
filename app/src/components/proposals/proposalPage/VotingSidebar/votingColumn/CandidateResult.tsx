@@ -38,7 +38,7 @@ export const CandidateResult = ({
         </div>
 
         <div className="flex flex-row gap-2 items-center ">
-          <div className="w-[60px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success text-success-foreground text-xs font-semibold border border-success">
+          <div className="w-[60px] h-6 px-1 py-2 gap-2 flex items-center justify-center rounded-md bg-success text-success-foreground text-xs font-normal border border-success">
             Elected
           </div>
           <ChevronRight

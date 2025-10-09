@@ -14,13 +14,13 @@ export default function Performance({
   return (
     <div className="w-full space-y-6">
       <div className="w-full flex items-center">
-        <h4 className="font-semibold text-xl">Performance</h4>
+        <h4 className="font-normal text-xl">Performance</h4>
       </div>
       <div className="w-full">
         <div className="grid grid-cols-2 gap-3">
           <div className="w-full space-y-6 rounded-lg border p-6">
             <div>
-              <h4 className="font-semibold text-foreground">
+              <h4 className="font-normal text-foreground">
                 $
                 {formatNumber(
                   Object.values(metrics.tvl).reduce(
@@ -39,7 +39,7 @@ export default function Performance({
           </div>
           <div className="w-full space-y-6 rounded-lg border p-6">
             <div>
-              <h4 className="font-semibold text-foreground">
+              <h4 className="font-normal text-foreground">
                 {formatNumber(
                   Object.values(metrics.transactions).reduce(
                     (acc, curr) => acc + curr.value,
@@ -55,7 +55,7 @@ export default function Performance({
           </div>
           <div className="w-full space-y-6 rounded-lg border p-6">
             <div>
-              <h4 className="font-semibold text-foreground">
+              <h4 className="font-normal text-foreground">
                 {formatNumber(
                   Object.values(metrics.gasFees).reduce(
                     (acc, curr) => acc + curr.value,
@@ -72,7 +72,7 @@ export default function Performance({
           </div>
           <div className="w-full space-y-6 rounded-lg border p-6">
             <div>
-              <h4 className="font-semibold text-foreground">
+              <h4 className="font-normal text-foreground">
                 {formatNumber(
                   Object.values(metrics.activeAddresses).reduce(
                     (acc, curr) => acc + curr.value,

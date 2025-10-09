@@ -11,7 +11,7 @@ export default function PricingAndInvestment({
 
   return (
     <div className="space-y-6 w-full">
-      <h4 className="text-xl font-semibold">Pricing and investment</h4>
+      <h4 className="text-xl font-normal">Pricing and investment</h4>
       <div className="pl-6">
         {pricingModel === "free" && (
           <div className="flex items-start space-x-2">
@@ -22,7 +22,7 @@ export default function PricingAndInvestment({
               alt="Free"
             />
             <p className="text-secondary-foreground">
-              <span className="text-foreground font-medium">Free</span> · The
+              <span className="text-foreground font-normal">Free</span> · The
               product or service is completely free to use without any charges
             </p>
           </div>
@@ -36,7 +36,7 @@ export default function PricingAndInvestment({
               alt="Free"
             />
             <p className="text-secondary-foreground">
-              <span className="text-foreground font-medium">No investment</span>{" "}
+              <span className="text-foreground font-normal">No investment</span>{" "}
               · This project has not received funding provided by individuals or
               investment firms.
             </p>

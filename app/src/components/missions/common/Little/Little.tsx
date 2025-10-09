@@ -7,7 +7,7 @@ export function Little({
 }) {
   return (
     <div className="flex flex-col">
-      <p className="font-bold">{title}</p>
+      <p className="font-normal">{title}</p>
       <p className="font-light text-sm">{description}</p>
     </div>
   )

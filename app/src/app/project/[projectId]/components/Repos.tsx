@@ -13,7 +13,7 @@ export default function Repos({ repos }: ReposProps) {
 
   return (
     <div className="w-full space-y-6">
-      <h4 className="font-semibold text-xl">Repos</h4>
+      <h4 className="font-normal text-xl">Repos</h4>
       <ul className="space-y-2 pl-6">
         {repos.map((repo, index) => {
           return (
@@ -33,7 +33,7 @@ export default function Repos({ repos }: ReposProps) {
                   className="flex items-center space-x-1 px-2 py-1.5 bg-secondary rounded-full"
                 >
                   <Image src={tag.icon} width={12} height={12} alt={tag.name} />
-                  <span className="text-secondary-foreground text-xs font-medium">
+                  <span className="text-secondary-foreground text-xs font-normal">
                     {tag.name}
                   </span>
                 </li>

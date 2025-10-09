@@ -48,7 +48,7 @@ export default function SocialBadgeLink({
   }
 
   return (
-    <div className="py-1 px-2.5 rounded-full bg-secondary text-sm font-medium flex items-center space-x-1">
+    <div className="py-1 px-2.5 rounded-full bg-secondary text-sm font-normal flex items-center space-x-1">
       {icon}
       <Link href={normalizedLink(href)} target={target} onClick={handleClick}>
         {text}

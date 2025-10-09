@@ -292,17 +292,17 @@ const ContributionsSection = ({
         />
       </div>
       <div>
-        <p className="font-semibold text-foreground">Category {category}</p>
-        <h4 className="text-xl font-semibold">{title}</h4>
+        <p className="font-normal text-foreground">Category {category}</p>
+        <h4 className="text-xl font-normal">{title}</h4>
         <p className="mt-2 text-secondary-foreground">{description}</p>
       </div>
     </header>
 
-    <h4 className="font-semibold text-base text-secondary-foreground">
+    <h4 className="font-normal text-base text-secondary-foreground">
       Examples: <span className="font-normal">{examples}</span>
     </h4>
 
-    <h4 className="font-semibold text-base text-secondary-foreground">
+    <h4 className="font-normal text-base text-secondary-foreground">
       Eligibility:{" "}
       <span className="font-normal">
         The following types of projects are eligible.
@@ -313,7 +313,7 @@ const ContributionsSection = ({
         <li key={index}>{criteria}</li>
       ))}
     </ul>
-    <h4 className="font-semibold text-base text-secondary-foreground">
+    <h4 className="font-normal text-base text-secondary-foreground">
       Not eligible:{" "}
       <span className="font-normal">
         The following types of projects are not eligible.

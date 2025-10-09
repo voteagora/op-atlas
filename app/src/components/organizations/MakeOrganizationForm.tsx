@@ -507,7 +507,7 @@ export default function MakeOrganizationForm({
 
           <div className="flex flex-col gap-1.5">
             <div>
-              <FormLabel className="text-sm font-medium">Website</FormLabel>
+              <FormLabel className="text-sm font-normal">Website</FormLabel>
               <div className="text-sm text-muted-foreground">
                 If your project has more than one website, you can add rows.
               </div>
@@ -542,7 +542,7 @@ export default function MakeOrganizationForm({
 
           <div className="flex flex-col gap-1.5">
             <div>
-              <p className="text-sm font-medium">Farcaster</p>
+              <p className="text-sm font-normal">Farcaster</p>
             </div>
             {farcasterFields.map((field, index) => (
               <FormField

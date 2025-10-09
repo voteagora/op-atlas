@@ -232,7 +232,7 @@ export function ContractsForm({ project }: ContractsFormProps) {
           <h3 className="text-text-default">Additional Data</h3>
 
           <div className="mt-2 font-normal text-secondary-foreground text-sm">
-            <h3 className="text-sm font-medium">DefiLlama adapter</h3>
+            <h3 className="text-sm font-normal">DefiLlama adapter</h3>
             <p className="text-sm font-normal">
               For DeFi projects, please link directly to each specific DefiLlama
               protocol page (e.g.{" "}

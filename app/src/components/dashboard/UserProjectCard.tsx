@@ -164,7 +164,7 @@ const UserProjectCard = ({
 
           <div className="mt-auto h-6 flex items-center gap-x-2">
             {isAdmin && (
-              <Badge variant="outline" className="text-xs font-medium h-full">
+              <Badge variant="outline" className="text-xs font-normal h-full">
                 Admin
               </Badge>
             )}
@@ -196,7 +196,7 @@ const UserProjectCard = ({
             </div>
 
             {projectHasChanges && hasBeenPublished && (
-              <div className="text-xs font-medium text-red-700 bg-red-100 rounded-full px-2 py-1 ml-1.5">
+              <div className="text-xs font-normal text-red-700 bg-red-100 rounded-full px-2 py-1 ml-1.5">
                 Unpublished edits
               </div>
             )}

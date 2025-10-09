@@ -34,7 +34,7 @@ const MyVote = ({ voteType }: { voteType: VoteType }) => {
         className={`w-[256px] h-[40px] gap-[5px] rounded-[6px] pt-[10px] pr-[16px] pb-[10px] pl-[16px] ${boxColor} justify-center flex items-center`}
       >
         <p
-          className={`${textColor} font-medium text-[14px] leading-[20px] tracking-[0%] text-center`}
+          className={`${textColor} font-normal text-[14px] leading-[20px] tracking-[0%] text-center`}
         >
           {voteType}
         </p>

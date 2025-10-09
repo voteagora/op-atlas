@@ -113,7 +113,7 @@ export const StandardRoleForm = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="text-xl font-semibold">
+      <div className="text-xl font-normal">
         Confirm the following and link to any relevant projects
       </div>
       <div className="text-foreground">

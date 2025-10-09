@@ -571,7 +571,7 @@ export default function ProjectDetailsForm({
 
           <div className="flex flex-col gap-1.5">
             <div>
-              <FormLabel className="text-sm font-medium">
+              <FormLabel className="text-sm font-normal">
                 Category<span className="ml-0.5 text-destructive">*</span>
               </FormLabel>
               <div className="text-secondary-foreground text-sm">
@@ -610,7 +610,7 @@ export default function ProjectDetailsForm({
             <Accordion type="single" collapsible className="w-fit">
               <AccordionItem value="item-1">
                 <AccordionTrigger>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-normal">
                     View category definitions
                   </p>
                 </AccordionTrigger>
@@ -623,7 +623,7 @@ export default function ProjectDetailsForm({
 
           <div className="flex flex-col gap-1.5">
             <div>
-              <FormLabel className="text-sm font-medium">Website</FormLabel>
+              <FormLabel className="text-sm font-normal">Website</FormLabel>
               <div className="text-sm text-muted-foreground">
                 If your organization has more than one website, you can add
                 rows.
@@ -663,7 +663,7 @@ export default function ProjectDetailsForm({
 
           <div className="flex flex-col gap-1.5">
             <div>
-              <p className="text-sm font-medium">Farcaster</p>
+              <p className="text-sm font-normal">Farcaster</p>
             </div>
             {farcasterFields.map((field, index) => (
               <FormField

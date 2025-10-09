@@ -53,7 +53,7 @@ export const ApplicationStatusCard = ({
   if (mission?.pageName === "growth-grants") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold hidden md:block">{"Apply"}</p>
+        <p className="font-normal hidden md:block">{"Apply"}</p>
 
         <p className="text-sm text-secondary-foreground text-center mb-2">
           Visit the Grants Council website to learn more and apply.
@@ -81,7 +81,7 @@ export const ApplicationStatusCard = ({
   } else if (mission?.pageName === "audit-grants") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold hidden md:block">
+        <p className="font-normal hidden md:block">
           Find an Audit Service Provider
         </p>
 
@@ -111,7 +111,7 @@ export const ApplicationStatusCard = ({
   } else if (mission?.pageName === "foundation-missions") {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold hidden md:block">Explore missions</p>
+        <p className="font-normal hidden md:block">Explore missions</p>
 
         <p className="text-sm text-secondary-foreground text-center mb-2">
           View missions in the Optimism GitHub Repo
@@ -140,7 +140,7 @@ export const ApplicationStatusCard = ({
   if (isLoading) {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold">{"Apply"}</p>
+        <p className="font-normal">{"Apply"}</p>
 
         <p className="text-sm text-secondary-foreground text-center mb-2">
           {`Apply by ${format(
@@ -172,7 +172,7 @@ export const ApplicationStatusCard = ({
   if (!data) {
     return (
       <div className="flex flex-col items-center gap-2">
-        <p className="font-semibold">{"Apply"}</p>
+        <p className="font-normal">{"Apply"}</p>
         {mission.applyBy && (
           <p className="text-sm text-secondary-foreground text-center mb-2">
             {`Apply by ${format(mission.applyBy, "MMM d")}`}
@@ -208,7 +208,7 @@ export const ApplicationStatusCard = ({
       if (userAppliedProjects && userAppliedProjects?.length > 0) {
         return (
           <div className="flex flex-col gap-4">
-            <p className="font-semibold">{"Your status"}</p>
+            <p className="font-normal">{"Your status"}</p>
 
             <div className="text-sm text-secondary-foreground text-center mb-2">
               <div className="flex flex-col gap-2">
@@ -258,7 +258,7 @@ export const ApplicationStatusCard = ({
       } else {
         return (
           <div className="flex flex-col items-center gap-2">
-            <p className="font-semibold">{"Apply"}</p>
+            <p className="font-normal">{"Apply"}</p>
 
             <p className="text-sm text-secondary-foreground text-center mb-2">
               {`Apply by ${format(
@@ -284,7 +284,7 @@ export const ApplicationStatusCard = ({
     } else {
       return (
         <div className="flex flex-col items-center gap-2">
-          <p className="font-semibold">{"Add project to apply"}</p>
+          <p className="font-normal">{"Add project to apply"}</p>
 
           <p className="text-sm text-secondary-foreground text-center mb-2">
             {

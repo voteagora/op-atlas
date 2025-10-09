@@ -117,7 +117,7 @@ const ResultFilters: React.FC<ResultFiltersProps> = ({
           </DialogTrigger>
           <DialogDrawer dontShowCloseButton>
             <div className="flex flex-col w-full p-4">
-              <div className="text-center font-semibold text-lg mb-6">
+              <div className="text-center font-normal text-lg mb-6">
                 Show projects rewarded in...
               </div>
               <div className="flex flex-col gap-2">

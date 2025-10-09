@@ -86,7 +86,7 @@ export default function RoleApplication({
       return (
         <div className="flex flex-col gap-4">
           <div className="border-t border-border-secondary"></div>
-          <div className="font-medium">About this role</div>
+          <div className="font-normal">About this role</div>
           <div className="text-secondary-foreground">
             <ReactMarkdown
               components={{
@@ -147,7 +147,7 @@ export default function RoleApplication({
   const renderInterestInRole = () => {
     return (
       <>
-        <div className="text-foreground font-medium">
+        <div className="text-foreground font-normal">
           Why are you interested in this role?
         </div>
         <div className="text-secondary-foreground">
@@ -160,7 +160,7 @@ export default function RoleApplication({
   const renderConflictsOfInterest = () => {
     return (
       <>
-        <div className="text-foreground font-medium">
+        <div className="text-foreground font-normal">
           If you have any conflicts of interest, please explain them here.
         </div>
         <div className="text-secondary-foreground">{conflicts || "None"}</div>
@@ -171,7 +171,7 @@ export default function RoleApplication({
   const renderExternalLinks = () => {
     return (
       <>
-        <div className="text-foreground font-medium">
+        <div className="text-foreground font-normal">
           Share any links that demonstrate your expertise:
         </div>
         {externalLinks.length > 0 && externalLinks.map((link) => (
@@ -199,7 +199,7 @@ export default function RoleApplication({
   const renderProjects = () => {
     return (
       <>
-        <div className="text-foreground font-medium">
+        <div className="text-foreground font-normal">
           Which of your projects demonstrate your expertise?
         </div>
         {projects && projects.length > 0 ? (
@@ -215,7 +215,7 @@ export default function RoleApplication({
 
   return (
     <div className={cn("flex flex-col gap-4 w-full", className)}>
-      <h2 className="text-xl font-medium">Governance</h2>
+      <h2 className="text-xl font-normal">Governance</h2>
 
       <div className="flex flex-col gap-6 border border-border-secondary rounded-lg p-6">
         <div className="flex flex-row gap-5">

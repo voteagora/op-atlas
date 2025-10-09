@@ -58,7 +58,7 @@ export function NotPassingEligibilityContainer({
         <XIcon size={24} className="text-[#FF0420]" />
       )}
       <div>
-        <p className="font-medium text-base text-foreground">{title}</p>
+        <p className="font-normal text-base text-foreground">{title}</p>
         <p className="text-secondary-foreground text-base">
           This project:{" "}
           {typeof projectValue === "number"

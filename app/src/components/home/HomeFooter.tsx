@@ -7,7 +7,7 @@ export const HomeFooter = () => {
   return (
     <div className="w-full pt-20 pb-40 bg-[#0f111a] inline-flex flex-col items-center gap-6">
       <div className="flex flex-col gap-2 text-center">
-        <div className="self-stretch text-contrast-foreground text-xl font-semibold leading-7">
+        <div className="self-stretch text-contrast-foreground text-xl font-normal leading-7">
           New to Optimism?
         </div>
         <div className="self-stretch text-[#f2f3f8] text-base font-normal leading-normal">
@@ -28,7 +28,7 @@ export const HomeFooter = () => {
           }}
           target="_blank"
         >
-          <span className="text-[#0f111a] text-sm font-medium leading-tight">
+          <span className="text-[#0f111a] text-sm font-normal leading-tight">
             Deploy a chain
           </span>
           <ArrowRightUp className="w-4 h-4" />
@@ -45,7 +45,7 @@ export const HomeFooter = () => {
           }}
           target="_blank"
         >
-          <span className="text-[#0f111a] text-sm font-medium leading-tight">
+          <span className="text-[#0f111a] text-sm font-normal leading-tight">
             Build an app
           </span>
           <ArrowRightUp className="w-4 h-4" />

@@ -38,7 +38,7 @@ export default function DevToolingMission({
           <div className="w-full bg-[#FFF0F1] rounded-xl p-8">
             <div className="w-full h-full flex items-center justify-center flex-col space-y-6">
               <div className="text-center space-y-3 z-50">
-                <span className="font-extrabold text-4xl">
+                <span className="font-normal text-4xl">
                   {formatNumber(opRewardSum, 0)} OP
                 </span>
                 <p className="text-secondary-foreground">
@@ -95,7 +95,7 @@ export default function DevToolingMission({
                 className="w-full data-[state=inactive]:hidden p-10 border borded-[#E0E2EB] rounded-xl mt-3"
               >
                 <div className="w-full flex items-center justify-center">
-                  <p className="text-foreground font-semibold text-base">
+                  <p className="text-foreground font-normal text-base">
                     {projectName} was not enrolled in {month}
                   </p>
                 </div>
@@ -113,7 +113,7 @@ export default function DevToolingMission({
                 <Accordion type="single" collapsible>
                   <AccordionItem value="retro-funding" className="w-full">
                     <div className="flex flex-col items-center w-full">
-                      <p className="font-semibold text-base text-foreground">
+                      <p className="font-normal text-base text-foreground">
                         Requirements to earn rewards in {month} were not met
                       </p>
                       <div className="flex items-center space-x-1">
@@ -155,7 +155,7 @@ export default function DevToolingMission({
                 <div className="flex justify-between items-start h-full">
                   <div className="flex flex-col justify-between h-full w-full">
                     <div>
-                      <p className="font-semibold text-base text-foreground">
+                      <p className="font-normal text-base text-foreground">
                         Top projects
                       </p>
                       <p className="text-secondary-foreground font-normal text-base">
@@ -215,7 +215,7 @@ export default function DevToolingMission({
                         height={40}
                       />
                       <div>
-                        <p className="text-foreground font-semibold text-base">
+                        <p className="text-foreground font-normal text-base">
                           {formatNumber(
                             devToolingMetrics?.devToolingReward?.[month]
                               ?.value ?? 0,

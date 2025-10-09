@@ -15,7 +15,7 @@ function ProfileOrganizations({
 
   return (
     <div className="flex flex-col pt-6">
-      <h2 className="text-foreground text-sm font-medium leading-tight pl-3 pb-3">
+      <h2 className="text-foreground text-sm font-normal leading-tight pl-3 pb-3">
         Organizations
       </h2>
       {organizations.map((organization) => (

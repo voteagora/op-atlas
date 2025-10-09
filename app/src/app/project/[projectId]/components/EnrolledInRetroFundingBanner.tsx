@@ -4,7 +4,7 @@ import Link from "next/link"
 
 export default function EnrolledInRetrofundingBanner() {
   return (
-    <div className="w-full px-3 py-2.5 rounded-lg bg-gradient-to-t from-[#FF0420] to-[#FF4B04] text-white text-sm font-medium flex items-center justify-between">
+    <div className="w-full px-3 py-2.5 rounded-lg bg-gradient-to-t from-[#FF0420] to-[#FF4B04] text-white text-sm font-normal flex items-center justify-between">
       <div className="flex items-center space-x-2">
         <Image
           src="/assets/icons/sunny-white.svg"

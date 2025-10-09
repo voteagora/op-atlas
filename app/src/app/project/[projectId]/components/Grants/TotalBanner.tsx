@@ -24,7 +24,7 @@ export default function TotalBanner() {
           height={48}
           alt="Optimism Logo"
         />
-        <span className="font-extrabold text-contrast-foreground text-4xl">
+        <span className="font-normal text-contrast-foreground text-4xl">
           562,288
         </span>
       </div>

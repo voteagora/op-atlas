@@ -24,7 +24,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
-      <div className="text-foreground text-2xl font-semibold">
+      <div className="text-foreground text-2xl font-normal">
         Profile details
       </div>
       <div className="flex flex-col gap-6">

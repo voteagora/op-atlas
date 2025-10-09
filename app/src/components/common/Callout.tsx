@@ -67,7 +67,7 @@ export const Callout = memo(function Callout({
         />
       )}
       {text && (
-        <p className={cn("mr-5 text-sm font-medium", showIcon && "ml-2")}>
+        <p className={cn("mr-5 text-sm font-normal", showIcon && "ml-2")}>
           {text}
         </p>
       )}
@@ -77,7 +77,7 @@ export const Callout = memo(function Callout({
       {linkText && (
         <ExternalLink
           href={linkHref ?? "#"}
-          className="ml-auto text-sm font-medium shrink-0"
+          className="ml-auto text-sm font-normal shrink-0"
         >
           {linkText}
         </ExternalLink>
