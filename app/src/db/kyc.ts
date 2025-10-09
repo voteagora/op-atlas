@@ -1,56 +1,139 @@
 "use server"
 
-import { KYCUser } from "@prisma/client"
+import { KYCUser, KYCLegalEntity } from "@prisma/client"
 
 import { prisma } from "./client"
 import { UserKYCTeam } from "@/lib/types"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 
-export async function updateKYCUserStatus(
-  parsedStatus: string,
-  unparsedPersonaStatus: string,
-  updatedAt: Date,
-  referenceId?: string,
-  expiresAt?: Date | string | null,
-) {
-  if (!referenceId) {
-    throw new Error("Reference ID is required for KYC user status update")
-  }
-
-  const result = await prisma.$queryRaw<KYCUser[]>`
-    UPDATE "KYCUser" SET
-      "status" = ${parsedStatus}::"KYCStatus",
-      "personaStatus" = ${unparsedPersonaStatus}::"PersonaStatus",
-      "updatedAt" = ${updatedAt},
-      "expiry" = COALESCE(${expiresAt}::timestamptz, ${updatedAt} + INTERVAL '1 year')
-    WHERE "personaReferenceId" = ${referenceId}
-    RETURNING *;
-  `
-  return result
+type UpdateKYCUserStatusParams = {
+  parsedStatus: string
+  personaStatus: string
+  updatedAt: Date
+  inquiryId: string
+  referenceId?: string
+  expiresAt?: Date | null
 }
 
-export async function updateLegalEntityStatusByInquiryId(
-  parsedStatus: string,
-  updatedAt: Date,
-  inquiryId: string,
-  expiresAt: Date,
-) {
+export async function updateKYCUserStatus({
+  parsedStatus,
+  personaStatus,
+  updatedAt,
+  inquiryId,
+  referenceId,
+  expiresAt,
+}: UpdateKYCUserStatusParams) {
   if (!inquiryId) {
-    throw new Error(
-      "Inquiry ID is required for legal entity status update",
-    )
+    throw new Error("Inquiry ID is required for KYC user status update")
   }
 
-  const result = await prisma.$queryRaw`
+  const expiryValue = expiresAt ?? null
+
+  const updatedByInquiry = await prisma.$queryRaw<KYCUser[]>`
+    UPDATE "KYCUser" SET
+      "status" = ${parsedStatus}::"KYCStatus",
+      "personaStatus" = ${personaStatus}::"PersonaStatus",
+      "updatedAt" = ${updatedAt},
+      "expiry" = CASE
+        WHEN ${expiryValue}::timestamptz IS NOT NULL THEN ${expiryValue}::timestamptz
+        ELSE "expiry"
+      END
+    WHERE "personaInquiryId" = ${inquiryId}
+      AND NOT ("status" = 'APPROVED' AND ${parsedStatus}::"KYCStatus" <> 'APPROVED')
+    RETURNING *;
+  `
+
+  if (updatedByInquiry.length > 0) {
+    return updatedByInquiry
+  }
+
+  if (!referenceId) {
+    return []
+  }
+
+  const updatedByReference = await prisma.$queryRaw<KYCUser[]>`
+    UPDATE "KYCUser" SET
+      "status" = ${parsedStatus}::"KYCStatus",
+      "personaStatus" = ${personaStatus}::"PersonaStatus",
+      "updatedAt" = ${updatedAt},
+      "personaInquiryId" = ${inquiryId},
+      "expiry" = CASE
+        WHEN ${expiryValue}::timestamptz IS NOT NULL THEN ${expiryValue}::timestamptz
+        ELSE "expiry"
+      END
+    WHERE "personaReferenceId" = ${referenceId}
+      AND (
+        "personaInquiryId" IS NULL
+        OR "status" <> 'APPROVED'
+      )
+      AND NOT ("status" = 'APPROVED' AND ${parsedStatus}::"KYCStatus" <> 'APPROVED')
+    RETURNING *;
+  `
+
+  return updatedByReference
+}
+
+type UpdateLegalEntityStatusParams = {
+  parsedStatus: string
+  updatedAt: Date
+  inquiryId: string
+  referenceId?: string
+  expiresAt?: Date | null
+}
+
+export async function updateLegalEntityStatus({
+  parsedStatus,
+  updatedAt,
+  inquiryId,
+  referenceId,
+  expiresAt,
+}: UpdateLegalEntityStatusParams) {
+  if (!inquiryId) {
+    throw new Error("Inquiry ID is required for legal entity status update")
+  }
+
+  const expiryValue = expiresAt ?? null
+
+  const updatedByInquiry = await prisma.$queryRaw<KYCLegalEntity[]>`
     UPDATE "KYCLegalEntity" SET
       "status" = ${parsedStatus}::"KYCStatus",
       "updatedAt" = ${updatedAt},
-      "expiry" = ${expiresAt}
+      "expiry" = CASE
+        WHEN ${expiryValue}::timestamptz IS NOT NULL THEN ${expiryValue}::timestamptz
+        ELSE "expiry"
+      END
     WHERE "personaInquiryId" = ${inquiryId}
+      AND NOT ("status" = 'APPROVED' AND ${parsedStatus}::"KYCStatus" <> 'APPROVED')
     RETURNING *;
   `
 
-  return result
+  if (updatedByInquiry.length > 0) {
+    return updatedByInquiry
+  }
+
+  if (!referenceId) {
+    return []
+  }
+
+  const updatedByReference = await prisma.$queryRaw<KYCLegalEntity[]>`
+    UPDATE "KYCLegalEntity" SET
+      "status" = ${parsedStatus}::"KYCStatus",
+      "updatedAt" = ${updatedAt},
+      "personaInquiryId" = ${inquiryId},
+      "expiry" = CASE
+        WHEN ${expiryValue}::timestamptz IS NOT NULL THEN ${expiryValue}::timestamptz
+        ELSE "expiry"
+      END
+    WHERE "personaReferenceId" = ${referenceId}
+      AND (
+        "personaInquiryId" IS NULL
+        OR "status" <> 'APPROVED'
+      )
+      AND NOT ("status" = 'APPROVED' AND ${parsedStatus}::"KYCStatus" <> 'APPROVED')
+    RETURNING *;
+  `
+
+  return updatedByReference
 }
 
 export async function getProjectKycTeam(projectId: string) {

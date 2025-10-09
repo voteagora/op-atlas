@@ -8,7 +8,7 @@ import {
   deleteKycTeam,
   updateKYCUserStatus,
   getUserKycTeamSources,
-  updateLegalEntityStatusByInquiryId,
+  updateLegalEntityStatus,
 } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
@@ -40,14 +40,14 @@ function calculateExpiryDate(
   parsedStatus: string,
   fallbackDate?: Date
 ): Date | null {
-  if (expiresAt) {
-    return new Date(expiresAt)
-  }
-
   if (parsedStatus === "APPROVED" && completedAt) {
     const date = new Date(completedAt)
     date.setFullYear(date.getFullYear() + 1)
     return date
+  }
+
+  if (expiresAt) {
+    return new Date(expiresAt)
   }
 
   if (fallbackDate) {
@@ -202,144 +202,158 @@ export const processKYC = async (entries: string[]) => {
 }
 
 export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
-  await Promise.all(
-    inquiries.map(async (inquiry) => {
-      const {
-        attributes: {
-          "updated-at": updatedAt,
-          "reference-id": referenceId,
-          "expires-at": expiresAt,
-          "completed-at": completedAt,
-          status,
-        },
-      } = inquiry
-
-      const parsedStatus =
-        inquiryStatusMap[status as keyof typeof inquiryStatusMap]
-
-      if (!parsedStatus) {
-        console.warn(`Unknown inquiry status: ${status}`)
-        return
-      }
-
-      if (!referenceId) {
-        console.warn(
-          `Missing the required referenceId for inquiry ${inquiry.id}`,
-        )
-        return
-      }
-
-      const updatedAtDate = new Date(updatedAt)
-      const expiryDate = calculateExpiryDate(expiresAt, completedAt, parsedStatus)
-
-      // Only updates KYCUsers with matching personaReferenceId (not null)
-      await updateKYCUserStatus(
-        parsedStatus,
+  for (const inquiry of inquiries) {
+    const {
+      attributes: {
+        "updated-at": updatedAt,
+        "reference-id": referenceId,
+        "expires-at": expiresAt,
+        "completed-at": completedAt,
         status,
-        updatedAtDate,
-        referenceId,
-        expiryDate,
+      },
+    } = inquiry
+
+    const parsedStatus =
+      inquiryStatusMap[status as keyof typeof inquiryStatusMap]
+
+    if (!parsedStatus) {
+      console.warn(`Unknown inquiry status: ${status}`)
+      continue
+    }
+
+    if (!referenceId) {
+      console.warn(
+        `Missing the required referenceId for inquiry ${inquiry.id}`,
       )
-    }),
-  )
+      continue
+    }
+
+    const updatedAtDate = new Date(updatedAt)
+    const expiryDate = calculateExpiryDate(
+      expiresAt,
+      completedAt,
+      parsedStatus,
+      updatedAtDate,
+    )
+
+    if (parsedStatus === "APPROVED" && !completedAt) {
+      console.warn(
+        `Approved inquiry ${inquiry.id} is missing completed-at timestamp`,
+      )
+    }
+
+    try {
+      await updateKYCUserStatus({
+        parsedStatus,
+        personaStatus: status,
+        updatedAt: updatedAtDate,
+        inquiryId: inquiry.id,
+        referenceId,
+        expiresAt: expiryDate,
+      })
+    } catch (error) {
+      console.error(
+        `Failed to update KYC user for inquiry ${inquiry.id}`,
+        error,
+      )
+    }
+  }
 }
 
 export const processPersonaCases = async (cases: PersonaCase[]) => {
-  await Promise.all(
-    cases.map(async (c) => {
-      if (Object.keys(c.attributes.fields).length === 0) {
-        console.warn(`No fields found for case ${c.id}`)
-        return
+  for (const personaCase of cases) {
+    if (Object.keys(personaCase.attributes.fields).length === 0) {
+      console.warn(`No fields found for case ${personaCase.id}`)
+      continue
+    }
+
+    const {
+      attributes: {
+        "updated-at": updatedAt,
+        "reference-id": caseReferenceId,
+        status,
+      },
+      relationships: {
+        inquiries: { data: inquiries },
+      },
+    } = personaCase
+
+    const parsedStatus =
+      caseStatusMap[status as keyof typeof caseStatusMap]
+
+    if (!parsedStatus) {
+      console.warn(`Unknown case status: ${status} for case ${personaCase.id}`)
+      continue
+    }
+
+    if (!caseReferenceId) {
+      console.warn(`Missing case reference id for case ${personaCase.id}`)
+    }
+
+    const updatedAtDate = new Date(updatedAt)
+
+    for (const inquiryRef of inquiries) {
+      const inquiryId = inquiryRef.id
+      if (!inquiryId) {
+        console.warn(`Missing inquiry id in case ${personaCase.id}`)
+        continue
       }
 
-      const {
-        attributes: {
-          "updated-at": updatedAt,
-          "reference-id": caseReferenceId,
-          status,
-        },
-        relationships: {
-          inquiries: { data: inquiries },
-        },
-      } = c
+      try {
+        const inquiry = await personaClient.getInquiryById(inquiryId)
 
-      const parsedStatus =
-        caseStatusMap[status as keyof typeof caseStatusMap]
-
-      if (!parsedStatus) {
-        console.warn(`Unknown case status: ${status} for case ${c.id}`)
-        return
-      }
-
-      // Only update LegalEntities that have a caseReferenceId
-      if (!caseReferenceId) {
-        console.warn(`Missing case reference id for case ${c.id}, skipping`)
-        return
-      }
-
-      const updatedAtDate = new Date(updatedAt)
-
-      // New flow: Match LegalEntity by personaInquiryId from the case's inquiry relationships
-      // Complete separation: Cases only update LegalEntities, never KYCUsers
-      for (const inquiryRef of inquiries) {
-        const inquiryId = inquiryRef.id
-        if (!inquiryId) {
-          console.warn(`Missing inquiry id in case ${c.id}`)
+        if (!inquiry) {
+          console.warn(
+            `Inquiry not found for id ${inquiryId} in case ${personaCase.id}`,
+          )
           continue
         }
 
-        try {
-          // Fetch the full inquiry to get expires-at and completed-at
-          const inquiry: PersonaInquiry | null =
-            await personaClient.getInquiryById(inquiryId)
+        const inquiryReferenceId =
+          inquiry.attributes["reference-id"] || caseReferenceId
 
-          if (!inquiry) {
-            console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
-            continue
-          }
-
-          const expiryDate = calculateExpiryDate(
-            inquiry.attributes["expires-at"],
-            inquiry.attributes["completed-at"],
-            parsedStatus,
-            updatedAtDate
+        if (!inquiryReferenceId) {
+          console.warn(
+            `Missing reference id for inquiry ${inquiryId} in case ${personaCase.id}`,
           )
+          continue
+        }
 
-          if (!expiryDate) {
-            console.warn(
-              `Could not calculate expiry date for inquiry ${inquiryId} in case ${c.id}, skipping`,
-            )
-            continue
-          }
+        const completedAt = inquiry.attributes["completed-at"]
+        const expiryDate = calculateExpiryDate(
+          inquiry.attributes["expires-at"],
+          completedAt,
+          parsedStatus,
+          updatedAtDate,
+        )
 
-          // Update the LegalEntity status - if no entity matches both inquiryId and referenceId,
-          // the update will return empty array
-          const updateResult = await updateLegalEntityStatusByInquiryId(
-            parsedStatus,
-            updatedAtDate,
-            inquiryId,
-            expiryDate,
-          )
-
-          if (Array.isArray(updateResult) && updateResult.length === 0) {
-            console.log(
-              `No LegalEntity found with inquiryId ${inquiryId} and referenceId ${caseReferenceId} for case ${c.id}`,
-            )
-            continue
-          }
-
-          console.log(
-            `Updated LegalEntity for inquiry ${inquiryId} to status ${parsedStatus}, expiry ${expiryDate.toISOString()}`,
-          )
-        } catch (error) {
-          console.error(
-            `Failed to update legal entity for inquiry ${inquiryId} in case ${c.id}`,
-            error,
+        if (parsedStatus === "APPROVED" && !completedAt) {
+          console.warn(
+            `Approved case ${personaCase.id} inquiry ${inquiryId} missing completed-at timestamp`,
           )
         }
+
+        const updatedEntities = await updateLegalEntityStatus({
+          parsedStatus,
+          updatedAt: updatedAtDate,
+          inquiryId,
+          referenceId: inquiryReferenceId,
+          expiresAt: expiryDate,
+        })
+
+        if (updatedEntities.length === 0) {
+          console.log(
+            `No KYCLegalEntity matched inquiry ${inquiryId} with reference ${inquiryReferenceId} in case ${personaCase.id}`,
+          )
+        }
+      } catch (error) {
+        console.error(
+          `Failed to update legal entity for inquiry ${inquiryId} in case ${personaCase.id}`,
+          error,
+        )
       }
-    }),
-  )
+    }
+  }
 }
 
 export const deleteKYCTeamAction = async ({
