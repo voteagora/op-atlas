@@ -7,6 +7,7 @@ import { LearnMoreLink } from "@/components/missions/details/LearnMore"
 
 import { auditGrantsData } from "./utils/auditGrantsData"
 import { foundationMissionsData } from "./utils/foundationMissions"
+import { governanceFundMissionsData } from "./utils/governanceFundMissionsData"
 import { growthGrantsData } from "./utils/growthGrantsData"
 import { retroFundingDevToolingData } from "./utils/retroFundingDevToolingData"
 import { retroFundingOnchainBuildersData } from "./utils/retroFundingOnchainBuildersData"
@@ -59,6 +60,7 @@ export const MISSIONS: MissionData[] = [
   retroFundingDevToolingData,
   retroFundingOnchainBuildersData,
   foundationMissionsData,
+  governanceFundMissionsData,
 ]
 
 export const PAST_FUNDING_ROUNDS: FundingRoundData[] = [
