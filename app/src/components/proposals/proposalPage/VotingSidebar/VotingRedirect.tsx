@@ -58,7 +58,7 @@ const VotingRedirect = ({
         ) : (
           <Link
             className="underline "
-            href="https://discord.com/channels/667044843901681675/1287789742582403123"
+            href="https://discord.gg/fDWeZUNX"
             target="_blank"
             rel="noopener noreferrer"
           >
