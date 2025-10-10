@@ -5,11 +5,11 @@ import { redirect } from "next/navigation"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
-import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
-import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
 import KYCStatusContainer, {
   KYCStatusTitle,
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
+import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
+import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
 import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { getUserProjectRole, verifyMembership } from "@/lib/actions/utils"
@@ -50,10 +50,10 @@ export default async function Page({
   }
 
   // Check user membership - redirect non-members to homepage
-  // const membershipCheck = await verifyMembership(params.projectId, userId)
-  // if (membershipCheck?.error) {
-  //   redirect("/")
-  // }
+  const membershipCheck = await verifyMembership(params.projectId, userId)
+  if (membershipCheck?.error) {
+    redirect("/")
+  }
 
   // Get user role
   const userRole = await getUserProjectRole(params.projectId, userId)
