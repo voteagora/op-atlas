@@ -536,7 +536,6 @@ model KYCUser {
   email              String
   firstName          String?
   lastName           String?
-  businessName       String?
   status             KYCStatus           @default(PENDING)
   expiry             DateTime
   createdAt          DateTime            @default(now())

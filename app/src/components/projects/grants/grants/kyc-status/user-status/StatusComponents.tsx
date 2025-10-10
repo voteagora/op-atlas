@@ -45,7 +45,6 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
   }
 }
 
-
 const StatusRow = ({
   user,
   emailResendBlock,
@@ -68,22 +67,22 @@ const StatusRow = ({
           <div className="flex flex-row gap-2">
             <RowText
               values={[
-                user.firstName + " " + user.lastName,
+                [user.firstName, user.lastName].filter(Boolean).join(" "),
                 user.email,
-                user.businessName || "",
               ]}
             />
           </div>
           <div className="flex flex-row gap-2">
             {user.status === "APPROVED" && user.expiry && (
               <Badge variant="secondary">
-                {`Verified until ${new Date(
-                  user.expiry,
-                ).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}`}
+                {`Verified until ${new Date(user.expiry).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  },
+                )}`}
               </Badge>
             )}
           </div>

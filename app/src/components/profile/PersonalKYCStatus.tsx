@@ -21,7 +21,6 @@ const PersonalKYCUserRow = ({ kycUser }: { kycUser: KYCUser }) => {
   const values = [
     kycUser.firstName && kycUser.lastName ? `${kycUser.firstName} ${kycUser.lastName}` : null,
     kycUser.email,
-    kycUser.businessName || null,
   ].filter(Boolean)
 
   return (
