@@ -865,51 +865,67 @@ export async function validateFindMyKYCCode(
       }
     }
 
-    // Find the orphaned KYCUser for this email
-    const orphanedKYCUser = await prisma.kYCUser.findFirst({
-      where: {
-        email: email.toLowerCase(),
-        expiry: {
-          gt: new Date(), // Not expired
-        },
-        UserKYCUsers: {
-          none: {}, // Still orphaned
-        },
-      },
-    })
+    // Use transaction to atomically check if KYCUser is orphaned and create link
+    // This prevents race conditions where multiple users try to link simultaneously
+    let orphanedKYCUser: any = null
 
-    if (!orphanedKYCUser) {
-      // Clear the verification token since KYC is no longer available
-      await prisma.userEmail.update({
-        where: { id: userEmail.id },
-        data: {
-          verificationToken: null,
-          verificationTokenExpiresAt: null,
-        },
+    try {
+      const linkResult = await prisma.$transaction(async (tx) => {
+        // Re-check if KYCUser is still orphaned within the transaction
+        const kycUser = await tx.kYCUser.findFirst({
+          where: {
+            email: email.toLowerCase(),
+            expiry: {
+              gt: new Date(), // Not expired
+            },
+            UserKYCUsers: {
+              none: {}, // Still orphaned
+            },
+          },
+        })
+
+        if (!kycUser) {
+          throw new Error(
+            "KYC verification is no longer available for linking.",
+          )
+        }
+
+        // Atomically create the link
+        await tx.userKYCUser.create({
+          data: {
+            userId,
+            kycUserId: kycUser.id,
+          },
+        })
+
+        return kycUser
       })
+
+      orphanedKYCUser = linkResult
+    } catch (transactionError) {
+      console.error("Transaction error during KYC linking:", transactionError)
+
+      // Always delete the UserEmail record after verification attempt
+      // This prevents conflicts with Privy sync and maintains single-email assumption
+      await prisma.userEmail.delete({
+        where: { id: userEmail.id },
+      })
+
+      const errorMessage =
+        transactionError instanceof Error
+          ? transactionError.message
+          : "Failed to link KYC verification. Please try again."
 
       return {
         success: false,
-        error: "KYC verification is no longer available for linking.",
+        error: errorMessage,
       }
     }
 
-    // Link the KYCUser to the current user
-    await prisma.userKYCUser.create({
-      data: {
-        userId,
-        kycUserId: orphanedKYCUser.id,
-      },
-    })
-
-    // Mark the email as verified and clear the verification token
-    await prisma.userEmail.update({
+    // Always delete the UserEmail record after successful verification
+    // This prevents conflicts with Privy sync and maintains single-email assumption
+    await prisma.userEmail.delete({
       where: { id: userEmail.id },
-      data: {
-        verified: true,
-        verificationToken: null,
-        verificationTokenExpiresAt: null,
-      },
     })
 
     // Revalidate pages that show KYC status
