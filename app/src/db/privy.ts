@@ -4,6 +4,8 @@ import { User } from "@prisma/client"
 import { User as PrivyUser } from "@privy-io/react-auth"
 import { getAddress } from "viem"
 
+import { revalidatePath } from "next/cache"
+
 import { addContactToList, removeContactFromList } from "@/lib/api/mailchimp"
 import { generateTemporaryUsername } from "@/lib/utils/username"
 
@@ -16,6 +18,8 @@ import {
   updateUser,
   updateUserEmail,
 } from "./users"
+
+import { linkOrphanedKYCUserToUser } from "./userKyc"
 
 export const syncPrivyUser = async (
   privyUser: PrivyUser,
@@ -123,6 +127,11 @@ export const syncPrivyUser = async (
         email: privyEmail,
         verified: true,
       })
+      const linkResult = await linkOrphanedKYCUserToUser(existingUser.id, privyEmail)
+      if (linkResult.linked) {
+        revalidatePath("/dashboard")
+        revalidatePath("/profile/details")
+      }
       try {
         // TODO: Andrei - verify that emails are properly added to mailing list
         await addContactToList({ email: privyEmail })

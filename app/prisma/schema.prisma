@@ -328,6 +328,50 @@ model ImpactStatement {
   @@index([categoryId])
 }
 
+// Reusable business identity
+model KYCLegalEntity {
+  id                       String                  @id @default(uuid())
+  name                     String
+  status                   KYCStatus               @default(PENDING) // APPROVED | REJECTED | PENDING
+  expiry                   DateTime? // valid-through; APPROVED & expiry>now() => reusable
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+  personaReferenceId       String?                 @unique
+  personaInquiryId         String?                 @unique
+  inquiryCreatedAt         DateTime?
+  teamLinks                KYCLegalEntityTeams[]
+  kycLegalEntityController KYCLegalEntityController? @relation(fields: [kycLegalEntityControllerId], references: [id])
+  kycLegalEntityControllerId String?
+
+  @@index([name])
+  @@index([personaInquiryId])
+}
+
+// Used for collecting POC / Controller of legal entity
+model KYCLegalEntityController {
+  id            String        @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  legalEntities KYCLegalEntity[]
+
+  @@index([email])
+}
+
+// Which entity was used by a given KYCTeam (one per GrantEligibility attempt)
+model KYCLegalEntityTeams {
+  kycTeamId     String
+  legalEntityId String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  team          KYCTeam     @relation(fields: [kycTeamId], references: [id])
+  legalEntity   KYCLegalEntity @relation(fields: [legalEntityId], references: [id])
+
+  @@id([kycTeamId, legalEntityId])
+}
+
 model ImpactStatementAnswer {
   id                String          @id @default(uuid())
   applicationId     String
@@ -498,26 +542,26 @@ model KYCUser {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   personaStatus      PersonaStatus?
-  kycUserType        KYCUserType         @default(USER)
+  personaReferenceId String?           @unique
+  personaInquiryId   String?           @unique
+  inquiryCreatedAt   DateTime?
   KYCUserTeams       KYCUserTeams[]
-  EmailNotifications EmailNotification[]
   UserKYCUsers       UserKYCUser[]
 
   @@index([email])
+  @@index([personaInquiryId])
 }
 
 model EmailNotification {
-  id        String                @id @default(uuid())
-  kycUserId String
-  type      EmailNotificationType
-  sentAt    DateTime              @default(now())
-  emailTo   String // Store the actual email used
-  success   Boolean               @default(true)
-  error     String? // Store any error messages
+  id          String                @id @default(uuid())
+  referenceId String
+  type        EmailNotificationType
+  sentAt      DateTime              @default(now())
+  emailTo     String // Store the actual email used
+  success     Boolean               @default(true)
+  error       String? // Store any error messages
 
-  kycUser KYCUser @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
-
-  @@index([kycUserId])
+  @@index([referenceId])
   @@index([type])
   @@index([sentAt])
 }
@@ -534,6 +578,7 @@ model KYCTeam {
   projects             Project[]
   rewardStreams        RewardStream[]
   superfludStream      SuperfluidStream[]
+  KYCLegalEntityTeams  KYCLegalEntityTeams[]
 
   @@index([walletAddress])
 }
@@ -980,10 +1025,6 @@ view pg_stat_statements {
   @@ignore
 }
 
-enum KYCUserType {
-  USER
-  LEGAL_ENTITY
-}
 
 enum KYCStatus {
   PENDING

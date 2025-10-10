@@ -1,30 +1,31 @@
 "use server"
 
-import { KYCUser } from "@prisma/client"
+import { randomBytes } from "crypto"
+
+import { KYCUser, KYCLegalEntity } from "@prisma/client"
+
+import { prisma } from "@/db/client"
 
 export interface PersonaInquiryLinkResponse {
   success: boolean
   inquiryId?: string
   inquiryUrl?: string
+  referenceId?: string
   error?: string
 }
 
-const PERSONA_API_URL = "https://api.withpersona.com"
+const PERSONA_VERIFICATION_URL =
+  "https://inquiry.withpersona.com/verify"
+
+type PersonaEntity =
+  | { type: 'kycUser', entity: KYCUser }
+  | { type: 'legalEntity', entity: KYCLegalEntity }
 
 export const createPersonaInquiryLink = async (
-  kycUser: KYCUser,
+  personaEntity: PersonaEntity,
   templateId: string,
 ): Promise<PersonaInquiryLinkResponse> => {
   try {
-    const PERSONA_API_KEY = process.env.PERSONA_API_KEY
-
-    if (!PERSONA_API_KEY) {
-      return {
-        success: false,
-        error: "Persona API key not configured",
-      }
-    }
-
     if (!templateId) {
       return {
         success: false,
@@ -32,84 +33,42 @@ export const createPersonaInquiryLink = async (
       }
     }
 
-    // Create inquiry payload
-    const inquiryPayload = {
-      data: {
-        type: "inquiry",
-        attributes: {
-          "inquiry-template-id": templateId,
-          "reference-id": kycUser.id,
-        },
-      },
+    const { type, entity } = personaEntity
+    let referenceId = entity.personaReferenceId ?? undefined
+
+    if (!referenceId) {
+      const newReferenceId = randomBytes(16).toString("hex")
+
+      if (type === 'kycUser') {
+        const updatedUser = await prisma.kYCUser.update({
+          where: { id: entity.id },
+          data: { personaReferenceId: newReferenceId },
+          select: { personaReferenceId: true },
+        })
+        referenceId = updatedUser.personaReferenceId ?? newReferenceId
+      } else {
+        const updatedEntity = await prisma.kYCLegalEntity.update({
+          where: { id: entity.id },
+          data: { personaReferenceId: newReferenceId },
+          select: { personaReferenceId: true },
+        })
+        referenceId = updatedEntity.personaReferenceId ?? newReferenceId
+      }
     }
 
-    const response = await fetch(`${PERSONA_API_URL}/api/v1/inquiries`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${PERSONA_API_KEY}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(inquiryPayload),
+    if (!referenceId) {
+      throw new Error("Failed to determine Persona reference ID")
+    }
+
+    const searchParams = new URLSearchParams({
+      "inquiry-template-id": templateId,
+      "reference-id": referenceId,
     })
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      console.error(
-        "Persona API Error Response:",
-        JSON.stringify(errorData, null, 2),
-      )
-
-      const errorMessage =
-        errorData.errors?.[0]?.detail ||
-        errorData.errors?.[0]?.title ||
-        errorData.error ||
-        errorData.message ||
-        errorData.detail ||
-        "Unknown error"
-
-      return {
-        success: false,
-        error: `Failed to create Persona inquiry: ${response.status} ${response.statusText} - ${errorMessage}`,
-      }
-    }
-
-    const inquiryData = await response.json()
-
-    if (inquiryData.data?.id) {
-      // Generate one-time link for the inquiry
-      const linkResponse = await fetch(
-        `${PERSONA_API_URL}/api/v1/inquiries/${inquiryData.data.id}/generate-one-time-link`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${PERSONA_API_KEY}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({}),
-        },
-      )
-
-      if (!linkResponse.ok) {
-        return {
-          success: false,
-          error: `Failed to generate one-time link: ${linkResponse.status} ${linkResponse.statusText}`,
-        }
-      }
-
-      const linkData = await linkResponse.json()
-
-      return {
-        success: true,
-        inquiryId: inquiryData.data.id,
-        inquiryUrl: linkData.meta?.["one-time-link"],
-      }
-    }
-
     return {
-      success: false,
-      error: "Invalid response from Persona API",
+      success: true,
+      inquiryUrl: `${PERSONA_VERIFICATION_URL}?${searchParams.toString()}`,
+      referenceId,
     }
   } catch (error) {
     console.error("Error creating Persona inquiry:", error)

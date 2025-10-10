@@ -100,6 +100,34 @@ type PersonaSingleResponse<T> = {
   data: T
 }
 
+type PersonaOneTimeLinkAttributes = {
+  "expires-at"?: string
+  [key: string]: unknown
+}
+
+type PersonaOneTimeLink = {
+  id: string
+  type: "inquiry/one-time-link"
+  attributes?: PersonaOneTimeLinkAttributes
+}
+
+type PersonaOneTimeLinkMeta = {
+  "one-time-link"?: string
+  "one-time-link-short"?: string
+  "expires-at"?: string
+  [key: string]: unknown
+}
+
+type PersonaOneTimeLinkResponse = {
+  data: PersonaOneTimeLink
+  meta?: PersonaOneTimeLinkMeta
+}
+
+export type GeneratedPersonaOneTimeLink = {
+  redirectUrl: string
+  expiresAt?: string
+}
+
 class PersonaClient {
   constructor(private readonly apiKey?: string) {
     if (!apiKey) {
@@ -162,19 +190,153 @@ class PersonaClient {
       return null
     }
   }
+
+  /**
+   * Create a new Persona Inquiry
+   * @param referenceId - Unique reference ID to link inquiry to KYCUser/LegalEntity
+   * @param templateId - Persona inquiry template ID
+   * @returns Created inquiry object
+   */
+  async createInquiry(
+    referenceId: string,
+    templateId: string,
+  ): Promise<PersonaInquiry> {
+    if (!this.apiKey) {
+      throw new Error("Persona API key not set")
+    }
+
+    try {
+      const url = `${PERSONA_API_URL}/api/v1/inquiries`
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "Persona-Version": "2023-01-05",
+        },
+        body: JSON.stringify({
+          data: {
+            attributes: {
+              "inquiry-template-id": templateId,
+              "reference-id": referenceId,
+            },
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(
+          `Failed to create inquiry: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`,
+        )
+      }
+
+      const data: PersonaSingleResponse<PersonaInquiry> = await response.json()
+      console.log(
+        `Created Persona inquiry ${data.data.id} for reference ${referenceId}`,
+      )
+      return data.data
+    } catch (error) {
+      console.error("Failed to create Persona inquiry:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Generate a one-time link (OTL) for an inquiry
+   * OTLs expire and can only be used once, providing better security
+   * @param inquiryId - Persona inquiry ID
+   * @returns One-time link object with URL and expiration
+   */
+  async generateOneTimeLink(
+    inquiryId: string,
+  ): Promise<GeneratedPersonaOneTimeLink> {
+    if (!this.apiKey) {
+      throw new Error("Persona API key not set")
+    }
+
+    try {
+      const url = `${PERSONA_API_URL}/api/v1/inquiries/${inquiryId}/generate-one-time-link`
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "Persona-Version": "2023-01-05",
+        },
+        body: JSON.stringify({
+          data: {
+            attributes: {},
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(
+          `Failed to generate OTL: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`,
+        )
+      }
+
+      const json: PersonaOneTimeLinkResponse = await response.json()
+      const { data: otl, meta = {} } = json
+      const linkCandidate =
+        typeof meta["one-time-link"] === "string" &&
+        meta["one-time-link"].trim().length > 0
+          ? meta["one-time-link"]
+          : typeof meta["one-time-link-short"] === "string" &&
+              meta["one-time-link-short"].trim().length > 0
+            ? meta["one-time-link-short"]
+            : undefined
+
+      if (!linkCandidate) {
+        console.error(
+          `Persona OTL response missing redirect link for inquiry ${inquiryId}`,
+          json,
+        )
+        throw new Error("Persona OTL response missing link")
+      }
+
+      const expiresAt =
+        (typeof meta["expires-at"] === "string" && meta["expires-at"]) ||
+        (typeof otl.attributes?.["expires-at"] === "string"
+          ? otl.attributes["expires-at"]
+          : undefined)
+
+      console.log(
+        `Generated OTL for inquiry ${inquiryId}, expires at ${expiresAt ?? "unknown"}`,
+      )
+
+      return {
+        redirectUrl: linkCandidate,
+        expiresAt,
+      }
+    } catch (error) {
+      console.error(`Failed to generate OTL for inquiry ${inquiryId}:`, error)
+      throw error
+    }
+  }
 }
 
 export const personaClient = new PersonaClient(process.env.PERSONA_API_KEY)
 
+type PersonaPaginatedMethod = {
+  [K in keyof PersonaClient]: PersonaClient[K] extends (
+    nextUrl?: string,
+  ) => Promise<PersonaResponse<any>>
+    ? K
+    : never
+}[keyof PersonaClient]
+
 async function* fetchGenerator<T>(
   client: PersonaClient,
-  path: keyof PersonaClient,
+  path: PersonaPaginatedMethod,
   nextUrl?: string,
 ): AsyncGenerator<T[]> {
   let currentUrl = nextUrl
 
   do {
-    const response = (await client[path as keyof PersonaClient](
+    const response = (await client[path](
       currentUrl || "",
     )) as PersonaResponse<T>
 

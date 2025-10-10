@@ -5,11 +5,11 @@ import { redirect } from "next/navigation"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
-import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
-import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
 import KYCStatusContainer, {
   KYCStatusTitle,
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
+import GrantDeliveryAddress from "@/components/projects/rewards/GrantDeliveryAddress"
+import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeliveryAddressSection"
 import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { getUserProjectRole, verifyMembership } from "@/lib/actions/utils"
@@ -61,7 +61,11 @@ export default async function Page({
 
   const project = await getKycTeamForProject({ projectId: params.projectId })
   const kycTeam = project?.kycTeam ?? undefined
-  const hasKycTeamWithUsers = !!(kycTeam && kycTeam.team && kycTeam.team.length > 0)
+  const hasKycTeamWithUsers = !!(
+    kycTeam &&
+    kycTeam.team &&
+    kycTeam.team.length > 0
+  )
 
   return (
     <div className="space-y-12">
@@ -80,14 +84,14 @@ export default async function Page({
       ) : (
         !hasKycTeamWithUsers && (
           <div className="space-y-6">
-            <GrantDeliveryAddressSection 
+            <GrantDeliveryAddressSection
               projectId={params.projectId}
               isAdmin={isAdmin}
             />
           </div>
         )
       )}
-      
+
       {project && hasKycTeamWithUsers && (
         <KYCStatusContainer project={project} isAdmin={isAdmin} />
       )}

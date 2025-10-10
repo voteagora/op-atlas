@@ -97,10 +97,13 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     return null
   }
 
+  // Don't show Navbar on KYC verification pages
+  const hideNavbar = pathname.startsWith("/kyc")
+
   return (
     <ConfettiContext.Provider value={setShowConfetti}>
       <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
-        <Navbar />
+        {!hideNavbar && <Navbar />}
         <ReactCanvasConfetti
           style={{
             position: "fixed",

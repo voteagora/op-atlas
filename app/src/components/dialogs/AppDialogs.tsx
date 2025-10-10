@@ -6,10 +6,12 @@ import { DeleteKYCTeamDialog } from "../projects/rewards/DeleteKYCTeamDialog"
 import { AddGrantDeliveryAddressDialog } from "./AddGrantDeliveryAddressDialog"
 import ClaimRewardsDialog from "./ClaimRewardsDialog"
 import EditProfileDialog from "./EditProfileDialog"
+import FindMyKYCDialog from "./FindMyKYCDialog"
 import { GetStartedDialog } from "./GetStartedDialog"
 import GovernanceAddressDialog from "./GovernanceAddressDialog"
 import GovernanceTestimonialRequestDialog from "./GovernanceTestimonialRequestDialog"
 import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
+import KYCEmailVerificationDialog from "./KYCEmailVerificationDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
 import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
 import { DialogType } from "./types"
@@ -77,6 +79,18 @@ export default function AppDialogs() {
         <ImportFromFarcasterDialog
           open
           onOpenChange={onOpenChange("import_from_farcaster")}
+        />
+      )}
+      {openDialog === "kyc_email_verification" && (
+        <KYCEmailVerificationDialog
+          open
+          onOpenChange={onOpenChange("kyc_email_verification")}
+        />
+      )}
+      {openDialog === "find_my_kyc" && (
+        <FindMyKYCDialog
+          open
+          onOpenChange={onOpenChange("find_my_kyc")}
         />
       )}
     </>

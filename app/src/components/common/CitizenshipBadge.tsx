@@ -1,9 +1,32 @@
-import { CheckboxCircleFIll } from "@/components/icons/remix"
+import Image from "next/image"
 
-export const CitizenshipBadge = () => {
+interface CitizenshipBadgeProps {
+  variant?: "full" | "icon"
+}
+
+export const CitizenshipBadge = ({ variant = "full" }: CitizenshipBadgeProps) => {
+  if (variant === "icon") {
+    return (
+      <div title="Citizen" className="cursor-default">
+        <Image
+          src="/assets/icons/badgeholder-sunny.png"
+          width={20}
+          height={20}
+          alt="Citizen"
+          className="rounded"
+        />
+      </div>
+    )
+  }
+
   return (
-    <div className="flex items-center gap-1 border border-border rounded-full px-2 py-[3px] text-xs text-foreground">
-      <CheckboxCircleFIll className="w-[14px] h-[14px]" fill="#FF0000" />
+    <div className="flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-red-200 text-red-600">
+      <Image
+        src="/assets/icons/badgeholder-sunny-darkred.png"
+        width={12}
+        height={12}
+        alt="Citizen"
+      />
       <div>Citizen</div>
     </div>
   )

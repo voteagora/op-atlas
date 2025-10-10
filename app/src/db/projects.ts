@@ -1799,68 +1799,83 @@ export async function addKYCTeamMembers({
     companyName: string
   }[]
 }) {
-  const allEmails = [
-    ...individuals.map((i) => i.email),
-    ...businesses.map((b) => b.email),
-  ]
+  const individualEmails = individuals.map((i) => i.email)
+  const businessControllerEmails = businesses.map((b) => b.email)
 
-  const [existingUsers, currentTeam] = await Promise.all([
+  const [existingUsers, existingEntities, currentUserTeam, currentEntityTeam] = await Promise.all([
     prisma.kYCUser.findMany({
-      where: { email: { in: allEmails } },
+      where: { email: { in: individualEmails } },
       include: {
         KYCUserTeams: true,
+      },
+    }),
+    prisma.kYCLegalEntity.findMany({
+      where: {
+        kycLegalEntityController: {
+          email: { in: businessControllerEmails },
+        },
+      },
+      include: {
+        kycLegalEntityController: true,
+        teamLinks: true,
       },
     }),
     prisma.kYCUserTeams.findMany({
       where: { kycTeamId, team: { deletedAt: null } },
     }),
+    prisma.kYCLegalEntityTeams.findMany({
+      where: { kycTeamId },
+    }),
   ])
 
   const existingIndividualUserMap = new Map(
-    existingUsers.filter((u) => !u.businessName).map((u) => [u.email, u]),
+    existingUsers.map((u) => [u.email, u]),
   )
-  const existingBusinessUserMap = new Map(
-    existingUsers.filter((u) => u.businessName).map((u) => [u.email, u]),
+  const existingBusinessEntityMap = new Map(
+    existingEntities.map((e) => [e.kycLegalEntityController?.email, e]),
   )
 
   const newIndividuals = individuals.filter(
     (i) => !existingIndividualUserMap.get(i.email),
   )
   const newBusinesses = businesses.filter(
-    (b) => !existingBusinessUserMap.get(b.email),
+    (b) => !existingBusinessEntityMap.get(b.email),
   )
 
-  // We need to remove users that are no longer in the team
-  const toRemove = [
-    // Remove users that are no longer in the team but their email is still used for individuals or businesses
+  // Remove individual users no longer in the team
+  const usersToRemove = [
     ...existingUsers
       .filter((u) => u.KYCUserTeams.some((t) => t.kycTeamId === kycTeamId))
-      .filter((u) => {
-        const isIndividualMember =
-          !u.businessName && individuals.some((i) => i.email === u.email)
-        const isBusinessMember =
-          !!u.businessName && businesses.some((b) => b.email === u.email)
-        return !isIndividualMember && !isBusinessMember
-      })
+      .filter((u) => !individuals.some((i) => i.email === u.email))
       .map((u) => u.KYCUserTeams.find((t) => t.kycTeamId === kycTeamId)!.id),
-    // Remove users that are no longer in the team & their email is not used for individuals or businesses
-    ...currentTeam
+    ...currentUserTeam
       .filter((t) => !existingUsers.some((e) => e.id === t.kycUserId))
       .map((t) => t.id),
   ]
 
-  // We need to add some existing users & all new users to the team
-  const toAdd = existingUsers
+  // Remove business entities no longer in the team
+  const entitiesToRemove = [
+    ...existingEntities
+      .filter((e) => e.teamLinks.some((t) => t.kycTeamId === kycTeamId))
+      .filter((e) => !businesses.some((b) => b.email === e.kycLegalEntityController?.email))
+      .map((e) => ({ kycTeamId, legalEntityId: e.id })),
+    ...currentEntityTeam
+      .filter((t) => !existingEntities.some((e) => e.id === t.legalEntityId))
+      .map((t) => ({ kycTeamId: t.kycTeamId, legalEntityId: t.legalEntityId })),
+  ]
+
+  // Add existing users not yet in the team
+  const usersToAdd = existingUsers
     .filter((u) => u.KYCUserTeams.every((t) => t.kycTeamId !== kycTeamId))
-    .filter((u) => {
-      const isNewIndividual =
-        !u.businessName && newIndividuals.some((i) => i.email === u.email)
-      const isNewBusiness =
-        !!u.businessName && newBusinesses.some((b) => b.email === u.email)
-      return !isNewIndividual && !isNewBusiness
-    })
+    .filter((u) => !newIndividuals.some((i) => i.email === u.email))
+
+  // Add existing entities not yet in the team
+  const entitiesToAdd = existingEntities
+    .filter((e) => e.teamLinks.every((t) => t.kycTeamId !== kycTeamId))
+    .filter((e) => !newBusinesses.some((b) => b.email === e.kycLegalEntityController?.email))
 
   await prisma.$transaction(async (tx) => {
+    // Create new individual KYC users
     const createdIndividuals = await tx.kYCUser.createManyAndReturn({
       data: newIndividuals.map((i) => ({
         email: i.email,
@@ -1870,37 +1885,73 @@ export async function addKYCTeamMembers({
       })),
     })
 
-    const createdBusinesses = await tx.kYCUser.createManyAndReturn({
-      data: newBusinesses.map((b) => ({
-        email: b.email,
-        firstName: b.firstName,
-        lastName: b.lastName,
-        expiry: new Date(),
-        businessName: b.companyName,
-      })),
-    })
+    // Create new business legal entities with controllers
+    const createdEntities = []
+    for (const b of newBusinesses) {
+      const entity = await tx.kYCLegalEntity.create({
+        data: {
+          name: b.companyName,
+          kycLegalEntityController: {
+            create: {
+              firstName: b.firstName,
+              lastName: b.lastName,
+              email: b.email.toLowerCase(),
+            },
+          },
+        },
+        include: {
+          kycLegalEntityController: true,
+        },
+      })
+      createdEntities.push(entity)
+    }
 
-    // Send transactional email to new KYC and KYB users
+    // Send transactional emails
     await Promise.all([
       ...createdIndividuals.map(sendKYCStartedEmail),
-      ...createdBusinesses.map(sendKYBStartedEmail),
+      ...createdEntities.map((e) => sendKYBStartedEmail(e as any)),
     ])
 
-    const allMembers = [...toAdd, ...createdIndividuals, ...createdBusinesses]
-
-    await Promise.all([
-      tx.kYCUserTeams.createMany({
-        data: allMembers.map((u) => ({
+    // Link users to team
+    const allUsersToLink = [...usersToAdd, ...createdIndividuals]
+    if (allUsersToLink.length > 0) {
+      await tx.kYCUserTeams.createMany({
+        data: allUsersToLink.map((u) => ({
           kycTeamId,
           kycUserId: u.id,
         })),
-      }),
-      tx.kYCUserTeams.deleteMany({
+      })
+    }
+
+    // Link entities to team
+    const allEntitiesToLink = [...entitiesToAdd, ...createdEntities]
+    if (allEntitiesToLink.length > 0) {
+      await tx.kYCLegalEntityTeams.createMany({
+        data: allEntitiesToLink.map((e) => ({
+          kycTeamId,
+          legalEntityId: e.id,
+        })),
+      })
+    }
+
+    // Remove old links
+    if (usersToRemove.length > 0) {
+      await tx.kYCUserTeams.deleteMany({
         where: {
-          id: { in: toRemove },
+          id: { in: usersToRemove },
         },
-      }),
-    ])
+      })
+    }
+
+    if (entitiesToRemove.length > 0) {
+      for (const { kycTeamId: teamId, legalEntityId } of entitiesToRemove) {
+        await tx.kYCLegalEntityTeams.delete({
+          where: {
+            kycTeamId_legalEntityId: { kycTeamId: teamId, legalEntityId },
+          },
+        })
+      }
+    }
   })
 }
 

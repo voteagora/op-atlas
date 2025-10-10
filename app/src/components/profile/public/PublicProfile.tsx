@@ -15,10 +15,12 @@ const PublicUserProfile = ({
   user,
   organizations,
   projects,
+                             kycStatus,
 }: {
   user: UserWithAddresses
   organizations: Organization[]
   projects: ProjectWithDetailsLite[]
+  kycStatus?: string
 }) => {
 
   return (
@@ -26,7 +28,7 @@ const PublicUserProfile = ({
       <div className="w-full lg:max-w-6xl lg:mx-auto pt-20 pb-12 lg:px-0 px-6 lg:grid lg:grid-cols-3 lg:gap-x-12">
         <div className="lg:col-span-1 max-w-[340px] lg:h-screen lg:overflow-y-auto">
           <div className="sticky top-0 pt-4 pb-6 z-10">
-            <ProfileHeader user={user} />
+            <ProfileHeader user={user} kycStatus={kycStatus} />
             <ProfileOrganizations organizations={organizations} />
           </div>
         </div>

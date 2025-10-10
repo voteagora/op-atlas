@@ -4,7 +4,8 @@ import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
-import { getUserKycTeams } from "@/lib/actions/kyc"
+import { getUserKycTeams } from "@/db/kyc"
+import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import {
   getAdminProjects,
@@ -26,7 +27,7 @@ export default async function Page() {
     redirect("/")
   }
 
-  const [user, projects, applications, organizations, adminProjects, kycTeams] =
+  const [user, projects, applications, organizations, adminProjects, kycTeams, userKYCStatus] =
     await Promise.all([
       getUserById(userId),
       getProjects(userId),
@@ -34,6 +35,7 @@ export default async function Page() {
       getUserOrganizations(userId),
       getAdminProjects(userId),
       getUserKycTeams(userId),
+      getUserKYCStatus(userId),
     ])
 
   if (!user) {
@@ -49,6 +51,7 @@ export default async function Page() {
         organizations={organizations}
         adminProjects={adminProjects}
         kycTeams={kycTeams}
+        userKYCStatus={userKYCStatus}
         className="w-full max-w-4xl"
       />
       <div className="fixed bottom-4 left-4">

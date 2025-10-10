@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
+import { UserRoundCheck } from "lucide-react"
 
 import { CitizenshipBadge } from "@/components/common/CitizenshipBadge"
 import { PencilFill } from "@/components/icons/remix"
@@ -18,9 +19,11 @@ import ProfileHeaderLinks from "./ProfileHeaderLinks"
 const ProfileHeader = ({
   className,
   user,
+  kycStatus
 }: {
   className?: string
   user: UserWithAddresses
+  kycStatus?: string
 }) => {
   const { data: session } = useSession()
   const username = useUsername(user)
@@ -29,6 +32,7 @@ const ProfileHeader = ({
     query: { type: CITIZEN_TYPES.user, id: user.id },
   })
   const [isCitizen, setIsCitizen] = useState(false)
+  const isVerified = kycStatus === "APPROVED"
 
   useEffect(() => {
     if (
@@ -58,13 +62,29 @@ const ProfileHeader = ({
           </Avatar>
         )}
         <div className="flex flex-col gap-6">
-          <div className="text-3xl font-semibold flex flex-wrap items-center gap-2 px-3">
-            {username} {isCitizen && <CitizenshipBadge />}
+          <div className="text-3xl font-semibold flex flex-wrap items-center gap-2">
+            {username}
+            <div className="flex items-center gap-1 ml-2">
+              {isCitizen && <CitizenshipBadge variant="icon" />}
+              {isVerified && <VerifiedBadge />}
+            </div>
           </div>
           <div className="text-sm text-muted-foreground ml-3">{user.bio}</div>
           <ProfileHeaderLinks user={user} />
         </div>
       </div>
+    </div>
+  )
+}
+
+const VerifiedBadge = () => {
+  return (
+    <div title="Identity verified" className="cursor-default">
+      <UserRoundCheck
+        fill="#000"
+        size={20}
+        className="rounded"
+      />
     </div>
   )
 }

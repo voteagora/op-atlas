@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, Ellipsis } from "lucide-react"
+import { ArrowUpRight, Ellipsis, UserRoundCheck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo, useEffect, useState } from "react"
@@ -12,11 +12,12 @@ import { useUsername } from "@/hooks/useUsername"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { useIsBadgeholder } from "@/lib/hooks"
 import { UserWithAddresses } from "@/lib/types"
+import { UserKYCStatus } from "@/lib/actions/userKyc"
 
 import { UserAvatar } from "../common/UserAvatar"
 import { CitizenshipBadge } from "../common/CitizenshipBadge"
+import { Badge } from "../common/Badge"
 import ImportFromFarcasterDialog from "../dialogs/ImportFromFarcasterDialog"
-import { ArrowDropRight } from "../icons/ArrowDropRight"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -28,8 +29,10 @@ import {
 
 const ProfileDetailCard = ({
   user: initialUser,
+  userKYCStatus,
 }: {
   user: UserWithAddresses
+  userKYCStatus?: UserKYCStatus
 }) => {
   const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
   const user = loadedUser || initialUser
@@ -55,47 +58,6 @@ const ProfileDetailCard = ({
     }
   }, [citizen])
 
-  const renderEmail = () => {
-    if (email) {
-      return (
-        <div>
-          Email{" "}
-          <span className="font-medium text-secondary-foreground">{email}</span>
-        </div>
-      )
-    } else {
-      return (
-        <Button
-          variant="link"
-          onClick={() => {
-            linkEmail()
-          }}
-        >
-          Add your email
-        </Button>
-      )
-    }
-  }
-
-  const renderUsername = () => {
-    if (user.username && user.farcasterId) {
-      return (
-        <span className="text-secondary-foreground">
-          Username: <span className="font-medium">{user.username}</span>
-        </span>
-      )
-    } else {
-      return (
-        <Link
-          href="/profile/details"
-          className="hover:underline flex items-center gap-x-0.5"
-        >
-          Add profile details{" "}
-          <ArrowDropRight fill="#6B7280" className="text-muted-foreground" />
-        </Link>
-      )
-    }
-  }
 
   return (
     <div className="flex gap-x-4">
@@ -130,10 +92,9 @@ const ProfileDetailCard = ({
         </button>
       )}
 
-      <div className="flex flex-col">
+      <div className="flex flex-col justify-center">
         <div className="text-2xl font-semibold flex items-center gap-x-2">
           {username || ""}
-          {isCitizen && <CitizenshipBadge />}
           {isBadgeholder && (
             <Image
               src="/assets/icons/badgeholder-sunny.png"
@@ -146,9 +107,58 @@ const ProfileDetailCard = ({
 
         {user.bio && <p>{user.bio}</p>}
 
-        <div className="mt-2 mr-4 flex items-center gap-x-4 text-sm text-muted-foreground">
-          <div>{renderUsername()}</div>
-          <div>{renderEmail()}</div>
+        <div className="mt-2 mr-4 flex items-center gap-2 flex-wrap">
+          {/* Citizenship Badge */}
+          {isCitizen && <CitizenshipBadge variant="full" />}
+
+          {/* Username Badge */}
+          {user.username && user.farcasterId ? (
+            <Badge text={`@${user.username}`} className="bg-secondary text-secondary-foreground px-2 py-1" />
+          ) : (
+            <Badge
+              as="button"
+              text="Add details"
+              leftIcon="/assets/icons/plus.svg"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1"
+              onClick={() => window.location.href = '/profile/details'}
+            />
+          )}
+
+          {/* Email Badge */}
+          {email ? (
+            <Badge text={email} className="bg-secondary text-secondary-foreground px-2 py-1" />
+          ) : (
+            <Badge
+              as="button"
+              text="Add email"
+              leftIcon="/assets/icons/plus.svg"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1"
+              onClick={() => linkEmail()}
+            />
+          )}
+
+          {/* KYC Verification Badge */}
+          {userKYCStatus && (
+            userKYCStatus.hasApprovedKYC ? (
+              <Badge
+                text={
+                  <span className="flex items-center gap-1">
+                    <UserRoundCheck fill="#000" size={12} />
+                    Verified
+                  </span>
+                }
+                className="bg-secondary text-secondary-foreground px-2 py-1"
+              />
+            ) : (
+              <Badge
+                as="button"
+                text="Verify your identity"
+                leftIcon="/assets/icons/plus.svg"
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-2 py-1"
+                onClick={() => window.location.href = '/profile/details'}
+              />
+            )
+          )}
         </div>
       </div>
 

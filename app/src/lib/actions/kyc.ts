@@ -4,7 +4,12 @@ import { isAfter, parse } from "date-fns"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { deleteKycTeam, updateKYCUserStatus } from "@/db/kyc"
+import {
+  deleteKycTeam,
+  updateKYCUserStatus,
+  getUserKycTeamSources,
+  updateLegalEntityStatus,
+} from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
 import {
@@ -17,8 +22,43 @@ import {
 } from "@/lib/persona"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { UserKYCTeam } from "@/lib/types"
+import { KYCStatus } from "@prisma/client"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+
+/**
+ * Calculate KYC/KYB expiry date based on Persona inquiry attributes
+ * @param expiresAt - Optional expires-at from Persona inquiry
+ * @param completedAt - Optional completed-at from Persona inquiry
+ * @param parsedStatus - The KYC status (APPROVED, PENDING, etc)
+ * @param fallbackDate - Optional fallback date to use for default calculation
+ * @returns Calculated expiry date, or null if no expires-at and not approved
+ */
+function calculateExpiryDate(
+  expiresAt: string | undefined,
+  completedAt: string | undefined,
+  parsedStatus: string,
+  fallbackDate?: Date
+): Date | null {
+  if (parsedStatus === "APPROVED" && completedAt) {
+    const date = new Date(completedAt)
+    date.setFullYear(date.getFullYear() + 1)
+    return date
+  }
+
+  if (expiresAt) {
+    return new Date(expiresAt)
+  }
+
+  if (fallbackDate) {
+    const date = new Date(fallbackDate)
+    date.setFullYear(date.getFullYear() + 1)
+    return date
+  }
+
+  // Return null to let SQL handle default (updatedAt + 1 year)
+  return null
+}
 
 const SUPERFLUID_CLAIM_DATES = [
   "2024-08-05",
@@ -162,98 +202,158 @@ export const processKYC = async (entries: string[]) => {
 }
 
 export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
-  await Promise.all(
-    inquiries.map(async (inquiry) => {
-      const {
-        attributes: {
-          "updated-at": updatedAt,
-          "reference-id": referenceId,
-          status,
-        },
-      } = inquiry
-
-      const parsedStatus =
-        inquiryStatusMap[status as keyof typeof inquiryStatusMap]
-
-      if (!parsedStatus) {
-        console.warn(`Unknown inquiry status: ${status}`)
-        return
-      }
-
-      if (!referenceId) {
-        console.warn(
-          `Missing the required referecedId for inquiry ${inquiry.id}`,
-        )
-        return
-      }
-
-      await updateKYCUserStatus(
-        parsedStatus,
+  for (const inquiry of inquiries) {
+    const {
+      attributes: {
+        "updated-at": updatedAt,
+        "reference-id": referenceId,
+        "expires-at": expiresAt,
+        "completed-at": completedAt,
         status,
-        new Date(updatedAt),
-        referenceId,
-        inquiry.attributes["expires-at"]
-          ? new Date(inquiry.attributes["expires-at"])
-          : null,
+      },
+    } = inquiry
+
+    const parsedStatus =
+      inquiryStatusMap[status as keyof typeof inquiryStatusMap]
+
+    if (!parsedStatus) {
+      console.warn(`Unknown inquiry status: ${status}`)
+      continue
+    }
+
+    if (!referenceId) {
+      console.warn(
+        `Missing the required referenceId for inquiry ${inquiry.id}`,
       )
-    }),
-  )
+      continue
+    }
+
+    const updatedAtDate = new Date(updatedAt)
+    const expiryDate = calculateExpiryDate(
+      expiresAt,
+      completedAt,
+      parsedStatus,
+      updatedAtDate,
+    )
+
+    if (parsedStatus === "APPROVED" && !completedAt) {
+      console.warn(
+        `Approved inquiry ${inquiry.id} is missing completed-at timestamp`,
+      )
+    }
+
+    try {
+      await updateKYCUserStatus({
+        parsedStatus,
+        personaStatus: status,
+        updatedAt: updatedAtDate,
+        inquiryId: inquiry.id,
+        referenceId,
+        expiresAt: expiryDate,
+      })
+    } catch (error) {
+      console.error(
+        `Failed to update KYC user for inquiry ${inquiry.id}`,
+        error,
+      )
+    }
+  }
 }
 
 export const processPersonaCases = async (cases: PersonaCase[]) => {
-  await Promise.all(
-    cases.map(async (c) => {
-      if (Object.keys(c.attributes.fields).length === 0) {
-        console.warn(`No fields found for case ${c.id}`)
-        return
+  for (const personaCase of cases) {
+    if (Object.keys(personaCase.attributes.fields).length === 0) {
+      console.warn(`No fields found for case ${personaCase.id}`)
+      continue
+    }
+
+    const {
+      attributes: {
+        "updated-at": updatedAt,
+        "reference-id": caseReferenceId,
+        status,
+      },
+      relationships: {
+        inquiries: { data: inquiries },
+      },
+    } = personaCase
+
+    const parsedStatus =
+      caseStatusMap[status as keyof typeof caseStatusMap]
+
+    if (!parsedStatus) {
+      console.warn(`Unknown case status: ${status} for case ${personaCase.id}`)
+      continue
+    }
+
+    if (!caseReferenceId) {
+      console.warn(`Missing case reference id for case ${personaCase.id}`)
+    }
+
+    const updatedAtDate = new Date(updatedAt)
+
+    for (const inquiryRef of inquiries) {
+      const inquiryId = inquiryRef.id
+      if (!inquiryId) {
+        console.warn(`Missing inquiry id in case ${personaCase.id}`)
+        continue
       }
 
-      const {
-        attributes: {
-          "updated-at": updatedAt,
-          // The Case.status takes precedence over the Inquiry.status whenever the Inquiriy
-          // is associated with a Case.
-          status,
-        },
-        relationships: {
-          inquiries: { data: inquiries },
-        },
-      } = c
-
-      for (const inquiryRef of inquiries) {
-        const inquiryId = inquiryRef.id
-        if (!inquiryId) {
-          console.warn(`Missing inquiry id in case ${c.id}`)
-          continue
-        }
-
-        const inquiry: PersonaInquiry | null =
-          await personaClient.getInquiryById(inquiryId)
+      try {
+        const inquiry = await personaClient.getInquiryById(inquiryId)
 
         if (!inquiry) {
-          console.warn(`Inquiry not found for id ${inquiryId} in case ${c.id}`)
+          console.warn(
+            `Inquiry not found for id ${inquiryId} in case ${personaCase.id}`,
+          )
           continue
         }
-        if (inquiry.attributes["reference-id"]) {
-          const parsedStatus =
-            caseStatusMap[status as keyof typeof caseStatusMap]
-          // The persona status value of a Case is slightly different from the status value of an Inquiry.
-          // Adjust Case statues like "Waiting on UBOs" to Pending for now.
-          const personaStatus = mapCaseStatusToPersonaStatus(status)
 
-          await updateKYCUserStatus(
-            parsedStatus,
-            personaStatus,
-            new Date(updatedAt),
-            inquiry.attributes["reference-id"],
-            inquiry.attributes["expires-at"]
-              ? new Date(inquiry.attributes["expires-at"])
-              : null,
+        const inquiryReferenceId =
+          inquiry.attributes["reference-id"] || caseReferenceId
+
+        if (!inquiryReferenceId) {
+          console.warn(
+            `Missing reference id for inquiry ${inquiryId} in case ${personaCase.id}`,
+          )
+          continue
+        }
+
+        const completedAt = inquiry.attributes["completed-at"]
+        const expiryDate = calculateExpiryDate(
+          inquiry.attributes["expires-at"],
+          completedAt,
+          parsedStatus,
+          updatedAtDate,
+        )
+
+        if (parsedStatus === "APPROVED" && !completedAt) {
+          console.warn(
+            `Approved case ${personaCase.id} inquiry ${inquiryId} missing completed-at timestamp`,
           )
         }
+
+        const updatedEntities = await updateLegalEntityStatus({
+          parsedStatus,
+          updatedAt: updatedAtDate,
+          inquiryId,
+          referenceId: inquiryReferenceId,
+          expiresAt: expiryDate,
+        })
+
+        if (updatedEntities.length === 0) {
+          console.log(
+            `No KYCLegalEntity matched inquiry ${inquiryId} with reference ${inquiryReferenceId} in case ${personaCase.id}`,
+          )
+        }
+      } catch (error) {
+        console.error(
+          `Failed to update legal entity for inquiry ${inquiryId} in case ${personaCase.id}`,
+          error,
+        )
       }
-    }),
-  )
+    }
+  }
 }
 
 export const deleteKYCTeamAction = async ({
@@ -392,7 +492,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: project.kycTeam.id,
@@ -416,7 +519,10 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         updatedAt: teamMember.users.updatedAt,
       }))
 
-      const status = resolveProjectStatus(users) as "PENDING" | "APPROVED" | "project_issue"
+      const status = resolveProjectStatus(users) as
+        | "PENDING"
+        | "APPROVED"
+        | "project_issue"
 
       kycTeams.push({
         id: orgKycTeam.team.id,
@@ -432,4 +538,185 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
   }
 
   return kycTeams
+}
+
+export async function getExistingLegalEntities(kycTeamId: string) {
+  try {
+    if (!kycTeamId) {
+      console.warn("getExistingLegalEntities: missing kycTeamId")
+      return []
+    }
+
+    console.debug("getExistingLegalEntities:start", { kycTeamId })
+
+    const links = await prisma.kYCLegalEntityTeams.findMany({
+      where: { kycTeamId },
+      include: {
+        legalEntity: {
+          include: {
+            kycLegalEntityController: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    console.debug("getExistingLegalEntities:linksFetched", {
+      count: links.length,
+    })
+
+    const now = new Date()
+
+    const mapped = links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+
+    const filtered = mapped.filter(
+      (e) => e.status === KYCStatus.APPROVED && (!e.expiry || e.expiry > now),
+    )
+
+    if (mapped.length !== filtered.length) {
+      const dropped = mapped.length - filtered.length
+      console.debug("getExistingLegalEntities:filteredOut", {
+        total: mapped.length,
+        approvedAndValid: filtered.length,
+        dropped,
+      })
+    }
+
+    const items = filtered.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.kycLegalEntityController?.firstName || "",
+      controllerLastName: e.kycLegalEntityController?.lastName || "",
+      controllerEmail: e.kycLegalEntityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug("getExistingLegalEntities:itemsPrepared", {
+      count: items.length,
+    })
+
+    return items
+  } catch (e) {
+    console.error("getExistingLegalEntities error", e)
+    return []
+  }
+}
+
+// Fetch distinct, approved, unexpired legal entities associated with any KYCTeam
+// linked to the given organization (to populate reusable entities list).
+export async function getAvailableLegalEntitiesForOrganization(
+  organizationId: string,
+) {
+  try {
+    if (!organizationId) {
+      console.warn(
+        "getAvailableLegalEntitiesForOrganization: missing organizationId",
+      )
+      return []
+    }
+    console.debug("getAvailableLegalEntitiesForOrganization:start", {
+      organizationId,
+    })
+
+    // 1) Find all KYCTeams linked to this organization
+    const orgTeams = await prisma.organizationKYCTeam.findMany({
+      where: { organizationId },
+      select: { kycTeamId: true },
+    })
+    const kycTeamIds = orgTeams.map((t) => t.kycTeamId)
+    console.debug("getAvailableLegalEntitiesForOrganization:orgTeamsFetched", {
+      teamCount: kycTeamIds.length,
+    })
+
+    if (kycTeamIds.length === 0) {
+      return []
+    }
+
+    // 2) Fetch all links from those teams to legal entities
+    const links = await prisma.kYCLegalEntityTeams.findMany({
+      where: { kycTeamId: { in: kycTeamIds } },
+      include: {
+        legalEntity: {
+          include: { kycLegalEntityController: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+    console.debug("getAvailableLegalEntitiesForOrganization:linksFetched", {
+      count: links.length,
+    })
+
+    const now = new Date()
+
+    // 3) Map links to legal entities, filter out rejected + expired, and dedupe by id
+    const approvedValid = links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .filter(
+        (e) => e.status !== KYCStatus.REJECTED && (!e.expiry || e.expiry > now),
+      )
+
+    // Dedupe by id
+    const seen = new Set<string>()
+    const deduped = approvedValid.filter((e) => {
+      if (seen.has(e.id)) return false
+      seen.add(e.id)
+      return true
+    })
+
+    const items = deduped.map((e) => ({
+      id: e.id,
+      businessName: e.name,
+      controllerFirstName: e.kycLegalEntityController?.firstName || "",
+      controllerLastName: e.kycLegalEntityController?.lastName || "",
+      controllerEmail: e.kycLegalEntityController?.email || "",
+      expiresAt: e.expiry ?? null,
+    }))
+
+    console.debug("getAvailableLegalEntitiesForOrganization:itemsPrepared", {
+      count: items.length,
+    })
+    return items
+  } catch (e) {
+    console.error("getAvailableLegalEntitiesForOrganization error", e)
+    return []
+  }
+}
+
+// Fetch all selected legal entities for a KYCTeam, regardless of approval/expiry,
+// to drive the Legal Entities status list in the KYC status UI.
+export async function getSelectedLegalEntitiesForTeam(kycTeamId: string) {
+  try {
+    if (!kycTeamId) return []
+
+    const links = await prisma.kYCLegalEntityTeams.findMany({
+      where: { kycTeamId },
+      include: {
+        legalEntity: {
+          include: {
+            kycLegalEntityController: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    return links
+      .map((l) => l.legalEntity)
+      .filter((e): e is NonNullable<typeof e> => Boolean(e))
+      .map((e) => ({
+        id: e.id,
+        name: e.name,
+        status: e.status,
+        expiry: e.expiry ?? null,
+        controllerFirstName: e.kycLegalEntityController?.firstName || "",
+        controllerLastName: e.kycLegalEntityController?.lastName || "",
+        controllerEmail: e.kycLegalEntityController?.email || "",
+      }))
+  } catch (e) {
+    console.error("getSelectedLegalEntitiesForTeam error", e)
+    return []
+  }
 }
