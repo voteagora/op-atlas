@@ -20,7 +20,7 @@ function getDisplayName(kycUser: KYCUserWithRelations): string {
   }
 
   // Final fallback
-  return 'Optimist'
+  return "Optimist"
 }
 
 // Helper function to check if KYCUser is orphaned (no KYCTeam)
@@ -33,16 +33,29 @@ function isOrphanedKYCUser(kycUser: KYCUserWithRelations): boolean {
 // =============================================================================
 
 // Template for KYC started email
-export function getKYCEmailTemplate(kycUser: KYCUserWithRelations, kycLink: string): string {
+export function getKYCEmailTemplate(
+  kycUser: KYCUserWithRelations,
+  kycLink: string,
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)}, ${isOrphanedKYCUser(kycUser) ? 'please complete the following steps to verify your identity' : 'Congratulations on applying for your Optimism Grant! 🎉'}</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(
+      kycUser,
+    )}, ${
+    isOrphanedKYCUser(kycUser)
+      ? "please complete the following steps to verify your identity"
+      : "Congratulations on applying for your Optimism Grant! 🎉"
+  }</h1>
 
-    <p style="font-size: 16px; margin-bottom: 40px;">${isOrphanedKYCUser(kycUser) ? 'To verify your identity within Optimism Atlas, please complete this quick KYC (Know Your Customer) process.' : 'To receive your OP tokens, we need you to complete a quick KYC (Know Your Customer) verification for your project. This is a standard security procedure that helps us ensure proper distribution of rewards.'}</p>
+    <p style="font-size: 16px; margin-bottom: 40px;">${
+      isOrphanedKYCUser(kycUser)
+        ? "To verify your identity within Optimism Atlas, please complete this quick KYC (Know Your Customer) process."
+        : "To receive your OP tokens, we need you to complete a quick KYC (Know Your Customer) verification for your project. This is a standard security procedure that helps us ensure proper distribution of rewards."
+    }</p>
 
     <p style="font-size: 16px;">Complete your verification in 3 easy steps:</p>
     <ol style="font-size: 16px; padding-left: 0; margin-left: 0; list-style-position: inside;">
@@ -82,17 +95,23 @@ export function getKYCReminderEmailTemplate(
         <img src="https://atlas.optimism.io/assets/images/sunny_default.png" alt="Sunny Logo" style="width: 120px; height: auto;"/>
     </div>
 
-    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(kycUser)}, ${isOrphanedKYCUser(kycUser) ? "you haven't completed your KYC verification yet" : "You haven't completed KYC verification for your Optimism grant yet"}</h1>
+    <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${getDisplayName(
+      kycUser,
+    )}, ${
+    isOrphanedKYCUser(kycUser)
+      ? "you haven't completed your KYC verification yet"
+      : "You haven't completed KYC verification for your Optimism grant yet"
+  }</h1>
 
-    <p style="font-size: 16px;">Your verification is just a few steps away:</p>
+    <p style="font-size: 16px;">Finish your verification in a few quick steps:</p>
 
     <ol style="font-size: 16px; padding-left: 0; margin-left: 0; list-style-position: inside;">
-        <li>Return to the verification portal using the link below</li>
-        <li>Complete any remaining document uploads or information fields</li>
-        <li>Submit your completed verification</li>
+        <li>Click the link below to return to the verification portal.</li>
+        <li>Upload any remaining documents and add any missing details.</li>
+        <li>Submit your verification once everything looks good.</li>
     </ol>
 
-    <p style="font-size: 16px; margin-bottom: 40px;">Your information is securely handled according to our privacy policy.</p>
+    <p style="font-size: 16px; margin-bottom: 40px;">Your information is handled securely in line with our <a href="https://www.optimism.io/data-privacy-policy" style="color: black; text-decoration: underline;">Privacy Policy</a>.</p>
 
     <div style="text-align: center; margin-bottom: 24px;">
         <a href="${kycLink}" style="background-color: #FF0420; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Complete KYC Verification Now</a>
@@ -100,7 +119,7 @@ export function getKYCReminderEmailTemplate(
 
     <p style="text-align: center; font-size: 16px; margin-bottom: 40px;">Link expires in 7 days.</p>
 
-    <p style="font-size: 16px;">Need help? Check KYC <a href="https://kyc.optimism.io/faq" style="color: black; text-decoration: underline;">FAQs</a>. Our support team are also happy to assist you. If you have any questions or run into issues, feel free to reach out to us via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>. We are happy to help!</p>
+    <p style="font-size: 16px;">Need help? You can find answers to common questions in our <a href="https://kyc.optimism.io/faq" style="color: black; text-decoration: underline;">KYC FAQs</a>. If you still need a hand, our support team is happy to help — simply email <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>, and someone from the team will be in touch shortly.</p>
 
     <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
@@ -112,7 +131,9 @@ export function getKYCReminderEmailTemplate(
     `
 }
 
-export function getKYCApprovedEmailTemplate(kycUser: KYCUserWithRelations): string {
+export function getKYCApprovedEmailTemplate(
+  kycUser: KYCUserWithRelations,
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -121,7 +142,11 @@ export function getKYCApprovedEmailTemplate(kycUser: KYCUserWithRelations): stri
 
     <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Thank you for completing KYC!</h1>
 
-    <p style="font-size: 16px; margin-bottom: 24px;">${isOrphanedKYCUser(kycUser) ? 'You should see your verification status update in Optimism Atlas within the next few days.' : 'In the coming days, the team will be in touch regarding next steps in your grant award and disbursement process. Keep an eye on your inbox!'}</p>
+    <p style="font-size: 16px; margin-bottom: 24px;">${
+      isOrphanedKYCUser(kycUser)
+        ? "You should see your verification status update in Optimism Atlas within the next few days."
+        : "In the coming days, the team will be in touch regarding next steps in your grant award and disbursement process. Keep an eye on your inbox!"
+    }</p>
 
     <p style="font-size: 16px; margin-bottom: 24px;">Questions or need support? Check our <a href="https://kyc.optimism.io/faq" style="color: black; text-decoration: underline;">FAQs</a> or reach out to our team via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a> —we're here to help.</p>
 
@@ -141,8 +166,11 @@ export function getKYCApprovedEmailTemplate(kycUser: KYCUserWithRelations): stri
     `
 }
 
-export function getKYCEmailVerificationTemplate(firstName: string, verificationLink: string): string {
-  const displayName = firstName || 'Optimist'
+export function getKYCEmailVerificationTemplate(
+  firstName: string,
+  verificationLink: string,
+): string {
+  const displayName = firstName || "Optimist"
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -175,15 +203,18 @@ export function getKYCEmailVerificationTemplate(firstName: string, verificationL
     `
 }
 
-export function getFindMyKYCVerificationTemplate(verificationCode: string): string {
+export function getFindMyKYCVerificationTemplate(
+  verificationCode: string,
+): string {
   const digits = verificationCode.split("")
   const digitWidth = 42
   const digitHeight = 42
   const borderWidth = 1
-  const selectAllStyles = "cursor: text; user-select: all; -webkit-user-select: all; -moz-user-select: all; -ms-user-select: all;"
+  const selectAllStyles =
+    "cursor: text; user-select: all; -webkit-user-select: all; -moz-user-select: all; -ms-user-select: all;"
   const digitCells = digits
     .map(
-      digit =>
+      (digit) =>
         `<td style="padding: 0;"><div style="width: ${digitWidth}px; height: ${digitHeight}px; border: ${borderWidth}px solid #E0E2EB; border-radius: 8px; background-color: #FFFFFF; font-size: 14px; font-weight: 500; line-height: ${digitHeight}px; text-align: center; ${selectAllStyles}">${digit}</div></td>`,
     )
     .join("")
@@ -230,7 +261,7 @@ export function getKYBEmailTemplate(params: {
   businessName: string
   kycLink: string
 }): string {
-  const displayName = params.firstName || 'Optimist'
+  const displayName = params.firstName || "Optimist"
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -273,7 +304,7 @@ export function getKYBReminderEmailTemplate(params: {
   firstName: string
   kycLink: string
 }): string {
-  const displayName = params.firstName || 'Optimist'
+  const displayName = params.firstName || "Optimist"
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
@@ -282,15 +313,15 @@ export function getKYBReminderEmailTemplate(params: {
 
     <h1 style="color: #333; text-align: center; margin: 0 0 40px 0; font-size: 24px;">Hi ${displayName}, You haven't completed KYB verification for your Optimism grant yet</h1>
 
-    <p style="font-size: 16px;">Your verification is just a few steps away:</p>
+    <p style="font-size: 16px;">Finish your verification in a few quick steps:</p>
 
     <ol style="font-size: 16px; padding-left: 0; margin-left: 0; list-style-position: inside;">
-        <li>Return to the verification portal using the link below</li>
-        <li>Complete any remaining document uploads or information fields</li>
-        <li>Submit your completed verification</li>
+        <li>Click the link below to return to the verification portal.</li>
+        <li>Upload any remaining documents and add any missing details.</li>
+        <li>Submit your verification once everything looks good.</li>
     </ol>
 
-    <p style="font-size: 16px; margin-bottom: 40px;">Your information is securely handled according to our privacy policy.</p>
+    <p style="font-size: 16px; margin-bottom: 40px;">Your information is handled securely in line with our <a href="https://www.optimism.io/data-privacy-policy" style="color: black; text-decoration: underline;">Privacy Policy</a>.</p>
 
     <div style="text-align: center; margin-bottom: 24px;">
         <a href="${params.kycLink}" style="background-color: #FF0420; color: white; padding: 10px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-size: 16px;">Complete KYB Verification Now</a>
@@ -298,7 +329,7 @@ export function getKYBReminderEmailTemplate(params: {
 
     <p style="text-align: center; font-size: 16px; margin-bottom: 40px;">Link expires in 7 days.</p>
 
-    <p style="font-size: 16px;">Need help? Check KYB <a href="https://kyc.optimism.io/faq" style="color: black; text-decoration: underline;">FAQs</a>. Our support team are also happy to assist you. If you have any questions or run into issues, feel free to reach out to us via <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>. We are happy to help!</p>
+    <p style="font-size: 16px;">Need help? You can find answers to common questions in our <a href="https://kyc.optimism.io/faq" style="color: black; text-decoration: underline;">KYB FAQs</a>. If you still need a hand, our support team is happy to help — simply email <a href="mailto:compliance@optimism.io" style="color: black; text-decoration: underline;">compliance@optimism.io</a>, and someone from the team will be in touch shortly.</p>
 
     <p style="font-size: 16px; margin-bottom: 24px;">Stay Optimistic,<br>The Optimism Team</p>
 
@@ -311,7 +342,7 @@ export function getKYBReminderEmailTemplate(params: {
 }
 
 export function getKYBApprovedEmailTemplate(firstName: string): string {
-  const displayName = firstName || 'Optimist'
+  const displayName = firstName || "Optimist"
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="text-align: center; margin-bottom: 30px;">
