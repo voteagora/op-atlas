@@ -69,7 +69,6 @@ const StatusRow = ({
               values={[
                 [user.firstName, user.lastName].filter(Boolean).join(" "),
                 user.email,
-                user.businessName || "",
               ]}
             />
           </div>
