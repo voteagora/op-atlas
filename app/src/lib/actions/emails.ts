@@ -1,23 +1,24 @@
 "use server"
 
 import mailchimp from "@mailchimp/mailchimp_transactional"
-import { EmailNotificationType, KYCUser, KYCLegalEntity } from "@prisma/client"
+import { EmailNotificationType, KYCLegalEntity, KYCUser } from "@prisma/client"
+import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { revalidatePath } from "next/cache"
-import { generateKYCToken } from "@/lib/utils/kycToken"
-import { getUserProjectRole, getUserOrganizationRole } from "./utils"
 import {
-  getKYCEmailTemplate,
-  getKYCReminderEmailTemplate,
+  getFindMyKYCVerificationTemplate,
+  getKYBApprovedEmailTemplate,
   getKYBEmailTemplate,
   getKYBReminderEmailTemplate,
   getKYCApprovedEmailTemplate,
-  getKYBApprovedEmailTemplate,
+  getKYCEmailTemplate,
   getKYCEmailVerificationTemplate,
-  getFindMyKYCVerificationTemplate,
+  getKYCReminderEmailTemplate,
 } from "@/lib/emailTemplates"
+import { generateKYCToken } from "@/lib/utils/kycToken"
+
+import { getUserOrganizationRole, getUserProjectRole } from "./utils"
 
 const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
 
@@ -25,8 +26,8 @@ const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
 const BASE_URL = (() => {
   const url = process.env.NEXT_PUBLIC_VERCEL_URL
   if (!url) return "https://atlas.optimism.io"
-  if (url.startsWith('http')) return url
-  if (url.includes('localhost')) return `http://${url}`
+  if (url.startsWith("http")) return url
+  if (url.includes("localhost")) return `http://${url}`
   return `https://${url}`
 })()
 
@@ -148,7 +149,8 @@ export const sendKYCStartedEmail = async (
     return emailResult
   } catch (error) {
     console.error("Error sending KYC started email:", error)
-    const errorMessage = error instanceof Error ? error.message : "Failed to send email"
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to send email"
 
     await trackEmailNotification({
       referenceId: kycUser.personaReferenceId || kycUser.id,
@@ -166,14 +168,20 @@ export const sendKYCStartedEmail = async (
 }
 
 export const sendKYBStartedEmail = async (
-  legalEntity: KYCLegalEntity & { kycLegalEntityController: { firstName: string, lastName: string, email: string } },
+  legalEntity: KYCLegalEntity & {
+    kycLegalEntityController: {
+      firstName: string
+      lastName: string
+      email: string
+    }
+  },
 ): Promise<EmailResponse> => {
   try {
     // Generate secure token for KYB verification gateway
     const token = await generateKYCToken(
       "legalEntity",
       legalEntity.id,
-      legalEntity.kycLegalEntityController.email
+      legalEntity.kycLegalEntityController.email,
     )
     const kycLink = `${BASE_URL}/kyc/verify/${token}`
 
@@ -200,7 +208,8 @@ export const sendKYBStartedEmail = async (
     return emailResult
   } catch (error) {
     console.error("Error sending KYB started email:", error)
-    const errorMessage = error instanceof Error ? error.message : "Failed to send email"
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to send email"
 
     await trackEmailNotification({
       referenceId: legalEntity.personaReferenceId || legalEntity.id,
@@ -284,7 +293,8 @@ export const sendKYCReminderEmail = async (
   if (recentReminder) {
     return {
       success: false,
-      error: "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
+      error:
+        "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
     }
   }
   // Generate secure token for KYC verification gateway
@@ -422,7 +432,7 @@ export const sendKYBReminderEmail = async (
   const token = await generateKYCToken(
     "legalEntity",
     legalEntity.id,
-    legalEntity.kycLegalEntityController.email
+    legalEntity.kycLegalEntityController.email,
   )
   const kycLink = `${BASE_URL}/kyc/verify/${token}`
 
@@ -570,7 +580,8 @@ export const sendPersonalKYCReminderEmail = async (
   if (recentReminder) {
     return {
       success: false,
-      error: "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
+      error:
+        "A reminder email was already sent within the last 24 hours. Please wait before sending another.",
     }
   }
 
@@ -626,7 +637,9 @@ export const sendKYCEmailVerificationEmail = async (
   return emailResult
 }
 
-export async function sendFindMyKYCVerificationCode(email: string): Promise<EmailResponse> {
+export async function sendFindMyKYCVerificationCode(
+  email: string,
+): Promise<EmailResponse> {
   const session = await auth()
   const userId = session?.user?.id
 
@@ -635,7 +648,7 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
   }
 
   try {
-    // Check if user already has a KYC
+    // 1. Check if user already has a KYC
     const existingUserKyc = await prisma.userKYCUser.findFirst({
       where: {
         userId,
@@ -652,7 +665,43 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
       }
     }
 
-    // Check if there's an orphaned KYCUser for this email (for tracking purposes)
+    // 2. Check if current user already has a VERIFIED email with this address
+    const existingVerifiedEmail = await prisma.userEmail.findFirst({
+      where: {
+        userId,
+        email: email.toLowerCase(),
+        verified: true,
+      },
+    })
+
+    if (existingVerifiedEmail) {
+      return {
+        success: false,
+        error: "This email is already verified on your account.",
+      }
+    }
+
+    // 3. Check if email exists for ANY other user
+    // IMPORTANT: Don't reveal that this email exists in the database (privacy/security)
+    const emailUsedByOtherUser = await prisma.userEmail.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        userId: {
+          not: userId,
+        },
+      },
+    })
+
+    if (emailUsedByOtherUser) {
+      // Generic error that doesn't reveal the email exists in our system
+      return {
+        success: false,
+        error:
+          "Unable to process this email address. Please try a different email or contact support if you believe this is an error.",
+      }
+    }
+
+    // 4. Check if there's an orphaned KYCUser for this email (for tracking purposes)
     const orphanedKYCUser = await prisma.kYCUser.findFirst({
       where: {
         email: email.toLowerCase(),
@@ -665,7 +714,7 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
       },
     })
 
-    // Delete any existing unverified UserEmail records for this user before creating a new one
+    // 5. Delete any existing unverified UserEmail records for this user before creating a new one
     await prisma.userEmail.deleteMany({
       where: {
         userId,
@@ -673,7 +722,7 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
       },
     })
 
-    // Check if there's already a UserEmail record for this user and email
+    // 6. Check if there's already a UserEmail record for this user and email
     let userEmail = await prisma.userEmail.findFirst({
       where: {
         userId,
@@ -681,8 +730,10 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
       },
     })
 
-    // Generate 6-digit verification code and 10-minute expiry
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+    // 7. Generate 6-digit verification code and 10-minute expiry
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString()
     const verificationTokenExpiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
 
     if (userEmail) {
@@ -697,18 +748,37 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
       })
     } else {
       // Create new UserEmail record
-      userEmail = await prisma.userEmail.create({
-        data: {
-          userId,
-          email: email.toLowerCase(),
-          verified: false,
-          verificationToken: verificationCode,
-          verificationTokenExpiresAt,
-        },
-      })
+      // This could still fail if there's a race condition, so wrap in try/catch
+      try {
+        userEmail = await prisma.userEmail.create({
+          data: {
+            userId,
+            email: email.toLowerCase(),
+            verified: false,
+            verificationToken: verificationCode,
+            verificationTokenExpiresAt,
+          },
+        })
+      } catch (createError) {
+        // If unique constraint violation, it means another user claimed this email
+        // in a race condition scenario
+        if (
+          createError instanceof Error &&
+          (createError.message.includes("Unique constraint") ||
+            createError.message.includes("unique"))
+        ) {
+          return {
+            success: false,
+            error:
+              "Unable to process this email address. Please try a different email or contact support if you believe this is an error.",
+          }
+        }
+        // Re-throw if it's a different error
+        throw createError
+      }
     }
 
-    // Send verification email with code
+    // 8. Send verification email with code
     const html = getFindMyKYCVerificationTemplate(verificationCode)
 
     const emailParams = {
@@ -718,6 +788,25 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
     }
 
     const emailResult = await sendTransactionEmail(emailParams)
+
+    if (!emailResult.success) {
+      // Email sending failed, track the notification if we have an orphaned KYC user
+      if (orphanedKYCUser) {
+        await trackEmailNotification({
+          referenceId: orphanedKYCUser.personaReferenceId || orphanedKYCUser.id,
+          type: "KYC_EMAIL_VERIFICATION",
+          emailTo: email.toLowerCase(),
+          success: false,
+          error: emailResult.error,
+        })
+      }
+
+      return {
+        success: false,
+        error:
+          "Unable to send verification email. Please check your email address and try again later.",
+      }
+    }
 
     // Track email notification if we found an orphaned KYC user
     if (orphanedKYCUser) {
@@ -739,12 +828,15 @@ export async function sendFindMyKYCVerificationCode(email: string): Promise<Emai
     console.error("Error sending Find My KYC verification code:", error)
     return {
       success: false,
-      error: "Failed to send verification code. Please try again.",
+      error: "An unexpected error occurred. Please try again later.",
     }
   }
 }
 
-export async function validateFindMyKYCCode(email: string, verificationCode: string): Promise<EmailResponse & { kycUser?: any }> {
+export async function validateFindMyKYCCode(
+  email: string,
+  verificationCode: string,
+): Promise<EmailResponse & { kycUser?: any }> {
   const session = await auth()
   const userId = session?.user?.id
 
