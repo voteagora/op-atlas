@@ -230,7 +230,6 @@ async function createKYCUser({
         id: existingUser.id,
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
-        businessName: existingUser.businessName,
         status: existingUser.status,
         email: existingUser.email,
       })
@@ -243,7 +242,6 @@ async function createKYCUser({
         email: email.toLowerCase(),
         firstName,
         lastName,
-        businessName,
         status,
         expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
       },
@@ -282,7 +280,6 @@ async function createKYCUser({
       id: newUser.id,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
-      businessName: newUser.businessName,
       status: newUser.status,
       email: newUser.email,
     })
