@@ -16,14 +16,16 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel"
 import { CarouselPagination } from "@/components/ui/carousel-pagination"
+import { useGitHubMissions } from "@/hooks/api/useGithubMissions"
 import { MissionData, MISSIONS } from "@/lib/MissionsAndRoundData"
 import { cn } from "@/lib/utils"
 import { auditGrantsData } from "@/lib/utils/auditGrantsData"
 import { foundationMissionsData } from "@/lib/utils/foundationMissions"
+import { governanceFundMissionsData } from "@/lib/utils/governanceFundMissionsData"
 import { growthGrantsData } from "@/lib/utils/growthGrantsData"
 import { retroFundingDevToolingData } from "@/lib/utils/retroFundingDevToolingData"
 import { retroFundingOnchainBuildersData } from "@/lib/utils/retroFundingOnchainBuildersData"
-import { useGitHubMissions } from "@/hooks/api/useGithubMissions"
+
 import TrackedLink from "../common/TrackedLink"
 
 const missionsMap = {
@@ -44,6 +46,10 @@ const missionsMap = {
     bestFor: "established apps",
   },
   [foundationMissionsData.pageName]: {
+    icon: <CodeFill fill="#0f111a" />,
+    bestFor: "",
+  },
+  [governanceFundMissionsData.pageName]: {
     icon: <CodeFill fill="#0f111a" />,
     bestFor: "",
   },

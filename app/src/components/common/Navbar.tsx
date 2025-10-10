@@ -54,6 +54,10 @@ export const grantLinks = [
     title: "Foundation Missions",
     href: "/missions/foundation-missions",
   },
+  {
+    title: "Governance Fund Missions",
+    href: "/missions/governance-fund-missions",
+  },
 ]
 
 export const Navbar = () => {
