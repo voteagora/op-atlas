@@ -87,8 +87,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${riforma.className}`}>
+    <html lang="en" className={riforma.variable}>
+      <body className={riforma.className}>
         <Providers>
           <ErrorBoundary>
             <AppDialogs />
