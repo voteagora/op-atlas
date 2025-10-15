@@ -28,7 +28,7 @@ const PersonalKYCUserRow = ({ kycUser }: { kycUser: KYCUser }) => {
       <div className="flex flex-row justify-between items-center w-full">
         <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
           <StatusIcon status={kycUser.status as ExtendedPersonaStatus} size={4} />
-          <p className="font-[Inter] font-normal text-sm text-text-foreground truncate">
+          <p className="font-riforma font-normal text-sm text-text-foreground truncate">
             {values.join(", ")}
           </p>
           {kycUser.status === "APPROVED" && kycUser.expiry && (

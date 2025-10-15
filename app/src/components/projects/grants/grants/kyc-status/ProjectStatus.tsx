@@ -60,10 +60,10 @@ const ProjectStatus = ({
       </div>
       {status === "PENDING" ? (
         <>
-          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center text-text-foreground">
+          <p className="font-riforma font-normal text-[14px] leading-[20px] text-center text-text-foreground">
             We are checking for verifications
           </p>
-          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-secondary">
+          <p className="font-riforma font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-secondary">
             An email from compliance@optimism.io has been sent to each person
             declared in the grant eligibility form. They must complete KYC/KYB
             via the link provided. Please ensure everyone has taken action and
@@ -72,10 +72,10 @@ const ProjectStatus = ({
         </>
       ) : (
         <>
-          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center text-text-destructive">
+          <p className="font-riforma font-normal text-[14px] leading-[20px] text-center text-text-destructive">
             Your grant delivery address cannot be verified
           </p>
-          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-destructive">
+          <p className="font-riforma font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-destructive">
             One or more of the associated parties is having an issue with their
             verification process. Please reach out to us at&nbsp;
             <a href="mailto:compliance@optimism.io" className="underline">

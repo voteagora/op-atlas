@@ -100,6 +100,7 @@
       Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
       "Segoe UI Emoji";
   }
+  
   h2 {
     @apply text-2xl font-normal;
   }
@@ -171,4 +172,11 @@
 
 .fc-authkit-signin-button button {
   @apply px-4 py-2 !text-sm !font-normal !border;
+}
+
+/* Block Google Fonts Inter from loading */
+@font-face {
+  font-family: 'Inter';
+  src: local('');
+  unicode-range: U+0000-FFFF;
 }

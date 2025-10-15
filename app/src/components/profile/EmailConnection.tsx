@@ -28,7 +28,7 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
             alt="Verified"
             className="mr-1"
           />
-          <span className="text-secondary-foreground text-sm font-[Inter]">{email}</span>
+          <span className="text-secondary-foreground text-sm font-riforma">{email}</span>
         </div>
       )}
       <Button
