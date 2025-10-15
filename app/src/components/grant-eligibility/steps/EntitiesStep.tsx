@@ -484,7 +484,7 @@ function VerifiedEntityRow({
             checked={checked}
             onChange={(e) => onToggle(item.id, e.target.checked, index)}
           />
-          <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-text-foreground">
+          <p className="font-riforma font-normal text-[14px] leading-[20px] text-text-foreground">
             {[
               item.businessName,
               `${item.controllerFirstName} ${item.controllerLastName}`.trim(),

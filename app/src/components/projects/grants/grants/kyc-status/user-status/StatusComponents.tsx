@@ -126,7 +126,7 @@ const EmailSendButton = ({
           }}
           className="rounded-md px-2 py-1 hover:bg-button-secondary hover:border hover:border-button-secondary hover:cursor-pointer active:border active:border-b-accent"
         >
-          <p className="font-[Inter] font-normal text-[14px] leading-[20px] tracking-[0%]">
+          <p className="font-riforma font-normal text-[14px] leading-[20px] tracking-[0%]">
             Resend email
           </p>
         </div>
@@ -149,7 +149,7 @@ const EmailSendButton = ({
 }
 
 const RowText = ({ values }: { values: string[] }) => (
-  <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-text-foreground">
+  <p className="font-riforma font-normal text-[14px] leading-[20px] text-text-foreground">
     {values.filter(Boolean).join(", ")}
   </p>
 )
