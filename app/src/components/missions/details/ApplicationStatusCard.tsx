@@ -136,6 +136,35 @@ export const ApplicationStatusCard = ({
         </Button>
       </div>
     )
+  } else if (mission?.pageName === "governance-fund-missions") {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <p className="font-semibold hidden md:block">Explore missions</p>
+
+        <p className="text-sm text-secondary-foreground text-center mb-2">
+          View opportunities in the Optimism Governance Forum via the Mission
+          Request section
+        </p>
+        <Button
+          className="bg-optimismRed text-white w-full border-0"
+          variant={"outline"}
+          onClick={() => {
+            buttonClickHandler({
+              href: "https://gov.optimism.io/tag/mission-request",
+              text: "Visit forum",
+              type: "application",
+            })
+            window.open(
+              "https://gov.optimism.io/tag/mission-request",
+              "_blank",
+              "noopener,noreferrer",
+            )
+          }}
+        >
+          Visit forum
+        </Button>
+      </div>
+    )
   }
   if (isLoading) {
     return (

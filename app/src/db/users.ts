@@ -308,9 +308,17 @@ export async function upsertUser({
 
 export async function deleteUserEmails(uid: string) {
   try {
+    // Only delete verified emails that don't have active verification processes
+    // This preserves unverified emails with verification tokens (like KYC email verification)
     await prisma.userEmail.deleteMany({
       where: {
         userId: uid,
+        verified: true,
+        verificationToken: null,
+        OR: [
+          { verificationTokenExpiresAt: null },
+          { verificationTokenExpiresAt: { lt: new Date() } }, // Expired tokens
+        ],
       },
     })
   } catch (error) {
@@ -327,16 +335,25 @@ export async function updateUserEmail({
   email?: string | null
   verified?: boolean
 }) {
-  const currentEmail = await prisma.userEmail.findFirst({
+  // Only delete verified emails that don't have pending verification tokens
+  // This preserves unverified emails with verification tokens (like KYC email verification)
+  const currentVerifiedEmail = await prisma.userEmail.findFirst({
     where: {
       userId: id,
+      verified: true,
+      verificationToken: null, // Only delete emails without pending verification
+      OR: [
+        { verificationTokenExpiresAt: null },
+        { verificationTokenExpiresAt: { lt: new Date() } }, // Expired tokens
+      ],
     },
   })
-  const deleteEmails = currentEmail
+
+  const deleteEmails = currentVerifiedEmail
     ? [
         prisma.userEmail.delete({
           where: {
-            id: currentEmail.id,
+            id: currentVerifiedEmail.id,
           },
         }),
       ]

@@ -87,6 +87,7 @@ const config = {
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
+          strong: "#0DA529",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",

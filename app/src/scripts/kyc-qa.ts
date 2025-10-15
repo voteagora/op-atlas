@@ -230,7 +230,6 @@ async function createKYCUser({
         id: existingUser.id,
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
-        businessName: existingUser.businessName,
         status: existingUser.status,
         email: existingUser.email,
       })
@@ -243,7 +242,6 @@ async function createKYCUser({
         email: email.toLowerCase(),
         firstName,
         lastName,
-        businessName,
         status,
         expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
       },
@@ -251,10 +249,24 @@ async function createKYCUser({
 
     // Send welcome email to the new user
     try {
-      const emailResult = await sendKYCStartedEmail(newUser)
+      // Re-fetch user with relations for email template
+      const newUserWithRelations = await prisma.kYCUser.findUnique({
+        where: { id: newUser.id },
+        include: {
+          KYCUserTeams: true,
+          UserKYCUsers: {
+            include: {
+              user: true
+            }
+          }
+        }
+      })
 
-      if (!emailResult.success) {
-        console.log("⚠️  Welcome email failed to send:", emailResult.error)
+      if (newUserWithRelations) {
+        const emailResult = await sendKYCStartedEmail(newUserWithRelations)
+        if (!emailResult.success) {
+          console.log("⚠️  Welcome email failed to send:", emailResult.error)
+        }
       }
     } catch (emailError) {
       console.log(
@@ -268,7 +280,6 @@ async function createKYCUser({
       id: newUser.id,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
-      businessName: newUser.businessName,
       status: newUser.status,
       email: newUser.email,
     })
@@ -296,13 +307,14 @@ async function createPersonaInquiryForUser(kycUser: any) {
       )
     }
 
-    // Log the payload being sent to Persona
-    console.log("📤 Sending payload to Persona API:")
+    console.log("📤 Preparing Persona verification link:")
     console.log(
       `  User Type: ${isBusiness ? "Business (KYB)" : "Individual (KYC)"}`,
     )
     console.log(`  Template ID: ${templateId}`)
-    console.log(`  Reference ID: ${kycUser.id}`)
+    console.log(
+      `  Current reference ID: ${kycUser.personaReferenceId || "<none>"}`,
+    )
     console.log(`  First Name: ${kycUser.firstName}`)
     console.log(`  Last Name: ${kycUser.lastName}`)
     console.log(`  Email: ${kycUser.email}`)
@@ -314,9 +326,11 @@ async function createPersonaInquiryForUser(kycUser: any) {
     const result = await createPersonaInquiryLink(kycUser, templateId)
 
     if (result.success) {
-      console.log("✅ Persona inquiry created successfully!")
-      console.log(`📋 Inquiry ID: ${result.inquiryId}`)
-      console.log(`🔗 Inquiry URL: ${result.inquiryUrl}`)
+      console.log("✅ Persona verification link generated!")
+      if (result.inquiryId) {
+        console.log(`📋 Inquiry ID: ${result.inquiryId}`)
+      }
+      console.log(`🔗 Verification URL: ${result.inquiryUrl}`)
       return result
     } else {
       throw new Error(`Failed to create Persona inquiry: ${result.error}`)

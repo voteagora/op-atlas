@@ -44,7 +44,7 @@ const UserOrganizationInfoRow = ({
         <Badge variant="outline" className="h-[24px] shrink-0 capitalize">
           {organization?.role}
         </Badge>
-        {isCitizen && <CitizenshipBadge />}
+        {isCitizen && <CitizenshipBadge variant="icon" />}
         <div className="h-full flex flex-row-reverse items-center w-fit ml-1.5">
           {organization?.organization?.team.slice(0, 5).map((teamUser) => (
             <Avatar key={teamUser.id} className="w-6 h-6 -ml-1.5 bg-secondary">

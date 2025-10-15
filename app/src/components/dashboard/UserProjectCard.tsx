@@ -169,7 +169,7 @@ const UserProjectCard = ({
               </Badge>
             )}
 
-            {isCitizen && <CitizenshipBadge />}
+            {isCitizen && <CitizenshipBadge variant="icon" />}
 
             {/* {project.contracts.length > 0 ? (
               <div className="h-full flex flex-row-reverse items-center w-fit mr-3">

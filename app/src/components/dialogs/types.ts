@@ -12,6 +12,8 @@ export type DialogType =
   | "delete_kyc_team"
   | "import_from_farcaster"
   | "governance_address"
+  | "kyc_email_verification"
+  | "find_my_kyc"
 
 export type DialogProps<T> = {
   open: boolean

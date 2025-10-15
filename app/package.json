@@ -27,7 +27,8 @@
     "studio": "prisma studio",
     "graphql:generate": "pnpm graphql-codegen",
     "process:oso-data": "tsx src/scripts/process-oso-data.ts",
-    "blacklist:project": "tsx src/scripts/blacklist-project.ts"
+    "blacklist:project": "tsx src/scripts/blacklist-project.ts",
+    "seed:kyc-sample": "prisma db push && tsx src/scripts/seed-kyc-sample.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -105,6 +106,7 @@
     "graphql-request": "^7.1.0",
     "graphql-tag": "^2.12.6",
     "html2canvas": "^1.4.1",
+    "jose": "^6.1.0",
     "lucide-react": "^0.363.0",
     "mixpanel-browser": "^2.50.0",
     "motion": "^12.23.9",

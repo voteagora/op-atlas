@@ -1,4 +1,4 @@
-import { KYCUser, Prisma } from "@prisma/client"
+import { KYCUser, Prisma, KYCStatus } from "@prisma/client"
 
 /**
  * Type representing a Project with its KYC team information.
@@ -44,10 +44,37 @@ export enum EmailState {
   SENDING = "SENDING",
   SENT = "SENT",
 }
+
+// Minimal shape for a Legal Entity contact used in status rows
+export type LegalEntityContact = {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  businessName?: string
+  status?: KYCStatus | null
+  expiry?: Date | string | null
+  // discriminator
+  kycUserType?: "LEGAL_ENTITY"
+}
+
+// Union of supported targets for status rows and resend actions
+export type KYCOrLegal = KYCUser | LegalEntityContact
+
 export interface KYCUserStatusProps {
-  user: KYCUser
+  user: KYCOrLegal
   isUser?: boolean
-  handleEmailResend: (kycUser: KYCUser) => void
+  handleEmailResend: (target: KYCOrLegal) => void
   emailResendBlock?: boolean
   emailState: EmailState
+}
+
+// Type guard: determine if a KYCOrLegal target is a LegalEntityContact
+export function isLegalEntityContact(target: KYCOrLegal): target is LegalEntityContact {
+  return (
+    typeof target === "object" &&
+    target !== null &&
+    "kycUserType" in target &&
+    (target as Partial<LegalEntityContact>).kycUserType === "LEGAL_ENTITY"
+  )
 }

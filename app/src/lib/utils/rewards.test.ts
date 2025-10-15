@@ -38,7 +38,7 @@ describe("processStream", () => {
         status: "PENDING" | "APPROVED" | "REJECTED"
         expiry: Date
         personaStatus: null
-        kycUserType: "USER"
+        personaReferenceId: string | null
       }
     }> = [],
   ): KYCStreamTeam => ({
@@ -109,7 +109,7 @@ describe("processStream", () => {
       status,
       expiry: new Date(),
       personaStatus: null,
-      kycUserType: "USER" as const,
+      personaReferenceId: null,
     },
   })
 

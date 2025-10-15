@@ -1,7 +1,7 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
-import { Mail } from "lucide-react"
+import Image from "next/image"
 
 import { Button } from "@/components/common/Button"
 import { useUser } from "@/hooks/db/useUser"
@@ -9,7 +9,7 @@ import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 
 export const EmailConnection = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId, enabled: true })
-  const { linkEmail, updateEmail, unlinkEmail } = usePrivyEmail(userId)
+  const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { user: privyUser } = usePrivy()
 
   const email = user?.emails[0]?.email || privyUser?.email?.address
@@ -18,11 +18,17 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
     privyUser?.email?.address?.toLowerCase()
 
   return (
-    <div className="flex space-x-1.5">
+    <div className="flex">
       {email && (
-        <div className={`input-container ${isSyncing ? "opacity-50" : ""}`}>
-          <Mail size={16} fill="#0F111A" color="#fff" />
-          <span>{email}</span>
+        <div className={`flex flex-row gap-2 min-w-0 flex-1 input-container ${isSyncing ? "opacity-50" : ""}`}>
+          <Image
+            src="/assets/icons/circle-check-green.svg"
+            height={16.67}
+            width={16.67}
+            alt="Verified"
+            className="mr-1"
+          />
+          <span className="text-secondary-foreground text-sm font-[Inter]">{email}</span>
         </div>
       )}
       <Button
@@ -37,12 +43,6 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
       >
         {email ? "Update" : "Add email"}
       </Button>
-
-      {email && (
-        <Button variant="secondary" onClick={unlinkEmail}>
-          Delete
-        </Button>
-      )}
     </div>
   )
 }
