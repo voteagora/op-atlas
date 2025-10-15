@@ -24,7 +24,7 @@ const KYCSubSection = ({
   return (
     <div className="flex flex-col gap-[8px] max-w-[664px]">
       <div className="flex items-center justify-between">
-        <p className="font-[Inter] font-medium text-[14px] leading-[20px] text-text-foreground">
+        <p className="font-[Inter] font-normal text-[14px] leading-[20px] text-text-foreground">
           {title}
         </p>
         {kycTeamId && organizationId && isAdmin && (

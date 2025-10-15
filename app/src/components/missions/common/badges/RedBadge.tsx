@@ -15,7 +15,7 @@ export const RedBadge = ({
   return (
     <Badge
       className={cn(
-        `text-sm font-medium text-rose-800 border-0 bg-rose-200`,
+        `text-sm font-normal text-rose-800 border-0 bg-rose-200`,
         className,
       )}
       variant={"outline"}

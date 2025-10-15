@@ -96,15 +96,15 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    font-family: var(--font-riforma), ui-sans-serif, system-ui, -apple-system,
       Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
       "Segoe UI Emoji";
   }
   h2 {
-    @apply text-2xl font-semibold;
+    @apply text-2xl font-normal;
   }
   h3 {
-    @apply text-lg font-semibold;
+    @apply text-lg font-normal;
   }
   p {
     @apply text-base font-normal text-inherit;
@@ -161,7 +161,7 @@
   }
 
   .text-h4 {
-    @apply font-semibold text-xl;
+    @apply font-normal text-xl;
   }
 }
 
@@ -170,5 +170,5 @@
 }
 
 .fc-authkit-signin-button button {
-  @apply px-4 py-2 !text-sm !font-semibold !border;
+  @apply px-4 py-2 !text-sm !font-normal !border;
 }

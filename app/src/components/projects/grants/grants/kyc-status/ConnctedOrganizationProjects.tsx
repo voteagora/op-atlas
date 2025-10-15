@@ -57,7 +57,7 @@ const ProjectRow = ({ project }: { project: Project }) => {
             <div className="w-full h-full bg-gray-200 rounded-sm"></div>
           )}
         </div>
-        <p className="font-inter text-sm font-normal leading-5">
+        <p className="font-riforma text-sm font-normal leading-5">
           {project.name}
         </p>
       </div>

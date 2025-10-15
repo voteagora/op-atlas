@@ -120,7 +120,7 @@ export const Navbar = () => {
               <div className="flex gap-12">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
-                    <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
+                    <div className="hidden sm:flex group gap-10 font-normal text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
                       <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
                         <div>Grants</div>
                         <ChevronDown size={12} />
@@ -148,7 +148,7 @@ export const Navbar = () => {
                 </DropdownMenu>
                 <div
                   className={cn(
-                    "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
+                    "hidden sm:flex group gap-10 font-normal text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
                     isProjects
                       ? "border-b-4 border-[#0F111A] text-text-default"
                       : "",
@@ -167,7 +167,7 @@ export const Navbar = () => {
                 </div>
                 <div
                   className={cn(
-                    "hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
+                    "hidden sm:flex group gap-10 font-normal text-text-muted h-full self-stretch hover:border-b-4 hover:border-[#0F111A] hover:text-text-default",
                     isGovernance
                       ? "border-b-4 border-[#0F111A] text-text-default"
                       : "",
@@ -186,7 +186,7 @@ export const Navbar = () => {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
-                    <div className="hidden sm:flex group gap-10 font-semibold text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
+                    <div className="hidden sm:flex group gap-10 font-normal text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
                       <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
                         <div>More</div>
                         <ChevronDown size={12} />

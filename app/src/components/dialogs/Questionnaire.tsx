@@ -41,7 +41,7 @@ const Questionnaire = ({
         <div className="flex flex-col h-full">
           {/* Header Section */}
           <DialogHeader className="p-6 space-y-2">
-            <p className="text-xl font-semibold leading-7 tracking-[0px] text-text-default text-center">
+            <p className="text-xl font-normal leading-7 tracking-[0px] text-text-default text-center">
               {title}
             </p>
             {titleAltText && (

@@ -138,14 +138,14 @@ export const FundingApplication = ({
                 alt="Submitted"
               />
               <div className="flex flex-col text-success-foreground">
-                <p className="font-medium text-sm">
+                <p className="font-normal text-sm">
                   Application submitted on{" "}
                   {format(applications[0].createdAt, "MMMM d, h:mm a")}
                 </p>
               </div>
             </div>
             <ExternalLink
-              className="text-sm text-success-foreground font-medium"
+              className="text-sm text-success-foreground font-normal"
               href={`${EAS_URL_PREFIX}${applications[0].attestationId}`}
             >
               View attestation
@@ -289,7 +289,7 @@ export const FundingApplication = ({
               I agree to the{" "}
               <ExternalLink
                 href="https://www.optimism.io/data-privacy-policy"
-                className="font-medium"
+                className="font-normal"
               >
                 Optimism Foundation&apos;s Privacy Policy
               </ExternalLink>
@@ -302,7 +302,7 @@ export const FundingApplication = ({
           See{" "}
           <ExternalLink
             href="https://www.optimism.io/data-privacy-policy"
-            className="font-medium"
+            className="font-normal"
           >
             Optimism&apos;s Privacy Policy
           </ExternalLink>{" "}

@@ -26,7 +26,7 @@ function NoRewardsDialog({ open, onOpenChange }: DialogProps<object>) {
             alt="Sunny face"
           />
           <div className="flex flex-col gap-2">
-            <DialogTitle className="text-center text-lg font-semibold text-text-default">
+            <DialogTitle className="text-center text-lg font-normal text-text-default">
               Your project did not receive rewards in Round 4
             </DialogTitle>
             <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">

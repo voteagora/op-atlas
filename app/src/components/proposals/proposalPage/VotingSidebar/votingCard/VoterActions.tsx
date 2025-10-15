@@ -103,7 +103,7 @@ const CardAction = ({
   if (loading) {
     return (
       <div
-        className={`rounded-md border border-solid p-3 w-full sm:w-[256px] h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle}`}
+        className={`rounded-md border border-solid p-3 w-full sm:w-[256px] h-10 flex items-center justify-center font-normal text-sm leading-5 font-riforma ${buttonStyle}`}
       >
         <Loader2 className="h-5 w-5 animate-spin" />
       </div>
@@ -114,7 +114,7 @@ const CardAction = ({
     <button
       onClick={handleAction}
       disabled={disabled}
-      className={`rounded-md border-solid p-3 w-full sm:w-[256px] h-10 flex items-center justify-center font-medium text-sm leading-5 font-inter ${buttonStyle} ${
+      className={`rounded-md border-solid p-3 w-full sm:w-[256px] h-10 flex items-center justify-center font-normal text-sm leading-5 font-riforma ${buttonStyle} ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >

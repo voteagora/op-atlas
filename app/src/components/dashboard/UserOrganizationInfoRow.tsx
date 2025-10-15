@@ -38,7 +38,7 @@ const UserOrganizationInfoRow = ({
         href={`/profile/organizations/${organization.organizationId}`}
         className="flex gap-2 justify-center items-center "
       >
-        <h3 className="max-w-48 ml-1 text-xl font-semibold text-ellipsis overflow-hidden text-nowrap capitalize">
+        <h3 className="max-w-48 ml-1 text-xl font-normal text-ellipsis overflow-hidden text-nowrap capitalize">
           {organization?.organization.name}
         </h3>
         <Badge variant="outline" className="h-[24px] shrink-0 capitalize">
@@ -54,7 +54,7 @@ const UserOrganizationInfoRow = ({
           ))}
         </div>
         {!isOrganizationSetupComplete(organization.organization) && (
-          <p className="text-sm font-medium text-secondary-foreground">
+          <p className="text-sm font-normal text-secondary-foreground">
             Finish setting up your org
           </p>
         )}

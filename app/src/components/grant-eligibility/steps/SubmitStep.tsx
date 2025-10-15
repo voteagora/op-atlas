@@ -187,7 +187,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
   return (
     <div className="space-y-8 w-full">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-xl font-normal">
           Are you ready to submit this form?
         </h2>
         <p className="text-base text-secondary-foreground">
@@ -201,7 +201,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         <div>
           <label
             htmlFor="grant-type"
-            className="block text-sm font-medium mb-2"
+            className="block text-sm font-normal mb-2"
           >
             Grant type
           </label>
@@ -218,7 +218,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         <div>
           <label
             htmlFor="grant-delivery-address"
-            className="block text-sm font-medium mb-2"
+            className="block text-sm font-normal mb-2"
           >
             Grant delivery address
           </label>
@@ -234,7 +234,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         {/* Responsible Individuals and Signers */}
         {signers.length > 0 && (
           <div>
-            <p className="block text-sm font-medium mb-2">
+            <p className="block text-sm font-normal mb-2">
               Responsible individuals and signers
             </p>
             <div className="space-y-2">
@@ -254,7 +254,7 @@ export default function SubmitStep({ onSuccess }: SubmitStepProps) {
         {/* Legal Entities */}
         {(selectedExistingEntities.length > 0 || entities.length > 0) && (
           <div>
-            <p className="block text-sm font-medium mb-2">Legal entities</p>
+            <p className="block text-sm font-normal mb-2">Legal entities</p>
             <div className="space-y-2">
               {selectedExistingEntities.map((e) => (
                 <Input

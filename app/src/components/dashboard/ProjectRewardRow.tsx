@@ -29,7 +29,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
             />
           )}
           <div className="flex-1 min-w-0 text-nowrap overflow-hidden overflow-ellipsis mr-8 flex-col">
-            <div className="font-semibold ">
+            <div className="font-normal ">
               {project.name} - Round {reward.roundId}
             </div>
             <div className="text-sm text-secondary-foreground">
@@ -43,7 +43,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
               width={24}
               alt="Optimism"
             />
-            <div className="font-semibold">
+            <div className="font-normal">
               {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
               {formatNumber(reward.amount)}
             </div>

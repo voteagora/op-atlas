@@ -134,7 +134,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
         <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
           <DialogHeader className="flex flex-col items-center gap-4">
             <div className="flex flex-col gap-2">
-              <DialogTitle className="text-center text-lg font-semibold text-text-default">
+              <DialogTitle className="text-center text-lg font-normal text-text-default">
                 Make an organization
               </DialogTitle>
               <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">

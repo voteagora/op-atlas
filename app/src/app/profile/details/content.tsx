@@ -20,13 +20,13 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-foreground text-base font-medium mb-4">
+      <div className="text-foreground text-base font-normal mb-4">
         Photo, display name, username and bio.
       </div>
       <div className="border border-border rounded-xl p-6">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Photo</div>
+            <div className="text-foreground font-normal text-sm">Photo</div>
             <Avatar className="!w-20 !h-20">
               <AvatarImage src={imageUrl || ""} alt="avatar" />
               <AvatarFallback className="w-20 h-20 flex items-center justify-center rounded-full border border-tertiary" style={{ backgroundColor: '#F2F3F8' }}>
@@ -36,17 +36,17 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Name</div>
+            <div className="text-foreground font-normal text-sm">Name</div>
             <Input value={username ?? ""} disabled />
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Username</div>
+            <div className="text-foreground font-normal text-sm">Username</div>
             <Input value={username ? `@${username}` : ""} disabled />
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-medium text-sm">Bio</div>
+            <div className="text-foreground font-normal text-sm">Bio</div>
             <Textarea value={bio} disabled className="h-20 resize-none" />
           </div>
 

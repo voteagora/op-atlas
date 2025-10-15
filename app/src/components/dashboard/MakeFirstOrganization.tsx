@@ -31,7 +31,7 @@ const MakeFirstOrganization = ({
             />
           </div>
           <div className="flex flex-col text-start">
-            <h3 className="text-base font-semibold">Make an organization</h3>
+            <h3 className="text-base font-normal">Make an organization</h3>
             <p className="text-base font-normal text-secondary-foreground">
               Group your team&apos;s projects in one place.
             </p>

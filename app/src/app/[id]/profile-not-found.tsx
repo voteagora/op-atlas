@@ -14,7 +14,7 @@ const ProfileNotFound = ({ params }: { params: { id: string } }) => {
         height={80}
       />
 
-      <div className="text-center justify-center text-foreground text-2xl font-semibold leading-loose">
+      <div className="text-center justify-center text-foreground text-2xl font-normal leading-loose">
         {shortenAddress(addressParam)}
       </div>
 

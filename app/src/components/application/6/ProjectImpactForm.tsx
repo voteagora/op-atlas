@@ -128,7 +128,7 @@ const ProjectImpactForm = ({
                 alt=""
               />
               <div className="flex flex-col text-start">
-                <h5 className="text-base font-semibold text-secondary-foreground truncate w-96 ">
+                <h5 className="text-base font-normal text-secondary-foreground truncate w-96 ">
                   {project.name}
                 </h5>
                 <p>Admin</p>
@@ -145,7 +145,7 @@ const ProjectImpactForm = ({
                     height={11.6}
                     width={11.6}
                   />
-                  <p className="font-medium text-sm text-success-foreground">
+                  <p className="font-normal text-sm text-success-foreground">
                     View attestation
                   </p>
                 </ExternalLink>
@@ -160,10 +160,10 @@ const ProjectImpactForm = ({
           <AccordionContent className="pb-0">
             <div className="mt-12 flex flex-col gap-y-12">
               <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-semibold text-text-default">
+                <h3 className="text-xl font-normal text-text-default">
                   Category
                 </h3>
-                <h5 className="text-sm font-medium text-foreground mt-4">
+                <h5 className="text-sm font-normal text-foreground mt-4">
                   Choose a category of impact for this project
                   <span className="text-destructive">*</span>
                 </h5>
@@ -207,7 +207,7 @@ const ProjectImpactForm = ({
               </div>
 
               <div className="flex flex-col gap-6">
-                <h4 className="text-xl font-semibold text-text-default">
+                <h4 className="text-xl font-normal text-text-default">
                   Impact statement
                 </h4>
                 <p className="text-sm text-secondary-foreground">
@@ -250,7 +250,7 @@ const ProjectImpactForm = ({
                     ?.sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10))
                     .map((impactStatement) => (
                       <div key={impactStatement.id}>
-                        <h6 className="text-sm font-medium">
+                        <h6 className="text-sm font-normal">
                           {impactStatement.question}
                           <span className="text-destructive">*</span>
                         </h6>
@@ -297,7 +297,7 @@ const ProjectImpactForm = ({
                                       placeholder="Add a response"
                                     />
                                     <span className="absolute bottom-2.5 left-3 text-[10px] text-muted-foreground space-x-1">
-                                      <span className="font-medium">
+                                      <span className="font-normal">
                                         {field?.value?.length}/1000
                                       </span>
                                       <span className="text-muted-foreground">
@@ -345,7 +345,7 @@ const CategoryItem = ({
         </span>
 
         <div>
-          <h6 className="text-sm font-medium">{name}</h6>
+          <h6 className="text-sm font-normal">{name}</h6>
           <p className="text-sm text-secondary-foreground">{description}</p>
         </div>
         <div className="min-w-[64px] h-[64px] flex justify-center items-center rounded-2xl">
@@ -360,7 +360,7 @@ const CategoryItem = ({
       </div>
       {selectedValue === value && (
         <div className="flex flex-col gap-y-1.5 pl-8 w-full">
-          <h5 className="text-sm font-medium text-foreground mt-4 w-full">
+          <h5 className="text-sm font-normal text-foreground mt-4 w-full">
             Which option describes your project?
             <span className="text-destructive">*</span>
           </h5>
@@ -398,7 +398,7 @@ const CategoryItem = ({
                         <div className="flex-grow">
                           <label
                             htmlFor={option}
-                            className="text-sm font-medium"
+                            className="text-sm font-normal"
                           >
                             {title}
                           </label>
@@ -435,7 +435,7 @@ const CategoryItem = ({
                           <div className="flex-grow">
                             <label
                               htmlFor={option}
-                              className="text-sm font-medium"
+                              className="text-sm font-normal"
                             >
                               {title}
                             </label>

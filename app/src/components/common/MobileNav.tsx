@@ -15,14 +15,14 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
     <div className="fixed z-50 bg-white text-black top-18 left-0 w-full h-[calc(100vh-72px)] py-6 px-8 flex flex-col gap-6">
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-          <AccordionTrigger className="text-2xl font-semibold hover:no-underline">
+          <AccordionTrigger className="text-2xl font-normal hover:no-underline">
             Grants
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-6 py-6">
             {grantLinks.map((item, index) => (
               <Link
                 key={index}
-                className="flex items-center text-sm font-medium gap-1"
+                className="flex items-center text-sm font-normal gap-1"
                 href={item.href}
                 onClick={onClose}
               >
@@ -33,14 +33,14 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
         </AccordionItem>
       </Accordion>
       <Link
-        className="text-2xl font-semibold"
+        className="text-2xl font-normal"
         href="/round/results"
         onClick={onClose}
       >
         Recipients
       </Link>
       <Link
-        className="text-2xl font-semibold"
+        className="text-2xl font-normal"
         href="/governance"
         onClick={onClose}
       >
@@ -48,14 +48,14 @@ export function MobileNav({ onClose }: { onClose: () => void }) {
       </Link>
       <Accordion type="single" collapsible>
         <AccordionItem value="item-1">
-          <AccordionTrigger className="text-2xl font-semibold hover:no-underline">
+          <AccordionTrigger className="text-2xl font-normal hover:no-underline">
             More
           </AccordionTrigger>
           <AccordionContent className="flex flex-col gap-6 py-6">
             {dropdownList.map((item, index) => (
               <ExternalLink
                 key={index}
-                className="flex items-center text-sm font-medium gap-1"
+                className="flex items-center text-sm font-normal gap-1"
                 href={item.href}
               >
                 <div>{item.title}</div>

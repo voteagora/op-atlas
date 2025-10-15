@@ -34,7 +34,7 @@ export const ChainAppRequirements = ({
       return (
         <ConditionRow isMet={true}>
           You&apos;ve added email in Atlas:{" "}
-          <span className="font-semibold">{email.email}</span> |{" "}
+          <span className="font-normal">{email.email}</span> |{" "}
           <button
             type="button"
             className={LINK_STYLE}
@@ -68,7 +68,7 @@ export const ChainAppRequirements = ({
       return (
         <ConditionRow isMet={true}>
           You&apos;ve added a governance address in Atlas:{" "}
-          <span className="font-semibold">
+          <span className="font-normal">
             {truncateAddress(govAddress.address as string)}
           </span>{" "}
           |{" "}
@@ -122,7 +122,7 @@ export const ChainAppRequirements = ({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="font-semibold text-xl text-foreground">Requirements</div>
+      <div className="font-normal text-xl text-foreground">Requirements</div>
       <div className="flex flex-col gap-1 text-secondary-foreground">
         <ConditionRow isMet={true}>
           {qualification.type === CITIZEN_TYPES.chain

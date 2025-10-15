@@ -178,7 +178,7 @@ export function VerifyAddressDialog({
                 className="resize-none"
               />
               {error && (
-                <p className="text-destructive text-sm font-medium">{error}</p>
+                <p className="text-destructive text-sm font-normal">{error}</p>
               )}
             </div>
             <Button

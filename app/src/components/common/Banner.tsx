@@ -25,7 +25,7 @@ export const Banner = () => {
 
   if (status === "unauthenticated") {
     return (
-      <div className="flex w-full bg-[#3374DB] text-white py-3 items-center justify-center text-[14px] font-medium">
+      <div className="flex w-full bg-[#3374DB] text-white py-3 items-center justify-center text-[14px] font-normal">
         <button
           onClick={() => {
             localStorage.setItem(LOCAL_STORAGE_LOGIN_REDIRECT, "/citizenship")
@@ -41,7 +41,7 @@ export const Banner = () => {
   }
 
   return (
-    <div className="flex w-full bg-[#3374DB] text-white py-3 items-center justify-center text-[14px] font-medium">
+    <div className="flex w-full bg-[#3374DB] text-white py-3 items-center justify-center text-[14px] font-normal">
       <Link
         href="/citizenship"
         className="hover:underline flex flex-row gap-2 items-center"

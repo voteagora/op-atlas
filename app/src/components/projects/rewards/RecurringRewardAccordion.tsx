@@ -77,7 +77,7 @@ const RewardAccordion = ({
       <div className="flex flex-col gap-2">
         <div className="flex flex-col space-y-2">
           <div>
-            <p className="font-medium text-foreground text-sm">
+            <p className="font-normal text-foreground text-sm">
               {REWARDS_NAMES[rewardRoundId].name}
             </p>
             <span className="text-secondary-foreground font-normal text-sm">
@@ -92,7 +92,7 @@ const RewardAccordion = ({
             {reward.kycTeam && linkToStream && teamVerified && (
               <button
                 type="button"
-                className="text-secondary-foreground text-xs font-medium bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                className="text-secondary-foreground text-xs font-normal bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
                 onClick={() =>
                   handleCopyAddress(reward?.kycTeam?.walletAddress ?? "")
                 }
@@ -127,7 +127,7 @@ const RewardAccordion = ({
       <div className="flex flex-col gap-4 pt-4">
         {stoppedStreams.length > 0 && (
           <div className="flex flex-col gap-2">
-            <div className="font-medium text-sm text-foreground">Notes</div>
+            <div className="font-normal text-sm text-foreground">Notes</div>
             {stoppedStreams.map((stream) => (
               <StreamStoppedSection key={stream.id} stream={stream} />
             ))}

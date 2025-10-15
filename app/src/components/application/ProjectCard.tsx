@@ -72,7 +72,7 @@ export const ProjectCard = memo(function ProjectCard({
         )}
         <p
           className={cn(
-            "text-lg font-semibold truncate",
+            "text-lg font-normal truncate",
             isIneligible && "opacity-50",
           )}
         >
@@ -87,7 +87,7 @@ export const ProjectCard = memo(function ProjectCard({
               height={14}
               width={14}
             />
-            <p className="font-medium text-sm text-success-foreground">
+            <p className="font-normal text-sm text-success-foreground">
               Submitted
             </p>
           </div>

@@ -282,7 +282,7 @@ export default function EntitiesStep() {
   return (
     <div className="space-y-8 w-full">
       <div className="space-y-4 mb-20">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-xl font-normal">
           Please provide information for any organizations or legal entities
           linked to this grant as a beneficiary or controller.
         </h2>
@@ -363,7 +363,7 @@ const EntitiesFormList = ({
       {entities.map((entity, index) => (
         <div key={index} className="space-y-6 relative group">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Entity {index + 1}</h3>
+            <h3 className="text-lg font-normal">Entity {index + 1}</h3>
             <Button
               type="button"
               variant="secondary"
@@ -379,7 +379,7 @@ const EntitiesFormList = ({
             <div>
               <label
                 htmlFor={`company-${index}`}
-                className="block text-sm font-medium mb-2"
+                className="block text-sm font-normal mb-2"
               >
                 Company
               </label>
@@ -395,7 +395,7 @@ const EntitiesFormList = ({
             <div>
               <label
                 htmlFor={`controller-first-name-${index}`}
-                className="block text-sm font-medium mb-2"
+                className="block text-sm font-normal mb-2"
               >
                 Controller first name
               </label>
@@ -413,7 +413,7 @@ const EntitiesFormList = ({
             <div>
               <label
                 htmlFor={`controller-last-name-${index}`}
-                className="block text-sm font-medium mb-2"
+                className="block text-sm font-normal mb-2"
               >
                 Controller last name
               </label>
@@ -431,7 +431,7 @@ const EntitiesFormList = ({
             <div>
               <label
                 htmlFor={`controller-email-${index}`}
-                className="block text-sm font-medium mb-2"
+                className="block text-sm font-normal mb-2"
               >
                 Controller email
               </label>
@@ -522,7 +522,7 @@ function VerifiedEntities({
 }) {
   return (
     <div className="space-y-8 w-full">
-      <h2 className="text-xl font-semibold">Verified Entities</h2>
+      <h2 className="text-xl font-normal">Verified Entities</h2>
       <p className="text-base text-secondary-foreground">
         If structural changes have been made to any of your verified entities
         (ex: new business controller), please don’t select them. Instead, add a

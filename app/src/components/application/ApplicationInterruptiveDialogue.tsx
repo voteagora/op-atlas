@@ -27,7 +27,7 @@ function ApplicationInterruptiveDialogue({
         <DialogHeader className="flex flex-col items-center gap-4">
           <Badge
             variant="secondary"
-            className="text-sm font-medium text-text-secondary"
+            className="text-sm font-normal text-text-secondary"
           >
             Announcement
           </Badge>
@@ -38,7 +38,7 @@ function ApplicationInterruptiveDialogue({
             alt="application announcement"
           />
           <div className="flex flex-col gap-2">
-            <DialogTitle className="text-center text-xl font-semibold text-text-default">
+            <DialogTitle className="text-center text-xl font-normal text-text-default">
               Now taking applications for Retro Funding Round 5: OP Stack
             </DialogTitle>
             <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">

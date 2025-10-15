@@ -39,7 +39,7 @@ export const RewardedProjectContainer = ({
             height={64}
           />
           <div>
-            <p className="font-semibold overflow-none line-clamp-1 group-hover:underline text-base">
+            <p className="font-normal overflow-none line-clamp-1 group-hover:underline text-base">
               {project.name}
             </p>
             <p className="text-secondary-foreground line-clamp-4 text-sm">

@@ -32,7 +32,7 @@ export function GrantInfoCallout({
 
           <div className="ml-3">
             <span className="text-sm text-secondary-foreground">{title}</span>
-            <span className="font-medium block text-text-default">
+            <span className="font-normal block text-text-default">
               {description}
             </span>
           </div>

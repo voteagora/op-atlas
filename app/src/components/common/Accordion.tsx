@@ -54,7 +54,7 @@ export default function Accordion({
       {items?.map(({ content, title }, index) => {
         const wrappedTitle =
           typeof title === "string" ? (
-            <h4 className="font-medium text-sm">{title}</h4>
+            <h4 className="font-normal text-sm">{title}</h4>
           ) : (
             title
           )

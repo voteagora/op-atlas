@@ -20,7 +20,7 @@ function GovernanceAddressDialog({ open, onOpenChange }: DialogProps<object>) {
       <DialogContent className="max-w-md max-h-[80vh]">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2 text-center">
-            <div className="font-semibold">Governance Wallet</div>
+            <div className="font-normal">Governance Wallet</div>
             <div className="text-sm text-muted-foreground">
               Optimism will issue a citizen badge to the wallet of your choice.
             </div>

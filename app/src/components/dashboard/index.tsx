@@ -125,7 +125,7 @@ const Dashboard = ({
       {visibleCardsCount < cardComponents.length && (
         <Button
           variant="ghost"
-          className="text-sm font-medium text-secondary-foreground !p-0 justify-center"
+          className="text-sm font-normal text-secondary-foreground !p-0 justify-center"
           onClick={handleShowMore}
         >
           Show 1 more
@@ -268,7 +268,7 @@ const Dashboard = ({
               href="https://gov.optimism.io/t/retro-funding-4-onchain-builders-round-details/7988"
               className="flex items-center gap-x-2 no-underline text-secondary-foreground"
             >
-              <p className="text-sm font-medium">
+              <p className="text-sm font-normal">
                 Learn more about Retro Funding Round 4
               </p>
               <ArrowUpRight size={16} />
@@ -282,7 +282,7 @@ const Dashboard = ({
             onClick={() => setJoinProjectDialogOpen(true)}
             className="flex items-center justify-center gap-x-2 no-underline text-secondary-foreground"
           >
-            <p className="text-sm font-medium">
+            <p className="text-sm font-normal">
               Join an existing project or organization
             </p>
           </Button>
@@ -292,7 +292,7 @@ const Dashboard = ({
       <p className="text-sm text-secondary-foreground text-center">
         Need support?
         <ExternalLink
-          className="font-bold"
+          className="font-normal"
           href="https://discord.com/invite/optimism"
         >
           {" "}

@@ -52,7 +52,7 @@ export const SunnyGuide = () => {
         aria-label="Open Sunny guide to help find the right grant program"
       >
         <RiveComponent className="w-full h-full hidden md:block" />
-        <div className="md:hidden inline-flex flex-col text-center justify-center text-[#b80018] text-xl font-semibold leading-7 group-hover:underline mt-6">
+        <div className="md:hidden inline-flex flex-col text-center justify-center text-[#b80018] text-xl font-normal leading-7 group-hover:underline mt-6">
           <div className="">Not sure?</div>
           <div>Sunny can help you find the right grant program</div>
         </div>
@@ -65,7 +65,7 @@ export const SunnyGuide = () => {
         />
 
         <div className="hidden md:inline-flex justify-start items-center gap-2 absolute  bottom-[64px]">
-          <div className="justify-center text-[#b80018] text-xl font-semibold leading-7 group-hover:underline">
+          <div className="justify-center text-[#b80018] text-xl font-normal leading-7 group-hover:underline">
             Not sure? Sunny can help you find the right grant program
           </div>
           <ArrowRightS className="w-6 h-6" fill="#b80018" />

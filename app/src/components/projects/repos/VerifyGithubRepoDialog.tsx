@@ -203,7 +203,7 @@ const SearchRepoStep = ({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="text-center text-lg font-semibold text-foreground">
+        <DialogTitle className="text-center text-lg font-normal text-foreground">
           First, let&apos;s find your repo
         </DialogTitle>
         <DialogDescription className="text-center text-base font-normal text-secondary-foreground mt-1">
@@ -341,7 +341,7 @@ const VerifyFundingStep = ({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="text-center text-lg font-semibold text-text-default">
+        <DialogTitle className="text-center text-lg font-normal text-text-default">
           {hasFundingFile
             ? "Please add the following to your project's funding.json file"
             : "Please add this JSON file to the root of your project"}
@@ -352,7 +352,7 @@ const VerifyFundingStep = ({
       </DialogHeader>
 
       <div className="flex flex-col w-full gap-1">
-        <p className="text-sm font-medium">funding.json</p>
+        <p className="text-sm font-normal">funding.json</p>
         <div className="relative w-full">
           <Button
             size="sm"
@@ -422,7 +422,7 @@ const ContractCodeStep = ({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="text-center text-lg font-semibold text-text-default">
+        <DialogTitle className="text-center text-lg font-normal text-text-default">
           Confirmation
         </DialogTitle>
         <DialogDescription className="text-center text-base font-normal text-secondary-foreground mt-1">
@@ -437,7 +437,7 @@ const ContractCodeStep = ({
             checked={containsContracts}
             onCheckedChange={toggleContainsContracts}
           />
-          <p className="text-sm font-medium">
+          <p className="text-sm font-normal">
             This repo contains contract code
           </p>
         </div>

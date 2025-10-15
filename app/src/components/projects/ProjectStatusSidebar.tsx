@@ -92,7 +92,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         isLoading={dashboardLoading}
         onClick={handleGoBack}
         variant="ghost"
-        className="text-sm font-medium !p-0 ml-2"
+        className="text-sm font-normal !p-0 ml-2"
       >
         {project?.organization?.organization?.name ?? "Your projects"}
         <Image
@@ -104,7 +104,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         />
       </Button>
 
-      <h2 className="max-w-48 line-clamp-2 text-2xl font-semibold text-secondary-foreground pl-2">
+      <h2 className="max-w-48 line-clamp-2 text-2xl font-normal text-secondary-foreground pl-2">
         {project?.name ?? "New project"}
       </h2>
 
@@ -127,7 +127,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
                 className={cn(
                   "flex items-center justify-start gap-2",
                   currentPage === option.toLowerCase()
-                    ? "font-medium text-foreground"
+                    ? "font-normal text-foreground"
                     : "",
                 )}
               >
@@ -179,7 +179,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               <Link
                 className={cn([
                   {
-                    "font-medium text-foreground": currentPage === "rewards",
+                    "font-normal text-foreground": currentPage === "rewards",
                   },
                 ])}
                 href={`/projects/${project.id}/rewards`}
@@ -188,7 +188,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               </Link>
               {(unclaimedCount > 0 ||
                 (recurringRewards && recurringRewards.length > 0)) && (
-                <div className="text-xs font-medium text-red-600 bg-red-200 rounded-md px-2 py-0.5">
+                <div className="text-xs font-normal text-red-600 bg-red-200 rounded-md px-2 py-0.5">
                   {unclaimedCount + (recurringRewards?.length ?? 0)}
                 </div>
               )}
@@ -197,7 +197,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               <Link
                 className={cn([
                   {
-                    "font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap":
+                    "font-normal text-foreground overflow-hidden text-ellipsis whitespace-nowrap":
                       currentPage === "grant-address",
                   },
                 ])}
@@ -264,7 +264,7 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
   if (projectStatus == "APPROVED") return null
   return (
     <div className="flex items-center justify-center bg-red-200 w-[80px] h-5 rotate-[0deg] opacity-100 rounded-full py-[2px] px-2">
-      <p className="text-red-600 font-inter font-medium text-[12px] leading-[16px] tracking-[0%] text-center">
+      <p className="text-red-600 font-riforma font-normal text-[12px] leading-[16px] tracking-[0%] text-center">
         Incomplete
       </p>
     </div>

@@ -49,20 +49,20 @@ export default function Grants({ funding }: GrantsProps) {
                   />
                 )}
                 <p>
-                  <span className="font-medium text-foreground">{grant}</span>
+                  <span className="font-normal text-foreground">{grant}</span>
                   <span className="text-secondary-foreground">
                     {" "}
                     · {formattedDate}
                   </span>
                 </p>
               </div>
-              <span className="font-medium">{formatNumber(amount, 0)} OP</span>
+              <span className="font-normal">{formatNumber(amount, 0)} OP</span>
             </li>
           )
         })}
         <li className="pt-2">
           <hr className="w-full" />
-          <div className="w-full flex items-center justify-between space-x-2 pt-4 text-foreground font-medium px-6">
+          <div className="w-full flex items-center justify-between space-x-2 pt-4 text-foreground font-normal px-6">
             <span>Total</span>
             <span>
               {formatNumber(

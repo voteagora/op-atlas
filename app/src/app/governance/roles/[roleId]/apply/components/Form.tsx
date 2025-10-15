@@ -49,7 +49,7 @@ export const Form = ({
   return (
     <div className="flex flex-col gap-20 w-full">
       <div className="flex flex-col gap-4 mt-14">
-        <div className="text-xl font-semibold">Nominate as:</div>
+        <div className="text-xl font-normal">Nominate as:</div>
 
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">

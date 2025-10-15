@@ -89,7 +89,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
     if (addresses.length > 0) {
       return (
         <div className="flex flex-col gap-2">
-          <div className="font-medium text-sm text-foreground">
+          <div className="font-normal text-sm text-foreground">
             Your verified addresses
           </div>
 
@@ -146,7 +146,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
       {user && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="font-medium text-sm text-foreground">
+            <span className="font-normal text-sm text-foreground">
               Safe address for Top 100 Delegates
             </span>
           </div>

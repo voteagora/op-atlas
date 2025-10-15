@@ -31,7 +31,7 @@ export function DocumentCallout({
           </div>
         }
         rightAlignedContent={
-          <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-medium">
+          <div className="flex items-center gap-1 ml-auto shrink-0 text-sm font-normal">
             <ArrowUpRightIcon width={16} height={16} />
           </div>
         }

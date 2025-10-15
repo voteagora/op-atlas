@@ -84,7 +84,7 @@ export const SafeContextWrapper = ({
         <div className="bg-card p-8 rounded-lg border shadow-lg max-w-md mx-4">
           <div className="flex items-center gap-3 mb-4">
             <AlertTriangle className="h-6 w-6 text-orange-500" />
-            <h3 className="text-lg font-semibold">Feature Not Available</h3>
+            <h3 className="text-lg font-normal">Feature Not Available</h3>
           </div>
 
           <div className="space-y-4 text-sm text-muted-foreground">
@@ -100,7 +100,7 @@ export const SafeContextWrapper = ({
             <div className="bg-muted p-3 rounded">
               <div className="flex items-center gap-2 mb-2">
                 <Wallet className="h-4 w-4" />
-                <span className="font-medium">Current Wallet Context</span>
+                <span className="font-normal">Current Wallet Context</span>
               </div>
               <div className="text-xs">
                 <div className="flex justify-between">

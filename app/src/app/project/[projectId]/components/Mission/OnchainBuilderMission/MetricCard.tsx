@@ -30,12 +30,12 @@ export default function MetricCard({
       className="flex flex-col justify-between p-6 bg-background rounded-xl border"
     >
       <div className="w-full flex items-center justify-between space-x-1">
-        <p className="font-semibold text-base">{formattedValue}</p>
+        <p className="font-normal text-base">{formattedValue}</p>
         {/* TODO: Add trend back in later */}
         {/* {value && trend?.value !== "0" ? (
           <div
             className={cn([
-              "px-2.5 py-1 rounded-full text-xs font-medium flex space-x-1 items-center",
+              "px-2.5 py-1 rounded-full text-xs font-normal flex space-x-1 items-center",
               {
                 "bg-green-100 text-green-foreground":
                   trend?.type === "increase",

@@ -35,7 +35,7 @@ export const SuperchainGrantCard = ({
       {/* Chain Badge */}
       <div className="absolute top-8 right-7">
         <div className="bg-secondary px-2 py-1 rounded-full">
-          <span className="text-xs font-medium text-secondary-foreground">
+          <span className="text-xs font-normal text-secondary-foreground">
             {grant.chain}
           </span>
         </div>
@@ -59,7 +59,7 @@ export const SuperchainGrantCard = ({
           <div className="flex flex-col gap-2">
             <h3
               className={cn(
-                "text-xl font-semibold leading-7 text-text-default group-hover:underline",
+                "text-xl font-normal leading-7 text-text-default group-hover:underline",
               )}
             >
               {grant.name}

@@ -93,7 +93,7 @@ export const GrantsInfo = () => {
         <div
           className={cn(
             status.textColor,
-            "text-center text-sm font-medium leading-[20px]",
+            "text-center text-sm font-normal leading-[20px]",
           )}
         >
           {status.text}
@@ -122,7 +122,7 @@ export const GrantsInfo = () => {
             {renderStatusPill(mission)}
           </div>
           <div className="flex flex-col gap-2">
-            <div className="text-text-default text-xl font-semibold leading-7 group-hover:underline">
+            <div className="text-text-default text-xl font-normal leading-7 group-hover:underline">
               {mission.name === "Onchain Builders" ||
               mission.name === "Dev Tooling"
                 ? `Retro Funding: ${mission.name}`

@@ -13,7 +13,7 @@ const AddFirstProject = ({ className }: { className?: string }) => {
       <div className="flex items-center justify-center border border-dashed border-muted rounded-xl h-12 w-12">
         <Image src="/assets/icons/plus.svg" width={20} height={20} alt="Plus" />
       </div>
-      <h3 className="text-base font-semibold">Add your first project</h3>
+      <h3 className="text-base font-normal">Add your first project</h3>
     </div>
   )
 }

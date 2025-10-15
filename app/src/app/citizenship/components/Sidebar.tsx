@@ -49,7 +49,7 @@ export const Sidebar = ({
     <div className="w-full flex flex-col text-center items-center gap-6 border border-border-secondary rounded-lg p-6">
       <EligibleCitizenAvatar user={user} qualification={qualification} />
 
-      <div className="text-sm font-semibold text-secondary-foreground">
+      <div className="text-sm font-normal text-secondary-foreground">
         {renderCopy()}
       </div>
 

@@ -73,7 +73,7 @@ export const RewardedProjectCrousel = ({
               ) : (
                 <div className="w-full h-full md:w-[100px] md:h-[100px] rounded-lg border border-tertiary bg-[#F2F3F8]"></div>
               )}
-              <div className="text-center text-base font-medium leading-normal text-secondary-foreground group-hover:underline line-clamp-2">
+              <div className="text-center text-base font-normal leading-normal text-secondary-foreground group-hover:underline line-clamp-2">
                 {project.name}
               </div>
             </div>
@@ -87,7 +87,7 @@ export const RewardedProjectCrousel = ({
                   width={18}
                   height={18}
                 />
-                <div className="text-center text-[#b80018] text-sm font-medium leading-tight">
+                <div className="text-center text-[#b80018] text-sm font-normal leading-tight">
                   {formatNumber(totalReward, 0, "compact")}
                 </div>
               </div>
@@ -101,7 +101,7 @@ export const RewardedProjectCrousel = ({
   return (
     <div className="inline-flex flex-col justify-start items-center gap-6 text-foreground">
       <div className="self-stretch inline-flex justify-between">
-        <div className="justify-start text-xl font-semibold leading-7">
+        <div className="justify-start text-xl font-normal leading-7">
           Over 500 projects have been rewarded
         </div>
         <TrackedLink
@@ -115,7 +115,7 @@ export const RewardedProjectCrousel = ({
           }}
           className="hidden md:flex px-4 py-2.5 rounded-md border border-tertiary flex justify-center items-center gap-2 hover:underline hover:bg-[#F2F3F8]"
         >
-          <div className="justify-start text-sm font-medium leading-tight">
+          <div className="justify-start text-sm font-normal leading-tight">
             See all
           </div>
           <ArrowRightS className="w-4 h-4" />
