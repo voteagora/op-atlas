@@ -3,6 +3,7 @@
 import { Role, RoleApplication } from "@prisma/client"
 import { toast } from "sonner"
 
+import { Button } from "@/components/common/Button"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
@@ -109,8 +110,34 @@ export default function SidebarApplications({
   }
 
   const renderFooter = () => {
-    // Temporarily hide the vote button until the vote link is live
-    return null
+    const proposalId = (role as unknown as { proposalId?: string | null })
+      ?.proposalId
+    if (!isSecurityRole || !proposalId || !isVotingPhase) return null
+
+    const onClick = async () => {
+      try {
+        const res = await fetch(`/api/agora/proposal-status?id=${proposalId}`)
+        const data = (await res.json()) as { ok: boolean }
+        if (data.ok) {
+          window.open(
+            `https://vote.optimism.io/proposals/${proposalId}`,
+            "_blank",
+          )
+        } else {
+          // best effort: do nothing if not live
+        }
+      } catch (e) {
+        // swallow; avoid noisy UX
+      }
+    }
+
+    return (
+      <div className="mx-4 mb-6">
+        <Button className="w-full" onClick={onClick}>
+          Vote on Agora
+        </Button>
+      </div>
+    )
   }
 
   return (
