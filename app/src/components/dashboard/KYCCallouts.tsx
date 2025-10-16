@@ -15,7 +15,7 @@ interface KYCInProgressCalloutProps {
 
 function KYCInProgressCallout({ kycTeam }: KYCInProgressCalloutProps) {
   const linkPath = kycTeam.projectId
-    ? `/project/${kycTeam.projectId}/grant-address`
+    ? `/projects/${kycTeam.projectId}/grant-address`
     : `/profile/organizations/${kycTeam.organizationId}/grant-address`
 
   return (
