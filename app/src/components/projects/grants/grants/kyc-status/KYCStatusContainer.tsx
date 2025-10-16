@@ -352,7 +352,7 @@ const KYCStatusPresenter = ({
             )}
             {showEditFooter && isAdmin && (
               <div className="flex flex-row w-full max-w-[664px] justify-center items-center gap-2">
-                <p className="font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
+                <p className="font-riforma text-[14px] font-[400] leading-[20px] text-center">
                   Is something missing or incorrect?
                 </p>
                 <span
@@ -368,7 +368,7 @@ const KYCStatusPresenter = ({
                   aria-label="Start KYC process over"
                   className="cursor-pointer"
                 >
-                  <p className="underline font-[Inter] text-[14px] font-[400] leading-[20px] text-center">
+                  <p className="underline font-riforma text-[14px] font-[400] leading-[20px] text-center">
                     Start over
                   </p>
                 </span>

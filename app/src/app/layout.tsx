@@ -5,8 +5,8 @@ import { Loader2 } from "lucide-react"
 import type { Metadata } from "next"
 import localFont from "next/font/local"
 
-import AppDialogs from "@/components/dialogs/AppDialogs"
 import ErrorBoundary from "@/components/common/ErrorBoundary"
+import AppDialogs from "@/components/dialogs/AppDialogs"
 import { CheckIconFilled } from "@/components/icons/checkIconFilled"
 import { InfoIconFilled } from "@/components/icons/infoIconFilled"
 import { Toaster } from "@/components/ui/sonner"
@@ -87,8 +87,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${riforma.className}`}>
+    <html lang="en" className={riforma.variable}>
+      <body className={riforma.className}>
         <Providers>
           <ErrorBoundary>
             <AppDialogs />
