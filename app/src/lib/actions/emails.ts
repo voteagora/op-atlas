@@ -652,6 +652,11 @@ export async function sendFindMyKYCVerificationCode(
     const existingUserKyc = await prisma.userKYCUser.findFirst({
       where: {
         userId,
+        kycUser: {
+          expiry: {
+            gt: new Date(),
+          },
+        },
       },
       include: {
         kycUser: true,
