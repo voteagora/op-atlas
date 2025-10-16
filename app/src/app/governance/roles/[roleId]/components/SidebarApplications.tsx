@@ -3,7 +3,6 @@
 import { Role, RoleApplication } from "@prisma/client"
 import { toast } from "sonner"
 
-import { Button } from "@/components/common/Button"
 import { UserAvatar } from "@/components/common/UserAvatar"
 import ExternalLink from "@/components/ExternalLink"
 import { ArrowRightS } from "@/components/icons/remix"
@@ -42,17 +41,33 @@ export default function SidebarApplications({
   endorsementEndAt: Date | null
 }) {
   const { data: t100, isLoading: loadingTop } = useIsTop100()
-  const { isVotingPhase, isEndorsementPhase, isNominationPhase } =
+  const { isVotingPhase, isEndorsementPhase, isNominationPhase, isClosed } =
     getRolePhaseStatus(role)
   const withinWindow =
     isEndorsementPhase ||
     (SC_ALLOW_APPROVAL_DURING_NOMINATION && isNominationPhase)
-  // Siempre obtenemos los conteos para poder mostrar el número y el overlay
+  // Always fetch counts to show the badge and hovercard
   const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
     enabled: true,
   })
 
   const isTop100 = Boolean(t100?.top100)
+
+  // Post-endorsement is when voting is active or the role is closed
+  const isPostEndorsementPhase = isVotingPhase || isClosed
+
+  // Map counts by application id for O(1) lookups when filtering
+  const countByApplicationId = new Map<number, number>(
+    (counts || []).map((c) => [c.nomineeApplicationId, c.count]),
+  )
+
+  // For Security Role after endorsements, only show candidates with >= 8 approvals
+  const displayedApplications =
+    isSecurityRole && isPostEndorsementPhase && applications
+      ? applications.filter(
+          (app) => (countByApplicationId.get(app.id) || 0) >= 8,
+        )
+      : applications
 
   if ((!applications || applications.length === 0) && !isSecurityRole) {
     return null
@@ -94,38 +109,21 @@ export default function SidebarApplications({
   }
 
   const renderFooter = () => {
-    const proposalId = (role as unknown as { proposalId?: string | null })
-      ?.proposalId
-    if (isSecurityRole && proposalId && isVotingPhase) {
-      return (
-        <div className="mx-4 mb-6">
-          <Button
-            className="w-full"
-            onClick={() =>
-              window.open(
-                `${process.env.NEXT_PUBLIC_AGORA_API_URL}proposals/${proposalId}`,
-                "_blank",
-              )
-            }
-          >
-            Vote on Agora
-          </Button>
-        </div>
-      )
-    }
+    // Temporarily hide the vote button until the vote link is live
+    return null
   }
 
   return (
     <>
       <div className="w-full flex flex-col border border-border-secondary rounded-lg">
         {renderHeader()}
-        {applications && applications.length > 0 ? (
+        {displayedApplications && displayedApplications.length > 0 ? (
           <div className="flex flex-col p-6">
             <div className="text-secondary-foreground text-sm font-normal mb-2">
-              {applications.length} candidate
-              {applications.length > 1 ? "s" : ""}
+              {displayedApplications.length} candidate
+              {displayedApplications.length > 1 ? "s" : ""}
             </div>
-            {applications?.map((application) =>
+            {displayedApplications?.map((application) =>
               application.userId ? (
                 <UserCandidate
                   key={application.id}
