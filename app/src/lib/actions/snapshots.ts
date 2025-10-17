@@ -31,8 +31,6 @@ import {
 import { getUnpublishedContractChanges } from "./projects"
 import { verifyMembership } from "./utils"
 
-export const maxDuration = 300;
-
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
 
