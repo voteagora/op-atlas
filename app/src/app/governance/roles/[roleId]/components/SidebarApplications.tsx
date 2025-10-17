@@ -110,25 +110,11 @@ export default function SidebarApplications({
   }
 
   const renderFooter = () => {
-    const proposalId = (role as unknown as { proposalId?: string | null })
-      ?.proposalId
+    const proposalId = (role as unknown as { proposalId?: string | null })?.proposalId
     if (!isSecurityRole || !proposalId || !isVotingPhase) return null
 
-    const onClick = async () => {
-      try {
-        const res = await fetch(`/api/agora/proposal-status?id=${proposalId}`)
-        const data = (await res.json()) as { ok: boolean }
-        if (data.ok) {
-          window.open(
-            `https://vote.optimism.io/proposals/${proposalId}`,
-            "_blank",
-          )
-        } else {
-          // best effort: do nothing if not live
-        }
-      } catch (e) {
-        // swallow; avoid noisy UX
-      }
+    const onClick = () => {
+      window.open(`https://vote.optimism.io/proposals/${proposalId}`, "_blank")
     }
 
     return (
