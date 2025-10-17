@@ -4,12 +4,28 @@ import { KYCStreamTeam, KYCTeamWithTeam } from "../types"
 import { RecurringRewardKycTeam } from "./rewards"
 
 export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
+  const now = new Date()
+
   return Boolean(
     kycTeam &&
       !kycTeam.deletedAt &&
       kycTeam.team.length > 0 &&
+      // Check all KYCUsers are APPROVED and not expired
       kycTeam.team.every(
-        (teamMember) => teamMember.users.status === "APPROVED",
+        (teamMember) =>
+          teamMember.users.status === "APPROVED" &&
+          teamMember.users.expiry &&
+          new Date(teamMember.users.expiry) > now
+      ) &&
+      // Check all KYCLegalEntities are APPROVED and not expired (if any exist)
+      (
+        !kycTeam.KYCLegalEntityTeams ||
+        kycTeam.KYCLegalEntityTeams.length === 0 ||
+        kycTeam.KYCLegalEntityTeams.every(
+          (entityTeam) =>
+            entityTeam.legalEntity.status === "APPROVED" &&
+            (!entityTeam.legalEntity.expiry || new Date(entityTeam.legalEntity.expiry) > now)
+        )
       ) &&
       !kycTeam.projects.some((project) => project.blacklist),
   )
@@ -18,12 +34,28 @@ export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
 export function isKycStreamTeamVerified(
   kycTeam?: KYCStreamTeam | RecurringRewardKycTeam,
 ) {
+  const now = new Date()
+
   return Boolean(
     kycTeam &&
       !kycTeam.deletedAt &&
       kycTeam.team.length > 0 &&
+      // Check all KYCUsers are APPROVED and not expired
       kycTeam.team.every(
-        (teamMember) => teamMember.users.status === "APPROVED",
+        (teamMember) =>
+          teamMember.users.status === "APPROVED" &&
+          teamMember.users.expiry &&
+          new Date(teamMember.users.expiry) > now
+      ) &&
+      // Check all KYCLegalEntities are APPROVED and not expired (if any exist)
+      (
+        !kycTeam.KYCLegalEntityTeams ||
+        kycTeam.KYCLegalEntityTeams.length === 0 ||
+        kycTeam.KYCLegalEntityTeams.every(
+          (entityTeam) =>
+            entityTeam.legalEntity.status === "APPROVED" &&
+            (!entityTeam.legalEntity.expiry || new Date(entityTeam.legalEntity.expiry) > now)
+        )
       ),
   )
 }
