@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
 import { sendKYCReminderEmail, sendKYBReminderEmail } from "@/lib/actions/emails"
-import { resolveProjectStatus } from "@/lib/utils/kyc"
+import { resolveProjectStatus, hasExpiredKYC } from "@/lib/utils/kyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { getSelectedLegalEntitiesForTeam } from "@/lib/actions/kyc"
 
@@ -208,6 +208,9 @@ const KYCStatusPresenter = ({
   const [legalSendingState, setLegalSendingState] = useState<
     Record<string, EmailState>
   >({})
+  const [legalRestartingState, setLegalRestartingState] = useState<
+    Record<string, EmailState>
+  >({})
   // Raw legal entity items linked to this KYC team; map to rows separately so
   // email spinner state updates (SENDING -> SENT) are reflected immediately.
   type SelectedTeamLegalEntity = {
@@ -325,12 +328,72 @@ const KYCStatusPresenter = ({
             }))
           }
         },
+        handleRestart: async (target: KYCOrLegal) => {
+          console.debug("[KYCLegalEntity][UI] Restart click handler invoked", {
+            target,
+            kycTeamId,
+            projectId,
+            organizationId,
+          })
+          setLegalRestartingState((prev) => ({
+            ...prev,
+            [e.id]: EmailState.SENDING,
+          }))
+
+          if (!isLegalEntityContact(target)) {
+            console.warn(
+              "[KYCLegalEntity][UI] Restart handler received a non-legal entity target.",
+              { target },
+            )
+            setLegalRestartingState((prev) => ({
+              ...prev,
+              [e.id]: EmailState.NOT_SENT,
+            }))
+            return
+          }
+
+          try {
+            const { restartKYCForExpiredLegalEntity } = await import("@/lib/actions/kyc")
+            const result = await restartKYCForExpiredLegalEntity({
+              legalEntityId: target.id,
+              kycTeamId: kycTeamId!,
+              projectId: projectId as string | undefined,
+              organizationId: organizationId as string | undefined,
+            })
+
+            if ("error" in result && result.error) {
+              toast.error(result.error)
+              setLegalRestartingState((prev) => ({
+                ...prev,
+                [e.id]: EmailState.NOT_SENT,
+              }))
+              return
+            }
+
+            setLegalRestartingState((prev) => ({
+              ...prev,
+              [e.id]: EmailState.SENT,
+            }))
+            // Trigger page refresh to show updated data
+            setTimeout(() => {
+              window.location.reload()
+            }, 1500)
+          } catch (err) {
+            console.error("[KYCLegalEntity][UI] restart handler failed", err)
+            toast.error("Failed to restart KYB")
+            setLegalRestartingState((prev) => ({
+              ...prev,
+              [e.id]: EmailState.NOT_SENT,
+            }))
+          }
+        },
         emailResendBlock: e.status === "APPROVED",
         emailState: legalSendingState[e.id] || EmailState.NOT_SENT,
+        restartState: legalRestartingState[e.id] || EmailState.NOT_SENT,
       }
     })
     setLegalEntitiesStatuses(mapped)
-  }, [legalItems, legalSendingState, projectId, organizationId, kycTeamId])
+  }, [legalItems, legalSendingState, legalRestartingState, projectId, organizationId, kycTeamId])
   return (
     <>
       <div className="flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
@@ -400,15 +463,62 @@ const ProjectKYCStatusContainer = ({
     projectId: project.id,
   })
 
+  const [restartingUsers, setRestartingUsers] = useState<Record<string, EmailState>>({})
+
+  const handleRestartKYC = useCallback(
+    async (target: KYCOrLegal) => {
+      setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.SENDING }))
+
+      try {
+        const { restartKYCForExpiredUser, restartKYCForExpiredLegalEntity } = await import("@/lib/actions/kyc")
+
+        let result
+        if (isLegalEntityContact(target)) {
+          // It's a legal entity
+          result = await restartKYCForExpiredLegalEntity({
+            legalEntityId: target.id,
+            kycTeamId: project.kycTeam!.id,
+            projectId: project.id,
+          })
+        } else {
+          // It's a KYCUser
+          result = await restartKYCForExpiredUser({
+            kycUserId: target.id,
+            kycTeamId: project.kycTeam!.id,
+            projectId: project.id,
+          })
+        }
+
+        if ("error" in result && result.error) {
+          toast.error(result.error)
+          setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.NOT_SENT }))
+        } else {
+          setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.SENT }))
+          // Trigger page refresh to show updated data
+          setTimeout(() => {
+            window.location.reload()
+          }, 1500)
+        }
+      } catch (error) {
+        console.error("Error restarting KYC:", error)
+        toast.error("Failed to restart KYC")
+        setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.NOT_SENT }))
+      }
+    },
+    [project.id, project.kycTeam]
+  )
+
   const users: KYCUserStatusProps[] | undefined = kycUsers?.map((user) => ({
     user,
     handleEmailResend:
       handleEmailResend as KYCUserStatusProps["handleEmailResend"],
+    handleRestart: handleRestartKYC,
     emailResendBlock:
       !isAdmin ||
       projectStatus === "project_issue" ||
       user.status === "APPROVED",
     emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
+    restartState: restartingUsers[user.id] || EmailState.NOT_SENT,
   }))
 
   if (isError) {
@@ -459,29 +569,72 @@ const OrganizationKYCStatusContainer = ({
       // We need to check TAM users (all users in the org's KYC team)
       // Flatten all users from the organization's KYC team structure
       const tamUsers = kycOrg.team.team.flatMap((t: any) => t.users || [])
+      const legalEntities =
+        kycOrg.team.KYCLegalEntityTeams?.map(
+          (entityTeam: any) => entityTeam.legalEntity,
+        ).filter(Boolean) ?? []
       const hasActiveStream =
         kycOrg.team.rewardStreams && kycOrg.team.rewardStreams.length > 0
+      const teamHasExpired = hasExpiredKYC(kycOrg.team)
+      const legalEntityCount = legalEntities.length
 
-      const orgStatus = (
+      const userStatus =
         tamUsers && tamUsers.length > 0
           ? resolveProjectStatus(tamUsers)
-          : "PENDING"
-      ) as import("@/components/projects/types").ExtendedPersonaStatus
+          : undefined
+      const legalHasRejected = legalEntities.some(
+        (entity: any) => entity?.status === "REJECTED",
+      )
+      const legalHasPending = legalEntities.some(
+        (entity: any) => entity?.status !== "APPROVED",
+      )
+
+      let orgStatus: import("@/components/projects/types").ExtendedPersonaStatus =
+        "PENDING"
+
+      if (teamHasExpired) {
+        orgStatus = "EXPIRED"
+      } else if (
+        userStatus === "project_issue" ||
+        legalHasRejected
+      ) {
+        orgStatus = "project_issue"
+      } else if (
+        userStatus === "PENDING" ||
+        legalHasPending
+      ) {
+        orgStatus = "PENDING"
+      } else if (
+        (userStatus === "APPROVED" || userStatus === undefined) &&
+        !legalHasPending &&
+        (tamUsers.length > 0 || legalEntityCount > 0)
+      ) {
+        orgStatus = "APPROVED"
+      }
 
       return {
         kycOrg,
         users: tamUsers,
         status: orgStatus,
         hasActiveStream,
+        legalEntityCount,
       }
     })
-    .filter((team) => team.users.length > 0) // Only show teams that have users
+    .filter(
+      (team) =>
+        team.users.length > 0 ||
+        team.legalEntityCount > 0 ||
+        team.status === "EXPIRED",
+    ) // Only show teams that have users, legal entities, or expired records
 
   const verifiedTeams = kycTeamsWithStatus.filter(
     (team) => team.status === "APPROVED",
   )
+  const expiredTeams = kycTeamsWithStatus.filter(
+    (team) => team.status === "EXPIRED",
+  )
   const inProgressTeams = kycTeamsWithStatus.filter(
-    (team) => team.status !== "APPROVED",
+    (team) => team.status !== "APPROVED" && team.status !== "EXPIRED",
   )
 
   return (
@@ -493,6 +646,25 @@ const OrganizationKYCStatusContainer = ({
             Verified
           </h4>
           {verifiedTeams.map((team) => (
+            <OrganizationKYCTeamCard
+              key={team.kycOrg.kycTeamId}
+              kycOrg={team.kycOrg}
+              users={team.users}
+              status={team.status}
+              hasActiveStream={team.hasActiveStream}
+              isAdmin={isAdmin}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Expired Addresses Section */}
+      {expiredTeams.length > 0 && (
+        <div className="space-y-6">
+          <h4 className="font-normal text-xl leading-6 text-text-default">
+            Expired
+          </h4>
+          {expiredTeams.map((team) => (
             <OrganizationKYCTeamCard
               key={team.kycOrg.kycTeamId}
               kycOrg={team.kycOrg}
@@ -544,13 +716,60 @@ const OrganizationKYCTeamCard = ({
     organizationId: kycOrg.organizationId,
   })
 
+  const [restartingUsers, setRestartingUsers] = useState<Record<string, EmailState>>({})
+
+  const handleRestartKYC = useCallback(
+    async (target: KYCOrLegal) => {
+      setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.SENDING }))
+
+      try {
+        const { restartKYCForExpiredUser, restartKYCForExpiredLegalEntity } = await import("@/lib/actions/kyc")
+
+        let result
+        if (isLegalEntityContact(target)) {
+          // It's a legal entity
+          result = await restartKYCForExpiredLegalEntity({
+            legalEntityId: target.id,
+            kycTeamId: kycOrg.kycTeamId,
+            organizationId: kycOrg.organizationId,
+          })
+        } else {
+          // It's a KYCUser
+          result = await restartKYCForExpiredUser({
+            kycUserId: target.id,
+            kycTeamId: kycOrg.kycTeamId,
+            organizationId: kycOrg.organizationId,
+          })
+        }
+
+        if ("error" in result && result.error) {
+          toast.error(result.error)
+          setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.NOT_SENT }))
+        } else {
+          setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.SENT }))
+          // Trigger page refresh to show updated data
+          setTimeout(() => {
+            window.location.reload()
+          }, 1500)
+        }
+      } catch (error) {
+        console.error("Error restarting KYC:", error)
+        toast.error("Failed to restart KYC")
+        setRestartingUsers(prev => ({ ...prev, [target.id]: EmailState.NOT_SENT }))
+      }
+    },
+    [kycOrg.kycTeamId, kycOrg.organizationId]
+  )
+
   const userMappings: KYCUserStatusProps[] = users.map((user) => ({
     user,
     handleEmailResend:
       handleEmailResend as KYCUserStatusProps["handleEmailResend"],
+    handleRestart: handleRestartKYC,
     emailResendBlock:
       !isAdmin || status === "project_issue" || user.status === "APPROVED",
     emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
+    restartState: restartingUsers[user.id] || EmailState.NOT_SENT,
   }))
 
   return (

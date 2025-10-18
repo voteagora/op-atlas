@@ -75,14 +75,22 @@ const ProjectStatus = ({
           <p className="font-riforma font-normal text-[14px] leading-[20px] text-center text-text-destructive">
             Your grant delivery address cannot be verified
           </p>
-          <p className="font-riforma font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-destructive">
-            One or more of the associated parties is having an issue with their
-            verification process. Please reach out to us at&nbsp;
-            <a href="mailto:compliance@optimism.io" className="underline">
-              compliance@optimism.io
-            </a>
-            &nbsp;for assistance.
-          </p>
+          {status === "EXPIRED" ? (
+            <p className="font-riforma font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-destructive">
+              One or more of the associated parties has an expired verification.
+              Use the <span className="font-semibold">Restart KYC</span> button
+              below to start a new verification cycle.
+            </p>
+          ) : (
+            <p className="font-riforma font-normal text-[14px] leading-[20px] text-center tracking-[0%] text-text-destructive">
+              One or more of the associated parties is having an issue with their
+              verification process. Please reach out to us at&nbsp;
+              <a href="mailto:compliance@optimism.io" className="underline">
+                compliance@optimism.io
+              </a>
+              &nbsp;for assistance.
+            </p>
+          )}
         </>
       )}
     </div>
