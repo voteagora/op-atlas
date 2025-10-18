@@ -1773,6 +1773,11 @@ export async function getKycTeamForProject({
               blacklist: true,
             },
           },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: true,
+            },
+          },
         },
       },
     },
