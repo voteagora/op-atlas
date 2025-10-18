@@ -28,22 +28,67 @@ export function isKycStreamTeamVerified(
   )
 }
 
-export function resolveProjectStatus(users: Pick<KYCUser, "status">[]) {
-  // If any users are expired, failed, or declined, return "project_issue"
+export function resolveProjectStatus(users: Pick<KYCUser, "status" | "expiry">[]) {
+  const now = new Date()
+
+  // Check for expired APPROVED users first
+  if (users.some((user) =>
+    user.status === "APPROVED" &&
+    user.expiry &&
+    new Date(user.expiry) < now
+  )) {
+    return "EXPIRED"
+  }
+
+  // If any users are REJECTED, return "project_issue"
   if (users.some((user) => user.status === "REJECTED")) {
     return "project_issue"
   }
 
-  // If any users are PENDING, resolve to "Pending"
+  // If any users are PENDING, resolve to "PENDING"
   if (users.some((user) => user.status === "PENDING")) {
     return "PENDING"
   }
 
-  // If all users are APPROVED, resolve to "Approved"
-  if (users.every((user) => user.status === "APPROVED")) {
+  // If all users are APPROVED and not expired
+  if (
+    users.every((user) => {
+      if (user.status !== "APPROVED") {
+        return false
+      }
+      if (!user.expiry) {
+        return true
+      }
+      return new Date(user.expiry) > now
+    })
+  ) {
     return "APPROVED"
   }
 
   // Default fallback
   return "PENDING"
+}
+
+export function hasExpiredKYC(kycTeam?: KYCTeamWithTeam): boolean {
+  if (!kycTeam) return false
+
+  const now = new Date()
+
+  // Check KYCUsers
+  const hasExpiredUsers = kycTeam.team.some(
+    (teamMember) =>
+      teamMember.users.status === "APPROVED" &&
+      teamMember.users.expiry &&
+      new Date(teamMember.users.expiry) < now
+  )
+
+  // Check KYCLegalEntities
+  const hasExpiredEntities = kycTeam.KYCLegalEntityTeams?.some(
+    (entityTeam) =>
+      entityTeam.legalEntity.status === "APPROVED" &&
+      entityTeam.legalEntity.expiry &&
+      new Date(entityTeam.legalEntity.expiry) < now
+  ) || false
+
+  return hasExpiredUsers || hasExpiredEntities
 }

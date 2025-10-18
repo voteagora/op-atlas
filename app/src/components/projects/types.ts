@@ -38,6 +38,7 @@ export type ProjectWithKycTeam = Prisma.ProjectGetPayload<{
 export type ExtendedPersonaStatus =
   | import("@prisma/client").KYCStatus
   | "project_issue"
+  | "EXPIRED"
 
 export enum EmailState {
   NOT_SENT = "NOT_SENT",
@@ -65,8 +66,10 @@ export interface KYCUserStatusProps {
   user: KYCOrLegal
   isUser?: boolean
   handleEmailResend: (target: KYCOrLegal) => void
+  handleRestart?: (target: KYCOrLegal) => void
   emailResendBlock?: boolean
   emailState: EmailState
+  restartState?: EmailState
 }
 
 // Type guard: determine if a KYCOrLegal target is a LegalEntityContact

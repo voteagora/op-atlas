@@ -163,6 +163,11 @@ export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
         blacklist: true
       }
     }
+    KYCLegalEntityTeams: {
+      include: {
+        legalEntity: true
+      }
+    }
   }
 }>
 
@@ -441,6 +446,7 @@ export interface UserKYCTeam {
     id: string
     status: "PENDING" | "APPROVED" | "REJECTED"
     updatedAt: Date
+    expiry: Date | null
   }>
-  status: "PENDING" | "APPROVED" | "project_issue"
+  status: "PENDING" | "APPROVED" | "EXPIRED" | "project_issue"
 }

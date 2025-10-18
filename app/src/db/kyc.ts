@@ -429,11 +429,13 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         id: teamMember.users.id,
         status: teamMember.users.status,
         updatedAt: teamMember.users.updatedAt,
+        expiry: teamMember.users.expiry,
       }))
 
       const status = resolveProjectStatus(users) as
         | "PENDING"
         | "APPROVED"
+        | "EXPIRED"
         | "project_issue"
 
       kycTeams.push({
@@ -456,12 +458,14 @@ export async function getUserKycTeams(userId: string): Promise<UserKYCTeam[]> {
         id: teamMember.users.id,
         status: teamMember.users.status,
         updatedAt: teamMember.users.updatedAt,
+        expiry: teamMember.users.expiry,
       }))
 
       const { resolveProjectStatus } = await import("@/lib/utils/kyc")
       const status = resolveProjectStatus(users) as
         | "PENDING"
         | "APPROVED"
+        | "EXPIRED"
         | "project_issue"
 
       kycTeams.push({
