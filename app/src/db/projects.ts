@@ -1767,6 +1767,11 @@ export async function getKycTeamForProject({
               users: true,
             },
           },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: true,
+            },
+          },
           rewardStreams: true,
           projects: {
             include: {
