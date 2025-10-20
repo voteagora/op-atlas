@@ -55,7 +55,7 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
         ) : (
           <>
             {!user?.notDeveloper && (
-              <Button variant="primary" onClick={linkGithub}>
+              <Button variant="secondary" onClick={linkGithub}>
                 Connect
               </Button>
             )}

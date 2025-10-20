@@ -10,6 +10,13 @@ import { updateGovForumProfileUrl } from "@/lib/actions/users"
 import { cn } from "@/lib/utils"
 
 import { Input } from "../ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export function GovForumConnection({ userId }: { userId: string }) {
   const { user, invalidate: invalidateUser } = useUser({
@@ -20,6 +27,8 @@ export function GovForumConnection({ userId }: { userId: string }) {
   const [govForumProfileUrl, setGovForumProfileUrl] = useState(
     user?.govForumProfileUrl || "",
   )
+  const [username, setUsername] = useState("")
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     if (user?.govForumProfileUrl) {
@@ -35,25 +44,29 @@ export function GovForumConnection({ userId }: { userId: string }) {
   }
 
   const handleSave = () => {
-    if (!govForumProfileUrl) {
-      toast.error("Please enter a profile URL")
+    if (!username) {
+      toast.error("Please enter a username")
       return
     }
 
-    if (user?.govForumProfileUrl === govForumProfileUrl) {
-      toast.error("Please enter a different profile URL")
+    const constructedUrl = `https://gov.optimism.io/u/${username}/summary`
+
+    if (user?.govForumProfileUrl === constructedUrl) {
+      toast.error("Please enter a different username")
       return
     }
 
-    if (!isValidGovForumUrl(govForumProfileUrl)) {
+    if (!isValidGovForumUrl(constructedUrl)) {
       toast.error(
-        "Please enter a valid gov forum profile URL (format: https://gov.optimism.io/u/yourname/summary)",
+        "Username produces invalid URL. Expected https://gov.optimism.io/u/username/summary",
       )
       return
     }
 
     toast.promise(
-      updateGovForumProfileUrl(govForumProfileUrl).then(() => invalidateUser()),
+      updateGovForumProfileUrl(constructedUrl)
+        .then(() => invalidateUser())
+        .then(() => setOpen(false)),
       {
         loading: "Updating profile URL...",
         success: "Profile URL updated successfully",
@@ -100,20 +113,36 @@ export function GovForumConnection({ userId }: { userId: string }) {
           )}
           <Input
             placeholder="https://gov.optimism.io/u/yourname/summary"
-            value={govForumProfileUrl}
-            onChange={(e) => setGovForumProfileUrl(e.target.value)}
+            value={user?.govForumProfileUrl || ""}
+            readOnly
             className={cn(user?.govForumProfileUrl && "pl-10")}
-            readOnly={!isEditing}
           />
         </div>
-        {isEditing ? (
-          <Button onClick={handleSave}>Save</Button>
-        ) : (
-          <Button onClick={() => setIsEditing(true)} variant="secondary">
-            Edit
-          </Button>
-        )}
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button variant="secondary">{user?.govForumProfileUrl ? "Edit" : "Connect"}</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Connect Governance Forum</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-2">
+              <Input
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <div className="text-xs text-secondary-foreground">
+                We will construct your profile URL as https://gov.optimism.io/u/username/summary
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={handleSave}>Save</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
 }
+
