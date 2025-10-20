@@ -89,9 +89,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
     if (addresses.length > 0) {
       return (
         <div className="flex flex-col gap-2">
-          <div className="font-normal text-sm text-foreground">
-            Your verified addresses
-          </div>
+          <div className="font-normal text-sm text-foreground">Your wallets</div>
 
           <div className="flex flex-col gap-2">
             {addresses.map(({ address, source, primary, isMismatched }) => (
@@ -138,7 +136,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
       {user && (
         <div className="flex items-center gap-2">
           <AddressConnection userId={user.id}>
-            Verify {Boolean(user?.addresses.length) && "another "}address
+            Link {Boolean(user?.addresses.length) && "another "}wallet
           </AddressConnection>
         </div>
       )}
