@@ -29,68 +29,69 @@ export default async function Page() {
     <div className="flex flex-col gap-6 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-normal">Connected Apps</h2>
 
-      <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-6">
         {/* Farcaster */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center space-x-1.5">
-            <Farcaster className="w-5 h-5" />
-            <h3 className="font-normal text-foreground">Farcaster</h3>
+        <div className="border border-border rounded-xl p-6 flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5">
+              <Farcaster className="w-5 h-5 text-foreground" />
+              <h3 className="font-medium text-foreground text-base">Farcaster</h3>
+            </div>
+            <div className="text-secondary-foreground mt-1 mb-4 text-base">
+              Connect your Farcaster account to import your username, bio, and avatar.
+            </div>
           </div>
-          <div className="text-secondary-foreground mb-4">
-            Connect your farcaster account to import your username, bio and
-            avatar.
+          <div className="flex-shrink-0">
+            <FarcasterConnection userId={session.user.id}>Connect</FarcasterConnection>
           </div>
-          <FarcasterConnection userId={session.user.id}>
-            Connect
-          </FarcasterConnection>
         </div>
 
         {/* Discord */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center space-x-1.5">
-            <Discord className="w-5 h-5" />
-            <h3 className="font-normal text-foreground">Discord</h3>
+        <div className="border border-border rounded-xl p-6 flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5">
+              <Discord className="w-5 h-5 text-foreground" />
+              <h3 className="font-medium text-foreground text-base">Discord</h3>
+            </div>
+            <div className="text-secondary-foreground mt-1 mb-4 text-base">
+              Connect your account so anyone can find you on Discord.
+            </div>
           </div>
-          <div className="text-secondary-foreground mb-4">
-            Connect your account so anyone can find you on Discord.
+          <div className="flex-shrink-0">
+            <DiscordConnection userId={session.user.id} />
           </div>
-          <DiscordConnection userId={session.user.id} />
         </div>
 
         {/* Github */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center space-x-1.5">
-            <Github className="w-5 h-5" />
-            <h3 className="font-normal text-foreground">Github</h3>
+        <div className="border border-border rounded-xl p-6 flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5">
+              <Github className="w-5 h-5 text-foreground" />
+              <h3 className="font-medium text-foreground text-base">GitHub</h3>
+            </div>
+            <div className="text-secondary-foreground mt-1 mb-4 text-base">
+              Connect your GitHub account to show your code contributions.
+            </div>
           </div>
-          <div className="text-secondary-foreground mb-4">
-            Connect your GitHub account to show your code contributions to the
-            Optimism Collective.
+          <div className="flex-shrink-0">
+            <GithubConnection userId={session.user.id} />
           </div>
-          <GithubConnection userId={session.user.id} />
         </div>
 
         {/* Gov Forum */}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center space-x-1.5">
-            <Optimism className="w-5 h-5" fill="#FF0000" />
-            <h3 className="font-normal text-foreground">
-              Collective Governance Forum
-            </h3>
+        <div className="border border-border rounded-xl p-6 flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5">
+              <Optimism className="w-5 h-5" fill="#FF0000" />
+              <h3 className="font-medium text-foreground text-base">Collective Governance Forum</h3>
+            </div>
+            <div className="text-secondary-foreground mt-1 mb-4 text-base">
+              Link your profile so anyone can find you on <a href="https://gov.optimism.io" target="_blank" rel="noopener noreferrer" className="underline">gov.optimism.io</a>.
+            </div>
           </div>
-          <div className="text-secondary-foreground mb-4">
-            Link your profile so anyone can find you on{" "}
-            <a
-              href="https://gov.optimism.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              gov.optimism.io
-            </a>
-            .
+          <div className="flex-shrink-0">
+            <GovForumConnection userId={session.user.id} />
           </div>
-          <GovForumConnection userId={session.user.id} />
         </div>
       </div>
     </div>
