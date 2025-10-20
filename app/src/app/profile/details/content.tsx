@@ -21,7 +21,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
   return (
     <div className="flex flex-col gap-2">
       <div className="text-foreground text-base font-normal mb-4">
-        Photo, display name, username and bio.
+        Photo, display name, username, and bio.
       </div>
       <div className="border border-border rounded-xl p-6">
         <div className="flex flex-col gap-6">
@@ -37,35 +37,35 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
           <div className="flex flex-col gap-2">
             <div className="text-foreground font-normal text-sm">Name</div>
-            <Input value={username ?? ""} disabled />
+            <Input value={username ?? ""} disabled className="text-secondary-foreground" />
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="text-foreground font-normal text-sm">Username</div>
-            <Input value={username ? `@${username}` : ""} disabled />
+            <Input value={username ? `@${username}` : ""} disabled className="text-secondary-foreground" />
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="text-foreground font-normal text-sm">Bio</div>
-            <Textarea value={bio} disabled className="h-20 resize-none" />
+            <Textarea value={bio} disabled className="h-20 resize-none text-secondary-foreground" />
           </div>
 
-          {user?.farcasterId && (
-            <ExtendedLink
-              as="button"
-              href="https://warpcast.com/"
-              text="Edit on Warpcast"
-            />
-          )}
+          {/* Farcaster connected - edit action below container per spec */}
         </div>
       </div>
 
       {!user?.farcasterId && (
-        <div className="mt-2">
+        <div className="mt-2 border border-border rounded-xl p-6">
           <FarcasterConnection userId={session.user.id}>
             <Farcaster fill="#FFFFFF" className="w-[20px] h-[20px]" />
             Import from Farcaster
           </FarcasterConnection>
+        </div>
+      )}
+
+      {user?.farcasterId && (
+        <div className="mt-2">
+          <ExtendedLink as="button" href="https://warpcast.com/" text="Edit on Warpcast" />
         </div>
       )}
     </div>

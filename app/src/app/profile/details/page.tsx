@@ -43,7 +43,7 @@ export default async function Page() {
       </div>
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
-          <h4 className="text-foreground text-base font-medium">Identity verification</h4>
+          <h4 className="text-foreground text-base font-medium">Identity Verification</h4>
           <Badge text="Private" className="bg-secondary text-secondary-foreground px-2 py-1" />
         </div>
         <div className="mb-4 text-base text-secondary-foreground">
