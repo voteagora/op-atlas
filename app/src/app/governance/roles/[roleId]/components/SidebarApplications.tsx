@@ -177,7 +177,7 @@ export default function SidebarApplications({
       </div>
       <div className="text-center text-sm text-secondary-foreground">
         <span className="font-normal">Need help? </span>
-        <ExternalLink href="https://discord.gg/fDWeZUNX" className="underline">
+        <ExternalLink href="https://discord.gg/tGyeUqRqgE" className="underline">
           Ask on Discord
         </ExternalLink>
       </div>

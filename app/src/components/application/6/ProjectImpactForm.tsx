@@ -198,7 +198,7 @@ const ProjectImpactForm = ({
                   Unsure which category to choose?
                   <ExternalLink
                     className="underline"
-                    href="https://discord.com/invite/optimism"
+                    href="https://discord.gg/tGyeUqRqgE"
                   >
                     {" "}
                     Get help in Discord.

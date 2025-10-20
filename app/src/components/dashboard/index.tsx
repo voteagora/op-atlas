@@ -293,7 +293,7 @@ const Dashboard = ({
         Need support?
         <ExternalLink
           className="font-normal"
-          href="https://discord.com/invite/optimism"
+          href="https://discord.gg/tGyeUqRqgE"
         >
           {" "}
           Get help in Discord.
