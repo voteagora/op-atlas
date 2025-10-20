@@ -85,7 +85,7 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
           Disconnect
         </Button>
       ) : (
-        <Button variant="primary" onClick={linkDiscord}>
+        <Button variant="secondary" onClick={linkDiscord}>
           Connect
         </Button>
       )}

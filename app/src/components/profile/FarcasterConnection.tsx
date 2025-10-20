@@ -60,7 +60,7 @@ export const FarcasterConnection = ({
         </Button>
       ) : (
         <Button
-          variant="primary"
+          variant="secondary"
           onClick={(event) => {
             event.preventDefault()
             linkFarcaster()
