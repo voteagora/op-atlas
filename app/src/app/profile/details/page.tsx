@@ -13,7 +13,7 @@ import { ProfileDetailsContent } from "./content"
 export const metadata: Metadata = {
   title: "Account Details - OP Atlas",
   description:
-    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+    "Manage your email, identity verification, and profile details.",
 }
 
 export default async function Page() {
@@ -30,9 +30,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
-      <div className="text-foreground text-2xl font-normal">
-        Account details
-      </div>
+      <div className="text-foreground text-2xl font-normal">Account Details</div>
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
           <h4 className="text-foreground text-base font-medium">Email</h4>

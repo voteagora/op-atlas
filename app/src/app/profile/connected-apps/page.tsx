@@ -14,9 +14,8 @@ import { GithubConnection } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
 
 export const metadata: Metadata = {
-  title: "Profile Connected Apps - OP Atlas",
-  description:
-    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+  title: "Connected Apps - OP Atlas",
+  description: "Connect apps like Farcaster, Discord, GitHub, and Governance Forum.",
 }
 
 export default async function Page() {
@@ -28,7 +27,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
-      <h2 className="text-foreground text-2xl font-normal">Connected apps</h2>
+      <h2 className="text-foreground text-2xl font-normal">Connected Apps</h2>
 
       <div className="flex flex-col gap-12">
         {/* Farcaster */}

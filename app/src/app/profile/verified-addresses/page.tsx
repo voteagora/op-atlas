@@ -6,9 +6,8 @@ import { auth } from "@/auth"
 import { VerifiedAddressesContent } from "./content"
 
 export const metadata: Metadata = {
-  title: "Profile Verified Addresses - OP Atlas",
-  description:
-    "Sign up on OP Atlas to vote for Citizen's House proposals, Retro Funding, and more.",
+  title: "Linked Wallets - OP Atlas",
+  description: "Link and manage your wallets for ENS, attestations, and governance.",
 }
 
 export default async function Page() {
@@ -20,12 +19,10 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
-      <h2 className="text-foreground text-2xl font-normal">
-        Verified addresses
-      </h2>
+      <h2 className="text-foreground text-2xl font-normal">Linked Wallets</h2>
       <div className="text-secondary-foreground">
-        Add a proof of ownership of an Ethereum address to your public profile,
-        so ENS and attestations can be displayed. Required for Badgeholders.
+        Link wallets to show ENS and attestations on your profile. Required for
+        Badgeholders.
       </div>
 
       <VerifiedAddressesContent userId={session.user.id} />
