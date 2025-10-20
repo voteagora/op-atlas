@@ -72,7 +72,7 @@ export function UserProfileSidebar({
             >
               •
             </div>
-            Account details
+            Account Details
           </Link>
           <Link
             href="/profile/connected-apps"
@@ -89,7 +89,7 @@ export function UserProfileSidebar({
             >
               •
             </div>
-            Connected apps
+            Connected Apps
           </Link>
           <Link
             href="/profile/verified-addresses"
@@ -106,7 +106,7 @@ export function UserProfileSidebar({
             >
               •
             </div>
-            Verified addresses
+            Linked Wallets
           </Link>
         </div>
       </div>
