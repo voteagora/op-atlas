@@ -27,7 +27,7 @@ const SOCIALS = [
   {
     name: "Discord",
     icon: <Discord />,
-    link: "https://discord.com/channels/667044843901681675/972069216343715860",
+    link: "https://discord.gg/tGyeUqRqgE",
   },
   {
     name: "Gov Forum",
@@ -267,7 +267,7 @@ export const ApplicationSubmitted = ({
         Need support?
         <ExternalLink
           className="font-normal"
-          href="https://discord.com/invite/optimism"
+          href="https://discord.gg/tGyeUqRqgE"
         >
           {" "}
           Get help in Discord.

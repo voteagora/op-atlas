@@ -222,7 +222,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         </ExternalLink>
         <ExternalLink
           className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary flex space-x-1 items-center"
-          href="https://discord.com/invite/optimism"
+          href="https://discord.gg/tGyeUqRqgE"
         >
           <span>Get help</span>
           <ChevronRight size={16} />

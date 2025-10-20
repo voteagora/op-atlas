@@ -152,7 +152,7 @@ export const auditGrantsData: MissionData = {
       title: "Discord",
       description: "Leave a message in the channel.",
       buttonText: "Join Channel",
-      buttonLink: "https://discord.com/invite/optimism",
+      buttonLink: "https://discord.gg/tGyeUqRqgE",
       externalLink: true,
       icon: <Discord />,
     },
