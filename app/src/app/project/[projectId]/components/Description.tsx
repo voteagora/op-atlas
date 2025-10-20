@@ -61,7 +61,7 @@ export default function Description({
     <div className="w-full">
       <div className="gap-x-12 space-y-4">
         <div>
-          <div className="flex items-start space-x-3">
+          <div className="flex flex-col lg:flex-row items-start lg:space-x-3">
             <Tooltip>
               <TooltipTrigger>
                 <h3 className="font-normal text-2xl text-left">
@@ -70,15 +70,15 @@ export default function Description({
               </TooltipTrigger>
               <TooltipContent>{name}</TooltipContent>
             </Tooltip>
-            <ul className="flex space-x-2">
+            <ul className="flex mt-4 lg:mt-0 lg:space-x-2">
               {tags
                 .filter((tag) => tag !== "")
                 .map((tag, i) => (
                   <li
                     key={i}
-                    className="px-2.5 py-1 rounded-full border-[1px] border-[#E0E2EB]"
+                    className="px-2.5 py-1 rounded-full border-[1px] border-[#E0E2EB] text-sm font-normal"
                   >
-                    <span className="text-sm font-normal">{tag}</span>
+                    <span>{tag}</span>
                   </li>
                 ))}
             </ul>
@@ -86,12 +86,12 @@ export default function Description({
         </div>
         <div className="divide-x-2 flex items-center space-x-2">
           {author && (
-            <div className="flex items-center space-x-2 text-secondary-foreground">
+            <div className="flex items-center lg:space-x-2 text-secondary-foreground">
               <span>By</span>
               {hasProfileLink ? (
                 <TrackedLink
                   href={`/${author?.farcasterHandle || author?.id}`}
-                  className="flex items-center space-x-2 hover:opacity-80"
+                  className="flex items-center lg:space-x-2 hover:opacity-80"
                   eventName="Link Click"
                   target="_blank"
                   eventData={{
@@ -131,7 +131,7 @@ export default function Description({
           {Boolean(deployedOn?.length) && (
             <div className="pl-2 flex items-center space-x-2">
               <span className="text-secondary-foreground">Deployed on</span>
-              <ul className="flex items-center gap-2 flex-wrap">
+              <ul className="flex items-center gap-1 lg:gap-2 flex-wrap">
                 {deployedOn!.map((network, i) => (
                   <li key={i} className="flex items-center">
                     <Tooltip>
