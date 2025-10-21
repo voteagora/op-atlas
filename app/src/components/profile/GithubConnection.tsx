@@ -53,13 +53,9 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
             Disconnect
           </Button>
         ) : (
-          <>
-            {!user?.notDeveloper && (
-              <Button variant="secondary" onClick={linkGithub}>
-                Connect
-              </Button>
-            )}
-          </>
+          <Button variant="secondary" onClick={linkGithub}>
+            Connect
+          </Button>
         )}
 
         <div
