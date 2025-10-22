@@ -298,6 +298,11 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
           users: true,
         },
       },
+      KYCLegalEntityTeams: {
+        include: {
+          legalEntity: true,
+        },
+      },
       rewardStreams: true,
       projects: {
         select: {
@@ -328,6 +333,11 @@ export async function getRewardStreamsWithRewardsForRound(roundId: string) {
           team: {
             include: {
               users: true,
+            },
+          },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: true,
             },
           },
           rewardStreams: {
@@ -473,6 +483,11 @@ export async function getProjectRecurringRewards(projectId: string) {
               team: {
                 select: {
                   users: true,
+                },
+              },
+              KYCLegalEntityTeams: {
+                include: {
+                  legalEntity: true,
                 },
               },
               rewardStreams: {

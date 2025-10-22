@@ -150,6 +150,11 @@ export async function getProjectKycTeam(projectId: string) {
               users: true,
             },
           },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: true,
+            },
+          },
           rewardStreams: true,
           projects: {
             include: {
@@ -185,6 +190,11 @@ export async function getKycTeamByWalletAddress(walletAddress: string) {
       team: {
         include: {
           users: true,
+        },
+      },
+      KYCLegalEntityTeams: {
+        include: {
+          legalEntity: true,
         },
       },
       rewardStreams: true,

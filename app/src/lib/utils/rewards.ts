@@ -133,6 +133,11 @@ export type RecurringRewardKycTeam = Prisma.KYCTeamGetPayload<{
         users: true
       }
     }
+    KYCLegalEntityTeams: {
+      include: {
+        legalEntity: true
+      }
+    }
     rewardStreams: {
       include: {
         streams: true
