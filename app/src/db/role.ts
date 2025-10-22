@@ -124,3 +124,21 @@ export async function getActiveUserRoleApplications(
 
   return applications
 }
+
+export async function getUserRoleApplications(
+  userId?: string,
+  organizationId?: string,
+): Promise<RoleApplication[]> {
+  if (!userId && !organizationId) {
+    throw new Error("Either userId or organizationId must be provided")
+  }
+
+  const applications = await prisma.roleApplication.findMany({
+    where: {
+      ...(userId && { userId }),
+      ...(organizationId && { organizationId }),
+    },
+  })
+
+  return applications
+}
