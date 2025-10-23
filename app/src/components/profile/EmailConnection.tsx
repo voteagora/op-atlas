@@ -22,14 +22,10 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
     <div className="flex">
       {email && (
         <div
-          className={`flex flex-row gap-2 min-w-0 flex-1 input-container ${
-            isSyncing ? "opacity-50" : ""
-          }`}
+          className={`flex flex-row gap-2 min-w-0 flex-1 input-container text-foreground cursor-text select-text`}
         >
           <CheckboxCircleFIll className="w-4 h-4 mr-1" fill="#1DBA6A" />
-          <span className="text-secondary-foreground text-sm font-riforma">
-            {email}
-          </span>
+          <span className="text-foreground text-sm font-riforma">{email}</span>
         </div>
       )}
       <Button

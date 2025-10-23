@@ -20,8 +20,10 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-foreground text-base font-normal mb-4">
-        Photo, display name, username, and bio.
+      <div className="flex items-center gap-2 mb-4">
+        <h4 className="text-foreground text-base font-medium">
+          Photo, display name, username, and bio
+        </h4>
       </div>
       <div className="border border-border rounded-xl p-6">
         <div className="flex flex-col gap-6">

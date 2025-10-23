@@ -29,7 +29,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
-      <div className="text-foreground text-2xl font-normal">
+      <div className="text-foreground text-2xl font-semibold">
         Account Details
       </div>
       <div className="flex flex-col">
@@ -46,7 +46,7 @@ export default async function Page() {
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
           <h4 className="text-foreground text-base font-medium">
-            Identity Verification
+            Identity verification
           </h4>
           <Badge text="Private" size="md" />
         </div>

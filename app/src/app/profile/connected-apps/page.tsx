@@ -31,7 +31,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
-      <h2 className="text-foreground text-2xl font-normal">Connected Apps</h2>
+      <h2 className="text-foreground text-2xl font-semibold">Connected Apps</h2>
 
       <div className="flex flex-col gap-6">
         {/* Farcaster */}

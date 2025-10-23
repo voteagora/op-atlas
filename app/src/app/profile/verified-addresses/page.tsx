@@ -19,7 +19,7 @@ export default async function Page() {
 
   return (
     <div className="flex flex-col gap-6 text-secondary-foreground">
-      <h2 className="text-foreground text-2xl font-normal">Linked Wallets</h2>
+      <h2 className="text-foreground text-2xl font-semibold">Linked Wallets</h2>
       <div className="text-secondary-foreground">
         Link wallets to show ENS and attestations on your profile. Required for
         Badgeholders.
