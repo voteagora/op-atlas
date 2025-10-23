@@ -4,6 +4,7 @@ import { getAddress } from "viem"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { useUser } from "@/hooks/db/useUser"
 import { useBadgeholderAddress } from "@/lib/hooks"
 import { UserAddressSource } from "@/lib/types"
@@ -59,12 +60,7 @@ export const PrimaryAddress = ({
             }}
           />
           {showCheckmark && (
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16.67}
-              width={16.67}
-              alt="Verified"
-            />
+            <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
           )}
 
           <p className="text-sm">{displayAddress}</p>
