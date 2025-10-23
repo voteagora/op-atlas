@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import {
   Dialog,
   DialogContent,
@@ -105,12 +106,7 @@ export function GovForumConnection({ userId }: { userId: string }) {
         {user?.govForumProfileUrl && (
           <div className="relative flex-1">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
-              <Image
-                src="/assets/icons/tickIcon.svg"
-                alt="Verified"
-                width={20}
-                height={20}
-              />
+              <CheckboxCircleFIll className="w-5 h-5" fill="#1DBA6A" />
             </div>
             <Input
               placeholder="https://gov.optimism.io/u/yourname/summary"

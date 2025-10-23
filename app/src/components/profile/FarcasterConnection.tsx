@@ -3,6 +3,7 @@
 import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 import { cn } from "@/lib/utils"
@@ -24,8 +25,11 @@ export const FarcasterConnection = ({
   const { user: privyUser } = usePrivy()
   const { linkFarcaster, unlinkFarcaster } = usePrivyFarcaster(userId)
 
-  const isIntermediateState = Number(user?.farcasterId || 0) !== privyUser?.farcaster?.fid
-  const username = user?.farcasterId ? user.username : privyUser?.farcaster?.username
+  const isIntermediateState =
+    Number(user?.farcasterId || 0) !== privyUser?.farcaster?.fid
+  const username = user?.farcasterId
+    ? user.username
+    : privyUser?.farcaster?.username
 
   return (
     <div className="flex flex-row gap-2">
@@ -38,12 +42,7 @@ export const FarcasterConnection = ({
                 isIntermediateState && "opacity-50",
               )}
             >
-              <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16.67}
-                width={16.67}
-                alt="Verified"
-              />
+              <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
               <p className="text-sm">@{username}</p>
             </div>
           </div>

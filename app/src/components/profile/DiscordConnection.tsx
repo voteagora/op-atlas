@@ -5,6 +5,7 @@ import Image from "next/image"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
@@ -64,12 +65,7 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
                 isSyncing && "opacity-50",
               )}
             >
-              <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16.67}
-                width={16.67}
-                alt="Verified"
-              />
+              <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
               <p className="text-sm">@{username}</p>
             </div>
           </div>
