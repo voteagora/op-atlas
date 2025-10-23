@@ -28,6 +28,21 @@ import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
+<<<<<<< HEAD
+=======
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
+import { useKYCProject } from "@/hooks/db/useKYCProject"
+import { useExpiredKYCCountForProject } from "@/hooks/db/useExpiredKYCCount"
+import { Project } from "@prisma/client"
+import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+>>>>>>> origin/main
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -203,6 +218,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               </Link>
               {/* Only shows if Project status resolves to 'PENDING' */}
               <IncompleteCard project={project} />
+              <ExpiredBadge project={project} />
             </div>
             <Separator />
           </>
@@ -218,7 +234,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         </ExternalLink>
         <ExternalLink
           className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary flex space-x-1 items-center"
-          href="https://discord.com/invite/optimism"
+          href="https://discord.gg/tGyeUqRqgE"
         >
           <span>Get help</span>
           <ChevronRight size={16} />
@@ -253,9 +269,9 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 })
 
 const IncompleteCard = ({ project }: { project: Project | null }) => {
-  const { data: kycUsers } = useKYCProject({ projectId: project?.id || "" })
-  if (!project || !project.id || !kycUsers) return null
-  const projectStatus = resolveProjectStatus(kycUsers)
+  const { data: kycData } = useKYCProject({ projectId: project?.id || "" })
+  if (!project || !project.id || !kycData) return null
+  const projectStatus = resolveProjectStatus(kycData.users, kycData.legalEntities)
 
   if (projectStatus == "APPROVED") return null
   return (
@@ -267,4 +283,30 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
   )
 }
 
-export { IncompleteCard }
+const ExpiredBadge = ({ project }: { project: Project | null }) => {
+  const { data: expiredCount } = useExpiredKYCCountForProject({
+    projectId: project?.id || "",
+    enabled: !!project?.id,
+  })
+
+  if (!expiredCount || expiredCount === 0) return null
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <Badge variant="destructive">{expiredCount}</Badge>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            {expiredCount} expired verification{expiredCount !== 1 ? "s" : ""}
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+export { IncompleteCard, ExpiredBadge }

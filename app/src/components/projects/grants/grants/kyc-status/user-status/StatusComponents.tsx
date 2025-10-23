@@ -1,4 +1,4 @@
-import { AlertTriangle, Loader2, X } from "lucide-react"
+import { AlertTriangle, Loader2, X, Check } from "lucide-react"
 import Image from "next/image"
 
 import { CheckboxCircleFIll } from "@/components/icons/remix"
@@ -9,6 +9,7 @@ import {
 } from "@/components/projects/types"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { isExpired } from "@/lib/utils/kyc"
 
 interface StatusIconProps {
   status: ExtendedPersonaStatus
@@ -16,9 +17,9 @@ interface StatusIconProps {
 }
 
 const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
-  const sizeInPx = size * 4 // Convert size units to pixels (5 -> 20px)
-
   switch (status) {
+    case "EXPIRED":
+      return <X className={cn(`h-${size} w-${size}`, "text-red-500")} />
     case "PENDING":
       return <Loader2 className={cn(`h-${size} w-${size}`, "animate-spin")} />
     case "APPROVED":
@@ -50,19 +51,22 @@ const StatusRow = ({
   handleEmailResend,
   emailState,
 }: KYCUserStatusProps) => {
+  const expired = isExpired(user)
+  const displayStatus = expired ? "EXPIRED" : (user.status as ExtendedPersonaStatus)
+
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
       <div className="flex flex-row justify-between items-center w-full">
         <div
           className="flex flex-row items-center gap-2"
           title={
-            user.status
-              ? user.status.charAt(0).toUpperCase() +
-                user.status.slice(1).toLowerCase()
+            displayStatus
+              ? displayStatus.charAt(0).toUpperCase() +
+                displayStatus.slice(1).toLowerCase()
               : "Pending"
           }
         >
-          <StatusIcon status={user!.status as ExtendedPersonaStatus} />
+          <StatusIcon status={displayStatus} />
           <div className="flex flex-row gap-2">
             <RowText
               values={[
@@ -73,20 +77,26 @@ const StatusRow = ({
           </div>
           <div className="flex flex-row gap-2">
             {user.status === "APPROVED" && user.expiry && (
-              <Badge variant="secondary">
-                {`Verified until ${new Date(user.expiry).toLocaleDateString(
-                  "en-US",
-                  {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  },
-                )}`}
-              </Badge>
+              expired ? (
+                <Badge variant="destructive">
+                  {`Expired`}
+                </Badge>
+              ) : (
+                <Badge variant="secondary">
+                  {`Verified until ${new Date(user.expiry).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    },
+                  )}`}
+                </Badge>
+              )
             )}
           </div>
         </div>
-        {!emailResendBlock && (
+        {!expired && !emailResendBlock && (
           <EmailSendButton
             user={user}
             handleEmailResend={handleEmailResend}

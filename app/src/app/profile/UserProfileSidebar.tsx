@@ -10,8 +10,46 @@ import { useState } from "react"
 
 import { IncompleteCard } from "@/components/projects/ProjectStatusSidebar"
 import { Button } from "@/components/ui/button"
-import { useOrganizationSidebarData } from "@/hooks/db/useOrganizationSidebarData"
 import { cn } from "@/lib/utils"
+import { useOrganizationSidebarData } from "@/hooks/db/useOrganizationSidebarData"
+import { useExpiredKYCCountForOrganization } from "@/hooks/db/useExpiredKYCCount"
+import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+const OrganizationExpiredBadge = ({
+  organizationId,
+}: {
+  organizationId: string
+}) => {
+  const { data: expiredCount } = useExpiredKYCCountForOrganization({
+    organizationId,
+    enabled: !!organizationId,
+  })
+
+  if (!expiredCount || expiredCount === 0) return null
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <Badge variant="destructive">{expiredCount}</Badge>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            {expiredCount} expired verification{expiredCount !== 1 ? "s" : ""}
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
 
 export function UserProfileSidebar({
   organizations,
@@ -167,6 +205,7 @@ export function UserProfileSidebar({
                     </span>
                     {/* Only shows if Project status resolves to 'PENDING' */}
                     <IncompleteCard project={incompleteProject} />
+                    <OrganizationExpiredBadge organizationId={organization.id} />
                   </div>
                 </Link>
               </li>

@@ -4,7 +4,9 @@ import { Role, RoleApplication } from "@prisma/client"
 
 import {
   getActiveUserRoleApplications,
+  getRoleApplications,
   getRoleById,
+  getUserRoleApplications,
   upsertRoleApplication,
 } from "@/db/role"
 
@@ -45,4 +47,11 @@ export async function activeUserApplications(
   organizationId?: string,
 ): Promise<RoleApplication[]> {
   return await getActiveUserRoleApplications(userId, organizationId)
+}
+
+export async function getAllUserRoleApplications(
+  userId?: string,
+  organizationId?: string,
+): Promise<RoleApplication[]> {
+  return await getUserRoleApplications(userId, organizationId)
 }
