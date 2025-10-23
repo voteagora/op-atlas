@@ -11,7 +11,13 @@ import { cn } from "@/lib/utils"
 
 import { Github } from "../icons/socials"
 
-export const GithubConnection = ({ userId }: { userId: string }) => {
+export const GithubConnection = ({
+  userId,
+  hideNotDeveloperToggle,
+}: {
+  userId: string
+  hideNotDeveloperToggle?: boolean
+}) => {
   const { user: privyUser } = usePrivy()
   const { user } = useUser({
     id: userId,
@@ -58,19 +64,28 @@ export const GithubConnection = ({ userId }: { userId: string }) => {
           </Button>
         )}
 
-        <div
-          className={cn(
-            "input-container text-sm",
-            user?.notDeveloper && "bg-secondary",
-          )}
-        >
-          <Checkbox
-            checked={user?.notDeveloper}
-            onCheckedChange={toggleIsDeveloper}
-          />
-          I&apos;m not a developer
-        </div>
+        {!hideNotDeveloperToggle && <div className="hidden" />}
       </div>
+    </div>
+  )
+}
+
+export const GithubNotDeveloperToggle = ({ userId }: { userId: string }) => {
+  const { user } = useUser({ id: userId, enabled: true })
+  const { toggleIsDeveloper } = usePrivyLinkGithub(userId)
+
+  return (
+    <div
+      className={cn(
+        "text-sm w-fit mt-4 gap-2 flex items-center",
+        user?.notDeveloper && "bg-secondary",
+      )}
+    >
+      <Checkbox
+        checked={user?.notDeveloper}
+        onCheckedChange={toggleIsDeveloper}
+      />
+      I&apos;m not a developer
     </div>
   )
 }

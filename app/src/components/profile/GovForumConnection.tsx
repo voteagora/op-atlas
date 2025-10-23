@@ -100,8 +100,8 @@ export function GovForumConnection({ userId }: { userId: string }) {
   return (
     <div className="flex flex-col space-y-4">
       <div className="flex gap-x-2">
-        <div className="relative flex-1">
-          {user?.govForumProfileUrl && (
+        {user?.govForumProfileUrl && (
+          <div className="relative flex-1">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
               <Image
                 src="/assets/icons/tickIcon.svg"
@@ -110,14 +110,14 @@ export function GovForumConnection({ userId }: { userId: string }) {
                 height={20}
               />
             </div>
-          )}
-          <Input
-            placeholder="https://gov.optimism.io/u/yourname/summary"
-            value={user?.govForumProfileUrl || ""}
-            readOnly
-            className={cn(user?.govForumProfileUrl && "pl-10")}
-          />
-        </div>
+            <Input
+              placeholder="https://gov.optimism.io/u/yourname/summary"
+              value={user.govForumProfileUrl}
+              readOnly
+              className="pl-10"
+            />
+          </div>
+        )}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="secondary">{user?.govForumProfileUrl ? "Edit" : "Connect"}</Button>

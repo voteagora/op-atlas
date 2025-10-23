@@ -10,12 +10,16 @@ import {
 } from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
-import { GithubConnection } from "@/components/profile/GithubConnection"
+import {
+  GithubConnection,
+  GithubNotDeveloperToggle,
+} from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
 
 export const metadata: Metadata = {
   title: "Connected Apps - OP Atlas",
-  description: "Connect apps like Farcaster, Discord, GitHub, and Governance Forum.",
+  description:
+    "Connect apps like Farcaster, Discord, GitHub, and Governance Forum.",
 }
 
 export default async function Page() {
@@ -35,14 +39,19 @@ export default async function Page() {
           <div className="flex-1">
             <div className="flex items-center gap-1.5">
               <Farcaster className="w-5 h-5 text-foreground" />
-              <h3 className="font-medium text-foreground text-base">Farcaster</h3>
+              <h3 className="font-medium text-foreground text-base">
+                Farcaster
+              </h3>
             </div>
             <div className="text-secondary-foreground mt-1 mb-4 text-base">
-              Connect your Farcaster account to import your username, bio, and avatar.
+              Connect your Farcaster account to import your username, bio, and
+              avatar.
             </div>
           </div>
           <div className="flex-shrink-0">
-            <FarcasterConnection userId={session.user.id}>Connect</FarcasterConnection>
+            <FarcasterConnection userId={session.user.id}>
+              Connect
+            </FarcasterConnection>
           </div>
         </div>
 
@@ -69,12 +78,13 @@ export default async function Page() {
               <Github className="w-5 h-5 text-foreground" />
               <h3 className="font-medium text-foreground text-base">GitHub</h3>
             </div>
-            <div className="text-secondary-foreground mt-1 mb-4 text-base">
+            <div className="text-secondary-foreground mt-1 text-base">
               Connect your GitHub account to show your code contributions.
             </div>
+            <GithubNotDeveloperToggle userId={session.user.id} />
           </div>
           <div className="flex-shrink-0">
-            <GithubConnection userId={session.user.id} />
+            <GithubConnection userId={session.user.id} hideNotDeveloperToggle />
           </div>
         </div>
 
@@ -83,10 +93,21 @@ export default async function Page() {
           <div className="flex-1">
             <div className="flex items-center gap-1.5">
               <Optimism className="w-5 h-5" fill="#FF0000" />
-              <h3 className="font-medium text-foreground text-base">Collective Governance Forum</h3>
+              <h3 className="font-medium text-foreground text-base">
+                Collective Governance Forum
+              </h3>
             </div>
             <div className="text-secondary-foreground mt-1 mb-4 text-base">
-              Link your profile so anyone can find you on <a href="https://gov.optimism.io" target="_blank" rel="noopener noreferrer" className="underline">gov.optimism.io</a>.
+              Link your profile so anyone can find you on{" "}
+              <a
+                href="https://gov.optimism.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                gov.optimism.io
+              </a>
+              .
             </div>
           </div>
           <div className="flex-shrink-0">
