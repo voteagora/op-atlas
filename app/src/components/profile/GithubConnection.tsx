@@ -32,18 +32,18 @@ export const GithubConnection = ({
     user?.github?.toLowerCase() !== privyUser?.github?.username?.toLowerCase()
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-row gap-2">
       {username && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-1.5">
             <div
               className={cn(
-                "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
+                "inline-flex items-center gap-1.5 border rounded-lg h-10 px-3",
                 isSyncing && "opacity-50",
               )}
             >
               <Github className="w-4 h-4 mr-1" />
-              <p className="text-sm">{username}</p>
+              <p className="text-sm">@{username}</p>
             </div>
           </div>
         </div>
@@ -72,7 +72,11 @@ export const GithubConnection = ({
 
 export const GithubNotDeveloperToggle = ({ userId }: { userId: string }) => {
   const { user } = useUser({ id: userId, enabled: true })
+  const { user: privyUser } = usePrivy()
   const { toggleIsDeveloper } = usePrivyLinkGithub(userId)
+
+  const isConnected = Boolean(user?.github || privyUser?.github?.username)
+  if (isConnected) return null
 
   return (
     <div

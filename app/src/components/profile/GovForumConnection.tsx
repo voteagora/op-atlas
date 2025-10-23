@@ -5,11 +5,6 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
-import { useUser } from "@/hooks/db/useUser"
-import { updateGovForumProfileUrl } from "@/lib/actions/users"
-import { cn } from "@/lib/utils"
-
-import { Input } from "../ui/input"
 import {
   Dialog,
   DialogContent,
@@ -17,6 +12,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useUser } from "@/hooks/db/useUser"
+import { updateGovForumProfileUrl } from "@/lib/actions/users"
+import { cn } from "@/lib/utils"
+
+import { Input } from "../ui/input"
 
 export function GovForumConnection({ userId }: { userId: string }) {
   const { user, invalidate: invalidateUser } = useUser({
@@ -29,6 +29,7 @@ export function GovForumConnection({ userId }: { userId: string }) {
   )
   const [username, setUsername] = useState("")
   const [open, setOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     if (user?.govForumProfileUrl) {
@@ -63,19 +64,20 @@ export function GovForumConnection({ userId }: { userId: string }) {
       return
     }
 
-    toast.promise(
-      updateGovForumProfileUrl(constructedUrl)
-        .then(() => invalidateUser())
-        .then(() => setOpen(false)),
-      {
-        loading: "Updating profile URL...",
-        success: "Profile URL updated successfully",
-        error: (error) => error.message || "Failed to update profile URL",
-      },
-    )
+    setIsSaving(true)
+    const promise = updateGovForumProfileUrl(constructedUrl)
+      .then(() => invalidateUser())
+      .then(() => setOpen(false))
+
+    toast.promise(promise, {
+      loading: "Updating profile URL...",
+      success: "Profile URL updated successfully",
+      error: (error) => error.message || "Failed to update profile URL",
+    })
+
+    promise.finally(() => setIsSaving(false))
   }
 
-  // TODO: This is annoying, we should not need to check if the profile is complete here.
   useEffect(() => {
     const isProfileComplete = () => {
       return (
@@ -112,32 +114,70 @@ export function GovForumConnection({ userId }: { userId: string }) {
             </div>
             <Input
               placeholder="https://gov.optimism.io/u/yourname/summary"
-              value={user.govForumProfileUrl}
+              value={user.govForumProfileUrl.replace(
+                /^https:\/\/gov\.optimism\.io\/u\//,
+                "../",
+              )}
               readOnly
               className="pl-10"
             />
           </div>
         )}
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog
+          open={open}
+          onOpenChange={(v) => {
+            setOpen(v)
+            if (!v) {
+              setUsername("")
+              setIsSaving(false)
+            }
+          }}
+        >
           <DialogTrigger asChild>
-            <Button variant="secondary">{user?.govForumProfileUrl ? "Edit" : "Connect"}</Button>
+            <Button variant="secondary">
+              {user?.govForumProfileUrl ? "Edit" : "Connect"}
+            </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Connect Governance Forum</DialogTitle>
+          <DialogContent className="sm:max-w-[440px]">
+            <DialogHeader className="text-center mb-0">
+              <DialogTitle className="text-center font-medium text-xl leading-7">
+                Governance Forum
+              </DialogTitle>
             </DialogHeader>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1 text-center">
+              <p className="text-normal leading-6 text-secondary-foreground">
+                Link to your profile so anyone can find you on
+                <br />
+                <a
+                  href="https://gov.optimism.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  gov.optimism.io
+                </a>
+                .
+              </p>
               <Input
-                placeholder="Username"
+                placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && username.trim()) {
+                    handleSave()
+                  }
+                }}
+                className="mt-4"
               />
-              <div className="text-xs text-secondary-foreground">
-                We will construct your profile URL as https://gov.optimism.io/u/username/summary
-              </div>
-              <div className="flex justify-end">
-                <Button onClick={handleSave}>Save</Button>
-              </div>
+              <Button
+                onClick={handleSave}
+                variant="primary"
+                isLoading={isSaving}
+                disabled={!username.trim() || isSaving}
+                className="w-full"
+              >
+                Connect
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -145,4 +185,3 @@ export function GovForumConnection({ userId }: { userId: string }) {
     </div>
   )
 }
-
