@@ -811,6 +811,15 @@ export async function getOrganizationKYCTeams({
       team: {
         include: {
           team: { include: { users: true } },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: {
+                include: {
+                  kycLegalEntityController: true,
+                },
+              },
+            },
+          },
           projects: {
             include: {
               blacklist: true,

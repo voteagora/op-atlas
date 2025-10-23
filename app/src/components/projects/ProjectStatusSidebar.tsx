@@ -25,8 +25,15 @@ import { Separator } from "../ui/separator"
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
-import { project } from "ramda"
+import { useExpiredKYCCountForProject } from "@/hooks/db/useExpiredKYCCount"
 import { Project } from "@prisma/client"
+import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -207,6 +214,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               </Link>
               {/* Only shows if Project status resolves to 'PENDING' */}
               <IncompleteCard project={project} />
+              <ExpiredBadge project={project} />
             </div>
             <Separator />
           </>
@@ -257,9 +265,9 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 })
 
 const IncompleteCard = ({ project }: { project: Project | null }) => {
-  const { data: kycUsers } = useKYCProject({ projectId: project?.id || "" })
-  if (!project || !project.id || !kycUsers) return null
-  const projectStatus = resolveProjectStatus(kycUsers)
+  const { data: kycData } = useKYCProject({ projectId: project?.id || "" })
+  if (!project || !project.id || !kycData) return null
+  const projectStatus = resolveProjectStatus(kycData.users, kycData.legalEntities)
 
   if (projectStatus == "APPROVED") return null
   return (
@@ -271,4 +279,30 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
   )
 }
 
-export { IncompleteCard }
+const ExpiredBadge = ({ project }: { project: Project | null }) => {
+  const { data: expiredCount } = useExpiredKYCCountForProject({
+    projectId: project?.id || "",
+    enabled: !!project?.id,
+  })
+
+  if (!expiredCount || expiredCount === 0) return null
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex">
+            <Badge variant="destructive">{expiredCount}</Badge>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            {expiredCount} expired verification{expiredCount !== 1 ? "s" : ""}
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+export { IncompleteCard, ExpiredBadge }
