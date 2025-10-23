@@ -3,8 +3,8 @@
 import { Session } from "next-auth"
 
 import ExtendedLink from "@/components/common/ExtendedLink"
-import { Farcaster } from "@/components/icons/socials"
 import { UserFill } from "@/components/icons/remix"
+import { Farcaster } from "@/components/icons/socials"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
@@ -29,7 +29,10 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
             <div className="text-foreground font-normal text-sm">Photo</div>
             <Avatar className="!w-20 !h-20">
               <AvatarImage src={imageUrl || ""} alt="avatar" />
-              <AvatarFallback className="w-20 h-20 flex items-center justify-center rounded-full border border-tertiary" style={{ backgroundColor: '#F2F3F8' }}>
+              <AvatarFallback
+                className="w-20 h-20 flex items-center justify-center rounded-full border border-tertiary"
+                style={{ backgroundColor: "#F2F3F8" }}
+              >
                 <UserFill className="w-6 h-6 text-muted-foreground" />
               </AvatarFallback>
             </Avatar>
@@ -37,20 +40,33 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
           <div className="flex flex-col gap-2">
             <div className="text-foreground font-normal text-sm">Name</div>
-            <Input value={username ?? ""} disabled className="text-secondary-foreground" />
+            <Input
+              value={username ?? ""}
+              placeholder="Your name"
+              disabled
+              className="text-secondary-foreground"
+            />
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="text-foreground font-normal text-sm">Username</div>
-            <Input value={username ? `@${username}` : ""} disabled className="text-secondary-foreground" />
+            <Input
+              value={username ? `@${username}` : ""}
+              placeholder="Your username"
+              disabled
+              className="text-secondary-foreground"
+            />
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="text-foreground font-normal text-sm">Bio</div>
-            <Textarea value={bio} disabled className="h-20 resize-none text-secondary-foreground" />
+            <Textarea
+              value={bio}
+              placeholder="Your bio"
+              disabled
+              className="h-20 resize-none text-secondary-foreground"
+            />
           </div>
-
-          {/* Farcaster connected - edit action below container per spec */}
         </div>
       </div>
 
@@ -65,7 +81,11 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
       {user?.farcasterId && (
         <div className="mt-2">
-          <ExtendedLink as="button" href="https://warpcast.com/" text="Edit on Warpcast" />
+          <ExtendedLink
+            as="button"
+            href="https://warpcast.com/"
+            text="Edit on Warpcast"
+          />
         </div>
       )}
     </div>
