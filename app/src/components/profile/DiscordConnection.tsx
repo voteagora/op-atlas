@@ -1,6 +1,7 @@
 "use client"
 
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
+import { X } from "lucide-react"
 import Image from "next/image"
 import { toast } from "sonner"
 
@@ -75,10 +76,12 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
       {username ? (
         <Button
           variant="secondary"
+          size="icon"
+          aria-label="Disconnect Discord"
           onClick={handleUnlinkDiscord}
           className={cn(isSyncing && "opacity-50")}
         >
-          Disconnect
+          <X className="w-4 h-4" />
         </Button>
       ) : (
         <Button variant="secondary" onClick={linkDiscord}>

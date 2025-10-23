@@ -26,7 +26,7 @@ const PersonalKYCUserRow = ({ kycUser }: { kycUser: KYCUser }) => {
   ].filter(Boolean)
 
   return (
-    <div className="flex flex-row w-full max-w-[664px] h-[40px] pt-[8px] pr-[12px] pb-[8px] pl-[12px] gap-[8px] rounded-[6px] border border-border bg-background">
+    <div className="flex flex-row w-full h-[40px] pt-[8px] pr-[12px] pb-[8px] pl-[12px] gap-[8px] rounded-[6px] border border-border bg-background">
       <div className="flex flex-row justify-between items-center w-full">
         <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
           <StatusIcon

@@ -2,6 +2,7 @@
 
 import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
+import { X } from "lucide-react"
 
 import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { useUser } from "@/hooks/db/useUser"
@@ -52,10 +53,12 @@ export const FarcasterConnection = ({
       {username ? (
         <Button
           variant="secondary"
+          size="icon"
+          aria-label="Disconnect Farcaster"
           onClick={unlinkFarcaster}
           className={cn(isIntermediateState && "opacity-50")}
         >
-          Disconnect
+          <X className="w-4 h-4" />
         </Button>
       ) : (
         <Button

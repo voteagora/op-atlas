@@ -19,7 +19,7 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
     privyUser?.email?.address?.toLowerCase()
 
   return (
-    <div className="flex">
+    <div className="flex gap-2">
       {email && (
         <div
           className={`flex flex-row gap-2 min-w-0 flex-1 input-container text-foreground cursor-text select-text`}

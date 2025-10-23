@@ -95,7 +95,7 @@ export function UserProfileSidebar({
         <div className="py-1.5 border-b border-border text-sm font-semibold text-foreground">
           Settings
         </div>
-        <div className="flex flex-col gap-2 text-secondary-foreground text-sm">
+        <div className="flex flex-col gap-2 mt-2 text-secondary-foreground text-sm">
           <Link
             href="/profile/details"
             className={cn(

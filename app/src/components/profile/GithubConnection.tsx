@@ -2,6 +2,7 @@
 
 import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
+import { X } from "lucide-react"
 
 import { Button } from "@/components/common/Button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -53,10 +54,12 @@ export const GithubConnection = ({
         {username ? (
           <Button
             variant="secondary"
+            size="icon"
+            aria-label="Disconnect GitHub"
             onClick={unlinkGithub}
             className={cn(isSyncing && "opacity-50")}
           >
-            Disconnect
+            <X className="w-4 h-4" />
           </Button>
         ) : (
           <Button variant="secondary" onClick={linkGithub}>
@@ -64,7 +67,7 @@ export const GithubConnection = ({
           </Button>
         )}
 
-        {!hideNotDeveloperToggle && <div className="hidden" />}
+        {!hideNotDeveloperToggle && <GithubNotDeveloperHint />}
       </div>
     </div>
   )
@@ -79,12 +82,7 @@ export const GithubNotDeveloperToggle = ({ userId }: { userId: string }) => {
   if (isConnected) return null
 
   return (
-    <div
-      className={cn(
-        "text-sm w-fit mt-4 gap-2 flex items-center",
-        user?.notDeveloper && "bg-secondary",
-      )}
-    >
+    <div className={cn("text-sm w-fit mt-4 gap-2 flex items-center")}>
       <Checkbox
         checked={user?.notDeveloper}
         onCheckedChange={toggleIsDeveloper}
@@ -93,3 +91,5 @@ export const GithubNotDeveloperToggle = ({ userId }: { userId: string }) => {
     </div>
   )
 }
+
+const GithubNotDeveloperHint = () => null

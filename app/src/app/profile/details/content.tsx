@@ -14,9 +14,10 @@ import { useUser } from "@/hooks/db/useUser"
 export const ProfileDetailsContent = ({ session }: { session: Session }) => {
   const { user } = useUser({ id: session?.user?.id, enabled: !!session?.user })
 
-  const username = user?.username || session?.user?.name
-  const imageUrl = user?.imageUrl || session?.user?.image
-  const bio = user?.bio || ""
+  const hasFarcaster = Boolean(user?.farcasterId)
+  const username = hasFarcaster ? user?.username || session?.user?.name : ""
+  const imageUrl = hasFarcaster ? user?.imageUrl || session?.user?.image : ""
+  const bio = hasFarcaster ? user?.bio || "" : ""
 
   return (
     <div className="flex flex-col gap-2">
@@ -73,7 +74,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
       </div>
 
       {!user?.farcasterId && (
-        <div className="mt-2 border border-border rounded-xl p-6">
+        <div className="mt-2">
           <FarcasterConnection userId={session.user.id}>
             <Farcaster fill="#FFFFFF" className="w-[20px] h-[20px]" />
             Import from Farcaster
