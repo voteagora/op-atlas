@@ -936,3 +936,188 @@ export async function restartKYCForExpiredLegalEntity({
     return { error: "Failed to restart KYB" }
   }
 }
+
+export async function restartAllExpiredKYCForTeam({
+  kycTeamId,
+  projectId,
+  organizationId,
+}: {
+  kycTeamId: string
+  projectId?: string
+  organizationId?: string
+}) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" }
+  }
+
+  // Verify admin status
+  if (projectId) {
+    const isInvalid = await verifyAdminStatus(projectId, session.user.id)
+    if (isInvalid?.error) return isInvalid
+  } else if (organizationId) {
+    const isInvalid = await verifyOrganizationAdmin(organizationId, session.user.id)
+    if (isInvalid?.error) return isInvalid
+  } else {
+    return { error: "Project or organization ID required" }
+  }
+
+  try {
+    const now = new Date()
+
+    // Find all expired KYC users for this team
+    const expiredUsers = await prisma.kYCUser.findMany({
+      where: {
+        KYCUserTeams: {
+          some: { kycTeamId }
+        },
+        status: "APPROVED",
+        expiry: {
+          lt: now
+        }
+      },
+      include: {
+        KYCUserTeams: true,
+        UserKYCUsers: true
+      }
+    })
+
+    // Find all expired legal entities for this team
+    const expiredEntities = await prisma.kYCLegalEntity.findMany({
+      where: {
+        teamLinks: {
+          some: { kycTeamId }
+        },
+        status: "APPROVED",
+        expiry: {
+          lt: now
+        }
+      },
+      include: {
+        kycLegalEntityController: true,
+        teamLinks: true,
+      }
+    })
+
+    if (expiredUsers.length === 0 && expiredEntities.length === 0) {
+      return { error: "No expired users or entities found" }
+    }
+
+    const restartedUsers: any[] = []
+    const restartedEntities: any[] = []
+
+    // Restart each expired user
+    for (const oldUser of expiredUsers) {
+      const newUser = await prisma.$transaction(async (tx) => {
+        const created = await tx.kYCUser.create({
+          data: {
+            email: oldUser.email,
+            firstName: oldUser.firstName,
+            lastName: oldUser.lastName,
+            status: "PENDING",
+            expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          }
+        })
+
+        // Link new user to KYC team
+        await tx.kYCUserTeams.create({
+          data: {
+            kycUserId: created.id,
+            kycTeamId,
+          }
+        })
+
+        // Unlink old user from team
+        await tx.kYCUserTeams.deleteMany({
+          where: {
+            kycUserId: oldUser.id,
+            kycTeamId,
+          }
+        })
+
+        // Copy UserKYCUser links if any
+        if (oldUser.UserKYCUsers.length > 0) {
+          await tx.userKYCUser.createMany({
+            data: oldUser.UserKYCUsers.map(link => ({
+              userId: link.userId,
+              kycUserId: created.id,
+            })),
+            skipDuplicates: true,
+          })
+        }
+
+        return created
+      })
+
+      restartedUsers.push(newUser)
+
+      // Send KYC started email
+      const { sendKYCStartedEmail } = await import("./emails")
+      await sendKYCStartedEmail(newUser)
+    }
+
+    // Restart each expired entity
+    for (const oldEntity of expiredEntities) {
+      if (!oldEntity.kycLegalEntityController) continue
+
+      const newEntity = await prisma.$transaction(async (tx) => {
+        const created = await tx.kYCLegalEntity.create({
+          data: {
+            name: oldEntity.name,
+            status: "PENDING",
+            expiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            kycLegalEntityControllerId: oldEntity.kycLegalEntityControllerId,
+          }
+        })
+
+        // Link new entity to KYC team
+        await tx.kYCLegalEntityTeams.create({
+          data: {
+            legalEntityId: created.id,
+            kycTeamId,
+          }
+        })
+
+        // Unlink old entity from team
+        await tx.kYCLegalEntityTeams.deleteMany({
+          where: {
+            legalEntityId: oldEntity.id,
+            kycTeamId,
+          }
+        })
+
+        return created
+      })
+
+      // Fetch with controller for email
+      const entityWithController = await prisma.kYCLegalEntity.findUnique({
+        where: { id: newEntity.id },
+        include: { kycLegalEntityController: true }
+      })
+
+      if (entityWithController?.kycLegalEntityController) {
+        const { sendKYBStartedEmail } = await import("./emails")
+        await sendKYBStartedEmail(entityWithController as any)
+      }
+
+      restartedEntities.push(newEntity)
+    }
+
+    // Revalidate paths
+    const { revalidatePath } = await import("next/cache")
+    if (projectId) {
+      revalidatePath(`/projects/${projectId}/grant-address`)
+    } else if (organizationId) {
+      revalidatePath(`/profile/organizations/${organizationId}/grant-address`)
+    }
+
+    return {
+      success: true,
+      restartedUsers: restartedUsers.length,
+      restartedEntities: restartedEntities.length
+    }
+  } catch (error) {
+    console.error("Error restarting all expired KYC:", error)
+    return { error: "Failed to restart KYC for all expired parties" }
+  }
+}

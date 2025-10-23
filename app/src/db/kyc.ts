@@ -318,41 +318,178 @@ export async function rejectProjectKYC(projectId: string) {
   return kycUsers.length
 }
 
+export async function getExpiredKYCCountForProject({
+  projectId,
+}: {
+  projectId: string
+}): Promise<number> {
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: {
+      kycTeam: {
+        include: {
+          team: {
+            include: {
+              users: true,
+            },
+          },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!project?.kycTeam) return 0
+
+  const now = new Date()
+  let count = 0
+
+  // Count expired KYCUsers
+  for (const teamMember of project.kycTeam.team) {
+    const user = teamMember.users
+    if (
+      user.status === "APPROVED" &&
+      user.expiry &&
+      new Date(user.expiry) < now
+    ) {
+      count++
+    }
+  }
+
+  // Count expired KYCLegalEntities
+  for (const entityTeam of project.kycTeam.KYCLegalEntityTeams || []) {
+    const entity = entityTeam.legalEntity
+    if (
+      entity.status === "APPROVED" &&
+      entity.expiry &&
+      new Date(entity.expiry) < now
+    ) {
+      count++
+    }
+  }
+
+  return count
+}
+
+export async function getExpiredKYCCountForOrganization({
+  organizationId,
+}: {
+  organizationId: string
+}): Promise<number> {
+  const orgKycTeams = await prisma.organizationKYCTeam.findMany({
+    where: {
+      organizationId,
+      deletedAt: null,
+    },
+    include: {
+      team: {
+        include: {
+          team: {
+            include: {
+              users: true,
+            },
+          },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  const now = new Date()
+  let count = 0
+
+  for (const orgKycTeam of orgKycTeams) {
+    // Count expired KYCUsers
+    for (const teamMember of orgKycTeam.team.team) {
+      const user = teamMember.users
+      if (
+        user.status === "APPROVED" &&
+        user.expiry &&
+        new Date(user.expiry) < now
+      ) {
+        count++
+      }
+    }
+
+    // Count expired KYCLegalEntities
+    for (const entityTeam of orgKycTeam.team.KYCLegalEntityTeams || []) {
+      const entity = entityTeam.legalEntity
+      if (
+        entity.status === "APPROVED" &&
+        entity.expiry &&
+        new Date(entity.expiry) < now
+      ) {
+        count++
+      }
+    }
+  }
+
+  return count
+}
+
 export async function getKYCUsersByProjectId({
   projectId,
 }: {
   projectId: string
 }) {
-  // This query follows the SQL join logic:
-  // select * from "Project" p
-  // join "KYCUserTeams" kut on kut."kycTeamId" = p."kycTeamId"
-  // join "KYCUser" ku on ku.id = kut."kycUserId"
-  // where p.id = '...'
-  const value = await prisma.kYCUser.findMany({
-    where: {
-      KYCUserTeams: {
-        some: {
+  // Fetch project with KYC team data including both users and legal entities in a single query
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    select: {
+      kycTeam: {
+        include: {
           team: {
-            projects: {
-              some: {
-                id: projectId,
+            include: {
+              users: {
+                include: {
+                  KYCUserTeams: true,
+                  UserKYCUsers: {
+                    include: {
+                      user: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          KYCLegalEntityTeams: {
+            include: {
+              legalEntity: {
+                include: {
+                  kycLegalEntityController: true,
+                },
               },
             },
           },
         },
       },
     },
-    include: {
-      KYCUserTeams: true,
-      UserKYCUsers: {
-        include: {
-          user: true,
-        },
-      },
-    },
   })
-  console.log("getKYCUsersByProjectId: ", { value })
-  return value
+
+  const users = project?.kycTeam?.team.map((team) => team.users) || []
+  const legalEntities =
+    project?.kycTeam?.KYCLegalEntityTeams?.map((entityTeam) => {
+      const e = entityTeam.legalEntity
+      return e ? {
+        id: e.id,
+        name: e.name,
+        status: e.status,
+        expiry: e.expiry ?? null,
+        controllerFirstName: e.kycLegalEntityController?.firstName || "",
+        controllerLastName: e.kycLegalEntityController?.lastName || "",
+        controllerEmail: e.kycLegalEntityController?.email || "",
+      } : null
+    }).filter((e): e is NonNullable<typeof e> => e !== null) || []
+
+  return { users, legalEntities }
 }
 
 // Encapsulate prisma calls for fetching user's KYC team sources (projects and organizations)

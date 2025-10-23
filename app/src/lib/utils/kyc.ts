@@ -2,6 +2,21 @@ import { KYCUser } from "@prisma/client"
 
 import { KYCStreamTeam, KYCTeamWithTeam } from "../types"
 import { RecurringRewardKycTeam } from "./rewards"
+import { KYCOrLegal } from "@/components/projects/types"
+
+/**
+ * Check if a KYC user or legal entity is expired
+ * @param item - KYCUser or LegalEntityContact
+ * @returns true if the item is approved but expired
+ */
+export function isExpired(item: KYCOrLegal): boolean {
+  return (
+    item.status === "APPROVED" &&
+    item.expiry !== null &&
+    item.expiry !== undefined &&
+    new Date(item.expiry) < new Date()
+  )
+}
 
 export function isKycTeamVerified(kycTeam?: KYCTeamWithTeam) {
   const now = new Date()
@@ -60,38 +75,42 @@ export function isKycStreamTeamVerified(
   )
 }
 
-export function resolveProjectStatus(users: Pick<KYCUser, "status" | "expiry">[]) {
+export function resolveProjectStatus(
+  users: Array<{ status: KYCUser["status"]; expiry: KYCUser["expiry"] | null }>,
+  legalEntities?: Array<{ status: KYCUser["status"]; expiry: KYCUser["expiry"] | null }>
+) {
   const now = new Date()
+  const allEntities = [...users, ...(legalEntities || [])]
 
-  // Check for expired APPROVED users first
-  if (users.some((user) =>
-    user.status === "APPROVED" &&
-    user.expiry &&
-    new Date(user.expiry) < now
+  // Check for expired APPROVED users or legal entities first
+  if (allEntities.some((entity) =>
+    entity.status === "APPROVED" &&
+    entity.expiry &&
+    new Date(entity.expiry) < now
   )) {
     return "EXPIRED"
   }
 
-  // If any users are REJECTED, return "project_issue"
-  if (users.some((user) => user.status === "REJECTED")) {
+  // If any users or legal entities are REJECTED, return "project_issue"
+  if (allEntities.some((entity) => entity.status === "REJECTED")) {
     return "project_issue"
   }
 
-  // If any users are PENDING, resolve to "PENDING"
-  if (users.some((user) => user.status === "PENDING")) {
+  // If any users or legal entities are PENDING, resolve to "PENDING"
+  if (allEntities.some((entity) => entity.status === "PENDING")) {
     return "PENDING"
   }
 
-  // If all users are APPROVED and not expired
+  // If all users and legal entities are APPROVED and not expired
   if (
-    users.every((user) => {
-      if (user.status !== "APPROVED") {
+    allEntities.every((entity) => {
+      if (entity.status !== "APPROVED") {
         return false
       }
-      if (!user.expiry) {
+      if (!entity.expiry) {
         return true
       }
-      return new Date(user.expiry) > now
+      return new Date(entity.expiry) > now
     })
   ) {
     return "APPROVED"
