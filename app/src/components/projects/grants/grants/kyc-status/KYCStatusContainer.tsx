@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ReactNode, useCallback } from "react"
 import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
 
 import ConnectedOrganizationProjects from "@/components/projects/grants/grants/kyc-status/ConnctedOrganizationProjects"
 import GrantDeliveryAddress from "@/components/projects/grants/grants/kyc-status/GrantDeliveryAddress"
@@ -19,13 +20,17 @@ import {
   isLegalEntityContact,
 } from "@/components/projects/types"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useKYCProject } from "@/hooks/db/useKYCProject"
-import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
+import { useKYCProject, KYC_PROJECT_USERS_QUERY_KEY } from "@/hooks/db/useKYCProject"
+import { useOrganizationKycTeams, ORGANIZATION_KYC_TEAM_QUERY_KEY } from "@/hooks/db/useOrganizationKycTeam"
 import { sendKYCReminderEmail, sendKYBReminderEmail } from "@/lib/actions/emails"
 import { resolveProjectStatus, hasExpiredKYC, isExpired } from "@/lib/utils/kyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { getSelectedLegalEntitiesForTeam } from "@/lib/actions/kyc"
 import { Button } from "@/components/ui/button"
+import {
+  EXPIRED_KYC_COUNT_PROJECT_QUERY_KEY,
+  EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY
+} from "@/hooks/db/useExpiredKYCCount"
 
 const KYCStatusContainer = ({
   project,
@@ -183,6 +188,7 @@ const RestartAllExpiredButton = ({
   isAdmin: boolean
 }) => {
   const [isRestarting, setIsRestarting] = useState(false)
+  const queryClient = useQueryClient()
 
   if (!isAdmin || !kycTeamId) return null
 
@@ -207,10 +213,27 @@ const RestartAllExpiredButton = ({
         toast.error(result.error)
       } else {
         toast.success("KYC restart initiated for all expired parties")
-        // Trigger page refresh to show updated data
-        setTimeout(() => {
-          window.location.reload()
-        }, 1500)
+
+        // Invalidate relevant queries to refresh data
+        if (projectId) {
+          // Invalidate project-specific queries
+          await queryClient.invalidateQueries({
+            queryKey: [KYC_PROJECT_USERS_QUERY_KEY, projectId]
+          })
+          await queryClient.invalidateQueries({
+            queryKey: [EXPIRED_KYC_COUNT_PROJECT_QUERY_KEY, projectId]
+          })
+        }
+
+        if (organizationId) {
+          // Invalidate organization-specific queries
+          await queryClient.invalidateQueries({
+            queryKey: [ORGANIZATION_KYC_TEAM_QUERY_KEY, organizationId]
+          })
+          await queryClient.invalidateQueries({
+            queryKey: [EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY, organizationId]
+          })
+        }
       }
     } catch (error) {
       console.error("Error restarting all KYC:", error)
