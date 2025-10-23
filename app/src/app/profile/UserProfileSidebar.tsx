@@ -9,17 +9,17 @@ import { useFeatureFlagEnabled } from "posthog-js/react"
 import { useState } from "react"
 
 import { IncompleteCard } from "@/components/projects/ProjectStatusSidebar"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useOrganizationSidebarData } from "@/hooks/db/useOrganizationSidebarData"
-import { useExpiredKYCCountForOrganization } from "@/hooks/db/useExpiredKYCCount"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useExpiredKYCCountForOrganization } from "@/hooks/db/useExpiredKYCCount"
+import { useOrganizationSidebarData } from "@/hooks/db/useOrganizationSidebarData"
+import { cn } from "@/lib/utils"
 
 const OrganizationExpiredBadge = ({
   organizationId,

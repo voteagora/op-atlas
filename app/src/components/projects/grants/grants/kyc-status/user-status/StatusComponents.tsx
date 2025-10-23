@@ -1,4 +1,4 @@
-import { AlertTriangle, Loader2, X, Check } from "lucide-react"
+import { AlertTriangle, Check, Loader2, X } from "lucide-react"
 import Image from "next/image"
 
 import { CheckboxCircleFIll } from "@/components/icons/remix"
@@ -52,7 +52,9 @@ const StatusRow = ({
   emailState,
 }: KYCUserStatusProps) => {
   const expired = isExpired(user)
-  const displayStatus = expired ? "EXPIRED" : (user.status as ExtendedPersonaStatus)
+  const displayStatus = expired
+    ? "EXPIRED"
+    : (user.status as ExtendedPersonaStatus)
 
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
@@ -76,11 +78,10 @@ const StatusRow = ({
             />
           </div>
           <div className="flex flex-row gap-2">
-            {user.status === "APPROVED" && user.expiry && (
-              expired ? (
-                <Badge variant="destructive">
-                  {`Expired`}
-                </Badge>
+            {user.status === "APPROVED" &&
+              user.expiry &&
+              (expired ? (
+                <Badge variant="destructive">{`Expired`}</Badge>
               ) : (
                 <Badge variant="secondary">
                   {`Verified until ${new Date(user.expiry).toLocaleDateString(
@@ -92,8 +93,7 @@ const StatusRow = ({
                     },
                   )}`}
                 </Badge>
-              )
-            )}
+              ))}
           </div>
         </div>
         {!expired && !emailResendBlock && (

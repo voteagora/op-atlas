@@ -9,9 +9,17 @@ import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { CheckboxCircleFIll } from "@/components/icons/remix"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
 import { Progress } from "@/components/ui/progress"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { useExpiredKYCCountForProject } from "@/hooks/db/useExpiredKYCCount"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
@@ -27,14 +35,6 @@ import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
-import { useExpiredKYCCountForProject } from "@/hooks/db/useExpiredKYCCount"
-import { Badge } from "@/components/ui/badge"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -304,4 +304,4 @@ const ExpiredBadge = ({ project }: { project: Project | null }) => {
   )
 }
 
-export { IncompleteCard, ExpiredBadge }
+export { ExpiredBadge, IncompleteCard }
