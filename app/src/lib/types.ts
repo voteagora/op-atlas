@@ -168,11 +168,6 @@ export type KYCTeamWithTeam = Prisma.KYCTeamGetPayload<{
         blacklist: true
       }
     }
-    KYCLegalEntityTeams: {
-      include: {
-        legalEntity: true
-      }
-    }
   }
 }>
 
