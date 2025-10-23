@@ -94,8 +94,8 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
           </div>
 
           <div className="flex flex-col gap-2">
-            {addresses.map(({ address, source, primary, isMismatched }) => (
-              <div key={address} className={isMismatched ? "opacity-50" : ""}>
+            {addresses.map(({ address, source, primary }) => (
+              <div key={address}>
                 <VerifiedAddress
                   address={address}
                   source={source as UserAddressSource}
