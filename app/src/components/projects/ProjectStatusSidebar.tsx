@@ -5,7 +5,6 @@ import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { project } from "ramda"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
@@ -28,13 +27,7 @@ import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
-<<<<<<< HEAD
-=======
-import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
-import { resolveProjectStatus } from "@/lib/utils/kyc"
-import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { useExpiredKYCCountForProject } from "@/hooks/db/useExpiredKYCCount"
-import { Project } from "@prisma/client"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -42,7 +35,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
->>>>>>> origin/main
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -271,7 +263,10 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 const IncompleteCard = ({ project }: { project: Project | null }) => {
   const { data: kycData } = useKYCProject({ projectId: project?.id || "" })
   if (!project || !project.id || !kycData) return null
-  const projectStatus = resolveProjectStatus(kycData.users, kycData.legalEntities)
+  const projectStatus = resolveProjectStatus(
+    kycData.users,
+    kycData.legalEntities,
+  )
 
   if (projectStatus == "APPROVED") return null
   return (

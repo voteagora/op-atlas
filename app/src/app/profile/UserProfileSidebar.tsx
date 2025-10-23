@@ -205,7 +205,9 @@ export function UserProfileSidebar({
                     </span>
                     {/* Only shows if Project status resolves to 'PENDING' */}
                     <IncompleteCard project={incompleteProject} />
-                    <OrganizationExpiredBadge organizationId={organization.id} />
+                    <OrganizationExpiredBadge
+                      organizationId={organization.id}
+                    />
                   </div>
                 </Link>
               </li>
