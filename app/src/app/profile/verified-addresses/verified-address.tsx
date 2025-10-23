@@ -3,6 +3,7 @@ import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { getAddress, isAddress } from "viem"
+import { useEnsName } from "@/hooks/useEnsName"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
@@ -77,6 +78,16 @@ export const VerifiedAddress = ({
     )
   }
 
+  const normalizedAddress =
+    address && isAddress(address) ? (getAddress(address) as `0x${string}`) : undefined
+  const { data: ensName } = useEnsName(normalizedAddress)
+
+  const displayLabel = ensName
+    ? null
+    : shouldShortenAddress
+      ? shortenAddress(address)
+      : address
+
   return (
     <div className="flex items-center gap-1.5 group">
       <div className="input-container justify-between">
@@ -86,7 +97,16 @@ export const VerifiedAddress = ({
           )}
 
           <p className="text-sm">
-            {shouldShortenAddress ? shortenAddress(address) : address}
+            {ensName ? (
+              <>
+                <span>{ensName}</span>
+                <span className="text-muted-foreground ml-1">
+                  {shortenAddress(address)}
+                </span>
+              </>
+            ) : (
+              <span>{displayLabel}</span>
+            )}
           </p>
 
           {primary && (

@@ -89,7 +89,9 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
     if (addresses.length > 0) {
       return (
         <div className="flex flex-col gap-2">
-          <div className="text-foreground text-base font-medium">Your wallets</div>
+          <div className="text-foreground text-base font-medium mt-4 mb-2">
+            Your wallets
+          </div>
 
           <div className="flex flex-col gap-2">
             {addresses.map(({ address, source, primary, isMismatched }) => (
@@ -131,10 +133,10 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-2">
       {renderAddresses()}
       {user && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-6">
           <AddressConnection userId={user.id}>
             Link {Boolean(user?.addresses.length) && "another "}wallet
           </AddressConnection>
@@ -142,15 +144,15 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
       )}
 
       {user && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-0.5 mt-2">
           <div className="flex items-center justify-between">
-            <span className="font-normal text-sm text-foreground">
+            <span className="text-foreground text-base font-medium mt-0.5">
               Safe address for Top 100 Delegates
             </span>
           </div>
 
           {safeAddresses.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-0">
               Add an Optimism Safe address you control to participate in
               elections as a Top 100 delegate.
             </p>
@@ -167,10 +169,10 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
           )}
           {safeAddresses.length === 0 && (
             <Button
-              className="button-primary w-fit mt-2"
+              className="button-secondary w-fit mt-3 font-medium"
               onClick={() => setIsSafeDialogOpen(true)}
             >
-              Verify Safe address
+              Verify
             </Button>
           )}
         </div>

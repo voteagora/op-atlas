@@ -8,10 +8,10 @@ import { usePathname, useRouter } from "next/navigation"
 import { useFeatureFlagEnabled } from "posthog-js/react"
 import { useState } from "react"
 
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 import { IncompleteCard } from "@/components/projects/ProjectStatusSidebar"
+import { Button } from "@/components/ui/button"
 import { useOrganizationSidebarData } from "@/hooks/db/useOrganizationSidebarData"
+import { cn } from "@/lib/utils"
 
 export function UserProfileSidebar({
   organizations,
@@ -24,11 +24,12 @@ export function UserProfileSidebar({
   const currentPage = pathname.split("/").slice(-1)[0]
 
   const [dashboardLoading, setDashboardLoading] = useState(false)
-  
-  const { data: organizationsData, isLoading: organizationsLoading } = useOrganizationSidebarData({
-    organizations,
-    pathname,
-  })
+
+  const { data: organizationsData, isLoading: organizationsLoading } =
+    useOrganizationSidebarData({
+      organizations,
+      pathname,
+    })
 
   const handleGoBack = () => {
     setDashboardLoading(true)
@@ -53,21 +54,21 @@ export function UserProfileSidebar({
         />
       </Button>
       <div>
-        <div className="py-1.5 border-b border-border text-sm font-normal text-foreground">
+        <div className="py-1.5 border-b border-border text-sm font-semibold text-foreground">
           Settings
         </div>
         <div className="flex flex-col gap-2 text-secondary-foreground text-sm">
           <Link
             href="/profile/details"
             className={cn(
-              currentPage === "details" && "text-foreground",
+              currentPage === "details" && "text-foreground font-medium",
               "flex gap-2 items-center",
             )}
           >
             <div
               className={cn(
                 currentPage !== "details" && "invisible",
-                "text-lg pb-0.5 w-4 text-muted-foreground",
+                "text-xl pb-0.5 w-3 text-muted-foreground",
               )}
             >
               •
@@ -77,14 +78,14 @@ export function UserProfileSidebar({
           <Link
             href="/profile/connected-apps"
             className={cn(
-              currentPage === "connected-apps" && "text-foreground",
+              currentPage === "connected-apps" && "text-foreground font-medium",
               "flex gap-2 items-center",
             )}
           >
             <div
               className={cn(
                 currentPage !== "connected-apps" && "invisible",
-                "text-lg pb-0.5 w-4 text-muted-foreground",
+                "text-xl pb-0.5 w-3 text-muted-foreground",
               )}
             >
               •
@@ -94,14 +95,15 @@ export function UserProfileSidebar({
           <Link
             href="/profile/verified-addresses"
             className={cn(
-              currentPage === "verified-addresses" && "text-foreground",
+              currentPage === "verified-addresses" &&
+                "text-foreground font-medium",
               "flex gap-2 items-center",
             )}
           >
             <div
               className={cn(
                 currentPage !== "verified-addresses" && "invisible",
-                "text-lg pb-0.5 w-4 text-muted-foreground",
+                "text-xl pb-0.5 w-3 text-muted-foreground",
               )}
             >
               •
@@ -111,7 +113,7 @@ export function UserProfileSidebar({
         </div>
       </div>
       <div>
-        <div className="py-2.5 border-b border-border text-sm font-normal text-foreground">
+        <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
           Organizations
         </div>
         <ul className="text-sm space-y-1.5 py-3.5">
@@ -129,12 +131,12 @@ export function UserProfileSidebar({
                   href={`/profile/organizations/${organization.id}`}
                   className={cn([
                     "text-secondary-foreground font-normal space-x-2",
-                    { "text-foreground font-normal": isLinkActive },
+                    { "text-foreground font-medium": isLinkActive },
                   ])}
                 >
                   <span
                     className={cn([
-                      "opacity-0 text-lg",
+                      "opacity-0 text-xl",
                       { "opacity-100": isLinkActive && !isGrantAddressActive },
                     ])}
                   >
@@ -147,7 +149,7 @@ export function UserProfileSidebar({
                   className={cn([
                     "text-secondary-foreground space-x-2 pl-4 flex flex-row ",
                     {
-                      "text-foreground font-normal": isGrantAddressActive,
+                      "text-foreground font-medium": isGrantAddressActive,
                     },
                   ])}
                 >
@@ -175,11 +177,11 @@ export function UserProfileSidebar({
             <Link
               href="/profile/organizations/new"
               className={cn(
-                currentPage === "new" && "text-foreground",
+                currentPage === "new" && "text-foreground font-medium",
                 "flex gap-2 items-center",
               )}
             >
-              <div className="text-lg pb-0.5 w-4">•</div>
+              <div className="text-xl pb-0.5 w-3">•</div>
               New organization
             </Link>
           )}
