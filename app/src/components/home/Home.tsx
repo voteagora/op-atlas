@@ -6,7 +6,6 @@ import { HomeHeader } from "./HomeHeader"
 import { OtherSuperchainGrants } from "./OtherSuperchainGrants"
 import { RewardedProjectCrousel } from "./RewardedProjectCrousel"
 import { SunnyGuide } from "./SunnyGuide"
-import { UserProjectsCTA } from "./UserProjectsCTA"
 
 export const Home = async () => {
   const projects = await getWeightedRandomGrantRecipients()
@@ -20,7 +19,6 @@ export const Home = async () => {
           <SunnyGuide />
           <RewardedProjectCrousel projects={projects} />
           <OtherSuperchainGrants />
-          <UserProjectsCTA />
         </div>
       </div>
       <HomeFooter />

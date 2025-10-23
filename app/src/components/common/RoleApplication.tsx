@@ -10,9 +10,8 @@ import { Link as LinkIcon } from "@/components/icons/remix"
 import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
 import { useProject } from "@/hooks/db/useProject"
-import { useActiveUserApplications } from "@/hooks/role/useActiveUserApplications"
+import { useAllRoleApplications } from "@/hooks/role/useAllUserAppications"
 import { useRole } from "@/hooks/role/useRole"
-import { useUsername } from "@/hooks/useUsername"
 import { OrganizationWithTeamAndProjects, UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { formatMMMd, formatMMMdyyyy } from "@/lib/utils/date"
@@ -32,8 +31,12 @@ export default function RoleApplication({
   const [conflicts, setConflicts] = useState<string | null>(null)
   const [projects, setProjects] = useState<any[] | null>(null)
   const [personalStatement, setPersonalStatement] = useState<string>("")
-  const [externalLinks, setExternalLinks] = useState<{ url: string; description: string }[]>([])
-  const { data: activeApplications, isLoading } = useActiveUserApplications({
+
+  const [externalLinks, setExternalLinks] = useState<
+    { url: string; description: string }[]
+  >([])
+
+  const { data: activeApplications, isLoading } = useAllRoleApplications({
     userId: user?.id,
     organizationId: organization?.id,
     enabled: !!user?.id || !!organization?.id,
