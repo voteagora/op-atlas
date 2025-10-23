@@ -1,14 +1,19 @@
 "use client"
 
+import { Project } from "@prisma/client"
 import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { project } from "ramda"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { Button } from "@/components/ui/button"
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
 import { Progress } from "@/components/ui/progress"
+import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { useIsAdmin } from "@/lib/hooks"
@@ -18,15 +23,11 @@ import {
   ProjectWithFullDetails,
 } from "@/lib/types"
 import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
-import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
-import { resolveProjectStatus } from "@/lib/utils/kyc"
-import { useKYCProject } from "@/hooks/db/useKYCProject"
-import { project } from "ramda"
-import { Project } from "@prisma/client"
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -133,12 +134,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               >
                 <div className="w-4 flex justify-center">
                   {completedSections.includes(option) ? (
-                    <Image
-                      src="/assets/icons/tickIcon.svg"
-                      width={16}
-                      height={16}
-                      alt="Check"
-                    />
+                    <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
                   ) : (
                     <Image
                       src="/assets/icons/circle-fill.svg"

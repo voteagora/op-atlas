@@ -4,6 +4,7 @@ import Image from "next/image"
 import React from "react"
 
 import ExternalLink from "@/components/ExternalLink"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { ApplicationWithDetails } from "@/lib/types"
 import { EAS_URL_PREFIX } from "@/lib/utils"
 
@@ -36,12 +37,7 @@ const ApplicationHeader = ({
       {hasApplied ? (
         <div className="flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
           <div className="flex items-center gap-2">
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16}
-              width={16}
-              alt="Submitted"
-            />
+            <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
             <div className="flex flex-col text-success-foreground max-w-[445px]">
               <p className="font-normal text-sm">
                 Your application was submitted on{" "}

@@ -2,6 +2,7 @@ import { format } from "date-fns"
 import Image from "next/image"
 import React from "react"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { ApplicationWithDetails } from "@/lib/types"
 
 interface ApplicationHeaderProps {
@@ -25,12 +26,7 @@ const ApplicationHeader = ({
       {hasApplied ? (
         <div className="flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
           <div className="flex items-center gap-2">
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16}
-              width={16}
-              alt="Submitted"
-            />
+            <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
             <div className="flex flex-col text-success-foreground">
               <p className="font-normal text-sm">
                 You submitted this application on{" "}

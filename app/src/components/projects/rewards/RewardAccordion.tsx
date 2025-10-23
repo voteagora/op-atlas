@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { Check, Information } from "@/components/icons/remix"
 import { Button } from "@/components/ui/button"
 import {
@@ -139,12 +140,7 @@ const RewardAccordion = ({
             </div>
             <div className="flex items-center gap-x-1.5">
               <div className="border border-border rounded-lg w-full flex px-3 py-[10px] gap-2 items-center">
-                <Image
-                  src="/assets/icons/tickIcon.svg"
-                  width={16}
-                  height={16}
-                  alt="Check"
-                />
+                <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
                 <div className="text-sm text-foreground">
                   Completed on{" "}
                   {format(

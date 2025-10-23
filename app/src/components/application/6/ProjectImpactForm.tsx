@@ -6,6 +6,7 @@ import { z } from "zod"
 import { Badge } from "@/components/common/Badge"
 import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import {
   Accordion,
   AccordionContent,
@@ -139,12 +140,7 @@ const ProjectImpactForm = ({
                   href={`${EAS_URL_PREFIX}${attestationId}`}
                   className="ml-auto flex items-center gap-1 mr-2"
                 >
-                  <Image
-                    alt="Checkmark"
-                    src="/assets/icons/circle-check-green.svg"
-                    height={11.6}
-                    width={11.6}
-                  />
+                  <CheckboxCircleFIll className="w-3 h-3" fill="#1DBA6A" />
                   <p className="font-normal text-sm text-success-foreground">
                     View attestation
                   </p>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import React, { memo, useState } from "react"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { ApplicationWithDetails } from "@/lib/types"
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
@@ -76,12 +77,7 @@ const ApplicationBanner = ({
           <p className="font-normal">Retro Funding Round 4: Onchain Builders</p>
           {application ? (
             <div className="flex items-center gap-1">
-              <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16}
-                width={16}
-                alt="Submitted"
-              />
+              <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
               <p className="text-secondary-foreground">
                 Applied, {format(application.createdAt, "MMM d, h:mm a")}
               </p>
