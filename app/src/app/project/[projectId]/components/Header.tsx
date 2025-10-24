@@ -46,21 +46,25 @@ export default function Header({
             />
           )}
 
-          <div className="flex items-center justify-center w-full h-[280px] bg-[#FBFCFE] overflow-hidden rounded-2xl">
+          <div className="flex items-center justify-center w-full h-[120px] lg:h-[280px] bg-[#FBFCFE] overflow-hidden lg:rounded-2xl">
             <Image
               src={banner}
               width={1024}
               height={280}
               alt="Project banner"
-              className="w-full h-full object-cover object-center rounded-2xl"
+              className="w-full h-full object-cover object-center lg:rounded-2xl"
             />
           </div>
         </div>
       )}
       {thumbnail && (
-        <div className="absolute -bottom-10 left-12 aspect-square">
-          <Avatar className="w-28 h-28 border  border-[#FBFCFE] rounded-xl">
-            <AvatarImage src={thumbnail} alt="avatar" className="rounded-xl" />
+        <div className="absolute -bottom-11 lg:-bottom-10 left-6 lg:left-12 aspect-square">
+          <Avatar className="w-16 h-16 lg:w-28 lg:h-28 border border-[#FBFCFE] rounded-lg lg:rounded-xl">
+            <AvatarImage
+              src={thumbnail}
+              alt="avatar"
+              className="rounded-lg lg:rounded-xl"
+            />
             {citizenAttested && (
               <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-0 bg-white rounded-full">
                 <CheckboxCircleFIll

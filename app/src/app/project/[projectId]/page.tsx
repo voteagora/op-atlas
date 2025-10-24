@@ -73,9 +73,9 @@ export default async function Page({ params }: PageProps) {
       }
 
   return (
-    <div className="w-full h-full mt-6 pb-12">
-      <div className="mx-auto w-full max-w-[1128px] px-8 space-y-20">
-        <div className="w-full mt-8">
+    <div className="w-full h-full lg:mt-6 pb-12">
+      <div className="mx-auto w-full max-w-[1128px] lg:px-8 lg:space-y-20">
+        <div className="w-full lg:mt-8">
           <Header
             projectId={projectId}
             userId={userId}
@@ -85,7 +85,7 @@ export default async function Page({ params }: PageProps) {
           />
         </div>
 
-        <div className="space-y-20 px-12 pt-12">
+        <div className="mt-[88px] lg:mt-0 lg:space-y-20 px-6 lg:px-12 lg:pt-12">
           <Description
             projectId={projectId}
             userId={userId}
