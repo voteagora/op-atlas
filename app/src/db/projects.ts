@@ -2479,3 +2479,27 @@ export async function isProjectBlacklisted(projectId: string) {
   })
   return !!blacklistEntry
 }
+
+export async function getEarliestRewardTranche(
+  projectId: string,
+  roundId: string,
+): Promise<number | null> {
+  const earliestReward = await prisma.recurringReward.findFirst({
+    where: {
+      projectId,
+      roundId,
+      deletedAt: null,
+      amount: {
+        not: "0",
+      },
+    },
+    orderBy: {
+      tranche: "asc",
+    },
+    select: {
+      tranche: true,
+    },
+  })
+
+  return earliestReward?.tranche ?? null
+}

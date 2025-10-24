@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { formatEther } from "viem"
 
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
+import { Information } from "@/components/icons/remix"
 import {
   CantClaimCallout,
   ScheduleClaimCallout,
@@ -16,6 +17,8 @@ import {
 import { copyToClipboard, formatNumber } from "@/lib/utils"
 import { isKycStreamTeamVerified } from "@/lib/utils/kyc"
 import {
+  calculateTrancheExpiryDate,
+  formatExpiryDate,
   RecurringRewardKycTeam,
   RecurringRewardsByRound,
 } from "@/lib/utils/rewards"
@@ -35,7 +38,10 @@ const RewardAccordion = ({
 }) => {
   const { projectId } = useParams()
 
-  const rewardRoundId = reward.roundId as keyof typeof REWARDS_NAMES
+  // For rounds 7 & 8, use season-specific key (e.g., "7-7", "8-8")
+  const rewardKey = (reward.roundId === '7' || reward.roundId === '8')
+    ? `${reward.roundId}-${reward.season}` as keyof typeof REWARDS_NAMES
+    : reward.roundId as keyof typeof REWARDS_NAMES
 
   const totalReward = reward.rewards.reduce(
     (acc, curr) => acc + BigInt(curr.amount),
@@ -72,42 +78,65 @@ const RewardAccordion = ({
     }
   }
 
+  // Calculate expiry date based on earliest tranche
+  const earliestTranche = reward.rewards.length > 0
+    ? Math.min(...reward.rewards.map(r => r.tranche))
+    : null
+
+  const expiryDate = earliestTranche
+    ? calculateTrancheExpiryDate(earliestTranche)
+    : null
+
+  const isExpired = expiryDate && new Date() >= expiryDate
+  const showExpiry = expiryDate && !teamVerified && !linkToStream
+
   return (
     <div>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col space-y-2">
           <div>
             <p className="font-normal text-foreground text-sm">
-              {REWARDS_NAMES[rewardRoundId].name}
+              {REWARDS_NAMES[rewardKey].name}
             </p>
             <span className="text-secondary-foreground font-normal text-sm">
-              {REWARDS_NAMES[rewardRoundId].date}
+              {REWARDS_NAMES[rewardKey].date}
             </span>
           </div>
-          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center">
-            <div className="text-sm text-secondary-foreground">
-              {formatNumber(formatEther(totalReward))} OP
+          <div className="border border-border rounded-lg flex px-3 py-[10px] gap-2 items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-secondary-foreground">
+                {formatNumber(formatEther(totalReward))} OP
+              </div>
+
+              {reward.kycTeam && linkToStream && teamVerified && (
+                <button
+                  type="button"
+                  className="text-secondary-foreground text-xs font-normal bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                  onClick={() =>
+                    handleCopyAddress(reward?.kycTeam?.walletAddress ?? "")
+                  }
+                >
+                  To: {truncateAddress(reward?.kycTeam?.walletAddress ?? "")}
+                </button>
+              )}
             </div>
 
-            {reward.kycTeam && linkToStream && teamVerified && (
-              <button
-                type="button"
-                className="text-secondary-foreground text-xs font-normal bg-secondary rounded-lg px-2 py-1 cursor-pointer hover:bg-secondary/80 transition-colors"
-                onClick={() =>
-                  handleCopyAddress(reward?.kycTeam?.walletAddress ?? "")
-                }
-              >
-                To: {truncateAddress(reward?.kycTeam?.walletAddress ?? "")}
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {showExpiry && (
+                <div className="text-secondary-foreground text-sm flex items-center gap-1">
+                  <Information className="w-4 h-4" fill="#404454" />
+                  {isExpired ? 'Expired' : 'Expires'} {formatExpiryDate(expiryDate)}
+                </div>
+              )}
 
-            {linkToStream && (
-              <OutboundArrowLink
-                target={linkToStream}
-                className="text-secondary-foreground ml-auto text-sm"
-                text="View on Superfluid"
-              />
-            )}
+              {linkToStream && (
+                <OutboundArrowLink
+                  target={linkToStream}
+                  className="text-secondary-foreground text-sm"
+                  text="View on Superfluid"
+                />
+              )}
+            </div>
           </div>
         </div>
 
