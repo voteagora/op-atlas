@@ -79,7 +79,7 @@ export const DiscordConnection = ({ userId }: { userId: string }) => {
           size="icon"
           aria-label="Disconnect Discord"
           onClick={handleUnlinkDiscord}
-          className={cn(isSyncing && "opacity-50")}
+          className={cn("w-10 h-10", isSyncing && "opacity-50")}
         >
           <X className="w-4 h-4" />
         </Button>

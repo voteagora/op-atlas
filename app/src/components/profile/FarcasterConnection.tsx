@@ -56,7 +56,7 @@ export const FarcasterConnection = ({
           size="icon"
           aria-label="Disconnect Farcaster"
           onClick={unlinkFarcaster}
-          className={cn(isIntermediateState && "opacity-50")}
+          className={cn("w-10 h-10", isIntermediateState && "opacity-50")}
         >
           <X className="w-4 h-4" />
         </Button>
