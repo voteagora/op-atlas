@@ -29,7 +29,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
       <div className="border border-border rounded-xl p-6">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-normal text-sm">Photo</div>
+            <div className="text-secondary-foreground font-normal text-sm">Photo</div>
             <Avatar className="!w-20 !h-20">
               <AvatarImage src={imageUrl || ""} alt="avatar" />
               <AvatarFallback
@@ -42,7 +42,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-normal text-sm">Name</div>
+            <div className="text-secondary-foreground font-normal text-sm">Name</div>
             <Input
               value={username ?? ""}
               placeholder="Your name"
@@ -52,7 +52,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-normal text-sm">Username</div>
+            <div className="text-secondary-foreground font-normal text-sm">Username</div>
             <Input
               value={username ? `@${username}` : ""}
               placeholder="Your username"
@@ -62,7 +62,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-foreground font-normal text-sm">Bio</div>
+            <div className="text-secondary-foreground font-normal text-sm">Bio</div>
             <Textarea
               value={bio}
               placeholder="Your bio"
@@ -76,7 +76,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
       {!user?.farcasterId && (
         <div className="mt-2">
           <FarcasterConnection userId={session.user.id}>
-            <Farcaster fill="#FFFFFF" className="w-[20px] h-[20px]" />
+            <Farcaster className="w-[20px] h-[20px]" />
             Import from Farcaster
           </FarcasterConnection>
         </div>

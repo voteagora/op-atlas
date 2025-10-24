@@ -169,7 +169,7 @@ export function VerifiedAddressesContent({ userId }: { userId: string }) {
           )}
           {safeAddresses.length === 0 && (
             <Button
-              className="button-secondary w-fit mt-3 font-medium"
+              className="button-secondary w-fit mt-3"
               onClick={() => setIsSafeDialogOpen(true)}
             >
               Verify
