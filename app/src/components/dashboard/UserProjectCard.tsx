@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { reverse } from "ramda"
 import { memo, useMemo } from "react"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { Progress } from "@/components/ui/progress"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
@@ -128,7 +129,6 @@ const UserProjectCard = ({
                 </span>
               </Button>
             </Link>
-
           </div>
 
           <div className="flex flex-row w-full justify-between items-center gap-4 justify-between">
@@ -141,13 +141,7 @@ const UserProjectCard = ({
                 <div className="m-auto">
                   {progress === 100 ? (
                     <div className="flex items-center">
-                      <Image
-                        alt="Checkmark"
-                        src="/assets/icons/circle-check-green.svg"
-                        height={16}
-                        width={16}
-                        className="w-4 h-4 object-center object-cover"
-                      />
+                      <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
                       <p className="ml-2 text-sm text-secondary-foreground">
                         Onchain
                       </p>

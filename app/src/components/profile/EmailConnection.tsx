@@ -4,6 +4,7 @@ import { usePrivy } from "@privy-io/react-auth"
 import Image from "next/image"
 
 import { Button } from "@/components/common/Button"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { useUser } from "@/hooks/db/useUser"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 
@@ -18,17 +19,13 @@ export const EmailConnection = ({ userId }: { userId: string }) => {
     privyUser?.email?.address?.toLowerCase()
 
   return (
-    <div className="flex">
+    <div className="flex gap-2">
       {email && (
-        <div className={`flex flex-row gap-2 min-w-0 flex-1 input-container ${isSyncing ? "opacity-50" : ""}`}>
-          <Image
-            src="/assets/icons/circle-check-green.svg"
-            height={16.67}
-            width={16.67}
-            alt="Verified"
-            className="mr-1"
-          />
-          <span className="text-secondary-foreground text-sm font-riforma">{email}</span>
+        <div
+          className={`flex flex-row gap-2 min-w-0 flex-1 input-container text-foreground cursor-text select-text`}
+        >
+          <CheckboxCircleFIll className="w-4 h-4 mr-1" fill="#1DBA6A" />
+          <span className="text-foreground text-sm font-riforma">{email}</span>
         </div>
       )}
       <Button

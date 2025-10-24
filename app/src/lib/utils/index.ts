@@ -227,10 +227,9 @@ export function profileProgress(user: UserWithAddresses): number {
 }
 
 export function shortenAddress(address: string) {
-  return `${address.substring(0, 6)}...${address.substring(
-    address.length - 4,
-    address.length,
-  )}`
+  const prefix = address.substring(0, 5)
+  const suffix = address.substring(address.length - 5, address.length)
+  return `${prefix}...${suffix}`
 }
 
 export function isOrganizationSetupComplete(organization: Organization) {

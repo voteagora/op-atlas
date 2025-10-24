@@ -2,9 +2,9 @@
 
 import { KYCUser } from "@prisma/client"
 import { usePrivy } from "@privy-io/react-auth"
+import { Loader2 } from "lucide-react"
 import { useTransition } from "react"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/common/Button"
 import { Callout } from "@/components/common/Callout"
@@ -12,6 +12,7 @@ import { useUser } from "@/hooks/db/useUser"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { createUserKYC } from "@/lib/actions/userKyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
+
 import PersonalKYCStatus from "./PersonalKYCStatus"
 
 interface IdentityVerificationProps {

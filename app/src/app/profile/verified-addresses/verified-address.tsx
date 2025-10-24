@@ -3,10 +3,12 @@ import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { getAddress, isAddress } from "viem"
+import { useEnsName } from "@/hooks/useEnsName"
 
 import { Badge } from "@/components/common/Badge"
 import { Badgeholder } from "@/components/common/Badgeholder"
 import ExternalLink from "@/components/ExternalLink"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -76,27 +78,56 @@ export const VerifiedAddress = ({
     )
   }
 
+  const normalizedAddress =
+    address && isAddress(address) ? (getAddress(address) as `0x${string}`) : undefined
+  const { data: ensName } = useEnsName(normalizedAddress)
+
+  const displayLabel = ensName
+    ? null
+    : shouldShortenAddress
+      ? shortenAddress(address)
+      : address
+
   return (
     <div className="flex items-center gap-1.5 group">
       <div className="input-container justify-between">
         <div className="flex items-center space-x-1.5 overflow-x-auto">
           {showCheckmark && (
-            <Image
-              src="/assets/icons/circle-check-green.svg"
-              height={16.67}
-              width={16.67}
-              alt="Verified"
-            />
+            <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
           )}
 
           <p className="text-sm">
-            {shouldShortenAddress ? shortenAddress(address) : address}
+            {ensName ? (
+              <>
+                <span>{ensName}</span>
+                <span className="text-muted-foreground ml-1">
+                  {shortenAddress(address)}
+                </span>
+              </>
+            ) : (
+              <span>{displayLabel}</span>
+            )}
           </p>
 
-          {primary && <Badge text="Governance" className="bg-secondary text-secondary-foreground px-2 py-1 shrink-0" />}
+          {primary && (
+            <Badge
+              text="Governance"
+              className="bg-secondary text-secondary-foreground px-2 py-1 shrink-0"
+            />
+          )}
           {isBadgeholderAddress && <Badgeholder />}
-          {source === "farcaster" && <Badge text="Farcaster" className="bg-secondary text-secondary-foreground px-2 py-1" />}
-          {source === "privy" && <Badge text="Privy" className="bg-secondary text-secondary-foreground px-2 py-1" />}
+          {source === "farcaster" && (
+            <Badge
+              text="Farcaster"
+              className="bg-secondary text-secondary-foreground px-2 py-1"
+            />
+          )}
+          {source === "privy" && (
+            <Badge
+              text="Privy"
+              className="bg-secondary text-secondary-foreground px-2 py-1"
+            />
+          )}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -174,16 +205,14 @@ export const SafeAddressRow = ({
     <div className="flex items-center gap-1.5 group">
       <div className="input-container justify-between">
         <div className="flex items-center space-x-1.5 overflow-x-auto">
-          <Image
-            src="/assets/icons/circle-check-green.svg"
-            height={16.67}
-            width={16.67}
-            alt="Verified Safe"
-          />
+          <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
 
           <p className="text-sm">{displayAddress}</p>
 
-          <Badge text="Safe" className="bg-secondary text-secondary-foreground px-2 py-1 shrink-0" />
+          <Badge
+            text="Safe"
+            className="bg-secondary text-secondary-foreground px-2 py-1 shrink-0"
+          />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -349,7 +378,10 @@ export function VerifySafeAddressDialog({
         {page === 0 && (
           <>
             <DialogHeader className="items-center gap-4 text-center">
-              <Badge text="Safe address" className="bg-secondary text-secondary-foreground px-2 py-1" />
+              <Badge
+                text="Safe address"
+                className="bg-secondary text-secondary-foreground px-2 py-1"
+              />
               <div className="flex flex-col items-center gap-4">
                 <div className="flex flex-col items-center gap-1 text-center">
                   <h3>
@@ -444,7 +476,10 @@ export function VerifySafeAddressDialog({
             </Button>
 
             <DialogHeader className="items-center gap-2 text-center">
-              <Badge text="Safe address" className="bg-secondary text-secondary-foreground px-2 py-1" />
+              <Badge
+                text="Safe address"
+                className="bg-secondary text-secondary-foreground px-2 py-1"
+              />
               <DialogTitle>Confirm your signature</DialogTitle>
               <DialogDescription>
                 Paste the signature produced by one of the Safe owners signing

@@ -3,31 +3,36 @@
 import { KYCUser } from "@prisma/client"
 import { Loader2, TriangleAlert } from "lucide-react"
 import Image from "next/image"
-import { useState, useCallback } from "react"
+import { useCallback, useState } from "react"
 import { toast } from "sonner"
 
-import { Button } from "@/components/common/Button"
-import { StatusIcon } from "@/components/projects/grants/grants/kyc-status/user-status/StatusComponents"
 import { Badge } from "@/components/common/Badge"
-import { ExtendedPersonaStatus, EmailState } from "@/components/projects/types"
+import { Button } from "@/components/common/Button"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
+import { StatusIcon } from "@/components/projects/grants/grants/kyc-status/user-status/StatusComponents"
+import { EmailState, ExtendedPersonaStatus } from "@/components/projects/types"
 import { sendPersonalKYCReminderEmail } from "@/lib/actions/emails"
 
 interface PersonalKYCStatusProps {
   kycUser: KYCUser
 }
 
-
 const PersonalKYCUserRow = ({ kycUser }: { kycUser: KYCUser }) => {
   const values = [
-    kycUser.firstName && kycUser.lastName ? `${kycUser.firstName} ${kycUser.lastName}` : null,
+    kycUser.firstName && kycUser.lastName
+      ? `${kycUser.firstName} ${kycUser.lastName}`
+      : null,
     kycUser.email,
   ].filter(Boolean)
 
   return (
-    <div className="flex flex-row w-full max-w-[664px] h-[40px] pt-[8px] pr-[12px] pb-[8px] pl-[12px] gap-[8px] rounded-[6px] border border-border bg-background">
+    <div className="flex flex-row w-full h-[40px] pt-[8px] pr-[12px] pb-[8px] pl-[12px] gap-[8px] rounded-[6px] border border-border bg-background">
       <div className="flex flex-row justify-between items-center w-full">
         <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
-          <StatusIcon status={kycUser.status as ExtendedPersonaStatus} size={4} />
+          <StatusIcon
+            status={kycUser.status as ExtendedPersonaStatus}
+            size={4}
+          />
           <p className="font-riforma font-normal text-sm text-text-foreground truncate">
             {values.join(", ")}
           </p>
@@ -76,20 +81,18 @@ export default function PersonalKYCStatus({ kycUser }: PersonalKYCStatusProps) {
         <Loader2 className="h-6 w-6 animate-spin" />
 
         <span className="text-sm text-secondary-foreground">
-          A message from compliance@optimism.io has been sent to your email. Please complete KYC via the
-          link provided and allow 48 hours for your status to update.
+          A message from compliance@optimism.io has been sent to your email.
+          Please complete KYC via the link provided and allow 48 hours for your
+          status to update.
         </span>
 
         <div className="flex items-start">
           {emailState === EmailState.SENT ? (
             <div className="flex items-center gap-2">
-              <span className="text-green-900 text-xs font-light">Email sent</span>
-              <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16.67}
-                width={16.67}
-                alt="Email sent"
-              />
+              <span className="text-green-900 text-xs font-light">
+                Email sent
+              </span>
+              <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
             </div>
           ) : (
             <Button
@@ -123,14 +126,15 @@ export default function PersonalKYCStatus({ kycUser }: PersonalKYCStatusProps) {
 
         <div className="text-sm">
           <span className="text-brand-primary">
-            There is an issue with your verification process. Please reach out to us at{" "}
+            There is an issue with your verification process. Please reach out
+            to us at{" "}
             <a
               href="mailto:compliance@optimism.io"
               className="text-brand-primary underline hover:no-underline"
             >
               compliance@optimism.io
-            </a>
-            {" "}for assistance.
+            </a>{" "}
+            for assistance.
           </span>
         </div>
       </div>

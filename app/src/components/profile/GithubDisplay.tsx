@@ -27,11 +27,12 @@ export const GithubDisplay = ({ userId }: { userId: string }) => {
       </div>
       <button
         className="text-sm text-secondary-foreground cursor-pointer bg-transparent border-none p-0 hover:opacity-80"
+        aria-label="Disconnect GitHub"
         onClick={() => {
           unlinkGithub()
         }}
       >
-        Disconnect
+        ✕
       </button>
     </div>
   )
