@@ -26,27 +26,30 @@ async function getFundingRewardsByRoundIdsAndSearchFn({
   const skip = (page - 1) * pageSize
   const take = pageSize
 
+  // Build the where clause - if roundIds is empty, don't filter by roundId (show all rounds)
+  const whereClause: Prisma.FundingRewardWhereInput = {
+    ...(roundIds.length > 0 && { roundId: { in: roundIds } }),
+    project: {
+      OR: [
+        {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+  }
+
   const [rewards, totalCount] = await prisma.$transaction([
     prisma.fundingReward.findMany({
-      where: {
-        roundId: { in: roundIds },
-        project: {
-          OR: [
-            {
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            {
-              description: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          ],
-        },
-      },
+      where: whereClause,
       select: {
         id: true,
         roundId: true,
@@ -77,25 +80,7 @@ async function getFundingRewardsByRoundIdsAndSearchFn({
       take,
     }),
     prisma.fundingReward.count({
-      where: {
-        roundId: { in: roundIds },
-        project: {
-          OR: [
-            {
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-            {
-              description: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          ],
-        },
-      },
+      where: whereClause,
     }),
   ])
 
