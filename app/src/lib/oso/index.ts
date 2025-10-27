@@ -563,7 +563,9 @@ const getTopProjects = cache(async (osoId: string) => {
 export async function getDeployedContracts(
   deployer: string,
 ): Promise<OsoDeployerContractsReturnType> {
-  const contracts = await fetch(`/api/oso/contracts/${deployer}`)
+  const contracts = await fetch(`/api/oso/contracts/${deployer}`, {
+    cache: "no-store",
+  })
 
   return contracts.json()
 }
