@@ -137,6 +137,7 @@ export function DeployerFormField({
             onOpenChange={(open) => !open && setIsVerifyingDialog(false)}
             projectId={projectId}
             deployerAddress={address as `0x${string}`}
+            expectedContracts={osoContracts?.length ?? undefined}
             onSubmit={(
               includedContracts: ProjectContract[],
               excludedContracts: ProjectContract[],

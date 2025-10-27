@@ -8,6 +8,10 @@ import { getProjectContracts } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
 
+// Heavy verification flows (OSO fetch + large contract batches) can exceed the
+// default execution window, so request the extended limit.
+export const maxDuration = 300
+
 export async function generateMetadata({
   params,
 }: {

@@ -1,6 +1,12 @@
 "use server"
 
-import { KYCUser, Prisma, Project, PublishedContract } from "@prisma/client"
+import {
+  KYCUser,
+  Prisma,
+  Project,
+  ProjectContract,
+  PublishedContract,
+} from "@prisma/client"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
@@ -24,6 +30,7 @@ import {
   UserProjectsWithDetails,
   UserWithProjects,
 } from "@/lib/types"
+import { chunkArray } from "@/lib/utils"
 import { withChangelogTracking } from "@/lib/utils/changelog"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
@@ -1010,27 +1017,118 @@ export async function addProjectContracts(
   projectId: string,
   contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
 ) {
-  const createOperations = contracts.map(async (contract) => {
+  const normalizedContracts = contracts.map((contract) => ({
+    ...contract,
+    contractAddress: getAddress(contract.contractAddress),
+    deployerAddress: getAddress(contract.deployerAddress),
+  }))
+
+  const keyFor = (contract: { contractAddress: string; chainId: number }) =>
+    `${contract.contractAddress}:${contract.chainId}`
+
+  const uniqueLookupTargets = new Map<
+    string,
+    { contractAddress: string; chainId: number }
+  >()
+
+  for (const contract of normalizedContracts) {
+    const key = keyFor(contract)
+    if (!uniqueLookupTargets.has(key)) {
+      uniqueLookupTargets.set(key, {
+        contractAddress: contract.contractAddress,
+        chainId: contract.chainId,
+      })
+    }
+  }
+
+  const existingKeys = new Set<string>()
+  const lookupChunks = chunkArray(
+    Array.from(uniqueLookupTargets.values()),
+    500,
+  )
+
+  for (const chunk of lookupChunks) {
+    if (chunk.length === 0) continue
+
+    const existing = await prisma.projectContract.findMany({
+      where: {
+        OR: chunk.map(({ contractAddress, chainId }) => ({
+          contractAddress,
+          chainId,
+        })),
+      },
+      select: {
+        contractAddress: true,
+        chainId: true,
+      },
+    })
+
+    existing.forEach(({ contractAddress, chainId }) =>
+      existingKeys.add(keyFor({ contractAddress, chainId })),
+    )
+  }
+
+  const failedContracts: Omit<
+    Prisma.ProjectContractCreateManyInput,
+    "project"
+  >[] = []
+  const contractsToCreate: Omit<
+    Prisma.ProjectContractCreateManyInput,
+    "project"
+  >[] = []
+
+  for (const contract of normalizedContracts) {
+    const key = keyFor(contract)
+    if (existingKeys.has(key)) {
+      failedContracts.push(contract)
+    } else {
+      contractsToCreate.push(contract)
+      existingKeys.add(key)
+    }
+  }
+
+  const insertedKeys = new Set<string>()
+  const creationChunks = chunkArray(contractsToCreate, 100)
+
+  for (const chunk of creationChunks) {
+    if (chunk.length === 0) continue
+
     try {
-      const result = await prisma.projectContract.create({
-        data: {
-          ...contract,
-          contractAddress: getAddress(contract.contractAddress),
-          deployerAddress: getAddress(contract.deployerAddress),
+      await prisma.projectContract.createMany({
+        data: chunk,
+        skipDuplicates: true,
+      })
+      chunk.forEach((contract) => insertedKeys.add(keyFor(contract)))
+    } catch (error) {
+      console.error(`Failed to create contract batch:`, error)
+      chunk.forEach((contract) => failedContracts.push(contract))
+    }
+  }
+
+  let createdContracts: ProjectContract[] = []
+  if (insertedKeys.size > 0) {
+    const keysToFetch = Array.from(insertedKeys).map((key) => {
+      const [contractAddress, chainId] = key.split(":")
+      return {
+        contractAddress,
+        chainId: Number(chainId),
+      }
+    })
+
+    const fetchChunks = chunkArray(keysToFetch, 500)
+    for (const chunk of fetchChunks) {
+      if (chunk.length === 0) continue
+      const results = await prisma.projectContract.findMany({
+        where: {
+          projectId,
+          OR: chunk.map(({ contractAddress, chainId }) => ({
+            contractAddress,
+            chainId,
+          })),
         },
       })
-      return { success: true, data: result }
-    } catch (error) {
-      console.error(`Failed to create contract:`, error)
-      return { success: false, data: contract, error }
+      createdContracts = createdContracts.concat(results)
     }
-  })
-
-  const results = await Promise.all(createOperations)
-
-  const createdContracts = {
-    succeeded: results.filter((r) => r.success).map((r) => r.data),
-    failed: results.filter((r) => !r.success).map((r) => r.data),
   }
 
   await prisma.project.update({
@@ -1043,8 +1141,8 @@ export async function addProjectContracts(
   })
 
   return {
-    createdContracts: createdContracts.succeeded,
-    failedContracts: createdContracts.failed,
+    createdContracts,
+    failedContracts,
   }
 }
 
