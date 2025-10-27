@@ -1,5 +1,6 @@
 "use client"
 
+import { X } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -77,6 +78,18 @@ export function GovForumConnection({ userId }: { userId: string }) {
     })
 
     promise.finally(() => setIsSaving(false))
+  }
+
+  const handleClear = () => {
+    const promise = updateGovForumProfileUrl("")
+      .then(() => invalidateUser())
+      .then(() => setGovForumProfileUrl(""))
+
+    toast.promise(promise, {
+      loading: "Clearing profile URL...",
+      success: "Profile URL cleared",
+      error: (error) => error.message || "Failed to clear profile URL",
+    })
   }
 
   useEffect(() => {
@@ -177,6 +190,17 @@ export function GovForumConnection({ userId }: { userId: string }) {
             </div>
           </DialogContent>
         </Dialog>
+        {user?.govForumProfileUrl && (
+          <Button
+            variant="secondary"
+            size="icon"
+            aria-label="Clear Gov Forum profile"
+            onClick={handleClear}
+            className="w-10 h-10"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        )}
       </div>
     </div>
   )
