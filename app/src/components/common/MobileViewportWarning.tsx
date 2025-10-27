@@ -14,6 +14,14 @@ export function MobileViewportWarning() {
           The mobile version of this site isn&apos;t ready yet. Please use your
           desktop computer.
         </div>
+        <button
+          onClick={() => window.history.back()}
+          className="px-4 py-2.5 bg-secondary rounded-md flex items-center gap-2"
+        >
+          <div className="text-foreground text-sm font-medium leading-tight">
+            Back
+          </div>
+        </button>
       </div>
     </div>
   )
