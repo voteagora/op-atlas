@@ -114,6 +114,15 @@ export const PublishForm = ({
     )
   }, [publishProgress])
 
+  const showResumeButton = useMemo(() => {
+    if (!publishProgress) return false
+    const someContractsPublished =
+      (publishProgress.publishedTotal ?? 0) > 0
+    const snapshotExists = project.snapshots.length > 0
+    const hasOutstanding = outstandingContracts > 0
+    return snapshotExists && someContractsPublished && hasOutstanding
+  }, [publishProgress, outstandingContracts, project.snapshots.length])
+
   const onPublish = async () => {
     setIsPublishing(true)
 
@@ -187,7 +196,7 @@ export const PublishForm = ({
             Publish
           </Button>
 
-          {outstandingContracts > 0 && (
+          {showResumeButton && (
             <Button
               variant="secondary"
               className="w-fit text-sm font-normal"
