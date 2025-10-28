@@ -1,6 +1,6 @@
 "use server"
 
-import { ProjectContract, PublishedContract } from "@prisma/client"
+import { ProjectContract } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -10,13 +10,14 @@ import {
   addPublishedContracts,
   getConsolidatedProjectTeam,
   getProject,
+  getProjectContracts,
   revokePublishedContracts,
   updateAllForProject,
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
 
 import {
-  createFullProjectSnapshotAttestations,
+  createContractAttestations,
   createOrganizationMetadataAttestation,
   createProjectMetadataAttestation,
   revokeContractAttestations,
@@ -30,6 +31,8 @@ import {
 } from "../utils/metadata"
 import { getUnpublishedContractChanges } from "./projects"
 import { verifyMembership } from "./utils"
+
+const PUBLISH_CONTRACT_BATCH_LIMIT = 500
 
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
@@ -62,24 +65,32 @@ export const createProjectSnapshot = async (projectId: string) => {
     const metadata = formatProjectMetadata(project, team)
     const ipfsHash = await uploadToPinata(project.id, metadata)
 
-    // Create attestation
-    const [{ snapshot }, _] = await Promise.all([
-      createProjectMetadataAttestations({
-        project,
-        ipfsHash,
-        farcasterId: session?.user?.farcasterId || "0",
-        unpublishedContractChanges,
-      }),
-      unpublishContracts(
-        unpublishedContractChanges?.toRevoke?.map((c) => c.id) ?? [],
-      ),
-    ])
+    // Create metadata attestation only
+    const attestationId = await createProjectMetadataAttestation({
+      farcasterId: session?.user?.farcasterId
+        ? parseInt(session.user.farcasterId)
+        : 0,
+      projectId: project.id,
+      name: project.name,
+      category: project.category ?? "",
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    })
+
+    const snapshot = await addProjectSnapshot({
+      projectId: project.id,
+      ipfsHash,
+      attestationId,
+    })
 
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")
 
     return {
       snapshot,
+      pendingContracts: {
+        toPublish: unpublishedContractChanges?.toPublish?.length ?? 0,
+        toRevoke: unpublishedContractChanges?.toRevoke?.length ?? 0,
+      },
       error: null,
     }
   } catch (error) {
@@ -102,100 +113,138 @@ export const createProjectSnapshot = async (projectId: string) => {
   }
 }
 
-const createProjectMetadataAttestations = async ({
-  project,
-  ipfsHash,
-  farcasterId,
-  unpublishedContractChanges,
-}: {
-  project: ProjectWithFullDetails
-  ipfsHash: string
-  farcasterId: string
-  unpublishedContractChanges: {
-    toPublish?: ProjectContract[]
-    toRevoke?: PublishedContract[]
-  } | null
-}) => {
-  const attestationsIds = await createFullProjectSnapshotAttestations({
-    project: {
-      farcasterId: parseInt(farcasterId),
-      projectId: project.id,
-      name: project.name,
-      category: project.category ?? "",
-      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
-    },
-    contracts:
-      unpublishedContractChanges?.toPublish?.map((c) => ({
-        contractAddress: c.contractAddress,
-        chainId: c.chainId,
-        deployer: c.deployerAddress,
-        deploymentTx: c.deploymentHash,
-        signature: c.verificationProof,
-        verificationChainId: c.verificationChainId || c.chainId,
-      })) ?? [],
-  })
-
-  if (attestationsIds.length === 0) {
-    throw new Error("Failed to create attestations")
-  }
-
-  // Update database
-  const [snapshot] = await updateProjectMetadataDatabase({
-    project,
-    ipfsHash,
-    attestationsIds,
-    projectId: project.id,
-    unpublishedContractChanges: {
-      toPublish: unpublishedContractChanges?.toPublish ?? [],
-      toRevoke: unpublishedContractChanges?.toRevoke ?? [],
-    },
-  })
-
-  return { snapshot, attestationsIds }
+const sortContractsForPublishing = (contracts: ProjectContract[]) => {
+  return contracts
+    .slice()
+    .sort((a, b) => {
+      if (a.chainId !== b.chainId) {
+        return a.chainId - b.chainId
+      }
+      return a.contractAddress.localeCompare(b.contractAddress)
+    })
 }
 
-const unpublishContracts = async (attestationIds: string[]) => {
-  await revokeContractAttestations(attestationIds)
-
-  return await revokePublishedContracts(attestationIds)
-}
-
-const updateProjectMetadataDatabase = async ({
-  project,
-  ipfsHash,
-  attestationsIds,
+export const publishProjectContractsBatch = async ({
   projectId,
-  unpublishedContractChanges,
+  batchSize = PUBLISH_CONTRACT_BATCH_LIMIT,
 }: {
-  project: { id: string }
-  ipfsHash: string
-  attestationsIds: string[]
   projectId: string
-  unpublishedContractChanges: {
-    toPublish?: ProjectContract[]
-    toRevoke?: PublishedContract[]
-  }
+  batchSize?: number
 }) => {
-  const [snapshot] = await Promise.all([
-    addProjectSnapshot({
-      projectId: project.id,
-      ipfsHash,
-      attestationId: attestationsIds[0],
-    }),
-    addPublishedContracts(
-      unpublishedContractChanges?.toPublish?.map((c, i) => ({
-        id: attestationsIds[i + 1],
-        contract: c.contractAddress,
-        deploymentTx: c.deploymentHash,
-        deployer: c.deployerAddress,
-        verificationChainId: c.verificationChainId || c.chainId,
-        signature: c.verificationProof,
-        chainId: c.chainId,
-        projectId,
-      })) ?? [],
-    ),
-  ])
-  return [snapshot]
+  const session = await auth()
+
+  const userId = session?.user?.id
+  if (!userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, userId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  const normalizedBatchSize = Math.max(
+    1,
+    Math.min(PUBLISH_CONTRACT_BATCH_LIMIT, batchSize ?? PUBLISH_CONTRACT_BATCH_LIMIT),
+  )
+
+  const projectContracts = await getProjectContracts({ projectId })
+  if (!projectContracts) {
+    return {
+      error: "Project not found",
+    }
+  }
+
+  const unpublishedContractChanges = await getUnpublishedContractChanges(
+    projectId,
+    projectContracts,
+  )
+
+  const toPublish = sortContractsForPublishing(
+    unpublishedContractChanges?.toPublish ?? [],
+  )
+  const toRevoke = (unpublishedContractChanges?.toRevoke ?? []).slice()
+
+  const publishBatch = toPublish.slice(0, normalizedBatchSize)
+  const revokeBatch = toRevoke.slice(0, normalizedBatchSize)
+
+  let publishedThisBatch = 0
+  let revokedThisBatch = 0
+
+  if (revokeBatch.length > 0) {
+    const revokeIds = revokeBatch.map((contract) => contract.id)
+    await revokeContractAttestations(revokeIds)
+    await revokePublishedContracts(revokeIds)
+    revokedThisBatch = revokeBatch.length
+  }
+
+  if (publishBatch.length > 0) {
+    const attestationIds = await createContractAttestations({
+      contracts: publishBatch.map((contract) => ({
+        contractAddress: contract.contractAddress,
+        chainId: contract.chainId,
+        deployer: contract.deployerAddress,
+        deploymentTx: contract.deploymentHash,
+        signature: contract.verificationProof,
+        verificationChainId:
+          contract.verificationChainId || contract.chainId,
+      })),
+      projectId: projectContracts.id,
+      farcasterId: session?.user?.farcasterId
+        ? parseInt(session.user.farcasterId)
+        : 0,
+    })
+
+    if (attestationIds.length > 0) {
+      const records = attestationIds
+        .map((attestationId, index) => {
+          const contract = publishBatch[index]
+          if (!contract) return null
+          return {
+            id: attestationId,
+            contract: contract.contractAddress,
+            deploymentTx: contract.deploymentHash,
+            deployer: contract.deployerAddress,
+            verificationChainId:
+              contract.verificationChainId || contract.chainId,
+            signature: contract.verificationProof,
+            chainId: contract.chainId,
+            projectId,
+          }
+        })
+        .filter(Boolean) as {
+        id: string
+        contract: string
+        deploymentTx: string
+        deployer: string
+        verificationChainId: number
+        signature: string
+        chainId: number
+        projectId: string
+      }[]
+
+      await addPublishedContracts(records)
+      publishedThisBatch = records.length
+    }
+  }
+
+  const updatedProjectContracts = await getProjectContracts({ projectId })
+  const updatedDiff = await getUnpublishedContractChanges(
+    projectId,
+    updatedProjectContracts,
+  )
+
+  return {
+    error: null,
+    publishedThisBatch,
+    revokedThisBatch,
+    remainingPublish: updatedDiff?.toPublish?.length ?? 0,
+    remainingRevoke: updatedDiff?.toRevoke?.length ?? 0,
+    totalVerified: updatedProjectContracts?.contracts.length ?? 0,
+    totalPublished: updatedProjectContracts?.publishedContracts.length ?? 0,
+  }
 }
 
 export const createProjectSnapshotOnBehalf = async (

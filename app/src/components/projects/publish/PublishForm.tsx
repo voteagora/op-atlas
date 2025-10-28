@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { intersection, sortBy } from "ramda"
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import { Snapshot } from "@/components/projects/publish/Snapshot"
@@ -17,6 +17,10 @@ import {
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import MetadataPublishedConfirmationDialog from "./MetadataPublishedConfirmationDialog"
+import {
+  PublishContractsDialog,
+  type PublishProgress,
+} from "./PublishContractsDialog"
 
 export const PublishForm = ({
   project,
@@ -28,8 +32,34 @@ export const PublishForm = ({
   const [isPublishing, setIsPublishing] = useState(false)
   const [showMetadataPublishedDialogue, setShowMetadataPublishedDialogue] =
     useState(false)
+  const [showPublishContractsDialog, setShowPublishContractsDialog] =
+    useState(false)
+  const [publishProgress, setPublishProgress] =
+    useState<PublishProgress | null>(null)
 
   const { track } = useAnalytics()
+
+  const fetchPublishProgress = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `/api/projects/${project.id}/contracts/publish-progress`,
+        { cache: "no-store" },
+      )
+
+      if (!response.ok) {
+        return
+      }
+
+      const data = (await response.json()) as PublishProgress
+      setPublishProgress(data)
+    } catch (error) {
+      console.error("Failed to load publish progress", error)
+    }
+  }, [project.id])
+
+  useEffect(() => {
+    fetchPublishProgress()
+  }, [fetchPublishProgress])
 
   const isReadyToPublish = useMemo(() => {
     const { completedSections } = getProjectStatus(project, contracts)
@@ -64,14 +94,41 @@ export const PublishForm = ({
     )
   }, [project])
 
+  const handleProgressUpdate = useCallback(
+    (progress: PublishProgress) => {
+      setPublishProgress(progress)
+    },
+    [],
+  )
+
+  const handlePublishComplete = useCallback(() => {
+    setShowPublishContractsDialog(false)
+    fetchPublishProgress()
+  }, [fetchPublishProgress])
+
+  const outstandingContracts = useMemo(() => {
+    if (!publishProgress) return 0
+    return (
+      (publishProgress.pendingPublish ?? 0) +
+      (publishProgress.pendingRevoke ?? 0)
+    )
+  }, [publishProgress])
+
   const onPublish = async () => {
     setIsPublishing(true)
 
     toast.promise(createProjectSnapshot(project.id), {
       loading: "Publishing metadata onchain...",
-      success: ({ snapshot }) => {
+      success: ({ snapshot, pendingContracts }) => {
         setIsPublishing(false)
         setShowMetadataPublishedDialogue(true)
+        if (
+          (pendingContracts?.toPublish ?? 0) > 0 ||
+          (pendingContracts?.toRevoke ?? 0) > 0
+        ) {
+          setShowPublishContractsDialog(true)
+        }
+        fetchPublishProgress()
         track("Publish Project", {
           projectId: project.id,
           attestationId: snapshot?.attestationId,
@@ -130,6 +187,16 @@ export const PublishForm = ({
             Publish
           </Button>
 
+          {outstandingContracts > 0 && (
+            <Button
+              variant="secondary"
+              className="w-fit text-sm font-normal"
+              onClick={() => setShowPublishContractsDialog(true)}
+            >
+              Continue publishing contracts
+            </Button>
+          )}
+
           {!isReadyToPublish && (
             <p className="text-sm text-destructive-foreground">
               You haven&apos;t completed all the previous steps
@@ -161,6 +228,18 @@ export const PublishForm = ({
           onOpenChange={setShowMetadataPublishedDialogue}
         />
       )}
+      <PublishContractsDialog
+        projectId={project.id}
+        open={showPublishContractsDialog}
+        onOpenChange={(next) => {
+          setShowPublishContractsDialog(next)
+          if (!next) {
+            fetchPublishProgress()
+          }
+        }}
+        onProgressUpdate={handleProgressUpdate}
+        onComplete={handlePublishComplete}
+      />
     </div>
   )
 }
