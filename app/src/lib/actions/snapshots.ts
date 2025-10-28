@@ -117,6 +117,13 @@ const sortContractsForPublishing = (contracts: ProjectContract[]) => {
   return contracts
     .slice()
     .sort((a, b) => {
+      const aCreated = new Date(a.createdAt).getTime()
+      const bCreated = new Date(b.createdAt).getTime()
+
+      if (aCreated !== bCreated) {
+        return aCreated - bCreated
+      }
+
       if (a.chainId !== b.chainId) {
         return a.chainId - b.chainId
       }
