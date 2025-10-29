@@ -1,6 +1,6 @@
 "use server"
 
-import { ProjectContract } from "@prisma/client"
+import { ProjectContract, ProjectSnapshot } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -29,11 +29,11 @@ import {
   formatProjectMetadata,
   ProjectMetadata,
 } from "../utils/metadata"
+import { projectHasUnpublishedChanges } from "../utils"
 import { getUnpublishedContractChanges } from "./projects"
 import { verifyMembership } from "./utils"
 
-const PUBLISH_CONTRACT_BATCH_LIMIT = 500
-
+const PUBLISH_CONTRACT_BATCH_LIMIT = 40
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
 
@@ -60,6 +60,24 @@ export const createProjectSnapshot = async (projectId: string) => {
     }
   }
 
+  const snapshots = (project.snapshots ?? []) as ProjectSnapshot[]
+  const latestSnapshot = getLatestSnapshot(snapshots)
+  const hasUnpublishedMetadataChanges = projectHasUnpublishedChanges(
+    snapshots,
+    project.lastMetadataUpdate,
+  )
+
+  if (!hasUnpublishedMetadataChanges && latestSnapshot) {
+    return {
+      snapshot: latestSnapshot,
+      pendingContracts: {
+        toPublish: unpublishedContractChanges?.toPublish?.length ?? 0,
+        toRevoke: unpublishedContractChanges?.toRevoke?.length ?? 0,
+      },
+      error: null,
+    }
+  }
+
   try {
     // Upload metadata to IPFS
     const metadata = formatProjectMetadata(project, team)
@@ -74,6 +92,7 @@ export const createProjectSnapshot = async (projectId: string) => {
       name: project.name,
       category: project.category ?? "",
       ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+      refUID: project.id,
     })
 
     const snapshot = await addProjectSnapshot({
@@ -108,7 +127,7 @@ export const createProjectSnapshot = async (projectId: string) => {
     console.error("Error creating snapshot", errorDetails)
 
     return {
-      error,
+      error: errorMessage || "Failed to create snapshot",
     }
   }
 }
@@ -154,11 +173,18 @@ export const publishProjectContractsBatch = async ({
 
   const normalizedBatchSize = Math.max(
     1,
-    Math.min(PUBLISH_CONTRACT_BATCH_LIMIT, batchSize ?? PUBLISH_CONTRACT_BATCH_LIMIT),
+    Math.min(
+      PUBLISH_CONTRACT_BATCH_LIMIT,
+      batchSize ?? PUBLISH_CONTRACT_BATCH_LIMIT,
+    ),
   )
 
-  const projectContracts = await getProjectContracts({ projectId })
-  if (!projectContracts) {
+  const [projectContracts, projectDetails] = await Promise.all([
+    getProjectContracts({ projectId }),
+    getProject({ id: projectId }),
+  ])
+
+  if (!projectContracts || !projectDetails) {
     return {
       error: "Project not found",
     }
@@ -169,9 +195,13 @@ export const publishProjectContractsBatch = async ({
     projectContracts,
   )
 
-  const toPublish = sortContractsForPublishing(
+  const sortedToPublish = sortContractsForPublishing(
     unpublishedContractChanges?.toPublish ?? [],
   )
+  const toPublish = sortedToPublish.filter(
+    (contract) => !!contract.verificationProof,
+  )
+  const skippedContracts = sortedToPublish.length - toPublish.length
   const toRevoke = (unpublishedContractChanges?.toRevoke ?? []).slice()
 
   const publishBatch = toPublish.slice(0, normalizedBatchSize)
@@ -179,6 +209,7 @@ export const publishProjectContractsBatch = async ({
 
   let publishedThisBatch = 0
   let revokedThisBatch = 0
+  let errorMessage: string | null = null
 
   if (revokeBatch.length > 0) {
     const revokeIds = revokeBatch.map((contract) => contract.id)
@@ -188,6 +219,15 @@ export const publishProjectContractsBatch = async ({
   }
 
   if (publishBatch.length > 0) {
+    if (!projectDetails.snapshots?.length) {
+      return {
+        error:
+          "Project metadata attestation not found. Publish metadata before publishing contracts.",
+      }
+    }
+
+    const contractRefUID = projectContracts.id
+
     const attestationIds = await createContractAttestations({
       contracts: publishBatch.map((contract) => ({
         contractAddress: contract.contractAddress,
@@ -202,6 +242,7 @@ export const publishProjectContractsBatch = async ({
       farcasterId: session?.user?.farcasterId
         ? parseInt(session.user.farcasterId)
         : 0,
+      refUID: contractRefUID,
     })
 
     if (attestationIds.length > 0) {
@@ -244,14 +285,28 @@ export const publishProjectContractsBatch = async ({
   )
 
   return {
-    error: null,
+    error: errorMessage,
     publishedThisBatch,
     revokedThisBatch,
+    skippedThisBatch: skippedContracts,
     remainingPublish: updatedDiff?.toPublish?.length ?? 0,
     remainingRevoke: updatedDiff?.toRevoke?.length ?? 0,
     totalVerified: updatedProjectContracts?.contracts.length ?? 0,
     totalPublished: updatedProjectContracts?.publishedContracts.length ?? 0,
   }
+}
+
+function getLatestSnapshot<T extends { createdAt: string | Date }>(
+  snapshots: T[] | null | undefined,
+): T | undefined {
+  if (!snapshots || snapshots.length === 0) {
+    return undefined
+  }
+
+  return [...snapshots].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )[0]
 }
 
 export const createProjectSnapshotOnBehalf = async (

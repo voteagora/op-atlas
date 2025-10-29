@@ -3,11 +3,11 @@
 import Link from "next/link"
 import { intersection, sortBy } from "ramda"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { toast } from "sonner"
 
-import { Snapshot } from "@/components/projects/publish/Snapshot"
+import { LinearProgress } from "@/components/common/LinearProgress"
 import { Button } from "@/components/ui/button"
-import { createProjectSnapshot } from "@/lib/actions/snapshots"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Snapshot } from "@/components/projects/publish/Snapshot"
 import { ProjectContracts, ProjectWithFullDetails } from "@/lib/types"
 import {
   getProjectStatus,
@@ -29,17 +29,20 @@ export const PublishForm = ({
   project: ProjectWithFullDetails
   contracts: ProjectContracts | null
 }) => {
-  const [isPublishing, setIsPublishing] = useState(false)
   const [showMetadataPublishedDialogue, setShowMetadataPublishedDialogue] =
     useState(false)
   const [showPublishContractsDialog, setShowPublishContractsDialog] =
     useState(false)
   const [publishProgress, setPublishProgress] =
     useState<PublishProgress | null>(null)
+  const [latestMetadataAttestationId, setLatestMetadataAttestationId] =
+    useState<string | undefined>(undefined)
+  const [isProgressLoading, setIsProgressLoading] = useState(true)
 
   const { track } = useAnalytics()
 
   const fetchPublishProgress = useCallback(async () => {
+    setIsProgressLoading(true)
     try {
       const response = await fetch(
         `/api/projects/${project.id}/contracts/publish-progress`,
@@ -54,6 +57,8 @@ export const PublishForm = ({
       setPublishProgress(data)
     } catch (error) {
       console.error("Failed to load publish progress", error)
+    } finally {
+      setIsProgressLoading(false)
     }
   }, [project.id])
 
@@ -104,7 +109,23 @@ export const PublishForm = ({
   const handlePublishComplete = useCallback(() => {
     setShowPublishContractsDialog(false)
     fetchPublishProgress()
-  }, [fetchPublishProgress])
+    if (latestMetadataAttestationId) {
+      setShowMetadataPublishedDialogue(true)
+    }
+  }, [fetchPublishProgress, latestMetadataAttestationId])
+
+  const handleMetadataPublished = useCallback(
+    (attestationId?: string) => {
+      setLatestMetadataAttestationId(attestationId)
+      track("Publish Project", {
+        projectId: project.id,
+        attestationId,
+        elementType: "Button",
+        elementName: "Publish",
+      })
+    },
+    [project.id, track],
+  )
 
   const outstandingContracts = useMemo(() => {
     if (!publishProgress) return 0
@@ -116,44 +137,31 @@ export const PublishForm = ({
 
   const showResumeButton = useMemo(() => {
     if (!publishProgress) return false
-    const someContractsPublished =
-      (publishProgress.publishedTotal ?? 0) > 0
     const snapshotExists = project.snapshots.length > 0
     const hasOutstanding = outstandingContracts > 0
-    return snapshotExists && someContractsPublished && hasOutstanding
+    return snapshotExists && hasOutstanding
   }, [publishProgress, outstandingContracts, project.snapshots.length])
 
-  const onPublish = async () => {
-    setIsPublishing(true)
-
-    toast.promise(createProjectSnapshot(project.id), {
-      loading: "Publishing metadata onchain...",
-      success: ({ snapshot, pendingContracts }) => {
-        setIsPublishing(false)
-        setShowMetadataPublishedDialogue(true)
-        if (
-          (pendingContracts?.toPublish ?? 0) > 0 ||
-          (pendingContracts?.toRevoke ?? 0) > 0
-        ) {
-          setShowPublishContractsDialog(true)
-        }
-        fetchPublishProgress()
-        track("Publish Project", {
-          projectId: project.id,
-          attestationId: snapshot?.attestationId,
-          elementType: "Button",
-          elementName: "Publish",
-        })
-        return "Snapshot published"
-      },
-      error: () => {
-        setIsPublishing(false)
-        return "Error publishing snapshot, please try again."
-      },
-    })
+  const onPublish = () => {
+    setShowMetadataPublishedDialogue(false)
+    setLatestMetadataAttestationId(undefined)
+    setShowPublishContractsDialog(true)
   }
 
   const canPublish = isReadyToPublish && !hasPublishedLatestChanges
+  const shouldShowResumeButton = !isProgressLoading && showResumeButton
+  const shouldShowPublishButton = !isProgressLoading && !shouldShowResumeButton
+  const totalContracts = publishProgress?.verifiedTotal ?? 0
+  const publishedContracts = publishProgress?.publishedTotal ?? 0
+  const remainingContracts =
+    (publishProgress?.pendingPublish ?? 0) +
+    (publishProgress?.pendingRevoke ?? 0)
+  const progressHelperText =
+    remainingContracts > 0
+      ? `${remainingContracts} contract${remainingContracts === 1 ? "" : "s"} remaining`
+      : publishedContracts > 0
+        ? "All contracts are published onchain"
+        : undefined
 
   return (
     <div className="flex flex-col gap-12">
@@ -161,10 +169,9 @@ export const PublishForm = ({
         <div className="flex flex-col gap-6">
           <h2 className="text-text-default">Publish metadata onchain</h2>
           <p className="text-text-secondary">
-            If you’ve completed the previous steps, then hit publish and
-            Optimism will issue an attestation containing your project’s
-            metadata. Following this step, you’ll be eligible to apply for Retro
-            Funding.
+            Publishing creates an attestation for your project metadata and one
+            for each verified contract. Once these attestations are onchain,
+            you&apos;ll be eligible to apply for Retro Funding.
           </p>
         </div>
 
@@ -185,25 +192,37 @@ export const PublishForm = ({
           </div>
         ) : null}
 
-        <div className="flex items-center gap-4">
-          <Button
-            isLoading={isPublishing}
-            variant="destructive"
-            disabled={!canPublish || isPublishing}
-            onClick={onPublish}
-            className="w-fit text-sm font-normal"
-          >
-            Publish
-          </Button>
+        {!isProgressLoading && totalContracts > 0 && (
+          <LinearProgress
+            current={publishedContracts}
+            total={totalContracts}
+            label="Contracts published"
+            helperText={progressHelperText}
+          />
+        )}
 
-          {showResumeButton && (
+        <div className="flex flex-wrap items-center gap-4">
+          {isProgressLoading ? (
+            <Skeleton className="h-9 w-40 rounded-md" />
+          ) : shouldShowResumeButton ? (
             <Button
-              variant="secondary"
+              variant="destructive"
               className="w-fit text-sm font-normal"
               onClick={() => setShowPublishContractsDialog(true)}
             >
               Continue publishing contracts
             </Button>
+          ) : (
+            shouldShowPublishButton && (
+              <Button
+                variant="destructive"
+                disabled={!canPublish || showPublishContractsDialog}
+                onClick={onPublish}
+                className="w-fit text-sm font-normal"
+              >
+                Publish
+              </Button>
+            )
           )}
 
           {!isReadyToPublish && (
@@ -248,6 +267,7 @@ export const PublishForm = ({
         }}
         onProgressUpdate={handleProgressUpdate}
         onComplete={handlePublishComplete}
+        onMetadataPublished={handleMetadataPublished}
       />
     </div>
   )

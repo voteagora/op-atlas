@@ -234,12 +234,14 @@ export async function createProjectMetadataAttestation({
   name,
   category,
   ipfsUrl,
+  refUID,
 }: {
   farcasterId: number
   projectId: string
   name: string
   category: string
   ipfsUrl: string
+  refUID?: string
 }) {
   const attestation = buildProjectMetadataAttestation({
     farcasterId,
@@ -247,6 +249,7 @@ export async function createProjectMetadataAttestation({
     name,
     category,
     ipfsUrl,
+    refUID,
   })
 
   const attestationId = await createAttestation(
@@ -321,6 +324,7 @@ export async function createContractAttestations({
   contracts,
   projectId,
   farcasterId,
+  refUID,
 }: {
   contracts: {
     contractAddress: string
@@ -332,14 +336,20 @@ export async function createContractAttestations({
   }[]
   projectId: string
   farcasterId: number
+  refUID?: string
 }) {
   const attestations = buildContractAttestations({
     contracts,
     projectId,
     farcasterId,
+    refUID,
   })
 
-  return await createMultiAttestations(attestations)
+  return await processAttestationsInBatches(
+    attestations,
+    createMultiAttestations,
+    60,
+  )
 }
 
 export async function createFullProjectSnapshotAttestations({
@@ -429,12 +439,14 @@ function buildProjectMetadataAttestation({
   name,
   category,
   ipfsUrl,
+  refUID,
 }: {
   farcasterId: number
   projectId: string
   name: string
   category: string
   ipfsUrl: string
+  refUID?: string
 }) {
   const data = projectMetadataSchema.encodeData([
     { name: "projectRefUID", value: projectId, type: "bytes32" },
@@ -449,7 +461,7 @@ function buildProjectMetadataAttestation({
   return {
     schema: PROJECT_METADATA_SCHEMA_ID,
     data,
-    refUID: projectId,
+    refUID: refUID ?? projectId,
   }
 }
 
@@ -457,6 +469,7 @@ function buildContractAttestations({
   contracts,
   projectId,
   farcasterId,
+  refUID,
 }: {
   contracts: {
     contractAddress: string
@@ -468,6 +481,7 @@ function buildContractAttestations({
   }[]
   projectId: string
   farcasterId: number
+  refUID?: string
 }) {
   const data = contracts.map((c) =>
     contractSchema.encodeData([
@@ -489,10 +503,12 @@ function buildContractAttestations({
     ]),
   )
 
+  const resolvedRefUID = resolveContractRefUID(projectId, refUID)
+
   return data.map((d) => ({
     schema: CONTRACT_SCHEMA_ID,
     data: d,
-    refUID: projectId,
+    refUID: resolvedRefUID,
   }))
 }
 
@@ -501,6 +517,15 @@ function parseZeroSignature(signature: string) {
     return "0x"
   }
   return signature
+}
+
+function resolveContractRefUID(projectId: string, refUID?: string) {
+  if (!refUID) {
+    throw new Error(
+      `Missing project metadata attestation reference UID for project ${projectId}`,
+    )
+  }
+  return refUID
 }
 
 export async function processAttestationsInBatches<T>(

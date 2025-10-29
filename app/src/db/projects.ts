@@ -1586,6 +1586,7 @@ export async function addPublishedContracts(
 ) {
   return prisma.publishedContract.createMany({
     data: contracts,
+    skipDuplicates: true,
   })
 }
 
