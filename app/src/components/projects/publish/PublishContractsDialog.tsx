@@ -153,19 +153,11 @@ export function PublishContractsDialog({
 
     try {
       let current = initialState ?? progress
-      let iterations = 0
       if (initialState) {
         setProgress(initialState)
         onProgressUpdate?.(initialState)
       }
       while (!abortRef.current) {
-        iterations += 1
-        if (iterations > 200) {
-          setError(
-            "Publishing is taking longer than expected. Please try again in a moment.",
-          )
-          break
-        }
         const hasPending =
           current.pendingPublish > 0 || current.pendingRevoke > 0
         if (!hasPending) {
@@ -207,7 +199,7 @@ export function PublishContractsDialog({
 
         if (!madeProgress) {
           setError(
-            "Publishing stalled because no progress could be made. Please verify contract proofs and try again.",
+            "Publishing stalled because no progress could be made. Please try again shortly.",
           )
           break
         }
