@@ -148,6 +148,7 @@ export type RecurringRewardKycTeam = Prisma.KYCTeamGetPayload<{
 
 export type RecurringRewardsByRound = {
   roundId: string
+  season: number // 7 for S7 (tranches 1-6), 8 for S8 (tranches 7+)
   rewards: RecurringRewardWithProject[]
   kycTeam?: RecurringRewardKycTeam
   streams: SuperfluidStream[]
@@ -158,21 +159,27 @@ export function formatRecurringRewards(
 ): RecurringRewardsByRound[] {
   if (!recurringRewards) return []
 
-  // Group by round
-  const recurringRewardsByRound = recurringRewards.reduce((acc, reward) => {
-    if (!acc[reward.roundId]) {
-      acc[reward.roundId] = []
+  // Group by round AND season (tranches 1-6 = S7, tranches 7+ = S8)
+  const grouped = recurringRewards.reduce((acc, reward) => {
+    const season = reward.tranche <= 6 ? 7 : 8
+    const key = `${reward.roundId}-${season}`
+
+    if (!acc[key]) {
+      acc[key] = []
     }
-    acc[reward.roundId].push(reward)
+    acc[key].push(reward)
     return acc
   }, {} as Record<string, RecurringRewardWithProject[]>)
 
-  return Object.entries(recurringRewardsByRound).map(([round, rewards]) => {
+  return Object.entries(grouped).map(([key, rewards]) => {
+    const [roundId, seasonStr] = key.split('-')
+    const season = parseInt(seasonStr, 10)
     const project = rewards[0].project
     const kycTeam = project.kycTeam
 
     return {
-      roundId: round,
+      roundId,
+      season,
       rewards: rewards.map((reward) => {
         return {
           ...reward,
@@ -181,8 +188,44 @@ export function formatRecurringRewards(
       kycTeam: kycTeam ?? undefined,
       streams:
         kycTeam?.rewardStreams
-          .filter((stream) => stream.roundId === round)
+          .filter((stream) => stream.roundId === roundId)
           .flatMap((stream) => stream.streams) ?? [],
     }
+  })
+}
+
+/**
+ * Calculate the expiry date for a reward claim based on tranche
+ * Tranche 1 = Feb 2025, expires Feb 28, 2026
+ * Tranche 2 = Mar 2025, expires Mar 31, 2026
+ * etc.
+ */
+export function calculateTrancheExpiryDate(tranche: number): Date {
+  // Start from Feb 1, 2025
+  const baseDate = new Date(2025, 1, 1) // Month is 0-indexed, so 1 = February
+
+  // Add tranche months
+  const trancheEndDate = new Date(baseDate)
+  trancheEndDate.setMonth(baseDate.getMonth() + tranche)
+
+  // Go to the last day of that month (set day to 0 of next month)
+  trancheEndDate.setDate(0)
+
+  // Add 1 year
+  const expiryDate = new Date(trancheEndDate)
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+
+  return expiryDate
+}
+
+/**
+ * Format the expiry date as a string for display
+ * e.g., "Feb 28, 2026"
+ */
+export function formatExpiryDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
   })
 }
