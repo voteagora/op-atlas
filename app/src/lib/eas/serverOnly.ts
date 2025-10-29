@@ -352,44 +352,6 @@ export async function createContractAttestations({
   )
 }
 
-export async function createFullProjectSnapshotAttestations({
-  project,
-  contracts,
-}: {
-  project: {
-    farcasterId: number
-    projectId: string
-    name: string
-    category: string
-    ipfsUrl: string
-  }
-  contracts: {
-    contractAddress: string
-    chainId: number
-    deployer: string
-    deploymentTx: string
-    signature: string
-    verificationChainId: number
-  }[]
-}) {
-  const attestations = [
-    buildProjectMetadataAttestation({
-      farcasterId: project.farcasterId,
-      projectId: project.projectId,
-      name: project.name,
-      category: project.category,
-      ipfsUrl: project.ipfsUrl,
-    }),
-    ...buildContractAttestations({
-      contracts,
-      projectId: project.projectId,
-      farcasterId: project.farcasterId,
-    }),
-  ]
-
-  return processAttestationsInBatches(attestations, createMultiAttestations)
-}
-
 export async function createCitizenWalletChangeAttestation({
   oldCitizenUID,
   newCitizenUID,
