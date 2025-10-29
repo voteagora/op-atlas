@@ -2,12 +2,12 @@
 
 import Link from "next/link"
 import { intersection, sortBy } from "ramda"
-import { useMemo, useState } from "react"
-import { toast } from "sonner"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { Snapshot } from "@/components/projects/publish/Snapshot"
+import { LinearProgress } from "@/components/common/LinearProgress"
 import { Button } from "@/components/ui/button"
-import { createProjectSnapshot } from "@/lib/actions/snapshots"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Snapshot } from "@/components/projects/publish/Snapshot"
 import { ProjectContracts, ProjectWithFullDetails } from "@/lib/types"
 import {
   getProjectStatus,
@@ -17,6 +17,10 @@ import {
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import MetadataPublishedConfirmationDialog from "./MetadataPublishedConfirmationDialog"
+import {
+  PublishContractsDialog,
+  type PublishProgress,
+} from "./PublishContractsDialog"
 
 export const PublishForm = ({
   project,
@@ -25,11 +29,45 @@ export const PublishForm = ({
   project: ProjectWithFullDetails
   contracts: ProjectContracts | null
 }) => {
-  const [isPublishing, setIsPublishing] = useState(false)
   const [showMetadataPublishedDialogue, setShowMetadataPublishedDialogue] =
     useState(false)
+  const [showPublishContractsDialog, setShowPublishContractsDialog] =
+    useState(false)
+  const [publishProgress, setPublishProgress] =
+    useState<PublishProgress | null>(null)
+  const [latestMetadataAttestationId, setLatestMetadataAttestationId] =
+    useState<string | undefined>(undefined)
+  const [isProgressLoading, setIsProgressLoading] = useState(true)
+  const [hasMetadataSnapshot, setHasMetadataSnapshot] = useState(
+    project.snapshots.length > 0,
+  )
 
   const { track } = useAnalytics()
+
+  const fetchPublishProgress = useCallback(async () => {
+    setIsProgressLoading(true)
+    try {
+      const response = await fetch(
+        `/api/projects/${project.id}/contracts/publish-progress`,
+        { cache: "no-store" },
+      )
+
+      if (!response.ok) {
+        return
+      }
+
+      const data = (await response.json()) as PublishProgress
+      setPublishProgress(data)
+    } catch (error) {
+      console.error("Failed to load publish progress", error)
+    } finally {
+      setIsProgressLoading(false)
+    }
+  }, [project.id])
+
+  useEffect(() => {
+    fetchPublishProgress()
+  }, [fetchPublishProgress])
 
   const isReadyToPublish = useMemo(() => {
     const { completedSections } = getProjectStatus(project, contracts)
@@ -64,30 +102,69 @@ export const PublishForm = ({
     )
   }, [project])
 
-  const onPublish = async () => {
-    setIsPublishing(true)
+  const handleProgressUpdate = useCallback(
+    (progress: PublishProgress) => {
+      setPublishProgress(progress)
+    },
+    [],
+  )
 
-    toast.promise(createProjectSnapshot(project.id), {
-      loading: "Publishing metadata onchain...",
-      success: ({ snapshot }) => {
-        setIsPublishing(false)
-        setShowMetadataPublishedDialogue(true)
-        track("Publish Project", {
-          projectId: project.id,
-          attestationId: snapshot?.attestationId,
-          elementType: "Button",
-          elementName: "Publish",
-        })
-        return "Snapshot published"
-      },
-      error: () => {
-        setIsPublishing(false)
-        return "Error publishing snapshot, please try again."
-      },
-    })
+  const handlePublishComplete = useCallback(() => {
+    setShowPublishContractsDialog(false)
+    fetchPublishProgress()
+    if (latestMetadataAttestationId) {
+      setShowMetadataPublishedDialogue(true)
+    }
+  }, [fetchPublishProgress, latestMetadataAttestationId])
+
+  const handleMetadataPublished = useCallback(
+    (attestationId?: string) => {
+      setHasMetadataSnapshot(true)
+      setLatestMetadataAttestationId(attestationId)
+      track("Publish Project", {
+        projectId: project.id,
+        attestationId,
+        elementType: "Button",
+        elementName: "Publish",
+      })
+    },
+    [project.id, track],
+  )
+
+  const outstandingContracts = useMemo(() => {
+    if (!publishProgress) return 0
+    return (
+      (publishProgress.pendingPublish ?? 0) +
+      (publishProgress.pendingRevoke ?? 0)
+    )
+  }, [publishProgress])
+
+  const showResumeButton = useMemo(() => {
+    if (!publishProgress) return false
+    const hasOutstanding = outstandingContracts > 0
+    return hasMetadataSnapshot && hasOutstanding
+  }, [publishProgress, outstandingContracts, hasMetadataSnapshot])
+
+  const onPublish = () => {
+    setShowMetadataPublishedDialogue(false)
+    setLatestMetadataAttestationId(undefined)
+    setShowPublishContractsDialog(true)
   }
 
   const canPublish = isReadyToPublish && !hasPublishedLatestChanges
+  const shouldShowResumeButton = !isProgressLoading && showResumeButton
+  const shouldShowPublishButton = !isProgressLoading && !shouldShowResumeButton
+  const totalContracts = publishProgress?.verifiedTotal ?? 0
+  const publishedContracts = publishProgress?.publishedTotal ?? 0
+  const remainingContracts =
+    (publishProgress?.pendingPublish ?? 0) +
+    (publishProgress?.pendingRevoke ?? 0)
+  const progressHelperText =
+    remainingContracts > 0
+      ? `${remainingContracts} contract${remainingContracts === 1 ? "" : "s"} remaining`
+      : publishedContracts > 0
+        ? "All contracts are published onchain"
+        : undefined
 
   return (
     <div className="flex flex-col gap-12">
@@ -95,10 +172,9 @@ export const PublishForm = ({
         <div className="flex flex-col gap-6">
           <h2 className="text-text-default">Publish metadata onchain</h2>
           <p className="text-text-secondary">
-            If you’ve completed the previous steps, then hit publish and
-            Optimism will issue an attestation containing your project’s
-            metadata. Following this step, you’ll be eligible to apply for Retro
-            Funding.
+            Publishing creates an attestation for your project metadata and one
+            for each verified contract. Once these attestations are onchain,
+            you&apos;ll be eligible to apply for Retro Funding.
           </p>
         </div>
 
@@ -119,16 +195,38 @@ export const PublishForm = ({
           </div>
         ) : null}
 
-        <div className="flex items-center gap-4">
-          <Button
-            isLoading={isPublishing}
-            variant="destructive"
-            disabled={!canPublish || isPublishing}
-            onClick={onPublish}
-            className="w-fit text-sm font-normal"
-          >
-            Publish
-          </Button>
+        {!isProgressLoading && totalContracts > 0 && (
+          <LinearProgress
+            current={publishedContracts}
+            total={totalContracts}
+            label="Contracts published"
+            helperText={progressHelperText}
+          />
+        )}
+
+        <div className="flex flex-wrap items-center gap-4">
+          {isProgressLoading ? (
+            <Skeleton className="h-9 w-40 rounded-md" />
+          ) : shouldShowResumeButton ? (
+            <Button
+              variant="destructive"
+              className="w-fit text-sm font-normal"
+              onClick={() => setShowPublishContractsDialog(true)}
+            >
+              Continue publishing contracts
+            </Button>
+          ) : (
+            shouldShowPublishButton && (
+              <Button
+                variant="destructive"
+                disabled={!canPublish || showPublishContractsDialog}
+                onClick={onPublish}
+                className="w-fit text-sm font-normal"
+              >
+                Publish
+              </Button>
+            )
+          )}
 
           {!isReadyToPublish && (
             <p className="text-sm text-destructive-foreground">
@@ -144,7 +242,7 @@ export const PublishForm = ({
 
         <hr className="mt-6" />
         <p className="text-base font-normal text-text-secondary ">
-          <span className="text-base font-normal">You’re not done yet!</span>{" "}
+          <span className="text-base font-normal">You&apos;re not done yet!</span>{" "}
           To be included in any round of Retro Funding, you must also submit a
           round-specific application.{" "}
         </p>
@@ -161,6 +259,19 @@ export const PublishForm = ({
           onOpenChange={setShowMetadataPublishedDialogue}
         />
       )}
+      <PublishContractsDialog
+        projectId={project.id}
+        open={showPublishContractsDialog}
+        onOpenChange={(next) => {
+          setShowPublishContractsDialog(next)
+          if (!next) {
+            fetchPublishProgress()
+          }
+        }}
+        onProgressUpdate={handleProgressUpdate}
+        onComplete={handlePublishComplete}
+        onMetadataPublished={handleMetadataPublished}
+      />
     </div>
   )
 }

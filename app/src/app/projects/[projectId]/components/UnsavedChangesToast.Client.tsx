@@ -27,16 +27,25 @@ const UnsavedChangesToastClient = ({
 
   const onPublish = useCallback(async () => {
     toast.promise(createProjectSnapshot(project.id), {
-      loading: "Publishing metadata onchain...",
-      success: ({ snapshot }) => {
-        setShowMetadataPublishedDialogue(true)
-        track("Publish Project", {
-          projectId: project.id,
-          attestationId: snapshot?.attestationId,
-          elementType: "Button",
-          elementName: "Publish",
-        })
-        return "Snapshot published"
+      loading: "Publishing onchain...",
+      success: (result) => {
+        if (result && "snapshot" in result && result.snapshot) {
+          const snapshot = result.snapshot
+          setShowMetadataPublishedDialogue(true)
+          track("Publish Project", {
+            projectId: project.id,
+            attestationId: snapshot.attestationId,
+            elementType: "Button",
+            elementName: "Publish",
+          })
+          return "Snapshot published"
+        }
+
+        if (result && "metadataPending" in result && result.metadataPending) {
+          return "Continuing to publish verified contracts..."
+        }
+
+        return "Nothing new to publish."
       },
       error: () => {
         return "Error publishing snapshot, please try again."

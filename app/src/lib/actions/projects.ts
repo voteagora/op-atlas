@@ -38,7 +38,7 @@ import {
 import { getUserById } from "@/db/users"
 
 import { createEntityAttestation } from "../eas/serverOnly"
-import { ProjectWithDetails, TeamRole } from "../types"
+import { ProjectContracts, ProjectWithDetails, TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import {
   verifyAdminStatus,
@@ -112,8 +112,11 @@ export const getUserApplicationsForRound = async (
   return userApplications
 }
 
-export const getUnpublishedContractChanges = async (projectId: string) => {
-  const project = await getProjectContracts({ projectId })
+export const getUnpublishedContractChanges = async (
+  projectId: string,
+  existingProject?: ProjectContracts | null,
+) => {
+  const project = existingProject ?? (await getProjectContracts({ projectId }))
   const allRelatedPublishedContracts = await getPublishedProjectContracts({
     projectId,
     contacts:

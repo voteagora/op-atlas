@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { type Address } from "viem"
 
 import { Badge } from "@/components/common/Badge"
+import { LinearProgress } from "@/components/common/LinearProgress"
 import { DialogProps } from "@/components/dialogs/types"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
@@ -139,6 +140,20 @@ export function VerifyAddressDialog({
     name: string
     blockExplorer?: string
   }>(CHAIN_INFO[selectedChain.toString()])
+
+  const verificationHelperText = (() => {
+    if (typeof progress.total === "number") {
+      const remaining = Math.max(progress.total - progress.inserted, 0)
+      if (remaining > 0) {
+        return `${remaining} contract${remaining === 1 ? "" : "s"} remaining`
+      }
+      return "All contracts processed"
+    }
+    if (progress.inserted > 0) {
+      return `${progress.inserted} contract${progress.inserted === 1 ? "" : "s"} processed`
+    }
+    return undefined
+  })()
 
   const onConfirmSignature = async () => {
     try {
@@ -292,6 +307,14 @@ export function VerifyAddressDialog({
                 <p className="text-destructive text-sm font-normal">{error}</p>
               )}
             </div>
+            {showProgress && (
+              <LinearProgress
+                current={progress.inserted}
+                total={progress.total ?? undefined}
+                label="Contracts detected"
+                helperText={verificationHelperText}
+              />
+            )}
             <Button
               className="self-stretch disabled:bg-destructive/80 disabled:text-white"
               variant="destructive"
@@ -300,26 +323,9 @@ export function VerifyAddressDialog({
               onClick={onConfirmSignature}
             >
               {loading ? (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2 text-sm">
                   <Loader2 size={18} className="animate-spin" />
-                  {showProgress ? (
-                    typeof progress.total === "number" &&
-                    progress.inserted >= progress.total ? (
-                      <span className="text-sm font-medium">
-                        Finalizing…
-                      </span>
-                    ) : (
-                      <span className="text-sm font-medium">
-                        {progress.inserted}
-                        {progress.total !== null
-                          ? ` / ${progress.total}`
-                          : null}{" "}
-                        contracts processed
-                      </span>
-                    )
-                  ) : (
-                    <span className="text-sm font-medium">Verifying…</span>
-                  )}
+                  Verifying…
                 </span>
               ) : (
                 "Continue"

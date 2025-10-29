@@ -554,6 +554,14 @@ async function getProjectFn({
 
 export const getProject = cache(getProjectFn)
 
+export async function getProjectFresh({
+  id,
+}: {
+  id: string
+}): Promise<ProjectWithFullDetails | null> {
+  return getProjectFn({ id })
+}
+
 async function getProjectTeamFn({
   id,
 }: {
@@ -712,6 +720,14 @@ async function getProjectContractsFn({
 
 export const getProjectContracts = cache(getProjectContractsFn)
 
+export async function getProjectContractsFresh({
+  projectId,
+}: {
+  projectId: string
+}): Promise<ProjectContracts | null> {
+  return getProjectContractsFn({ projectId })
+}
+
 async function getPublishedProjectContractsFn({
   projectId,
   contacts,
@@ -722,46 +738,64 @@ async function getPublishedProjectContractsFn({
     contractAddress: string
   }[]
 }): Promise<PublishedContract[]> {
-  const [projectContracts, relatedContracts] = await Promise.all([
-    prisma.publishedContract.findMany({
-      where: {
-        projectId,
-        AND: [
-          {
-            revokedAt: null,
-            NOT: {
-              OR: contacts.map((c) => ({
-                AND: [{ contract: c.contractAddress }, { chainId: c.chainId }],
-              })),
-            },
-          },
-        ],
-      },
-    }),
+  const normalizedContacts = contacts.map((c) => ({
+    chainId: c.chainId,
+    contractAddress: getAddress(c.contractAddress),
+  }))
 
-    await (async () => {
-      if (contacts.length === 0) {
-        return []
-      }
+  const contactKey = new Set(
+    normalizedContacts.map(
+      (c) => `${c.contractAddress.toLowerCase()}:${c.chainId}`,
+    ),
+  )
 
-      return prisma.publishedContract.findMany({
+  const projectContractsAll = await prisma.publishedContract.findMany({
+    where: {
+      projectId,
+      revokedAt: null,
+    },
+  })
+
+  const projectContracts = projectContractsAll.filter((contract) => {
+    const key = `${getAddress(contract.contract).toLowerCase()}:${
+      contract.chainId
+    }`
+    return !contactKey.has(key)
+  })
+
+  const relatedContracts: PublishedContract[] = []
+  const contactsByChain = new Map<number, Set<string>>()
+  for (const contact of normalizedContacts) {
+    const key = contactsByChain.get(contact.chainId) ?? new Set<string>()
+    key.add(contact.contractAddress)
+    contactsByChain.set(contact.chainId, key)
+  }
+
+  for (const [chainId, addresses] of Array.from(contactsByChain.entries())) {
+    const addressChunks = chunkArray(Array.from(addresses), 500)
+    for (const chunk of addressChunks) {
+      if (chunk.length === 0) continue
+
+      const chunkResults = await prisma.publishedContract.findMany({
         where: {
-          AND: [
-            {
-              OR: contacts.map((c) => ({
-                AND: [{ contract: c.contractAddress }, { chainId: c.chainId }],
-              })),
-            },
-            {
-              revokedAt: null,
-            },
-          ],
+          revokedAt: null,
+          chainId,
+          contract: {
+            in: chunk,
+          },
         },
       })
-    })(),
-  ])
 
-  return [...projectContracts, ...relatedContracts]
+      relatedContracts.push(...chunkResults)
+    }
+  }
+
+  const uniqueRelated = new Map<string, PublishedContract>()
+  relatedContracts.forEach((contract) => {
+    uniqueRelated.set(contract.id, contract)
+  })
+
+  return [...projectContracts, ...Array.from(uniqueRelated.values())]
 }
 
 export const getPublishedProjectContracts = cache(
@@ -1568,6 +1602,7 @@ export async function addPublishedContracts(
 ) {
   return prisma.publishedContract.createMany({
     data: contracts,
+    skipDuplicates: true,
   })
 }
 
