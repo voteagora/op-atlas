@@ -29,10 +29,8 @@ const UnsavedChangesToastClient = ({
     toast.promise(createProjectSnapshot(project.id), {
       loading: "Publishing onchain...",
       success: (result) => {
-        const snapshot = result?.snapshot ?? null
-        const metadataPending = result?.metadataPending ?? false
-
-        if (snapshot) {
+        if (result && "snapshot" in result && result.snapshot) {
+          const snapshot = result.snapshot
           setShowMetadataPublishedDialogue(true)
           track("Publish Project", {
             projectId: project.id,
@@ -43,7 +41,7 @@ const UnsavedChangesToastClient = ({
           return "Snapshot published"
         }
 
-        if (metadataPending) {
+        if (result && "metadataPending" in result && result.metadataPending) {
           return "Continuing to publish verified contracts..."
         }
 
