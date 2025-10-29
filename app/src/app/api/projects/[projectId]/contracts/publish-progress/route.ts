@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { getProjectContracts } from "@/db/projects"
+import { getProjectContractsFresh } from "@/db/projects"
 import { getUnpublishedContractChanges } from "@/lib/actions/projects"
 
 export const dynamic = "force-dynamic"
@@ -13,7 +13,7 @@ export async function GET(
   const { projectId } = params
 
   try {
-    const project = await getProjectContracts({ projectId })
+    const project = await getProjectContractsFresh({ projectId })
     if (!project) {
       return NextResponse.json({
         verifiedTotal: 0,

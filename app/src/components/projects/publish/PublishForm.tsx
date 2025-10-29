@@ -38,6 +38,9 @@ export const PublishForm = ({
   const [latestMetadataAttestationId, setLatestMetadataAttestationId] =
     useState<string | undefined>(undefined)
   const [isProgressLoading, setIsProgressLoading] = useState(true)
+  const [hasMetadataSnapshot, setHasMetadataSnapshot] = useState(
+    project.snapshots.length > 0,
+  )
 
   const { track } = useAnalytics()
 
@@ -116,6 +119,7 @@ export const PublishForm = ({
 
   const handleMetadataPublished = useCallback(
     (attestationId?: string) => {
+      setHasMetadataSnapshot(true)
       setLatestMetadataAttestationId(attestationId)
       track("Publish Project", {
         projectId: project.id,
@@ -137,10 +141,9 @@ export const PublishForm = ({
 
   const showResumeButton = useMemo(() => {
     if (!publishProgress) return false
-    const snapshotExists = project.snapshots.length > 0
     const hasOutstanding = outstandingContracts > 0
-    return snapshotExists && hasOutstanding
-  }, [publishProgress, outstandingContracts, project.snapshots.length])
+    return hasMetadataSnapshot && hasOutstanding
+  }, [publishProgress, outstandingContracts, hasMetadataSnapshot])
 
   const onPublish = () => {
     setShowMetadataPublishedDialogue(false)

@@ -10,7 +10,8 @@ import {
   addPublishedContracts,
   getConsolidatedProjectTeam,
   getProject,
-  getProjectContracts,
+  getProjectContractsFresh,
+  getProjectFresh,
   revokePublishedContracts,
   updateAllForProject,
 } from "@/db/projects"
@@ -180,8 +181,8 @@ export const publishProjectContractsBatch = async ({
   )
 
   const [projectContracts, projectDetails] = await Promise.all([
-    getProjectContracts({ projectId }),
-    getProject({ id: projectId }),
+    getProjectContractsFresh({ projectId }),
+    getProjectFresh({ id: projectId }),
   ])
 
   if (!projectContracts || !projectDetails) {
@@ -278,7 +279,7 @@ export const publishProjectContractsBatch = async ({
     }
   }
 
-  const updatedProjectContracts = await getProjectContracts({ projectId })
+  const updatedProjectContracts = await getProjectContractsFresh({ projectId })
   const updatedDiff = await getUnpublishedContractChanges(
     projectId,
     updatedProjectContracts,

@@ -554,6 +554,14 @@ async function getProjectFn({
 
 export const getProject = cache(getProjectFn)
 
+export async function getProjectFresh({
+  id,
+}: {
+  id: string
+}): Promise<ProjectWithFullDetails | null> {
+  return getProjectFn({ id })
+}
+
 async function getProjectTeamFn({
   id,
 }: {
@@ -711,6 +719,14 @@ async function getProjectContractsFn({
 }
 
 export const getProjectContracts = cache(getProjectContractsFn)
+
+export async function getProjectContractsFresh({
+  projectId,
+}: {
+  projectId: string
+}): Promise<ProjectContracts | null> {
+  return getProjectContractsFn({ projectId })
+}
 
 async function getPublishedProjectContractsFn({
   projectId,
