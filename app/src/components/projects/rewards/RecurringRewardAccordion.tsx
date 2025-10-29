@@ -15,10 +15,10 @@ import {
   YouAreNotAdminCallout,
 } from "@/components/ui/callouts"
 import { copyToClipboard, formatNumber } from "@/lib/utils"
+import { formatMMMdyyyy } from "@/lib/utils/date"
 import { isKycStreamTeamVerified } from "@/lib/utils/kyc"
 import {
   calculateTrancheExpiryDate,
-  formatExpiryDate,
   RecurringRewardKycTeam,
   RecurringRewardsByRound,
 } from "@/lib/utils/rewards"
@@ -125,7 +125,7 @@ const RewardAccordion = ({
               {showExpiry && (
                 <div className="text-secondary-foreground text-sm flex items-center gap-1">
                   <Information className="w-4 h-4" fill="#404454" />
-                  {isExpired ? 'Expired' : 'Expires'} {formatExpiryDate(expiryDate)}
+                  {isExpired ? 'Expired' : 'Expires'} {formatMMMdyyyy(expiryDate)}
                 </div>
               )}
 
