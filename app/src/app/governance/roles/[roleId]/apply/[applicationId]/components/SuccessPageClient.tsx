@@ -61,7 +61,7 @@ export const SuccessPageClient = ({
 
   if (isSecurityRole) {
     return (
-      <main className="flex flex-col items-center justify-center h-full gap-8 w-full bg-foreground min-h-screen">
+      <main className="flex flex-col items-center justify-center h-full gap-8 w-full bg-background min-h-screen">
         <AnalyticsTracker role={role} />
         <div className="flex flex-col items-center justify-center gap-8 max-w-[712px] relative z-10">
           {sharedIntro}

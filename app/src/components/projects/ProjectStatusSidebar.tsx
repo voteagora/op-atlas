@@ -1,5 +1,6 @@
 "use client"
 
+import { Project } from "@prisma/client"
 import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -7,8 +8,19 @@ import { usePathname, useRouter } from "next/navigation"
 import { memo, useMemo, useState } from "react"
 import { toast } from "sonner"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
 import { Progress } from "@/components/ui/progress"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { useExpiredKYCCountForProject } from "@/hooks/db/useExpiredKYCCount"
+import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { deleteUserProject } from "@/lib/actions/projects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { useIsAdmin } from "@/lib/hooks"
@@ -18,22 +30,11 @@ import {
   ProjectWithFullDetails,
 } from "@/lib/types"
 import { cn, getProjectStatus, ProjectSection } from "@/lib/utils"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
 import { Separator } from "../ui/separator"
-import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog"
-import { resolveProjectStatus } from "@/lib/utils/kyc"
-import { useKYCProject } from "@/hooks/db/useKYCProject"
-import { useExpiredKYCCountForProject } from "@/hooks/db/useExpiredKYCCount"
-import { Project } from "@prisma/client"
-import { Badge } from "@/components/ui/badge"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 // Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
@@ -140,12 +141,7 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
               >
                 <div className="w-4 flex justify-center">
                   {completedSections.includes(option) ? (
-                    <Image
-                      src="/assets/icons/tickIcon.svg"
-                      width={16}
-                      height={16}
-                      alt="Check"
-                    />
+                    <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
                   ) : (
                     <Image
                       src="/assets/icons/circle-fill.svg"
@@ -267,7 +263,10 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 const IncompleteCard = ({ project }: { project: Project | null }) => {
   const { data: kycData } = useKYCProject({ projectId: project?.id || "" })
   if (!project || !project.id || !kycData) return null
-  const projectStatus = resolveProjectStatus(kycData.users, kycData.legalEntities)
+  const projectStatus = resolveProjectStatus(
+    kycData.users,
+    kycData.legalEntities,
+  )
 
   if (projectStatus == "APPROVED") return null
   return (
@@ -305,4 +304,4 @@ const ExpiredBadge = ({ project }: { project: Project | null }) => {
   )
 }
 
-export { IncompleteCard, ExpiredBadge }
+export { ExpiredBadge, IncompleteCard }

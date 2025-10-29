@@ -84,6 +84,25 @@ export const updateGovForumProfileUrl = async (govForumProfileUrl: string) => {
   }
 }
 
+export const clearGovForumProfileUrl = async () => {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const updated = await updateUser({
+    id: session.user.id,
+    govForumProfileUrl: null,
+  })
+
+  return {
+    error: null,
+    user: updated,
+  }
+}
+
 /**
  * Searches users by Farcaster username, address, email, or ENS name.
  * The query must be at least one character long.

@@ -417,17 +417,17 @@ const AccountContent = () => {
           <hr className="w-full border-[0.5px] border-border" />
           <ProfileMenuItem
             href="/profile/details"
-            label="Account details"
+            label="Account Details"
             currentContext={currentContext}
           />
           <ProfileMenuItem
             href="/profile/connected-apps"
-            label="Connected apps"
+            label="Connected Apps"
             currentContext={currentContext}
           />
           <ProfileMenuItem
             href="/profile/verified-addresses"
-            label="Verified addresses"
+            label="Linked Wallets"
             currentContext={currentContext}
           />
           <ProfileMenuItem
@@ -663,17 +663,17 @@ const TestModeAccount = () => {
           <hr className="w-full border-[0.5px] border-border" />
           <ProfileMenuItem
             href="/profile/details"
-            label="Profile details"
+            label="Account Details"
             currentContext={currentContext}
           />
           <ProfileMenuItem
             href="/profile/connected-apps"
-            label="Connected apps"
+            label="Connected Apps"
             currentContext={currentContext}
           />
           <ProfileMenuItem
             href="/profile/verified-addresses"
-            label="Verified addresses"
+            label="Linked Wallets"
             currentContext={currentContext}
           />
           <ProfileMenuItem

@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { memo, useMemo, useState } from "react"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { ProjectWithDetails } from "@/lib/types"
@@ -81,12 +82,7 @@ export const ProjectCard = memo(function ProjectCard({
 
         {hasApplied && (
           <div className="ml-auto flex items-center gap-1 py-1 px-3 rounded-full bg-success">
-            <Image
-              alt="Checkmark"
-              src="/assets/icons/circle-check-green.svg"
-              height={14}
-              width={14}
-            />
+            <CheckboxCircleFIll className="w-3.5 h-3.5" fill="#1DBA6A" />
             <p className="font-normal text-sm text-success-foreground">
               Submitted
             </p>

@@ -4,6 +4,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { submitApplications } from "@/lib/actions/applications"
 import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
@@ -131,12 +132,7 @@ export const FundingApplication = ({
         {hasApplied ? (
           <div className="flex justify-between items-center gap-2 p-4 bg-success rounded-xl w-full">
             <div className="flex items-center gap-2">
-              <Image
-                src="/assets/icons/circle-check-green.svg"
-                height={16}
-                width={16}
-                alt="Submitted"
-              />
+              <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
               <div className="flex flex-col text-success-foreground">
                 <p className="font-normal text-sm">
                   Application submitted on{" "}

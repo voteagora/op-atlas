@@ -1,6 +1,7 @@
-import { AlertTriangle, Loader2, X, Check } from "lucide-react"
+import { AlertTriangle, Check, Loader2, X } from "lucide-react"
 import Image from "next/image"
 
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import {
   EmailState,
   ExtendedPersonaStatus,
@@ -22,7 +23,12 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
     case "PENDING":
       return <Loader2 className={cn(`h-${size} w-${size}`, "animate-spin")} />
     case "APPROVED":
-      return <Check className={cn(`h-${size} w-${size}`, "text-success-strong")} />
+      return (
+        <CheckboxCircleFIll
+          className={cn(`h-${size} w-${size}`)}
+          fill="#1DBA6A"
+        />
+      )
     case "REJECTED":
       return <X className={cn(`h-${size} w-${size}`, "text-red-500")} />
     case "project_issue":
@@ -46,7 +52,9 @@ const StatusRow = ({
   emailState,
 }: KYCUserStatusProps) => {
   const expired = isExpired(user)
-  const displayStatus = expired ? "EXPIRED" : (user.status as ExtendedPersonaStatus)
+  const displayStatus = expired
+    ? "EXPIRED"
+    : (user.status as ExtendedPersonaStatus)
 
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
@@ -70,11 +78,10 @@ const StatusRow = ({
             />
           </div>
           <div className="flex flex-row gap-2">
-            {user.status === "APPROVED" && user.expiry && (
-              expired ? (
-                <Badge variant="destructive">
-                  {`Expired`}
-                </Badge>
+            {user.status === "APPROVED" &&
+              user.expiry &&
+              (expired ? (
+                <Badge variant="destructive">{`Expired`}</Badge>
               ) : (
                 <Badge variant="secondary">
                   {`Verified until ${new Date(user.expiry).toLocaleDateString(
@@ -86,8 +93,7 @@ const StatusRow = ({
                     },
                   )}`}
                 </Badge>
-              )
-            )}
+              ))}
           </div>
         </div>
         {!expired && !emailResendBlock && (
@@ -140,12 +146,7 @@ const EmailSendButton = ({
       return (
         <div className="flex flex-row items-center gap-2" title="Email sent">
           <p className="text-green-900 text-xs font-light">Email sent</p>
-          <Image
-            src="/assets/icons/circle-check-green.svg"
-            height={16.67}
-            width={16.67}
-            alt="Email sent"
-          />
+          <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
         </div>
       )
   }

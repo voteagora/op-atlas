@@ -49,7 +49,7 @@ export const RewardedProjectCrousel = ({
         className="basis-full md:basis-1/2 lg:basis-1/5"
       >
         <TrackedLink
-          className="flex flex-col p-6 bg-foreground border border-tertiary rounded-xl h-full hover:bg-[#F2F3F8] cursor-pointer group"
+          className="flex flex-col p-6 bg-background border border-tertiary rounded-xl h-full hover:bg-[#F2F3F8] cursor-pointer group"
           href={`/project/${project.id}`}
           eventName="Link Click"
           eventData={{
