@@ -795,7 +795,7 @@ async function getPublishedProjectContractsFn({
     uniqueRelated.set(contract.id, contract)
   })
 
-  return [...projectContracts, ...uniqueRelated.values()]
+  return [...projectContracts, ...Array.from(uniqueRelated.values())]
 }
 
 export const getPublishedProjectContracts = cache(
