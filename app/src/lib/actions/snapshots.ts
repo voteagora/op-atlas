@@ -15,7 +15,6 @@ import {
   getConsolidatedProjectTeam,
   getProject,
   getProjectContractsFresh,
-  getProjectFresh,
   revokePublishedContracts,
   updateAllForProject,
 } from "@/db/projects"
@@ -28,7 +27,7 @@ import {
   revokeContractAttestations,
 } from "../eas/serverOnly"
 import { uploadToPinata } from "../pinata"
-import { ProjectWithFullDetails } from "../types"
+import { ProjectTeam, ProjectWithFullDetails } from "../types"
 import {
   formatOrganizationMetadata,
   formatProjectMetadata,
@@ -120,6 +119,38 @@ async function publishContractsWithoutBatching({
     toRevoke: updatedDiff?.toRevoke?.length ?? 0,
   }
 }
+
+async function createMetadataSnapshotRecord({
+  project,
+  team,
+  farcasterId,
+}: {
+  project: ProjectWithFullDetails
+  team: ProjectTeam
+  farcasterId: string | null
+}) {
+  const metadata = formatProjectMetadata(project, team)
+  const ipfsHash = await uploadToPinata(project.id, metadata)
+  const attestationId = await createProjectMetadataAttestation({
+    farcasterId: farcasterId ? parseInt(farcasterId, 10) : 0,
+    projectId: project.id,
+    name: project.name,
+    category: project.category ?? "",
+    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+    refUID: project.id,
+  })
+
+  const snapshot = await addProjectSnapshot({
+    projectId: project.id,
+    ipfsHash,
+    attestationId,
+  })
+
+  revalidatePath("/dashboard")
+  revalidatePath("/projects", "layout")
+
+  return { snapshot }
+}
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
 
@@ -154,64 +185,63 @@ export const createProjectSnapshot = async (projectId: string) => {
   )
   const contractsToPublish = unpublishedContractChanges?.toPublish ?? []
   const contractsToRevoke = unpublishedContractChanges?.toRevoke ?? []
-  const shouldPublishWithoutBatching =
-    contractsToPublish.length <= NO_BATCHING_CONTRACT_THRESHOLD &&
-    (contractsToPublish.length > 0 || contractsToRevoke.length > 0)
 
-  if (!hasUnpublishedMetadataChanges && latestSnapshot) {
+  const shouldCreateSnapshot =
+    hasUnpublishedMetadataChanges ||
+    contractsToPublish.length > 0 ||
+    contractsToRevoke.length > 0
+
+  if (!shouldCreateSnapshot && latestSnapshot) {
     return {
       snapshot: latestSnapshot,
       pendingContracts: {
-        toPublish: contractsToPublish.length,
-        toRevoke: contractsToRevoke.length,
+        toPublish: 0,
+        toRevoke: 0,
       },
+      metadataPending: false,
+      requiresBatching: false,
       error: null,
     }
   }
 
+  const shouldPublishWithoutBatching =
+    contractsToPublish.length <= NO_BATCHING_CONTRACT_THRESHOLD
+
   try {
-    // Upload metadata to IPFS
-    const metadata = formatProjectMetadata(project, team)
-    const ipfsHash = await uploadToPinata(project.id, metadata)
-
-    // Create metadata attestation only
-    const attestationId = await createProjectMetadataAttestation({
-      farcasterId: session?.user?.farcasterId
-        ? parseInt(session.user.farcasterId)
-        : 0,
-      projectId: project.id,
-      name: project.name,
-      category: project.category ?? "",
-      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
-      refUID: project.id,
-    })
-
-    const snapshot = await addProjectSnapshot({
-      projectId: project.id,
-      ipfsHash,
-      attestationId,
-    })
-
-    let pendingContracts = {
-      toPublish: contractsToPublish.length,
-      toRevoke: contractsToRevoke.length,
-    }
-
     if (shouldPublishWithoutBatching) {
-      pendingContracts = await publishContractsWithoutBatching({
+      const updatedPending = await publishContractsWithoutBatching({
         projectId: project.id,
         toPublish: contractsToPublish,
         toRevoke: contractsToRevoke,
         farcasterId: session?.user?.farcasterId ?? null,
       })
+
+      const { snapshot } = await createMetadataSnapshotRecord({
+        project,
+        team,
+        farcasterId: session?.user?.farcasterId ?? null,
+      })
+
+      return {
+        snapshot,
+        pendingContracts: {
+          toPublish: updatedPending.toPublish,
+          toRevoke: updatedPending.toRevoke,
+        },
+        metadataPending: false,
+        requiresBatching: false,
+        error: null,
+      }
     }
 
-    revalidatePath("/dashboard")
-    revalidatePath("/projects", "layout")
-
     return {
-      snapshot,
-      pendingContracts,
+      snapshot: null,
+      pendingContracts: {
+        toPublish: contractsToPublish.length,
+        toRevoke: contractsToRevoke.length,
+      },
+      metadataPending: true,
+      requiresBatching: true,
       error: null,
     }
   } catch (error) {
@@ -281,12 +311,9 @@ export const publishProjectContractsBatch = async ({
     ),
   )
 
-  const [projectContracts, projectDetails] = await Promise.all([
-    getProjectContractsFresh({ projectId }),
-    getProjectFresh({ id: projectId }),
-  ])
+  const projectContracts = await getProjectContractsFresh({ projectId })
 
-  if (!projectContracts || !projectDetails) {
+  if (!projectContracts) {
     return {
       error: "Project not found",
     }
@@ -308,6 +335,7 @@ export const publishProjectContractsBatch = async ({
   let publishedThisBatch = 0
   let revokedThisBatch = 0
   let errorMessage: string | null = null
+  const contractRefUID = projectContracts.id
 
   if (revokeBatch.length > 0) {
     const revokeIds = revokeBatch.map((contract) => contract.id)
@@ -317,15 +345,6 @@ export const publishProjectContractsBatch = async ({
   }
 
   if (publishBatch.length > 0) {
-    if (!projectDetails.snapshots?.length) {
-      return {
-        error:
-          "Project metadata attestation not found. Publish metadata before publishing contracts.",
-      }
-    }
-
-    const contractRefUID = projectContracts.id
-
     const attestationIds = await createContractAttestations({
       contracts: publishBatch.map((contract) => ({
         contractAddress: contract.contractAddress,
@@ -390,6 +409,76 @@ export const publishProjectContractsBatch = async ({
     remainingRevoke: updatedDiff?.toRevoke?.length ?? 0,
     totalVerified: updatedProjectContracts?.contracts.length ?? 0,
     totalPublished: updatedProjectContracts?.publishedContracts.length ?? 0,
+  }
+}
+
+export const finalizeProjectSnapshot = async (projectId: string) => {
+  const session = await auth()
+
+  const userId = session?.user?.id
+  if (!userId) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const isInvalid = await verifyMembership(projectId, userId)
+  if (isInvalid?.error) {
+    return isInvalid
+  }
+
+  const [project, team, unpublishedContractChanges] = await Promise.all([
+    getProject({ id: projectId }),
+    getConsolidatedProjectTeam({ projectId }),
+    getUnpublishedContractChanges(projectId),
+  ])
+
+  if (!project) {
+    return {
+      error: "Project not found",
+    }
+  }
+
+  const pendingPublish = unpublishedContractChanges?.toPublish?.length ?? 0
+  const pendingRevoke = unpublishedContractChanges?.toRevoke?.length ?? 0
+
+  if (pendingPublish > 0 || pendingRevoke > 0) {
+    return {
+      error: "Contracts are still pending publication",
+    }
+  }
+
+  const snapshots = (project.snapshots ?? []) as ProjectSnapshot[]
+  const latestSnapshot = getLatestSnapshot(snapshots)
+  const hasUnpublishedMetadataChanges = projectHasUnpublishedChanges(
+    snapshots,
+    project.lastMetadataUpdate,
+  )
+
+  if (!hasUnpublishedMetadataChanges && latestSnapshot) {
+    return {
+      snapshot: latestSnapshot,
+      error: null,
+    }
+  }
+
+  try {
+    const { snapshot } = await createMetadataSnapshotRecord({
+      project,
+      team,
+      farcasterId: session?.user?.farcasterId ?? null,
+    })
+
+    return {
+      snapshot,
+      error: null,
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error("Error finalizing snapshot", error)
+    return {
+      error: errorMessage || "Failed to finalize snapshot",
+    }
   }
 }
 

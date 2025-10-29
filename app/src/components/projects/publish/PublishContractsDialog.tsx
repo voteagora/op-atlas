@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   createProjectSnapshot,
+  finalizeProjectSnapshot,
   publishProjectContractsBatch,
 } from "@/lib/actions/snapshots"
 
@@ -60,10 +61,15 @@ export function PublishContractsDialog({
   const [error, setError] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [metadataStatus, setMetadataStatus] = useState<
-    "idle" | "running" | "success" | "error"
+    "idle" | "pending" | "running" | "success" | "error"
   >("idle")
   const [metadataError, setMetadataError] = useState<string | null>(null)
-  const [metadataAttempt, setMetadataAttempt] = useState(0)
+  const [needsMetadataFinalization, setNeedsMetadataFinalization] =
+    useState(false)
+  const [phase, setPhase] =
+    useState<"contracts" | "metadata" | "success">("contracts")
+  const [retryKey, setRetryKey] = useState(0)
+
   const abortRef = useRef(false)
   const processingRef = useRef(false)
 
@@ -80,88 +86,64 @@ export function PublishContractsDialog({
     }
   }
 
-  useEffect(() => {
-    abortRef.current = !open
-    if (!open) {
-      setMetadataStatus("idle")
-      setMetadataError(null)
-      setError(null)
-      setProgress(DEFAULT_PROGRESS)
-      setIsProcessing(false)
-      processingRef.current = false
+  const finalizeMetadata = async () => {
+    if (!needsMetadataFinalization || abortRef.current) {
+      setMetadataStatus("success")
+      setPhase("success")
+      onComplete?.()
       return
     }
 
-    setMetadataStatus("running")
-    setMetadataError(null)
-    setError(null)
-    setProgress(DEFAULT_PROGRESS)
-    setIsProcessing(false)
-    processingRef.current = false
+    try {
+      setPhase("metadata")
+      setMetadataStatus("running")
+      setMetadataError(null)
 
-    const run = async () => {
-      try {
-        const snapshotResult = await createProjectSnapshot(projectId)
-        if (abortRef.current) return
+      const finalizeResult = await finalizeProjectSnapshot(projectId)
+      if (abortRef.current) return
 
-        if (!snapshotResult || snapshotResult.error) {
-          setMetadataStatus("error")
-          setMetadataError(
-            typeof snapshotResult?.error === "string"
-              ? snapshotResult.error
-              : "Failed to publish metadata. Please try again.",
-          )
-          return
-        }
-
-        const snapshotAttestationId = snapshotResult.snapshot?.attestationId
-
-        setMetadataStatus("success")
-        onMetadataPublished?.(snapshotAttestationId)
-
-        const snapshot = await loadProgress()
-        if (abortRef.current) return
-
-        const hasWork =
-          (snapshot.pendingPublish ?? 0) > 0 ||
-          (snapshot.pendingRevoke ?? 0) > 0
-
-        if (hasWork) {
-          await processBatches(snapshot)
-        } else {
-          onComplete?.()
-        }
-      } catch (err) {
-        console.error(err)
+      if (!finalizeResult || finalizeResult.error) {
         setMetadataStatus("error")
-        setMetadataError("Failed to publish metadata. Please try again.")
+        setMetadataError(
+          typeof finalizeResult?.error === "string"
+            ? finalizeResult.error
+            : "Failed to publish metadata. Please try again.",
+        )
+        return
       }
-    }
 
-    run()
+      setNeedsMetadataFinalization(false)
+      setError(null)
+      await loadProgress()
+      if (abortRef.current) return
 
-    return () => {
-      abortRef.current = true
+      setMetadataStatus("success")
+      setPhase("success")
+      onMetadataPublished?.(finalizeResult.snapshot?.attestationId)
+      onComplete?.()
+    } catch (err) {
+      console.error(err)
+      setMetadataStatus("error")
+      setMetadataError("Failed to publish metadata. Please try again.")
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, projectId, metadataAttempt, onMetadataPublished, onComplete])
+  }
 
   const processBatches = async (initialState?: PublishProgress) => {
     if (processingRef.current || abortRef.current) return
     processingRef.current = true
     setIsProcessing(true)
 
+    let current = initialState ?? progress
+    if (initialState) {
+      setProgress(initialState)
+      onProgressUpdate?.(initialState)
+    }
+
     try {
-      let current = initialState ?? progress
-      if (initialState) {
-        setProgress(initialState)
-        onProgressUpdate?.(initialState)
-      }
       while (!abortRef.current) {
         const hasPending =
           current.pendingPublish > 0 || current.pendingRevoke > 0
         if (!hasPending) {
-          onComplete?.()
           break
         }
 
@@ -174,7 +156,7 @@ export function PublishContractsDialog({
               ? batchResult.error
               : "Failed to publish contracts. Please try again.",
           )
-          break
+          return
         }
 
         if (
@@ -182,7 +164,7 @@ export function PublishContractsDialog({
           !("totalPublished" in batchResult)
         ) {
           setError("Failed to publish contracts. Please try again.")
-          break
+          return
         }
 
         current = {
@@ -201,19 +183,15 @@ export function PublishContractsDialog({
           setError(
             "Publishing stalled because no progress could be made. Please try again shortly.",
           )
-          break
+          return
         }
 
         setProgress(current)
         onProgressUpdate?.(current)
+      }
 
-        if (
-          current.pendingPublish === 0 &&
-          current.pendingRevoke === 0
-        ) {
-          onComplete?.()
-          break
-        }
+      if (!abortRef.current) {
+        await finalizeMetadata()
       }
     } catch (err) {
       console.error(err)
@@ -224,14 +202,104 @@ export function PublishContractsDialog({
     }
   }
 
-  const handleRetryMetadata = () => {
+  useEffect(() => {
+    abortRef.current = !open
+    if (!open) {
+      setPhase("contracts")
+      setMetadataStatus("idle")
+      setMetadataError(null)
+      setError(null)
+      setProgress(DEFAULT_PROGRESS)
+      setIsProcessing(false)
+      setNeedsMetadataFinalization(false)
+      processingRef.current = false
+      return
+    }
+
+    setPhase("contracts")
     setMetadataStatus("running")
     setMetadataError(null)
-    setMetadataAttempt((attempt) => attempt + 1)
+    setError(null)
+    setProgress(DEFAULT_PROGRESS)
+    setIsProcessing(false)
+    setNeedsMetadataFinalization(false)
+    processingRef.current = false
+
+    const run = async () => {
+      try {
+        const snapshotResult = await createProjectSnapshot(projectId)
+        if (abortRef.current) return
+
+        if (!snapshotResult || snapshotResult.error) {
+          setMetadataStatus("error")
+          setMetadataError(
+            typeof snapshotResult?.error === "string"
+              ? snapshotResult.error
+              : "Failed to start publishing. Please try again.",
+          )
+          return
+        }
+
+        if (!snapshotResult.metadataPending) {
+          setPhase("metadata")
+          setError(null)
+          await loadProgress()
+          if (abortRef.current) return
+
+          setMetadataStatus("success")
+          setPhase("success")
+          onMetadataPublished?.(snapshotResult.snapshot?.attestationId)
+          onComplete?.()
+          return
+        }
+
+        setNeedsMetadataFinalization(true)
+        setMetadataStatus("pending")
+
+        const snapshot = await loadProgress()
+        if (abortRef.current) return
+
+        const hasWork =
+          (snapshot.pendingPublish ?? 0) > 0 ||
+          (snapshot.pendingRevoke ?? 0) > 0
+
+        if (hasWork) {
+          await processBatches(snapshot)
+        } else {
+          await finalizeMetadata()
+        }
+      } catch (err) {
+        console.error(err)
+        setMetadataStatus("error")
+        setMetadataError("Failed to start publishing. Please try again.")
+      }
+    }
+
+    run()
+
+    return () => {
+      abortRef.current = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    open,
+    projectId,
+    retryKey,
+    onMetadataPublished,
+    onComplete,
+  ])
+
+  const handleRetryMetadata = () => {
+    setMetadataError(null)
+    if (needsMetadataFinalization) {
+      finalizeMetadata()
+    } else {
+      setRetryKey((attempt) => attempt + 1)
+    }
   }
 
   const handleRetryContracts = () => {
-    if (isProcessing || metadataStatus !== "success") {
+    if (isProcessing || abortRef.current) {
       return
     }
     setError(null)
@@ -243,21 +311,22 @@ export function PublishContractsDialog({
   const remainingContracts = progress.pendingPublish
   const remainingRevocations = progress.pendingRevoke
   const totalRemaining = remainingContracts + remainingRevocations
-  const progressHelperText = remainingRevocations > 0
-    ? `${remainingRevocations} outdated attestation${remainingRevocations === 1 ? "" : "s"} awaiting revocation`
-    : totalRemaining > 0
-      ? `${totalRemaining} contract${totalRemaining === 1 ? "" : "s"} remaining`
-      : "All contracts are published onchain"
+  const progressHelperText =
+    remainingRevocations > 0
+      ? `${remainingRevocations} outdated attestation${remainingRevocations === 1 ? "" : "s"} awaiting revocation`
+      : totalRemaining > 0
+        ? `${totalRemaining} contract${totalRemaining === 1 ? "" : "s"} remaining`
+        : "All contracts are published onchain"
 
-  const showProgress =
-    metadataStatus === "success" &&
-    totalContracts > 0 &&
-    (publishedCount > 0 || remainingContracts > 0)
+  const showProgress = totalContracts > 0
+  const showContractSpinner =
+    phase === "contracts" &&
+    !error &&
+    (isProcessing || metadataStatus === "pending" || metadataStatus === "running")
 
   const completed =
     metadataStatus === "success" &&
-    (totalContracts === 0 ||
-      (remainingContracts === 0 && remainingRevocations === 0))
+    totalRemaining === 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -265,12 +334,48 @@ export function PublishContractsDialog({
         <DialogHeader className="flex flex-col items-center gap-4">
           <DialogTitle className="flex flex-col items-center gap-4">
             <span className="text-base font-semibold text-center">
-              Publishing verified contracts onchain
+              Publishing project onchain
             </span>
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 w-full text-center">
-          {metadataStatus === "running" && (
+          {showProgress && (
+            <LinearProgress
+              current={publishedCount}
+              total={totalContracts}
+              label="Contracts published"
+              helperText={progressHelperText}
+              className="w-full max-w-xs sm:max-w-sm"
+            />
+          )}
+
+          {showContractSpinner && (
+            <div className="flex items-center gap-2 text-sm text-secondary-foreground">
+              <Loader2 size={18} className="animate-spin" />
+              <span>Publishing verified contracts…</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm text-destructive-foreground">{error}</p>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleRetryContracts}
+              >
+                Retry contract publish
+              </Button>
+            </div>
+          )}
+
+          {metadataStatus === "pending" && !error && !isProcessing && (
+            <p className="text-sm text-secondary-foreground">
+              Waiting for contract attestations to finish…
+            </p>
+          )}
+
+          {metadataStatus === "running" && phase === "metadata" && (
             <div className="flex items-center gap-2 text-sm text-secondary-foreground">
               <Loader2 size={18} className="animate-spin" />
               <span>Publishing metadata onchain…</span>
@@ -294,56 +399,14 @@ export function PublishContractsDialog({
           )}
 
           {metadataStatus === "success" && (
-            <>
-              {showProgress && (
-                <LinearProgress
-                  current={publishedCount}
-                  total={totalContracts}
-                  label="Contracts published"
-                  helperText={progressHelperText}
-                  className="w-full max-w-xs sm:max-w-sm"
-                />
-              )}
-
-              {!showProgress &&
-                !error &&
-                (remainingContracts > 0 || remainingRevocations > 0) && (
-                  <p className="text-sm text-secondary-foreground">
-                    Preparing to publish verified contracts…
-                  </p>
-                )}
-
-              {error && (
-                <div className="flex flex-col items-center gap-3">
-                  <p className="text-sm text-destructive-foreground">
-                    {error}
-                  </p>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={handleRetryContracts}
-                  >
-                    Retry contract publish
-                  </Button>
-                </div>
-              )}
-
-              {!completed && !error && (
-                <div className="flex items-center gap-2 text-sm text-secondary-foreground">
-                  <Loader2
-                    size={18}
-                    className={`animate-spin ${isProcessing ? "opacity-100" : "opacity-60"}`}
-                  />
-                </div>
-              )}
-
-              {completed && (
-                <div className="text-sm font-medium text-success">
-                  All contracts are now published!
-                </div>
-              )}
-            </>
+            <div className="flex flex-col items-center gap-3">
+              <Badge accent text="Publish complete" />
+              <p className="text-sm text-success">
+                All contracts and metadata are now published onchain.
+              </p>
+            </div>
           )}
+
         </div>
       </DialogContent>
     </Dialog>
