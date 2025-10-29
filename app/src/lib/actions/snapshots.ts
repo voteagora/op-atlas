@@ -1,6 +1,10 @@
 "use server"
 
-import { ProjectContract, ProjectSnapshot } from "@prisma/client"
+import {
+  ProjectContract,
+  ProjectSnapshot,
+  PublishedContract,
+} from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
 import { auth } from "@/auth"
@@ -34,7 +38,88 @@ import { projectHasUnpublishedChanges } from "../utils"
 import { getUnpublishedContractChanges } from "./projects"
 import { verifyMembership } from "./utils"
 
+const NO_BATCHING_CONTRACT_THRESHOLD = 150
 const PUBLISH_CONTRACT_BATCH_LIMIT = 40
+
+async function publishContractsWithoutBatching({
+  projectId,
+  toPublish,
+  toRevoke,
+  farcasterId,
+}: {
+  projectId: string
+  toPublish: ProjectContract[]
+  toRevoke: PublishedContract[]
+  farcasterId: string | null
+}) {
+  if (toRevoke.length > 0) {
+    const revokeIds = toRevoke.map((contract) => contract.id)
+    await revokeContractAttestations(revokeIds)
+    await revokePublishedContracts(revokeIds)
+  }
+
+  if (toPublish.length > 0) {
+    const attestationIds = await createContractAttestations({
+      contracts: toPublish.map((contract) => ({
+        contractAddress: contract.contractAddress,
+        chainId: contract.chainId,
+        deployer: contract.deployerAddress,
+        deploymentTx: contract.deploymentHash,
+        signature: contract.verificationProof,
+        verificationChainId:
+          contract.verificationChainId || contract.chainId,
+      })),
+      projectId,
+      farcasterId:
+        farcasterId !== null ? Number.parseInt(farcasterId, 10) || 0 : 0,
+      refUID: projectId,
+    })
+
+    if (attestationIds.length > 0) {
+      const records = attestationIds
+        .map((attestationId, index) => {
+          const contract = toPublish[index]
+          if (!contract) return null
+          return {
+            id: attestationId,
+            contract: contract.contractAddress,
+            deploymentTx: contract.deploymentHash,
+            deployer: contract.deployerAddress,
+            verificationChainId:
+              contract.verificationChainId || contract.chainId,
+            signature: contract.verificationProof,
+            chainId: contract.chainId,
+            projectId,
+          }
+        })
+        .filter(Boolean) as {
+        id: string
+        contract: string
+        deploymentTx: string
+        deployer: string
+        verificationChainId: number
+        signature: string
+        chainId: number
+        projectId: string
+      }[]
+
+      if (records.length > 0) {
+        await addPublishedContracts(records)
+      }
+    }
+  }
+
+  const updatedProjectContracts = await getProjectContractsFresh({ projectId })
+  const updatedDiff = await getUnpublishedContractChanges(
+    projectId,
+    updatedProjectContracts,
+  )
+
+  return {
+    toPublish: updatedDiff?.toPublish?.length ?? 0,
+    toRevoke: updatedDiff?.toRevoke?.length ?? 0,
+  }
+}
 export const createProjectSnapshot = async (projectId: string) => {
   const session = await auth()
 
@@ -67,13 +152,18 @@ export const createProjectSnapshot = async (projectId: string) => {
     snapshots,
     project.lastMetadataUpdate,
   )
+  const contractsToPublish = unpublishedContractChanges?.toPublish ?? []
+  const contractsToRevoke = unpublishedContractChanges?.toRevoke ?? []
+  const shouldPublishWithoutBatching =
+    contractsToPublish.length <= NO_BATCHING_CONTRACT_THRESHOLD &&
+    (contractsToPublish.length > 0 || contractsToRevoke.length > 0)
 
   if (!hasUnpublishedMetadataChanges && latestSnapshot) {
     return {
       snapshot: latestSnapshot,
       pendingContracts: {
-        toPublish: unpublishedContractChanges?.toPublish?.length ?? 0,
-        toRevoke: unpublishedContractChanges?.toRevoke?.length ?? 0,
+        toPublish: contractsToPublish.length,
+        toRevoke: contractsToRevoke.length,
       },
       error: null,
     }
@@ -102,15 +192,26 @@ export const createProjectSnapshot = async (projectId: string) => {
       attestationId,
     })
 
+    let pendingContracts = {
+      toPublish: contractsToPublish.length,
+      toRevoke: contractsToRevoke.length,
+    }
+
+    if (shouldPublishWithoutBatching) {
+      pendingContracts = await publishContractsWithoutBatching({
+        projectId: project.id,
+        toPublish: contractsToPublish,
+        toRevoke: contractsToRevoke,
+        farcasterId: session?.user?.farcasterId ?? null,
+      })
+    }
+
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")
 
     return {
       snapshot,
-      pendingContracts: {
-        toPublish: unpublishedContractChanges?.toPublish?.length ?? 0,
-        toRevoke: unpublishedContractChanges?.toRevoke?.length ?? 0,
-      },
+      pendingContracts,
       error: null,
     }
   } catch (error) {
