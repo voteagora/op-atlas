@@ -102,7 +102,10 @@ export function PublishContractsDialog({
       const finalizeResult = await finalizeProjectSnapshot(projectId)
       if (abortRef.current) return
 
-      if (!finalizeResult || finalizeResult.error) {
+      if (
+        !finalizeResult ||
+        ("error" in finalizeResult && finalizeResult.error)
+      ) {
         setMetadataStatus("error")
         setMetadataError(
           typeof finalizeResult?.error === "string"
@@ -119,7 +122,11 @@ export function PublishContractsDialog({
 
       setMetadataStatus("success")
       setPhase("success")
-      onMetadataPublished?.(finalizeResult.snapshot?.attestationId)
+      if ("snapshot" in finalizeResult && finalizeResult.snapshot) {
+        onMetadataPublished?.(finalizeResult.snapshot.attestationId)
+      } else {
+        onMetadataPublished?.()
+      }
       onComplete?.()
     } catch (err) {
       console.error(err)
@@ -240,7 +247,10 @@ export function PublishContractsDialog({
           return
         }
 
-        if (!snapshotResult.metadataPending) {
+        if (
+          "metadataPending" in snapshotResult &&
+          !snapshotResult.metadataPending
+        ) {
           setPhase("metadata")
           setError(null)
           await loadProgress()
@@ -248,7 +258,14 @@ export function PublishContractsDialog({
 
           setMetadataStatus("success")
           setPhase("success")
-          onMetadataPublished?.(snapshotResult.snapshot?.attestationId)
+          if (
+            "snapshot" in snapshotResult &&
+            snapshotResult.snapshot
+          ) {
+            onMetadataPublished?.(snapshotResult.snapshot.attestationId)
+          } else {
+            onMetadataPublished?.()
+          }
           onComplete?.()
           return
         }
