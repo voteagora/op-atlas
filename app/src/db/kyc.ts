@@ -263,6 +263,13 @@ export async function deleteKycTeam({
       })
     }
 
+    // Delete KYCLegalEntityTeams relationships for this KYC team
+    await tx.kYCLegalEntityTeams.deleteMany({
+      where: {
+        kycTeamId: kycTeamId,
+      },
+    })
+
     // Finally, delete the KYC team
     if (hasActiveStream) {
       // Soft delete if there's an active stream
