@@ -352,7 +352,6 @@ export function PublishContractsDialog({
           {showContractSpinner && (
             <div className="flex items-center gap-2 text-sm text-secondary-foreground">
               <Loader2 size={18} className="animate-spin" />
-              <span>Publishing verified contracts…</span>
             </div>
           )}
 

@@ -242,7 +242,7 @@ export const PublishForm = ({
 
         <hr className="mt-6" />
         <p className="text-base font-normal text-text-secondary ">
-          <span className="text-base font-normal">You’re not done yet!</span>{" "}
+          <span className="text-base font-normal">You&apos;re not done yet!</span>{" "}
           To be included in any round of Retro Funding, you must also submit a
           round-specific application.{" "}
         </p>
