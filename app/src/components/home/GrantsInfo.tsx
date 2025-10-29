@@ -105,7 +105,7 @@ export const GrantsInfo = () => {
   const renderMission = (mission: MissionData) => {
     return (
       <TrackedLink
-        className="h-[344px] px-7 py-8 bg-foreground rounded-xl border border-tertiary inline-flex flex-col justify-between items-start text-secondary-foreground hover:bg-[#F2F3F8] cursor-pointer group"
+        className="h-[344px] px-7 py-8 bg-background rounded-xl border border-tertiary inline-flex flex-col justify-between items-start text-secondary-foreground hover:bg-[#F2F3F8] cursor-pointer group"
         key={mission.name}
         href={`/missions/${mission.pageName}`}
         eventName="Link Click"
