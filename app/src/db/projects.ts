@@ -771,7 +771,7 @@ async function getPublishedProjectContractsFn({
     contactsByChain.set(contact.chainId, key)
   }
 
-  for (const [chainId, addresses] of contactsByChain.entries()) {
+  for (const [chainId, addresses] of Array.from(contactsByChain.entries())) {
     const addressChunks = chunkArray(Array.from(addresses), 500)
     for (const chunk of addressChunks) {
       if (chunk.length === 0) continue
