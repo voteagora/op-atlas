@@ -196,13 +196,9 @@ export const publishProjectContractsBatch = async ({
     projectContracts,
   )
 
-  const sortedToPublish = sortContractsForPublishing(
+  const toPublish = sortContractsForPublishing(
     unpublishedContractChanges?.toPublish ?? [],
   )
-  const toPublish = sortedToPublish.filter(
-    (contract) => !!contract.verificationProof,
-  )
-  const skippedContracts = sortedToPublish.length - toPublish.length
   const toRevoke = (unpublishedContractChanges?.toRevoke ?? []).slice()
 
   const publishBatch = toPublish.slice(0, normalizedBatchSize)
@@ -289,7 +285,7 @@ export const publishProjectContractsBatch = async ({
     error: errorMessage,
     publishedThisBatch,
     revokedThisBatch,
-    skippedThisBatch: skippedContracts,
+    skippedThisBatch: 0,
     remainingPublish: updatedDiff?.toPublish?.length ?? 0,
     remainingRevoke: updatedDiff?.toRevoke?.length ?? 0,
     totalVerified: updatedProjectContracts?.contracts.length ?? 0,

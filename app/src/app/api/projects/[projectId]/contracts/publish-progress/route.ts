@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
 
+import { auth } from "@/auth"
 import { getProjectContractsFresh } from "@/db/projects"
 import { getUnpublishedContractChanges } from "@/lib/actions/projects"
+import { verifyMembership } from "@/lib/actions/utils"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -13,6 +15,18 @@ export async function GET(
   const { projectId } = params
 
   try {
+    const session = await auth()
+    const userId = session?.user?.id
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const membership = await verifyMembership(projectId, userId)
+    if (membership?.error) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
     const project = await getProjectContractsFresh({ projectId })
     if (!project) {
       return NextResponse.json({
