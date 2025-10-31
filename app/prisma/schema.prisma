@@ -796,10 +796,6 @@ model CitizenSeason {
   createdAt               DateTime               @default(now())
   updatedAt               DateTime               @updatedAt
 
-  @@unique([seasonId, userId])
-  @@unique([seasonId, organizationId])
-  @@unique([seasonId, projectId])
-  @@unique([seasonId, governanceAddress])
   @@index([seasonId, userId])
 }
 

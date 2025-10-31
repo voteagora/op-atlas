@@ -78,6 +78,9 @@ const SOCIAL_THRESHOLDS = {
   PLATINUM: 0.82,
 } as const
 
+const WALLET_BATCH_SIZE = 5
+const SOCIAL_BATCH_SIZE = 5
+
 export async function evaluateTrustScores({
   seasonId,
   userId,
@@ -154,20 +157,33 @@ async function evaluateWalletScores(wallets: string[]): Promise<WalletTrustScore
     return []
   }
 
-  const results = await Promise.all(
-    wallets.map(async (address) => {
+  const normalizedWallets = wallets.map((address) => address.toLowerCase())
+  const uniqueWallets = Array.from(new Set(normalizedWallets))
+
+  const uniqueResults = await mapInBatches(
+    uniqueWallets,
+    WALLET_BATCH_SIZE,
+    async (address) => {
       const passportScore = await fetchPassportScore({ address })
       const band = mapWalletBand(passportScore)
       return {
-        address: address.toLowerCase(),
+        address,
         score: passportScore.score,
         band,
         source: passportScore,
       }
-    }),
+    },
   )
 
-  return results
+  const walletMap = new Map(uniqueWallets.map((address, index) => [address, uniqueResults[index]]))
+
+  return normalizedWallets.map((address) => {
+    const score = walletMap.get(address)
+    if (!score) {
+      throw new Error(`Missing passport score for wallet ${address}`)
+    }
+    return score
+  })
 }
 
 async function evaluateSocialScores({
@@ -181,8 +197,10 @@ async function evaluateSocialScores({
     return []
   }
 
-  const results = await Promise.all(
-    socials.map(async ({ platform, identifier }) => {
+  const results = await mapInBatches(
+    socials,
+    SOCIAL_BATCH_SIZE,
+    async ({ platform, identifier }) => {
       const lookup = await lookupOpenRankScore({
         seasonId,
         platform: platform as OpenRankPlatform,
@@ -198,7 +216,7 @@ async function evaluateSocialScores({
         band,
         source: lookup,
       }
-    }),
+    },
   )
 
   return results
@@ -267,4 +285,27 @@ function extractLoadedAt(
   }
 
   return null
+}
+
+async function mapInBatches<T, R>(
+  items: readonly T[],
+  batchSize: number,
+  mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  if (items.length === 0) {
+    return []
+  }
+
+  const size = Math.max(1, batchSize)
+  const results: R[] = []
+
+  for (let start = 0; start < items.length; start += size) {
+    const batch = items.slice(start, start + size)
+    const mapped = await Promise.all(
+      batch.map((item, index) => mapper(item, start + index)),
+    )
+    results.push(...mapped)
+  }
+
+  return results
 }

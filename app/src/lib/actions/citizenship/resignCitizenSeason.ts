@@ -104,7 +104,6 @@ export async function resignCitizenSeason(citizenSeasonId: string) {
       where: { id: citizenSeasonId },
       data: {
         registrationStatus: CitizenRegistrationStatus.REVOKED,
-        attestationId: null,
       },
     })
   } catch (error) {

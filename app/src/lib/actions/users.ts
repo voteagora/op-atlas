@@ -103,36 +103,6 @@ return {
 }
 }
 
-export const updateTwitterHandle = async (twitter: string) => {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  // Validate twitter handle format (can be @username or just username)
-  const cleanHandle = twitter.startsWith("@") ? twitter.slice(1) : twitter
-
-  // Validate format: alphanumeric and underscores, 1-15 characters
-  if (!cleanHandle.match(/^[a-zA-Z0-9_]{1,15}$/)) {
-    return {
-      error:
-        "Invalid X handle format. Use alphanumeric characters and underscores only (1-15 characters)",
-    }
-  }
-
-  const updated = await updateUser({
-    id: session.user.id,
-    twitter: cleanHandle,
-  })
-
-  return {
-    error: null,
-    user: updated,
-  }
-}
-
 /**
  * Searches users by Farcaster username, address, email, or ENS name.
  * The query must be at least one character long.
@@ -283,21 +253,4 @@ export const refreshUserPassport = async () => {
     success: errors.length === 0
   }
 }
-
-export const getCitizenshipEligibility = async () => {
-  const session = await auth()
-  const userId = session?.user?.id
-
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  return {
-    isEligible: true
-  }
-}
-
-
 

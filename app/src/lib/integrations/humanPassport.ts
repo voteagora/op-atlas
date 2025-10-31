@@ -29,9 +29,16 @@ export async function fetchPassportScore({
   model = DEFAULT_MODEL,
   signal,
 }: FetchPassportScoreArgs): Promise<PassportScoreResult> {
+  return {
+    address: address.toLowerCase(),
+    score: 0,
+    status: "blocked",
+    fetchedAt: new Date(),
+    raw: "data",
+  }
+  
   const lowerAddress = address.toLowerCase()
   const timestamp = new Date()
-
   if (!API_KEY) {
     return {
       address: lowerAddress,
