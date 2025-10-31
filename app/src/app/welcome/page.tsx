@@ -77,7 +77,7 @@ function Dots({ total, current }: { total: number; current: number }) {
         <div
           key={i}
           className={`w-2.5 h-2.5 rounded-full ${
-            current === i ? "bg-foreground" : "bg-backgroundSecondary"
+            current === i ? "bg-background" : "bg-backgroundSecondary"
           }`}
         />
       ))}

@@ -121,7 +121,7 @@ export const Navbar = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
                     <div className="hidden sm:flex group gap-10 font-normal text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
-                      <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
+                      <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer font-medium text-base leading-6">
                         <div>Grants</div>
                         <ChevronDown size={12} />
                       </div>
@@ -158,7 +158,7 @@ export const Navbar = () => {
                     <Link
                       className={`${
                         isProjects ? "mt-1" : "group-hover:mt-1"
-                      } focus:outline-none focus:opacity-80`}
+                      } focus:outline-none focus:opacity-80 font-medium text-base leading-6`}
                       href="/round/results?rounds=7,8"
                     >
                       Recipients
@@ -177,7 +177,7 @@ export const Navbar = () => {
                     <Link
                       className={`${
                         isGovernance ? "mt-1" : "group-hover:mt-1"
-                      } focus:outline-none focus:opacity-80`}
+                      } focus:outline-none focus:opacity-80 font-medium text-base leading-6`}
                       href="/governance"
                     >
                       Governance
@@ -187,7 +187,7 @@ export const Navbar = () => {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="h-full focus:outline-none focus:opacity-80">
                     <div className="hidden sm:flex group gap-10 font-normal text-text-muted h-full self-stretch hover:border-b-4 hover:border-bg-tertiary hover:text-text-default">
-                      <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer">
+                      <div className="flex items-center gap-1 group-hover:mt-1 cursor-pointer font-medium text-base leading-6">
                         <div>More</div>
                         <ChevronDown size={12} />
                       </div>

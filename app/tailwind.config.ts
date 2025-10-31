@@ -30,6 +30,9 @@ const config = {
       width: {
         body: "712px",
       },
+      fontWeight: {
+        semibold: "500",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -63,7 +66,7 @@ const config = {
           foreground: "hsl(var(--text-foreground))",
           destructive: "#FF0420",
         },
-        foreground: "var(--foreground)",
+        foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
