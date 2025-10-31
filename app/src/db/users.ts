@@ -1008,6 +1008,7 @@ export async function updateUser({
   privyDid?: string | null
   discord?: string | null
   github?: string | null
+  twitter?: string | null
   notDeveloper?: boolean
   govForumProfileUrl?: string | null
 }) {

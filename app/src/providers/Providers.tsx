@@ -36,7 +36,19 @@ const farcasterConfig = {
 
 const queryClient = new QueryClient()
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+type SeasonBannerConfig = {
+  priorityWindow: boolean
+  registrationOpen: boolean
+  seasonName: string
+}
+
+export default function Providers({
+  children,
+  defaultBanner,
+}: {
+  children: React.ReactNode
+  defaultBanner?: SeasonBannerConfig | null
+}) {
   return (
     <SessionProvider>
       <AuthKitProvider config={farcasterConfig}>
@@ -45,7 +57,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             <AnalyticsProvider>
               <DialogProvider>
                 <TooltipProvider>
-                  <LayoutWrapper>
+                  <LayoutWrapper defaultBanner={defaultBanner}>
                     <PostHogProvider>{children}</PostHogProvider>
                   </LayoutWrapper>
                 </TooltipProvider>

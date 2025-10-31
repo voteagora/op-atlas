@@ -11,6 +11,12 @@ import { CheckIconFilled } from "@/components/icons/checkIconFilled"
 import { InfoIconFilled } from "@/components/icons/infoIconFilled"
 import { Toaster } from "@/components/ui/sonner"
 import Providers from "@/providers/Providers"
+import {
+  getActiveSeason,
+  hasRegistrationEnded,
+  hasRegistrationStarted,
+  isPriorityWindowOpen,
+} from "@/lib/seasons"
 
 import { sharedMetadata } from "./shared-metadata"
 
@@ -81,15 +87,34 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const activeSeason = await getActiveSeason()
+
+  let defaultBanner: { priorityWindow: boolean; registrationOpen: boolean; seasonName: string } | null = null
+
+  if (activeSeason && activeSeason.id === "9") {
+    const priorityWindow = isPriorityWindowOpen(activeSeason)
+    const registrationStarted = hasRegistrationStarted(activeSeason)
+    const registrationEnded = hasRegistrationEnded(activeSeason)
+    const registrationOpen = registrationStarted && !registrationEnded
+
+    if (priorityWindow || registrationOpen) {
+      defaultBanner = {
+        priorityWindow,
+        registrationOpen,
+        seasonName: activeSeason.name,
+      }
+    }
+  }
+
   return (
     <html lang="en" className={riforma.variable}>
       <body className={riforma.className}>
-        <Providers>
+        <Providers defaultBanner={defaultBanner}>
           <ErrorBoundary>
             <AppDialogs />
             {children}

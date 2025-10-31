@@ -154,11 +154,12 @@ export const syncPrivyUser = async (
     }
   }
 
-  // Update Discord and Github
+  // Update Discord, Github, and Twitter
   await updateUser({
     id: existingUser.id,
     discord: privyUser?.discord?.username || null,
     github: privyUser?.github?.username || null,
+    twitter: privyUser?.twitter?.username || null,
   })
 
   return await getUserById(existingUser.id)

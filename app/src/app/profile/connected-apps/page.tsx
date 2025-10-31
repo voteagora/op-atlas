@@ -7,6 +7,8 @@ import {
   Farcaster,
   Github,
   Optimism,
+  World,
+  XOptimism,
 } from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
@@ -15,6 +17,8 @@ import {
   GithubNotDeveloperToggle,
 } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
+import { WorldConnection } from "@/components/profile/WorldIdConnection"
+import { XConnection } from "@/components/profile/XConnection"
 
 export const metadata: Metadata = {
   title: "Connected Apps - OP Atlas",
@@ -113,6 +117,30 @@ export default async function Page() {
           <div className="flex-shrink-0 self-center">
             <GovForumConnection userId={session.user.id} />
           </div>
+        </div>
+
+        {/* WorldID */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center space-x-1.5">
+            <World className="w-5 h-5" />
+            <h3 className="font-semibold text-base text-foreground">WorldID</h3>
+          </div>
+          <div className="text-base mb-4">Add your proof of personhood.</div>
+          <WorldConnection userId={session.user.id} variant="button">
+            Connect
+          </WorldConnection>
+        </div>
+
+        {/* X */}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center space-x-1.5">
+            <XOptimism className="w-5 h-5" />
+            <h3 className="font-semibold text-base text-foreground">X</h3>
+          </div>
+          <div className="text-base mb-4">
+            Connect your account so anyone can find you on X.
+          </div>
+          <XConnection userId={session.user.id} />
         </div>
       </div>
     </div>

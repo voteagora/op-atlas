@@ -12,7 +12,12 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useUser } from "../db/useUser"
 import { useHandlePrivyErrors } from "../useHandlePrivyErrors"
 
-export const usePrivyEmail = (userId: string) => {
+type UsePrivyEmailOptions = {
+  onLinkSuccess?: () => void
+  onUpdateSuccess?: () => void
+}
+
+export const usePrivyEmail = (userId: string, options?: UsePrivyEmailOptions) => {
   const isLinking = useRef(false)
 
   const onError = useHandlePrivyErrors()
@@ -31,7 +36,10 @@ export const usePrivyEmail = (userId: string) => {
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
-            .then(() => (isLinking.current = false)),
+            .then(() => {
+              isLinking.current = false
+              options?.onLinkSuccess?.()
+            }),
           {
             loading: "Adding email...",
             success: "Email added successfully",
@@ -49,7 +57,10 @@ export const usePrivyEmail = (userId: string) => {
         toast.promise(
           syncPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
-            .then(() => (isLinking.current = false)),
+            .then(() => {
+              isLinking.current = false
+              options?.onUpdateSuccess?.()
+            }),
           {
             loading: "Updating email...",
             success: "Email updated successfully",
