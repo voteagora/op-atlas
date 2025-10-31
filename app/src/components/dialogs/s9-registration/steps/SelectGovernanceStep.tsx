@@ -28,7 +28,7 @@ export function SelectGovernanceStep({
   return (
     <div className="flex flex-col">
       <h3 className="text-xl font-semibold text-foreground mt-4 text-center">
-        If you're found eligible, where should we issue your citizen badge?
+        If you&apos;re found eligible, where should we issue your citizen badge?
       </h3>
       <RadioGroup
         value={selectedGovernance ?? undefined}

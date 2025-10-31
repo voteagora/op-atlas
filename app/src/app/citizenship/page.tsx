@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { citizenCategory, CitizenSeason } from "@prisma/client"
+import { citizenCategory } from "@prisma/client"
 import { Link as LinkIcon } from "lucide-react"
 
 import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequirements"
@@ -48,6 +48,8 @@ import { truncateAddress } from "@/lib/utils/string"
 
 import { AnalyticsTracker } from "./components/AnalyticsTracker"
 import { SidebarActiveCitizen } from "./components/SidebarActiveCitizen"
+
+type S9CitizenSeason = NonNullable<Awaited<ReturnType<typeof getCitizenSeasonByUser>>>
 
 export default async function Page({
   searchParams,
@@ -388,7 +390,7 @@ async function renderSeasonNinePage({
 
               <div className="mt-6 space-y-6 text-base text-secondary-foreground">
                 <p>
-                  The Citizens' House votes on decisions that shape the direction of the Collective. Please note that citizens from previous seasons are required to register again to continue serving in {season.name}.
+                  The Citizens&apos; House votes on decisions that shape the direction of the Collective. Please note that citizens from previous seasons are required to register again to continue serving in {season.name}.
                 </p>
                 <div>
                   <p>To register, you’ll first be asked to...</p>
@@ -409,7 +411,7 @@ async function renderSeasonNinePage({
                   href="https://community.optimism.io/citizens-house/citizen-house-overview"
                   icon={LinkIcon}
                 >
-                  Gov Docs: Citizens' House
+                  Gov Docs: Citizens&apos; House
                 </LinkBox>
               </div>
             </div>
@@ -440,7 +442,7 @@ function determineRegistrationCardState({
   isBlocked,
 }: {
   season: SeasonWithConfig
-  citizenSeason: CitizenSeason | null
+  citizenSeason: S9CitizenSeason | null
   hasVerifiedEmail: boolean
   hasPriorityAccess: boolean
   priorityWindow: boolean
@@ -466,7 +468,7 @@ function determineRegistrationCardState({
     return {
       type: "registration-closed",
       message:
-        `Thanks for your interest, but the Citizens' House has reached capacity for ${season.name}.`,
+        `Thanks for your interest, but the Citizens&apos; House has reached capacity for ${season.name}.`,
     }
   }
 
