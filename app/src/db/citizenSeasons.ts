@@ -96,12 +96,13 @@ export async function getCitizenSeasonByOrganization({
   seasonId: string
   organizationId: string
 }) {
-  return prisma.citizenSeason.findUnique({
+  return prisma.citizenSeason.findFirst({
     where: {
-      seasonId_organizationId: {
-        seasonId,
-        organizationId,
-      },
+      seasonId,
+      organizationId,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   })
 }
@@ -113,12 +114,13 @@ export async function getCitizenSeasonByProject({
   seasonId: string
   projectId: string
 }) {
-  return prisma.citizenSeason.findUnique({
+  return prisma.citizenSeason.findFirst({
     where: {
-      seasonId_projectId: {
-        seasonId,
-        projectId,
-      },
+      seasonId,
+      projectId,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   })
 }
@@ -137,15 +139,25 @@ export async function upsertCitizenSeason({
   userId: string
   data: CitizenSeasonUpsertData
 }) {
-  return prisma.citizenSeason.upsert({
+  const existing = await prisma.citizenSeason.findFirst({
     where: {
-      seasonId_userId: {
-        seasonId,
-        userId,
-      },
+      seasonId,
+      userId,
     },
-    update: data,
-    create: {
+    orderBy: {
+      createdAt: "desc",
+    },
+  })
+
+  if (existing) {
+    return prisma.citizenSeason.update({
+      where: { id: existing.id },
+      data,
+    })
+  }
+
+  return prisma.citizenSeason.create({
+    data: {
       seasonId,
       userId,
       ...data,
