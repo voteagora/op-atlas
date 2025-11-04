@@ -11,7 +11,7 @@ export interface OpenRankScore {
   platform: OpenRankPlatform
   /** Normalized 0-1 score */
   score: number | null
-  source: "snapshot" | "mock" | "missing"
+  source: "snapshot" | "missing"
   loadedAt: Date | null
   snapshot?: OpenRankSnapshot
 }
@@ -20,18 +20,6 @@ type LookupArgs = {
   seasonId: string
   platform: OpenRankPlatform
   identifier: string
-}
-
-const MOCK_OPEN_RANK_SCORES: Record<
-  string,
-  Array<{ platform: OpenRankPlatform; identifier: string; score: number }>
-> = {
-  "9": [
-    { platform: "FARCASTER", identifier: "shaun", score: 0.82 },
-    { platform: "GITHUB", identifier: "optimism", score: 0.76 },
-    { platform: "X", identifier: "optimism", score: 0.7 },
-    { platform: "FARCASTER", identifier: "emily", score: 0.88 },
-  ],
 }
 
 export async function lookupOpenRankScore({
@@ -60,17 +48,6 @@ export async function lookupOpenRankScore({
     }
   }
 
-  const mockScore = findMockScore(seasonId, platform, normalizedIdentifier)
-  if (mockScore) {
-    return {
-      identifier,
-      platform,
-      score: mockScore.score,
-      source: "mock",
-      loadedAt: new Date(),
-    }
-  }
-
   return {
     identifier,
     platform,
@@ -82,19 +59,4 @@ export async function lookupOpenRankScore({
 
 function normalizeIdentifier(identifier: string) {
   return identifier.trim().toLowerCase()
-}
-
-function findMockScore(
-  seasonId: string,
-  platform: OpenRankPlatform,
-  identifier: string,
-) {
-  const seasonMocks = MOCK_OPEN_RANK_SCORES[seasonId]
-  if (!seasonMocks) return null
-
-  return seasonMocks.find(
-    (entry) =>
-      entry.platform === platform &&
-      normalizeIdentifier(entry.identifier) === identifier,
-  )
 }

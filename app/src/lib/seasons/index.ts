@@ -5,27 +5,7 @@ import { Prisma, Season } from "@prisma/client"
 
 import { prisma } from "@/db/client"
 
-export const DEFAULT_SEASON_CONFIG = {
-  trustScoring: {
-    passThreshold: 50,
-    blockThreshold: 0,
-    socialWeight: 0.5,
-    walletWeight: 0.5,
-  },
-  passport: {
-    requestTimeoutMs: 30 * 1000,
-    retryBackoffMs: 5 * 60 * 1000,
-  },
-  openRank: {
-    staleAfterHours: 24,
-  },
-  priorityAccess: {
-    enabled: true,
-  },
-} as const
-
-type DefaultSeasonConfig = typeof DEFAULT_SEASON_CONFIG
-export type SeasonRuntimeConfig = DefaultSeasonConfig & Record<string, unknown>
+export type SeasonRuntimeConfig = Record<string, unknown>
 
 export type SeasonWithConfig = Omit<Season, "config"> & {
   config: SeasonRuntimeConfig
@@ -75,13 +55,10 @@ export function resolveSeasonConfig(
   rawConfig: Prisma.JsonValue | null | undefined,
 ): SeasonRuntimeConfig {
   if (!isPlainObject(rawConfig)) {
-    return cloneConfig(DEFAULT_SEASON_CONFIG)
+    return {}
   }
 
-  return mergeConfig(
-    cloneConfig(DEFAULT_SEASON_CONFIG),
-    rawConfig as Record<string, unknown>,
-  )
+  return cloneConfig(rawConfig as Record<string, unknown>)
 }
 
 type SeasonSchedule = Pick<
@@ -134,40 +111,10 @@ function hydrateSeason(season: Season | null): SeasonWithConfig | null {
   }
 }
 
-function cloneConfig(config: DefaultSeasonConfig): DefaultSeasonConfig {
-  return JSON.parse(JSON.stringify(config)) as DefaultSeasonConfig
-}
-
-function mergeConfig<T extends Record<string, unknown>>(
-  base: T,
-  override: Record<string, unknown>,
-): T {
-  const result: Record<string, unknown> = { ...base }
-
-  for (const [key, value] of Object.entries(override)) {
-    if (!isMergeable(value)) {
-      result[key] = value
-      continue
-    }
-
-    const existing = result[key]
-    if (isMergeable(existing)) {
-      result[key] = mergeConfig(
-        existing as Record<string, unknown>,
-        value as Record<string, unknown>,
-      )
-    } else {
-      result[key] = value
-    }
-  }
-
-  return result as T
+function cloneConfig(config: Record<string, unknown>): SeasonRuntimeConfig {
+  return JSON.parse(JSON.stringify(config)) as SeasonRuntimeConfig
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value)
-}
-
-function isMergeable(value: unknown): value is Record<string, unknown> {
-  return isPlainObject(value)
 }

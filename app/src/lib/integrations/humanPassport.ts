@@ -17,7 +17,7 @@ type FetchPassportScoreArgs = {
   signal?: AbortSignal
 }
 
-const DEFAULT_MODEL = "aggregate-unique-humanity"
+const DEFAULT_MODEL = "aggregate"
 
 const API_URL =
   process.env.HUMAN_PASSPORT_API_URL?.replace(/\/$/, "") ??
@@ -41,18 +41,14 @@ export async function fetchPassportScore({
     }
   }
 
-  const endpoint = `${API_URL}/models/${model}/score`
+  const endpoint = `${API_URL}/v2/models/score/${lowerAddress}`
 
   try {
     const response = await fetch(endpoint, {
-      method: "POST",
+      method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
+        "X-API-KEY": API_KEY,
       },
-      body: JSON.stringify({
-        address: lowerAddress,
-      }),
       signal,
       cache: "no-store",
     })
@@ -70,7 +66,7 @@ export async function fetchPassportScore({
     }
 
     const data = await safeJson(response)
-    const scoreValue = extractScore(data)
+    const scoreValue = extractScore(data, model)
 
     if (typeof scoreValue !== "number") {
       return {
@@ -123,7 +119,7 @@ async function safeJson(response: Response) {
   }
 }
 
-function extractScore(payload: unknown): number | null {
+function extractScore(payload: unknown, model: string): number | null {
   if (!payload || typeof payload !== "object") {
     return null
   }
@@ -138,6 +134,18 @@ function extractScore(payload: unknown): number | null {
     }
   }
 
+  const modelScore = extractModelScoreFromDetails(payload, model)
+  if (modelScore !== null) {
+    return modelScore
+  }
+
+  if (model !== DEFAULT_MODEL) {
+    const defaultModelScore = extractModelScoreFromDetails(payload, DEFAULT_MODEL)
+    if (defaultModelScore !== null) {
+      return defaultModelScore
+    }
+  }
+
   if ("data" in payload) {
     const nested = (payload as { data: unknown }).data
     if (nested && typeof nested === "object" && "score" in nested) {
@@ -148,18 +156,46 @@ function extractScore(payload: unknown): number | null {
   return null
 }
 
+function extractModelScoreFromDetails(payload: unknown, model: string): number | null {
+  if (!payload || typeof payload !== "object") {
+    return null
+  }
+
+  const details = (payload as { details?: unknown }).details
+  if (!details || typeof details !== "object") {
+    return null
+  }
+
+  const models = (details as { models?: unknown }).models
+  if (!models || typeof models !== "object") {
+    return null
+  }
+
+  const entry = (models as Record<string, unknown>)[model]
+  if (!entry || typeof entry !== "object") {
+    return null
+  }
+
+  return getScoreValue((entry as { score?: unknown }).score ?? null)
+}
+
 function getScoreValue(value: unknown): number | null {
   if (typeof value === "number") {
-    return value
+    return Number.isFinite(value) ? value : null
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
   }
 
   if (
     value &&
     typeof value === "object" &&
     "value" in value &&
-    typeof (value as { value: unknown }).value === "number"
+    (value as { value: unknown }).value !== undefined
   ) {
-    return (value as { value: number }).value
+    return getScoreValue((value as { value: unknown }).value)
   }
 
   return null
