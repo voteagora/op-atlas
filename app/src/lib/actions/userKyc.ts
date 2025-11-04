@@ -418,3 +418,51 @@ export async function checkPendingKYCVerification() {
     }
   }
 }
+
+// Attempts to link an existing, orphaned KYCUser by email to the current session user.
+// This will NOT create a new KYC record and is safe to call on login.
+export async function linkExistingKYCForEmail(email: string) {
+  const session = await auth()
+  const userId = session?.user?.id
+
+  if (!userId) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  const normalizedEmail = email?.toLowerCase()?.trim()
+  if (!normalizedEmail) {
+    return { success: false, error: "Email required" }
+  }
+
+  try {
+    // If user already has a KYC, nothing to do
+    const existingUserKyc = await getUserKYCUser(userId)
+    if (existingUserKyc) {
+      return { success: false, alreadyLinked: true }
+    }
+
+    // Look for an orphaned, non-expired KYC for this email
+    const orphanedKYC = await prisma.kYCUser.findFirst({
+      where: {
+        email: normalizedEmail,
+        expiry: { gt: new Date() },
+        UserKYCUsers: { none: {} },
+      },
+    })
+
+    if (!orphanedKYC) {
+      return { success: false, notFound: true }
+    }
+
+    // Link it to the current user
+    await createUserKYCUser(userId, orphanedKYC.id)
+
+    // Revalidate pages that show KYC status
+    revalidatePath("/dashboard")
+    revalidatePath("/profile/details")
+
+    return { success: true, linked: true }
+  } catch (error) {
+    return { success: false, error: "Failed to link KYC" }
+  }
+}
