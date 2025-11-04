@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, Ellipsis, UserRoundCheck } from "lucide-react"
+import { ArrowUpRight, Ellipsis } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { memo, useEffect, useState } from "react"
@@ -143,7 +143,11 @@ const ProfileDetailCard = ({
               <Badge
                 text={
                   <span className="flex items-center gap-1">
-                    <UserRoundCheck fill="#000" size={12} />
+                    <img
+                      src="https://cdn.jsdelivr.net/npm/remixicon/icons/User/user-follow-fill.svg"
+                      alt="verified"
+                      className="w-[12px] h-[12px]"
+                    />
                     Verified
                   </span>
                 }

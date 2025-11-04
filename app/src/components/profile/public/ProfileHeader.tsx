@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { UserRoundCheck } from "lucide-react"
 
 import { CitizenshipBadge } from "@/components/common/CitizenshipBadge"
 import { PencilFill } from "@/components/icons/remix"
@@ -80,10 +79,10 @@ const ProfileHeader = ({
 const VerifiedBadge = () => {
   return (
     <div title="Identity verified" className="cursor-default">
-      <UserRoundCheck
-        fill="#000"
-        size={20}
-        className="rounded"
+      <img
+        src="https://cdn.jsdelivr.net/npm/remixicon/icons/User/user-follow-fill.svg"
+        alt="verified"
+        className="w-[20px] h-[20px]"
       />
     </div>
   )
