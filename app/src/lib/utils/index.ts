@@ -33,6 +33,12 @@ export function formatNumber(
 ) {
   const value = Number(amount)
 
+  // Guard against non-finite values (Infinity, -Infinity, NaN)
+  // Ensures we never render strings like "Infinity%" in the UI
+  if (!Number.isFinite(value)) {
+    return "0"
+  }
+
   // Custom compact suffix for K/M when notation is standard
   if (notation === "standard") {
     const abs = Math.abs(value)
