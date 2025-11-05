@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
+import { useLogin } from "@privy-io/react-auth"
+import { signIn } from "next-auth/react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { useAppDialogs } from "@/providers/DialogProvider"
@@ -31,10 +34,13 @@ export type RegistrationCardState =
     type: "registration-blocked"
     message: string
   }
+  | {
+    type: "sign-in"
+  }
 
 type Props = {
   state: RegistrationCardState
-  userId: string
+  userId: string | null
   season: SeasonWithConfig
 }
 
@@ -42,21 +48,35 @@ export function RegistrationCard({ state, userId, season }: Props) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const { openDialog, setOpenDialog, setData } = useAppDialogs()
-  const { linkEmail } = usePrivyEmail(userId, {
+  const { linkEmail } = usePrivyEmail(userId ?? "", {
     onLinkSuccess: () => {
       // Refresh server component data to update the registration card state
       router.refresh()
     },
   })
 
+  const { login: privyLogin } = useLogin({
+    onComplete: () => {
+      router.refresh()
+    },
+    onError: (error) => {
+      toast.error("Unable to sign in. Please try again.")
+      console.error("Sign in error:", error)
+    },
+  })
+
   const invalidateUserQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY, userId] })
-    queryClient.invalidateQueries({ queryKey: [USER_ADDRESSES_QUERY_KEY, userId] })
-  }, [queryClient])
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY, userId] })
+      queryClient.invalidateQueries({ queryKey: [USER_ADDRESSES_QUERY_KEY, userId] })
+    }
+  }, [queryClient, userId])
 
   const hasInvalidatedRef = useRef(false)
 
   useEffect(() => {
+    if (!userId) return
+
     if (openDialog === "s9_registration") {
       if (typeof window !== "undefined") {
         window.sessionStorage.setItem(S9_REGISTRATION_DIALOG_STORAGE_KEY, "true")
@@ -88,6 +108,7 @@ export function RegistrationCard({ state, userId, season }: Props) {
         state,
         seasonName: season.name,
         openDialog: (ctaId) => {
+          if (!userId) return
           setData((prev) => ({
             ...prev,
             userId,
@@ -100,6 +121,7 @@ export function RegistrationCard({ state, userId, season }: Props) {
           setOpenDialog("s9_registration")
         },
         linkEmail,
+        privyLogin,
       })}
     </div>
   )
@@ -110,13 +132,32 @@ function renderContent({
   seasonName,
   openDialog,
   linkEmail,
+  privyLogin,
 }: {
   state: RegistrationCardState
   seasonName: string
   openDialog: (ctaId?: string) => void
   linkEmail: () => void
+  privyLogin: () => void
 }) {
   switch (state.type) {
+    case "sign-in":
+      return (
+        <>
+          <div className="flex flex-col gap-2 text-center w-full">
+            <div className="text-base font-semibold text-foreground">
+              Register for citizenship in {seasonName}
+            </div>
+          </div>
+          <Button
+            type="button"
+            className="w-full button-primary"
+            onClick={privyLogin}
+          >
+            Sign in
+          </Button>
+        </>
+      )
     case "register":
       return (
         <>

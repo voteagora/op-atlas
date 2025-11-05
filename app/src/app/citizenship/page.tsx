@@ -122,10 +122,6 @@ export default async function Page({
   const session = await auth()
   const userId = session?.user?.id
 
-  if (!userId) {
-    redirect("/")
-  }
-
   const season = await getActiveSeason()
 
   if (season?.id === "9") {
@@ -288,26 +284,22 @@ async function renderSeasonNinePage({
   season,
   searchParams,
 }: {
-  userId: string
+  userId: string | undefined
   season: SeasonWithConfig
   searchParams: Record<string, string | undefined>
 }) {
-  const user = await getUserById(userId)
+  const user = userId ? await getUserById(userId) : null
 
-  if (!user) {
-    redirect("/")
-  }
-
-  const citizenSeason = await getCitizenSeasonByUser({
+  const citizenSeason = user && userId ? await getCitizenSeasonByUser({
     seasonId: season.id,
     userId,
-  })
+  }) : null
 
-  const userWallets = user.addresses
+  const userWallets = user?.addresses
     .map((address) => address.address)
-    .filter((addr): addr is string => Boolean(addr))
+    .filter((addr): addr is string => Boolean(addr)) ?? []
   const normalizedUserWallets = userWallets.map((addr) => addr.toLowerCase())
-  const hasVerifiedEmail = user.emails.some((email) => email.verified)
+  const hasVerifiedEmail = user?.emails.some((email) => email.verified) ?? false
   const priorityWindow = isPriorityWindowOpen(season)
   const registrationStarted = hasRegistrationStarted(season)
   const registrationEnded = hasRegistrationEnded(season)
@@ -332,7 +324,7 @@ async function renderSeasonNinePage({
   }
 
   const [hasPriorityAccess, registeredCitizensCount, blockedEvaluation] = await Promise.all([
-    priorityWindow
+    priorityWindow && normalizedUserWallets.length > 0
       ? hasPriorityAttestation({
           seasonId: season.id,
           addresses: normalizedUserWallets,
@@ -344,10 +336,10 @@ async function renderSeasonNinePage({
           type: citizenCategory.USER,
         })
       : Promise.resolve(0),
-    findBlockedCitizenSeasonEvaluation({
+    userId ? findBlockedCitizenSeasonEvaluation({
       seasonId: season.id,
       userId,
-    }),
+    }) : Promise.resolve(null),
   ])
 
   const limitReached = season.userCitizenLimit
@@ -359,7 +351,7 @@ async function renderSeasonNinePage({
 
   let registeredCardContext: RegisteredCardContext | null = null
 
-  if (citizenSeason) {
+  if (citizenSeason && user) {
     registeredCardContext = {
       kind: "user",
       citizenSeasonId: citizenSeason.id,
@@ -423,6 +415,7 @@ async function renderSeasonNinePage({
       registrationOpen,
       limitReached,
       isBlocked,
+      isLoggedIn: Boolean(user),
     })
 
   const statusLabel = registrationOpen ? "Open" : "Closed"
@@ -481,21 +474,23 @@ async function renderSeasonNinePage({
                 </LinkBox>
               </div>
 
-              <div className="mt-12">
-                <SeasonNineTestControls
-                  userId={user.id}
-                  seasonId={season.id}
-                  hasBlockedEvaluation={isBlocked}
-                  searchParams={searchParams}
-                />
-              </div>
+              {user && (
+                <div className="mt-12">
+                  <SeasonNineTestControls
+                    userId={user.id}
+                    seasonId={season.id}
+                    hasBlockedEvaluation={isBlocked}
+                    searchParams={searchParams}
+                  />
+                </div>
+              )}
             </div>
           </div>
           <div className="w-full lg:w-[304px] flex-shrink-0">
             {registeredCardContext ? (
               <RegisteredCard seasonName={season.name} context={registeredCardContext} />
             ) : sidebarCardState ? (
-              <RegistrationCard state={sidebarCardState} userId={user.id} season={season} />
+              <RegistrationCard state={sidebarCardState} userId={user?.id ?? null} season={season} />
             ) : null}
           </div>
         </div>
@@ -1779,6 +1774,7 @@ function determineRegistrationCardState({
   registrationOpen,
   limitReached,
   isBlocked,
+  isLoggedIn,
 }: {
   season: SeasonWithConfig
   citizenSeason: S9CitizenSeason | null
@@ -1790,9 +1786,17 @@ function determineRegistrationCardState({
   registrationOpen: boolean
   limitReached: boolean
   isBlocked: boolean
+  isLoggedIn: boolean
 }): RegistrationCardState | null {
   if (citizenSeason) {
     return null
+  }
+
+  // If user is not logged in, show sign-in state
+  if (!isLoggedIn) {
+    return {
+      type: "sign-in",
+    }
   }
 
   if (!registrationStarted) {
