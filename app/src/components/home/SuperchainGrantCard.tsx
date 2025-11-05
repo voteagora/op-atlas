@@ -34,8 +34,8 @@ export const SuperchainGrantCard = ({
     >
       {/* Chain Badge */}
       <div className="absolute top-8 right-7">
-        <div className="bg-secondary px-2 py-1 rounded-full">
-          <span className="text-xs font-normal text-secondary-foreground">
+        <div className="bg-secondary px-2.5 py-1 rounded-full">
+          <span className="text-sm font-normal text-secondary-foreground leading-[20px] flex text-center">
             {grant.chain}
           </span>
         </div>
