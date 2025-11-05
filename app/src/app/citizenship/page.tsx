@@ -132,6 +132,10 @@ export default async function Page({
     })
   }
 
+  if (!userId) {
+    redirect("/")
+  }
+
   const [user, citizen, qualification, isCitizenshipLimitReached] =
     await Promise.all([
       getUserById(userId),
