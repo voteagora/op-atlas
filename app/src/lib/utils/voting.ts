@@ -190,13 +190,10 @@ const getCitizenTypes = (proposalData: ProposalData, vote?: VoteType) => {
           : "This decision stands"
       return votingEnded(new Date(proposalData.endTime), statusText)
     }
-    const statusText =
-      proposalData.status === ProposalStatus.DEFEATED
-        ? `been ${proposalData.status}`
-        : `${proposalData.status}`
+    // For standard and other proposal types
     return votingEnded(
       new Date(proposalData.endTime),
-      `This proposal has ${statusText}`,
+      "This proposal has ended",
     )
   } else {
     return comingSoon(proposalData)
@@ -242,6 +239,27 @@ export const getVotingCardProps = (
   }
 
   if (!isCitizen) {
+    // Check if proposal has ended - show ended state for all proposal types
+    if (new Date(proposalData.endTime) < new Date()) {
+      // Special text for optimistic / override proposals that have ended
+      if (
+        proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
+        proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||
+        proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC_TIERED
+      ) {
+        const statusText =
+          proposalData.status === ProposalStatus.DEFEATED
+            ? "This decision was vetoed"
+            : "This decision stands"
+        return votingEnded(new Date(proposalData.endTime), statusText)
+      }
+      // For standard and other proposal types
+      return votingEnded(
+        new Date(proposalData.endTime),
+        "This proposal has ended",
+      )
+    }
+
     if (
       proposalData.proposalType === ProposalType.OFFCHAIN_OPTIMISTIC ||
       proposalData.proposalType === ProposalType.HYBRID_OPTIMISTIC_TIERED ||

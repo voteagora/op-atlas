@@ -133,6 +133,18 @@ const ProposalStatusBadge = ({ type }: ProposalStatusBadgeProps) => {
           icon: <XCircle width={12} height={12} />,
           text: "Failed",
         }
+      case ProposalStatus.DEFEATED:
+        return {
+          classes: "bg-red-100 text-red-800",
+          icon: <XCircle width={12} height={12} />,
+          text: "DEFEATED",
+        }
+      case ProposalStatus.SUCCEEDED:
+        return {
+          classes: "bg-green-100 text-green-800",
+          icon: <CheckCircle width={12} height={12} />,
+          text: "SUCCEEDED",
+        }
       default:
         return {
           classes: "bg-gray-100 text-gray-600",
