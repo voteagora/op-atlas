@@ -19,6 +19,7 @@ import {
   ProposalType,
   VoteType,
 } from "@/components/proposals/proposal.types"
+import { ProposalStatusBadge } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
@@ -940,6 +941,15 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           )}
 
         <div className="w-full flex flex-col gap-2 items-center justify-center">
+          {new Date(proposalData.endTime) < new Date() &&
+            (proposalData.status === ProposalStatus.DEFEATED ||
+              proposalData.status === ProposalStatus.SUCCEEDED ||
+              proposalData.status === ProposalStatus.EXECUTED ||
+              proposalData.status === ProposalStatus.QUEUED ||
+              proposalData.status === ProposalStatus.FAILED ||
+              proposalData.status === ProposalStatus.CANCELLED) && (
+              <ProposalStatusBadge type={proposalData.status} />
+            )}
           <a href={getAgoraProposalLink(proposalData.id)} target="_blank">
             <p className="text-sm text-center underline text-secondary-foreground hover:text-foreground/80 transition-colors duration-200">
               View results
