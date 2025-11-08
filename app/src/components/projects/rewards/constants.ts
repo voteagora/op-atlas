@@ -24,4 +24,25 @@ export const REWARDS_NAMES = {
     date: "Feb 12 - Dec 31, 2025",
     endDate: "Dec 31, 2025",
   },
+  // Season-specific entries for rounds 7 & 8
+  "7-7": {
+    name: "S7 Dev Tooling",
+    date: "Feb 4 - Jul 31, 2025",
+    endDate: "Jul 31, 2025",
+  },
+  "7-8": {
+    name: "S8 Dev Tooling",
+    date: "Aug 1 - Dec 31, 2025",
+    endDate: "Dec 31, 2025",
+  },
+  "8-7": {
+    name: "S7 Onchain Builders",
+    date: "Feb 12 - Jul 31, 2025",
+    endDate: "Jul 31, 2025",
+  },
+  "8-8": {
+    name: "S8 Onchain Builders",
+    date: "Aug 1 - Dec 31, 2025",
+    endDate: "Dec 31, 2025",
+  },
 }
