@@ -2403,7 +2403,12 @@ export async function getProjectOSOData(projectId: string) {
         amount: true,
         tranche: true,
       },
-    }),
+    }).then(rewards =>
+      rewards.map(r => ({
+        ...r,
+        amount: r.amount.toString(), // Convert Decimal to string
+      }))
+    ),
   ])
 
   return {

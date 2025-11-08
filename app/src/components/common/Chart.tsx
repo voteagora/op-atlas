@@ -16,7 +16,9 @@ type ChartData = Record<
 export default function Chart({ data }: { data: ChartData }) {
   const formattedData: ChartEntry[] = Object.entries(data)
     .map(([dateStr, { value }]) => {
-      const date = new Date(dateStr)
+      // Parse date as local time to avoid timezone issues
+      const [year, month, day] = dateStr.split('-').map(Number)
+      const date = new Date(year, month - 1, day)
       return {
         date,
         value,
