@@ -80,7 +80,7 @@ const VerifiedBadge = () => {
   return (
     <div title="Identity verified" className="cursor-default">
       <img
-        src="https://cdn.jsdelivr.net/npm/remixicon/icons/User/user-follow-fill.svg"
+        src="/assets/icons/verified-badge.svg"
         alt="verified"
         className="w-[20px] h-[20px]"
       />

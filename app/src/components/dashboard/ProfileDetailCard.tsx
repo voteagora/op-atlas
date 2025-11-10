@@ -144,7 +144,7 @@ const ProfileDetailCard = ({
                 text={
                   <span className="flex items-center gap-1">
                     <img
-                      src="https://cdn.jsdelivr.net/npm/remixicon/icons/User/user-follow-fill.svg"
+                      src="/assets/icons/verified-badge.svg"
                       alt="verified"
                       className="w-[12px] h-[12px]"
                     />
