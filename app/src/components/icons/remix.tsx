@@ -488,6 +488,36 @@ export const UserFill = ({
   )
 }
 
+export const UserFollowFill = ({
+  className,
+  fill = "#000",
+}: {
+  className?: string
+  fill?: string
+}) => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Base user silhouette (filled) */}
+      <path
+        fill={fill}
+        d="M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13Z"
+      ></path>
+      {/* Check mark overlay (filled, no circle), positioned near right shoulder */}
+      <path
+        fill={fill}
+        transform="translate(14.2,11.4) scale(0.38)"
+        d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z"
+      ></path>
+    </svg>
+  )
+}
+
 export const AddFill = ({
   className,
   fill = "#404454",
