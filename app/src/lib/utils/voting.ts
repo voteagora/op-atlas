@@ -30,7 +30,7 @@ const defaultCardText = (proposalData?: ProposalData) => {
           cardText: {
             title: "Cast your citizen vote",
             descriptionElement:
-              "This proposal will automatically pass unless the Token House and Citizens' House choose to veto it.",
+              'This proposal automatically passes unless vetoed. "For" and "abstain" votes are ignored (UX only). Requires 12% TH opposition or CH tier thresholds. No transactions allowed - social signaling only.',
           },
         }
       default:
@@ -110,7 +110,7 @@ const castYourVote = (proposalType: ProposalType, customTitle?: string) => {
       case ProposalType.OFFCHAIN_OPTIMISTIC:
       case ProposalType.OFFCHAIN_OPTIMISTIC_TIERED:
       case ProposalType.HYBRID_OPTIMISTIC_TIERED:
-        return "This proposal will automatically pass unless the Token House and Citizens’ House choose to veto it."
+        return 'This proposal automatically passes unless vetoed. "For" and "abstain" votes are ignored (UX only). Requires 12% TH opposition or CH tier thresholds. No transactions allowed - social signaling only.'
       default:
         return ""
     }
@@ -138,7 +138,7 @@ const wantToVote = (eligibility: CitizenshipQualification | null) => {
       cardText: {
         ...cardText,
         descriptionElement:
-          "The Citizens' House votes on decisions that shape the direction of the Collective.",
+          "The Citizens’ House votes on decisions that shape the direction of the Collective.",
       },
     }
   } else {
