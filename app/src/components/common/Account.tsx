@@ -17,7 +17,6 @@ import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { UserAvatar } from "@/components/common/UserAvatar"
-import { isTestMode } from "@/lib/auth/testMode"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +29,8 @@ import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { useWallet } from "@/hooks/useWallet"
+import { linkExistingKYCForEmail } from "@/lib/actions/userKyc"
+import { isTestMode } from "@/lib/auth/testMode"
 import { AUTH_STATUS, LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
 import { useIsBadgeholder, usePrevious } from "@/lib/hooks"
 import {
@@ -43,21 +44,18 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { safeService } from "@/services/SafeService"
 
-// EOA Wallet Menu Item Component
 type EOAWalletMenuItemProps = {
   currentContext: string
   signerWallet: any
   switchToEOA: () => void
 }
 
-// Profile Menu Item Component
 type ProfileMenuItemProps = {
   href: string
   label: string
   currentContext: string
 }
 
-// Profile Menu Item Component
 const ProfileMenuItem = ({
   href,
   label,
@@ -116,7 +114,6 @@ const EOAWalletMenuItem = ({
   )
 }
 
-// Safe Wallets Menu Items Component
 type SafeWalletsMenuItemsProps = {
   availableSafeWallets: any[]
   selectedSafeWallet: any
@@ -314,6 +311,12 @@ const AccountContent = () => {
           isLinking.current = true
         } else {
           checkBadgeholderStatus()
+          // Background check to link existing KYC by email (no new KYC creation)
+          linkExistingKYCForEmail(privyUser.email.address).then((res) => {
+            if (res?.success) {
+              router.refresh()
+            }
+          })
         }
       } else {
         track("Profile created", {
@@ -476,7 +479,7 @@ export const Account = () => {
   if (isTestMode()) {
     return <TestModeAccount />
   }
-  
+
   // In production mode, render the full component with Privy hooks
   return <AccountContent />
 }
@@ -575,6 +578,15 @@ const TestModeAccount = () => {
           elementName: "Profile Creation",
         })
       }
+      // In test mode, also attempt background link with a generic email if present
+      const email = user?.emails?.[0]?.email as string | undefined
+      if (email) {
+        linkExistingKYCForEmail(email).then((res) => {
+          if (res?.success) {
+            router.refresh()
+          }
+        })
+      }
     }
   }, [
     authStatus,
@@ -585,6 +597,8 @@ const TestModeAccount = () => {
     router,
     setOpenDialog,
     checkBadgeholderStatus,
+    didLogIn,
+    user?.emails,
   ])
 
   if (session) {
