@@ -1,10 +1,17 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
+
 import { auth } from "@/auth"
 import { prisma } from "@/db/client"
-import { getUserKYCUser, createUserKYCUser, getUserPersonalKYC } from "@/db/userKyc"
+import {
+  createUserKYCUser,
+  getUserKYCUser,
+  getUserPersonalKYC,
+  linkOrphanedKYCUserToUser,
+} from "@/db/userKyc"
+
 import { sendKYCStartedEmail } from "./emails"
-import { revalidatePath } from "next/cache"
 
 export interface CreateUserKYCParams {
   firstName?: string
@@ -18,7 +25,9 @@ export interface UserKYCStatus {
   kycUser?: any
 }
 
-export async function getUserKYCStatus(userId?: string): Promise<UserKYCStatus> {
+export async function getUserKYCStatus(
+  userId?: string,
+): Promise<UserKYCStatus> {
   if (!userId) {
     const session = await auth()
     userId = session?.user?.id
@@ -32,7 +41,7 @@ export async function getUserKYCStatus(userId?: string): Promise<UserKYCStatus> 
 
   return {
     hasValidKYC: !!userKycUser,
-    hasApprovedKYC: !!userKycUser && userKycUser.kycUser?.status === 'APPROVED',
+    hasApprovedKYC: !!userKycUser && userKycUser.kycUser?.status === "APPROVED",
     kycUser: userKycUser?.kycUser || null,
   }
 }
@@ -54,7 +63,10 @@ export async function createUserKYC(params: CreateUserKYCParams) {
 
   // If firstName or lastName are provided, both must be provided
   if ((firstName && !lastName) || (!firstName && lastName)) {
-    return { error: "Both first name and last name are required when providing name information" }
+    return {
+      error:
+        "Both first name and last name are required when providing name information",
+    }
   }
 
   // If firstName and lastName are provided, validate them
@@ -72,7 +84,10 @@ export async function createUserKYC(params: CreateUserKYCParams) {
     // Check if user already has a valid KYC
     const existingUserKyc = await getUserKYCUser(userId)
     if (existingUserKyc) {
-      return { error: "You already have an active KYC verification. Please check your status." }
+      return {
+        error:
+          "You already have an active KYC verification. Please check your status.",
+      }
     }
 
     // Check if email is already used for an active KYC
@@ -115,10 +130,10 @@ export async function createUserKYC(params: CreateUserKYCParams) {
             KYCUserTeams: true,
             UserKYCUsers: {
               include: {
-                user: true
-              }
-            }
-          }
+                user: true,
+              },
+            },
+          },
         })
 
         if (kycUserWithRelations) {
@@ -142,9 +157,8 @@ export async function createUserKYC(params: CreateUserKYCParams) {
       isNewUser,
       message: isNewUser
         ? "A message from compliance@optimism.io has been sent to [email@email.com]. Please complete KYC via the link provided and allow 48 hours for your status to update."
-        : "KYC verification successfully found for this email!"
+        : "KYC verification successfully found for this email!",
     }
-
   } catch (error) {
     console.error("Error creating user KYC:", error)
     return { error: "Failed to start KYC verification. Please try again." }
@@ -195,9 +209,14 @@ export async function deletePersonalKYC(kycUserId: string) {
     const kycUser = userKycUser.kycUser
 
     // Security check: Don't allow deletion of approved KYC unless expired
-    if (kycUser.status === "APPROVED" && kycUser.expiry && kycUser.expiry > new Date()) {
+    if (
+      kycUser.status === "APPROVED" &&
+      kycUser.expiry &&
+      kycUser.expiry > new Date()
+    ) {
       return {
-        error: "Cannot delete an active approved verification. Please contact support if you need assistance."
+        error:
+          "Cannot delete an active approved verification. Please contact support if you need assistance.",
       }
     }
 
@@ -217,7 +236,10 @@ export async function deletePersonalKYC(kycUserId: string) {
       })
 
       // If this KYCUser is only connected to this user and no teams, we can safely delete it
-      if (kycUserConnections.length === 1 && kycUserTeamConnections.length === 0) {
+      if (
+        kycUserConnections.length === 1 &&
+        kycUserTeamConnections.length === 0
+      ) {
         // Delete the UserKYCUser relationship first
         await tx.userKYCUser.delete({
           where: {
@@ -247,9 +269,9 @@ export async function deletePersonalKYC(kycUserId: string) {
 
     return {
       success: true,
-      message: "KYC verification deleted successfully. You can now start the process again."
+      message:
+        "KYC verification deleted successfully. You can now start the process again.",
     }
-
   } catch (error) {
     console.error("Error deleting personal KYC:", error)
     return { error: "Failed to delete KYC verification. Please try again." }
@@ -290,7 +312,6 @@ export async function validateOrphanedKYCEmail(email: string) {
     }
   }
 }
-
 
 export async function linkKYCToUser(verificationToken: string) {
   try {
@@ -435,33 +456,28 @@ export async function linkExistingKYCForEmail(email: string) {
   }
 
   try {
-    // If user already has a KYC, nothing to do
-    const existingUserKyc = await getUserKYCUser(userId)
-    if (existingUserKyc) {
+    const result = await linkOrphanedKYCUserToUser(userId, normalizedEmail)
+
+    if (result.linked) {
+      revalidatePath("/dashboard")
+      revalidatePath("/profile/details")
+      return { success: true, linked: true }
+    }
+
+    if (result.reason === "already-linked") {
       return { success: false, alreadyLinked: true }
     }
-
-    // Look for an orphaned, non-expired KYC for this email
-    const orphanedKYC = await prisma.kYCUser.findFirst({
-      where: {
-        email: normalizedEmail,
-        expiry: { gt: new Date() },
-        UserKYCUsers: { none: {} },
-      },
-    })
-
-    if (!orphanedKYC) {
+    if (result.reason === "not-found") {
       return { success: false, notFound: true }
     }
+    if (result.reason === "invalid-email") {
+      return { success: false, error: "Email invalid" }
+    }
+    if (result.reason === "no-user") {
+      return { success: false, error: "Unauthorized" }
+    }
 
-    // Link it to the current user
-    await createUserKYCUser(userId, orphanedKYC.id)
-
-    // Revalidate pages that show KYC status
-    revalidatePath("/dashboard")
-    revalidatePath("/profile/details")
-
-    return { success: true, linked: true }
+    return { success: false, error: "Failed to link KYC" }
   } catch (error) {
     return { success: false, error: "Failed to link KYC" }
   }
