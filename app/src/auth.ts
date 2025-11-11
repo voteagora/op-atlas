@@ -6,6 +6,23 @@ import {
   type SignedImpersonationSession,
 } from "@/lib/auth/impersonationSession"
 
+function isSignedImpersonationSession(
+  value: unknown,
+): value is SignedImpersonationSession {
+  if (!value || typeof value !== "object") {
+    return false
+  }
+  const session = value as Partial<SignedImpersonationSession>
+  return (
+    typeof session.isActive === "boolean" &&
+    typeof session.adminUserId === "string" &&
+    typeof session.adminAddress === "string" &&
+    typeof session.targetUserId === "string" &&
+    typeof session.targetUserName === "string" &&
+    typeof session.startedAt === "string"
+  )
+}
+
 if (!process.env.NEXT_PUBLIC_VERCEL_URL) {
   throw new Error("Please define NEXT_PUBLIC_VERCEL_URL in .env")
 }
@@ -68,16 +85,17 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
 
       const adminId = token.id as string | undefined
-      const impersonation = token.impersonation
-      if (impersonation) {
-        if (
-          !isSignedImpersonationSessionValid(impersonation, {
-            currentAdminUserId: adminId,
-          })
-        ) {
-          token.impersonation = undefined
-        }
-      } else {
+      const impersonation = isSignedImpersonationSession(token.impersonation)
+        ? token.impersonation
+        : null
+      if (
+        impersonation &&
+        !isSignedImpersonationSessionValid(impersonation, {
+          currentAdminUserId: adminId,
+        })
+      ) {
+        token.impersonation = undefined
+      } else if (!impersonation) {
         token.impersonation = undefined
       }
 
@@ -90,7 +108,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       session.user.farcasterId = token.farcasterId
 
       // Include impersonation metadata in session
-      const tokenImpersonation = token.impersonation
+      const tokenImpersonation = isSignedImpersonationSession(
+        token.impersonation,
+      )
+        ? token.impersonation
+        : null
       if (
         tokenImpersonation &&
         isSignedImpersonationSessionValid(tokenImpersonation, {
