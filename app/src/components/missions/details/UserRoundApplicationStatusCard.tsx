@@ -41,5 +41,7 @@ export const UserRoundApplicationStatusCard = ({
 
 export const SessionRoundApplicationStatusCard = () => {
   const session = useSession()
-  return <UserRoundApplicationStatusCard userId={session?.data?.user.id} />
+  const viewerId =
+    session.data?.impersonation?.targetUserId ?? session.data?.user?.id
+  return <UserRoundApplicationStatusCard userId={viewerId} />
 }

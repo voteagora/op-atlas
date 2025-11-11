@@ -1,7 +1,6 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
-import Image from "next/image"
 import { X } from "lucide-react"
 
 import { Button } from "@/components/common/Button"
@@ -12,22 +11,90 @@ import { cn } from "@/lib/utils"
 
 import { Github } from "../icons/socials"
 
+type HookedUser = ReturnType<typeof useUser>["user"]
+
+type GithubConnectionProps = {
+  userId: string
+  hideNotDeveloperToggle?: boolean
+  readOnly?: boolean
+}
+
 export const GithubConnection = ({
   userId,
   hideNotDeveloperToggle,
-}: {
-  userId: string
-  hideNotDeveloperToggle?: boolean
-}) => {
-  const { user: privyUser } = usePrivy()
+  readOnly = false,
+}: GithubConnectionProps) => {
   const { user } = useUser({
     id: userId,
     enabled: true,
   })
+  const { user: privyUser } = usePrivy()
 
-  const { linkGithub, unlinkGithub, toggleIsDeveloper } =
-    usePrivyLinkGithub(userId)
+  if (readOnly) {
+    return (
+      <GithubConnectionReadOnly
+        user={user}
+        hideNotDeveloperToggle={hideNotDeveloperToggle}
+      />
+    )
+  }
 
+  return (
+    <GithubConnectionInteractive
+      userId={userId}
+      user={user}
+      privyUser={privyUser}
+      hideNotDeveloperToggle={hideNotDeveloperToggle}
+    />
+  )
+}
+
+const GithubConnectionReadOnly = ({
+  user,
+  hideNotDeveloperToggle,
+}: {
+  user: HookedUser
+  hideNotDeveloperToggle?: boolean
+}) => {
+  const username = user?.github
+  return (
+    <div className="flex flex-row gap-2 items-center">
+      <div className="flex flex-row gap-2 min-w-0 flex-1 input-container text-foreground">
+        {username ? (
+          <>
+            <Github className="w-4 h-4 mr-1" />
+            <span className="text-sm break-all">@{username}</span>
+          </>
+        ) : (
+          <span className="text-sm text-muted-foreground">
+            GitHub not connected.
+          </span>
+        )}
+      </div>
+      <Button variant="secondary" disabled>
+        Unavailable while impersonating
+      </Button>
+      {!hideNotDeveloperToggle && username && (
+        <span className="text-xs text-muted-foreground">
+          Connection read-only
+        </span>
+      )}
+    </div>
+  )
+}
+
+const GithubConnectionInteractive = ({
+  userId,
+  user,
+  privyUser,
+  hideNotDeveloperToggle,
+}: {
+  userId: string
+  user: HookedUser
+  privyUser: ReturnType<typeof usePrivy>["user"]
+  hideNotDeveloperToggle?: boolean
+}) => {
+  const { linkGithub, unlinkGithub } = usePrivyLinkGithub(userId)
   const username = user?.github || privyUser?.github?.username
   const isSyncing =
     user?.github?.toLowerCase() !== privyUser?.github?.username?.toLowerCase()
@@ -74,6 +141,11 @@ export const GithubConnection = ({
 }
 
 export const GithubNotDeveloperToggle = ({ userId }: { userId: string }) => {
+  const { data: session } = useSession()
+  if (session?.impersonation?.isActive) {
+    return null
+  }
+
   const { user } = useUser({ id: userId, enabled: true })
   const { user: privyUser } = usePrivy()
   const { toggleIsDeveloper } = usePrivyLinkGithub(userId)

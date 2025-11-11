@@ -1,6 +1,9 @@
+'use client'
+
 import { User } from "@prisma/client"
 import { ArrowUpRight, Check, X } from "lucide-react"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
@@ -31,6 +34,10 @@ export function CompleteProfileCallout({
   user: UserWithAddresses
   setIsCompleteProfileAccordionDismissed: (dismissed: boolean) => void
 }) {
+  const { data: session } = useSession()
+  if (session?.impersonation?.isActive) {
+    return null
+  }
   const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
   const user = loadedUser || initialUser
 

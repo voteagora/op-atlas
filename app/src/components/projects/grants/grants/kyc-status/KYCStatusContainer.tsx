@@ -425,23 +425,14 @@ const KYCStatusPresenter = ({
                 <p className="font-riforma text-[14px] font-[400] leading-[20px] text-center">
                   Is something missing or incorrect?
                 </p>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault()
-                      openDeleteKYCTeamDialog()
-                    }
-                  }}
+                <button
+                  type="button"
                   onClick={openDeleteKYCTeamDialog}
                   aria-label="Start KYC process over"
-                  className="cursor-pointer"
+                  className="underline font-riforma text-[14px] font-[400] leading-[20px] text-center cursor-pointer"
                 >
-                  <p className="underline font-riforma text-[14px] font-[400] leading-[20px] text-center">
-                    Start over
-                  </p>
-                </span>
+                  Start over
+                </button>
               </div>
             )}
           </>

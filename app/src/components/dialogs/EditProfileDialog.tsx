@@ -20,6 +20,10 @@ import { DialogProps } from "./types"
 function EditProfileDialog({ open, onOpenChange }: DialogProps<object>) {
   const { setOpenDialog } = useAppDialogs()
   const { data: session } = useSession()
+  const viewerName =
+    session?.impersonation?.targetUserName ?? session?.user?.name ?? ""
+  const viewerImage =
+    session?.impersonation?.targetUserImage ?? session?.user?.image ?? ""
 
   const onClickEditEmail = () => {
     setOpenDialog("email")
@@ -30,8 +34,8 @@ function EditProfileDialog({ open, onOpenChange }: DialogProps<object>) {
       <DialogContent className="flex flex-col items-center gap-y-6 sm:max-w-md">
         <DialogHeader className="flex flex-col items-center gap-4">
           <Avatar className="!w-20 !h-20">
-            <AvatarImage src={session?.user?.image || ""} alt="avatar" />
-            <AvatarFallback>{session?.user?.name}</AvatarFallback>
+            <AvatarImage src={viewerImage} alt="avatar" />
+            <AvatarFallback>{viewerName}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-1">
             <DialogTitle className="text-center text-lg font-normal text-text-default">
