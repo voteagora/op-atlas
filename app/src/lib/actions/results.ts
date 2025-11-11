@@ -1,6 +1,7 @@
 "use server"
 
-import { getFundingRewardsByRoundIdsAndSearch } from "@/db/rewards"
+import { getFundingRewardsByRoundIdsAndSearchWithClient } from "@/db/rewards"
+import { withSessionDb } from "@/lib/db/sessionContext"
 
 export const findFundingRewards = async ({
   roundIds,
@@ -14,24 +15,29 @@ export const findFundingRewards = async ({
   sortBy: "asc" | "desc"
   page: number
   pageSize: number
-}) => {
-  try {
-    const fundingRewardsData = await getFundingRewardsByRoundIdsAndSearch({
-      roundIds,
-      search,
-      sortBy,
-      page,
-      pageSize,
-    })
+}) =>
+  withSessionDb(async ({ db }) => {
+    try {
+      const fundingRewardsData =
+        await getFundingRewardsByRoundIdsAndSearchWithClient(
+          {
+            roundIds,
+            search,
+            sortBy,
+            page,
+            pageSize,
+          },
+          db,
+        )
 
-    return {
-      error: null,
-      fundingRewards: fundingRewardsData ?? null,
+      return {
+        error: null,
+        fundingRewards: fundingRewardsData ?? null,
+      }
+    } catch (error: unknown) {
+      console.error("Error fetching funding rewards", (error as Error).message)
+      return {
+        error: "Error fetching funding rewards",
+      }
     }
-  } catch (error: unknown) {
-    console.error("Error fetching funding rewards", (error as Error).message)
-    return {
-      error: "Error fetching funding rewards",
-    }
-  }
-}
+  })

@@ -1,7 +1,7 @@
-import { auth } from "@/auth"
+import { prisma as defaultPrisma } from "../../db/client"
 import { Prisma, PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { Session } from "next-auth"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 type TransactionOptions = {
   maxWait?: number
@@ -9,26 +9,20 @@ type TransactionOptions = {
   isolationLevel?: Prisma.TransactionIsolationLevel
 }
 
+type ChangelogContext = {
+  db?: PrismaClient
+  session?: Session | null
+}
+
 export async function withChangelogTracking<T>(
-  run: (
-    tx: Omit<
-      PrismaClient,
-      | "$connect"
-      | "$disconnect"
-      | "$use"
-      | "$on"
-      | "$extends"
-      | "$transaction"
-      | "$runCommandRaw"
-      | "$queryRaw"
-      | "$queryRawUnsafe"
-      | "$executeRawUnsafe"
-    > & { $executeRaw: typeof prisma.$executeRaw },
-  ) => Promise<T>,
+  run: (tx: Prisma.TransactionClient) => Promise<T>,
   options?: TransactionOptions,
+  context: ChangelogContext = {},
 ): Promise<T> {
-  const session = await auth()
-  const userId = session?.user?.id
+  const client = context.db ?? defaultPrisma
+  const { session, userId } = await withImpersonation({
+    session: context.session,
+  })
   const runWithTracking = async (tx: Prisma.TransactionClient) => {
     if (userId) {
       try {
@@ -39,8 +33,8 @@ export async function withChangelogTracking<T>(
   }
 
   if (options) {
-    return prisma.$transaction(runWithTracking, options)
+    return client.$transaction(runWithTracking, options)
   }
 
-  return prisma.$transaction(runWithTracking)
+  return client.$transaction(runWithTracking)
 }

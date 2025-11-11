@@ -1,9 +1,15 @@
 import {
   getUserOrganizationsWithDetails,
+  getUserOrganizationsWithDetailsWithClient,
   getUserProjectOrganizations,
+  getUserProjectOrganizationsWithClient,
   isUserAdminOfOrganization,
 } from "@/db/organizations"
-import { getUserProjects } from "@/db/projects"
+import {
+  getUserProjects,
+  getUserProjectsWithClient,
+} from "@/db/projects"
+import type { PrismaClient } from "@prisma/client"
 
 import { ProjectWithDetails } from "../types"
 
@@ -45,10 +51,25 @@ export const projectMembers = (project: ProjectWithDetails) => {
   ]
 }
 
-export const verifyMembership = async (projectId: string, userId: string) => {
+export type MembershipError =
+  | null
+  | {
+      error: string
+      context: "project" | "organization" | "both"
+    }
+
+export const verifyMembership = async (
+  projectId: string,
+  userId: string,
+  db?: PrismaClient,
+): Promise<MembershipError> => {
   const [projects, userProjectOrganizations] = await Promise.all([
-    getUserProjects({ userId }),
-    getUserProjectOrganizations(userId, projectId),
+    db
+      ? getUserProjectsWithClient({ userId }, db)
+      : getUserProjects({ userId }),
+    db
+      ? getUserProjectOrganizationsWithClient(userId, projectId, db)
+      : getUserProjectOrganizations(userId, projectId),
   ])
   const projectMembership = projects?.projects.find(
     ({ project }) => project.id === projectId,
@@ -61,16 +82,25 @@ export const verifyMembership = async (projectId: string, userId: string) => {
   if (!organizationMembership && !projectMembership) {
     return {
       error: "Unauthorized",
+      context: "both",
     }
   }
 
   return null
 }
 
-export const verifyAdminStatus = async (projectId: string, userId: string) => {
+export const verifyAdminStatus = async (
+  projectId: string,
+  userId: string,
+  db?: PrismaClient,
+) => {
   const [projects, userProjectOrganizations] = await Promise.all([
-    getUserProjects({ userId }),
-    getUserProjectOrganizations(userId, projectId),
+    db
+      ? getUserProjectsWithClient({ userId }, db)
+      : getUserProjects({ userId }),
+    db
+      ? getUserProjectOrganizationsWithClient(userId, projectId, db)
+      : getUserProjectOrganizations(userId, projectId),
   ])
   const projectMembership = projects?.projects.find(
     (item) => item.project.id === projectId,
@@ -80,12 +110,19 @@ export const verifyAdminStatus = async (projectId: string, userId: string) => {
     (item) => item.organization.projects.length > 0,
   )
 
-  if (
-    projectMembership?.role !== "admin" &&
-    organizationMembership?.role !== "admin"
-  ) {
+  const isProjectAdmin = projectMembership?.role === "admin"
+  const isOrganizationAdmin = organizationMembership?.role === "admin"
+
+  if (!isProjectAdmin && !isOrganizationAdmin) {
+    let context: "project" | "organization" | "both" = "both"
+    if (projectMembership && !organizationMembership) {
+      context = "project"
+    } else if (!projectMembership && organizationMembership) {
+      context = "organization"
+    }
     return {
       error: "Unauthorized",
+      context,
     }
   }
 
@@ -95,8 +132,11 @@ export const verifyAdminStatus = async (projectId: string, userId: string) => {
 export const verifyOrganizationMembership = async (
   organizationId: string,
   userId: string,
+  db?: PrismaClient,
 ) => {
-  const userOrganization = await getUserOrganizationsWithDetails(userId)
+  const userOrganization = db
+    ? await getUserOrganizationsWithDetailsWithClient(userId, db)
+    : await getUserOrganizationsWithDetails(userId)
   const membership = userOrganization?.organizations.find(
     ({ organization }) => organization.id === organizationId,
   )
@@ -112,8 +152,9 @@ export const verifyOrganizationMembership = async (
 export const verifyOrganizationAdmin = async (
   organizationId: string,
   userId: string,
+  db?: PrismaClient,
 ) => {
-  const isAdmin = await isUserAdminOfOrganization(userId, organizationId)
+  const isAdmin = await isUserAdminOfOrganization(userId, organizationId, db)
 
   if (!isAdmin) {
     return {
@@ -124,10 +165,18 @@ export const verifyOrganizationAdmin = async (
   return null
 }
 
-export const getUserProjectRole = async (projectId: string, userId: string): Promise<'admin' | 'member' | null> => {
+export const getUserProjectRole = async (
+  projectId: string,
+  userId: string,
+  db?: PrismaClient,
+): Promise<"admin" | "member" | null> => {
   const [projects, userProjectOrganizations] = await Promise.all([
-    getUserProjects({ userId }),
-    getUserProjectOrganizations(userId, projectId),
+    db
+      ? getUserProjectsWithClient({ userId }, db)
+      : getUserProjects({ userId }),
+    db
+      ? getUserProjectOrganizationsWithClient(userId, projectId, db)
+      : getUserProjectOrganizations(userId, projectId),
   ])
 
   // Check direct project membership
@@ -152,8 +201,14 @@ export const getUserProjectRole = async (projectId: string, userId: string): Pro
   return null
 }
 
-export const getUserOrganizationRole = async (organizationId: string, userId: string): Promise<'admin' | 'member' | null> => {
-  const userOrganization = await getUserOrganizationsWithDetails(userId)
+export const getUserOrganizationRole = async (
+  organizationId: string,
+  userId: string,
+  db?: PrismaClient,
+): Promise<"admin" | "member" | null> => {
+  const userOrganization = db
+    ? await getUserOrganizationsWithDetailsWithClient(userId, db)
+    : await getUserOrganizationsWithDetails(userId)
   const membership = userOrganization?.organizations.find(
     ({ organization }) => organization.id === organizationId,
   )

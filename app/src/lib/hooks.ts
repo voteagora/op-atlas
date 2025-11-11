@@ -12,24 +12,32 @@ import {
 
 export function useIsAdmin(team: ProjectTeam) {
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.isActive && session?.impersonation?.targetUserId
+      ? session.impersonation.targetUserId
+      : session?.user?.id
 
   return (
     team &&
     session &&
     team.find(
-      (member) => member.user.id === session.user.id && member.role === "admin",
+      (member) => member.user.id === viewerId && member.role === "admin",
     )
   )
 }
 
 export function useIsOrganizationAdmin(organization?: OrganizationWithDetails) {
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.isActive && session?.impersonation?.targetUserId
+      ? session.impersonation.targetUserId
+      : session?.user?.id
 
   return (
     organization &&
     session &&
     organization.team.find(
-      (member) => member.userId === session.user.id && member.role === "admin",
+      (member) => member.userId === viewerId && member.role === "admin",
     )
   )
 }

@@ -3,7 +3,6 @@
 import { Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/auth"
 import {
   addProjectRepository,
   removeProjectRepository,
@@ -12,6 +11,7 @@ import {
   updateProjectRepositories,
   updateProjectRepository,
 } from "@/db/projects"
+import { SessionDbContext, withSessionDb } from "@/lib/db/sessionContext"
 
 import { getCrate } from "../crates"
 import {
@@ -26,29 +26,55 @@ import { isOpenSourceLicense } from "../licenses"
 import { getNpmPackage } from "../npm"
 import { verifyMembership } from "./utils"
 
-export const findRepo = async (owner: string, slug: string) => {
-  const session = await auth()
-  if (!session) {
-    return {
-      error: "Not authenticated",
-    }
-  }
+type ProjectMemberContext = SessionDbContext & { userId: string }
 
-  try {
-    const repo = await getRepository(owner, slug)
-    if (repo) {
+async function withProjectMember<T>(
+  projectId: string,
+  handler: (ctx: ProjectMemberContext) => Promise<T>,
+) {
+  return withSessionDb(async (ctx) => {
+    if (!ctx.userId) {
       return {
-        error: null,
-        repo: repo ?? null,
-      }
+        error: "Unauthorized",
+      } as T
     }
-  } catch (error: unknown) {
-    console.error("Error searching for repo", (error as Error).message)
-    return {
-      error: "Error searching for repo",
+
+    const membership = await verifyMembership(projectId, ctx.userId, ctx.db)
+    if (membership?.error) {
+      return membership as T
     }
-  }
+
+    return handler({ ...ctx, userId: ctx.userId })
+  }, { requireUser: true })
 }
+
+export const findRepo = async (owner: string, slug: string) =>
+  withSessionDb(
+    async ({ userId }) => {
+      if (!userId) {
+        return {
+          error: "Not authenticated",
+        }
+      }
+
+      try {
+        const repo = await getRepository(owner, slug)
+        if (repo) {
+          return {
+            error: null,
+            repo: repo ?? null,
+          }
+        }
+        return { error: null, repo: null }
+      } catch (error: unknown) {
+        console.error("Error searching for repo", (error as Error).message)
+        return {
+          error: "Error searching for repo",
+        }
+      }
+    },
+    { requireUser: true },
+  )
 
 const fetchFundingFile = async (owner: string, slug: string) => {
   try {
@@ -218,104 +244,84 @@ export const createGithubRepo = async (
   slug: string,
   name?: string,
   description?: string,
-) => {
-  // const session = await auth()
+) =>
+  withProjectMember(projectId, async ({ db }) => {
+    const verification = await verifyGithubRepo(projectId, owner, slug)
+    if (verification.error) return { error: verification.error }
 
-  // if (!session?.user?.id) {
-  //   return {
-  //     error: "Unauthorized",
-  //   }
-  // }
+    try {
+      const repo = await addProjectRepository(
+        {
+          projectId,
+          repo: {
+            type: "github",
+            url: `https://github.com/${owner}/${slug}`,
+            verified: true,
+            openSource: !!verification.repo?.isOpenSource,
+            npmPackage: !!verification.repo?.isNpmPackage,
+            crate: !!verification.repo?.isCrate,
+            name,
+            description,
+          },
+        },
+        db,
+      )
 
-  // const isInvalid = await verifyMembership(projectId, session.user.farcasterId)
-  // if (isInvalid?.error) {
-  //   return isInvalid
-  // }
+      revalidatePath("/dashboard")
+      revalidatePath("/projects", "layout")
 
-  const verification = await verifyGithubRepo(projectId, owner, slug)
-  if (verification.error) return { error: verification.error }
-
-  try {
-    const repo = await addProjectRepository({
-      projectId,
-      repo: {
-        type: "github",
-        url: `https://github.com/${owner}/${slug}`,
-        verified: true,
-        openSource: !!verification.repo?.isOpenSource,
-        npmPackage: !!verification.repo?.isNpmPackage,
-        crate: !!verification.repo?.isCrate,
-        name,
-        description,
-      },
-    })
-
-    revalidatePath("/dashboard")
-    revalidatePath("/projects", "layout")
-
-    return {
-      error: null,
-      repo,
-    }
-  } catch (error: unknown) {
-    console.error("Error creating repo", error)
-    // Handle the case where another project has used this repo
-    if (
-      error instanceof Error &&
-      error.message.includes("Unique constraint failed on the fields: (`url`)")
-    ) {
       return {
-        error: "Repo already exists",
+        error: null,
+        repo,
+      }
+    } catch (error: unknown) {
+      console.error("Error creating repo", error)
+      if (
+        error instanceof Error &&
+        error.message.includes("Unique constraint failed on the fields: (`url`)")
+      ) {
+        return {
+          error: "Repo already exists",
+        }
+      }
+
+      return {
+        error: "Error creating repo",
       }
     }
-
-    return {
-      error: "Error creating repo",
-    }
-  }
-}
+  })
 
 // Only allows very limited property updates
 export const updateGithubRepo = async (
   projectId: string,
   url: string,
   updates: { containsContracts: boolean; name?: string; description?: string },
-) => {
-  const session = await auth()
+) =>
+  withProjectMember(projectId, async ({ db }) => {
+    try {
+      const repo = await updateProjectRepository(
+        {
+          projectId,
+          url,
+          updates,
+        },
+        db,
+      )
 
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
+      revalidatePath("/dashboard")
+      revalidatePath("/projects", "layout")
+
+      return {
+        error: null,
+        repo,
+      }
+    } catch (error) {
+      console.error("Error updating repo", error)
+      return {
+        error: "Error updating repo",
+      }
     }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  try {
-    const repo = await updateProjectRepository({
-      projectId,
-      url,
-      updates,
-    })
-
-    revalidatePath("/dashboard")
-    revalidatePath("/projects", "layout")
-
-    return {
-      error: null,
-      repo,
-    }
-  } catch (error) {
-    console.error("Error updating repo", error)
-    return {
-      error: "Error updating repo",
-    }
-  }
-}
+  })
 
 // Update multiple repo update
 export const updateGithubRepos = async (
@@ -329,159 +335,123 @@ export const updateGithubRepos = async (
       description?: string
     }
   }[],
-) => {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  try {
-    const projectUpdate = updateProject({
-      id: projectId,
-      project: {
-        hasCodeRepositories: !noRepos,
-      },
-    })
-
-    const repoUpdates = Promise.all(
-      repos.map((repo) =>
-        updateProjectRepository({
-          projectId,
-          url: repo.url,
-          updates: {
-            containsContracts: repo.updates.containsContracts,
-            name: repo.updates.name,
-            description: repo.updates.description,
+) =>
+  withProjectMember(projectId, async ({ db, session }) => {
+    try {
+      const projectUpdate = updateProject(
+        {
+          id: projectId,
+          project: {
+            hasCodeRepositories: !noRepos,
           },
-        }),
-      ),
-    )
+        },
+        { db, session },
+      )
 
-    const [_, updatedRepos] = await Promise.all([projectUpdate, repoUpdates])
+      const repoUpdates = Promise.all(
+        repos.map((repo) =>
+          updateProjectRepository(
+            {
+              projectId,
+              url: repo.url,
+              updates: {
+                containsContracts: repo.updates.containsContracts,
+                name: repo.updates.name,
+                description: repo.updates.description,
+              },
+            },
+            db,
+          ),
+        ),
+      )
 
-    revalidatePath("/dashboard")
-    revalidatePath("/projects", "layout")
+      const [, updatedRepos] = await Promise.all([projectUpdate, repoUpdates])
 
-    return {
-      error: null,
-      repos: updatedRepos,
+      revalidatePath("/dashboard")
+      revalidatePath("/projects", "layout")
+
+      return {
+        error: null,
+        repos: updatedRepos,
+      }
+    } catch (error) {
+      console.error("Error updating repos", error)
+      return {
+        error: "Error updating repos",
+      }
     }
-  } catch (error) {
-    console.error("Error updating repos", error)
-    return {
-      error: "Error updating repos",
-    }
-  }
-}
+  })
 
-export const removeGithubRepo = async (projectId: string, url: string) => {
-  const session = await auth()
-
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  try {
-    await removeProjectRepository({
-      projectId,
-      repositoryUrl: url,
-    })
-
-    revalidatePath("/dashboard")
-    revalidatePath("/projects", "layout")
-
-    return {
-      success: true,
-      error: null,
-    }
-  } catch (error) {
-    console.error("Error removing repo", error)
-    return {
-      error: "Error removing repo",
-    }
-  }
-}
-
-export const updatePackageRepos = async (projectId: string, urls: string[]) => {
-  const session = await auth()
-
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  try {
-    const repos = await updateProjectRepositories({
-      projectId,
-      type: "package",
-      repositories: urls.map((url) => {
-        return {
-          url,
-          type: "package",
-          verified: false,
+export const removeGithubRepo = async (projectId: string, url: string) =>
+  withProjectMember(projectId, async ({ db }) => {
+    try {
+      await removeProjectRepository(
+        {
           projectId,
-        }
-      }),
-    })
+          repositoryUrl: url,
+        },
+        db,
+      )
 
-    revalidatePath("/dashboard")
-    revalidatePath("/projects", "layout")
+      revalidatePath("/dashboard")
+      revalidatePath("/projects", "layout")
 
-    return {
-      error: null,
-      repos,
+      return {
+        success: true,
+        error: null,
+      }
+    } catch (error) {
+      console.error("Error removing repo", error)
+      return {
+        error: "Error removing repo",
+      }
     }
-  } catch (error) {
-    console.error("Error updating packages", error)
-    return {
-      error: "Error updating packages",
+  })
+
+export const updatePackageRepos = async (
+  projectId: string,
+  urls: string[],
+) =>
+  withProjectMember(projectId, async ({ db }) => {
+    try {
+      const repos = await updateProjectRepositories(
+        {
+          projectId,
+          type: "package",
+          repositories: urls.map((url) => ({
+            url,
+            type: "package",
+            verified: false,
+            projectId,
+          })),
+        },
+        db,
+      )
+
+      revalidatePath("/dashboard")
+      revalidatePath("/projects", "layout")
+
+      return {
+        error: null,
+        repos,
+      }
+    } catch (error) {
+      console.error("Error updating packages", error)
+      return {
+        error: "Error updating packages",
+      }
     }
-  }
-}
+  })
 
 export const setProjectLinks = async (
   projectId: string,
   links: Prisma.ProjectLinksCreateManyInput[],
-) => {
-  const session = await auth()
+) =>
+  withProjectMember(projectId, async ({ db }) => {
+    await updateProjectLinks({ projectId, links }, db)
 
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
 
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  await updateProjectLinks({ projectId, links })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/projects", "layout")
-}
+    return { error: null }
+  })
