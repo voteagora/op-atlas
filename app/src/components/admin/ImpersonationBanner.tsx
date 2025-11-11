@@ -133,7 +133,7 @@ export function ImpersonationBanner() {
               <strong className="text-sm">Admin Mode: Viewing as {session.impersonation.targetUserName}</strong>
             </div>
             <span className="text-xs text-muted-foreground">
-              Using yesterday's data snapshot • Changes won't affect production
+              Using yesterday&apos;s data snapshot • Changes won&apos;t affect production
               {session.impersonation.targetUserEmail && (
                 <> • {session.impersonation.targetUserEmail}</>
               )}

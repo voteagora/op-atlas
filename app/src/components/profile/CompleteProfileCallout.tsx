@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { User } from "@prisma/client"
 import { ArrowUpRight, Check, X } from "lucide-react"
@@ -35,10 +35,12 @@ export function CompleteProfileCallout({
   setIsCompleteProfileAccordionDismissed: (dismissed: boolean) => void
 }) {
   const { data: session } = useSession()
+  const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
+
   if (session?.impersonation?.isActive) {
     return null
   }
-  const { user: loadedUser } = useUser({ id: initialUser.id, enabled: true })
+
   const user = loadedUser || initialUser
 
   const progress = profileProgress(user)
@@ -46,9 +48,8 @@ export function CompleteProfileCallout({
 
   const onDismiss = () => {
     // Use last 16 chars of privyDid for user-specific cookie (30 days expiry)
-    const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
-    document.cookie =
-      `completeProfileAccordionDismissed_${userIdentifier}=true; max-age=2592000; path=/`
+    const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : "default"
+    document.cookie = `completeProfileAccordionDismissed_${userIdentifier}=true; max-age=2592000; path=/`
     setIsCompleteProfileAccordionDismissed(true)
   }
 

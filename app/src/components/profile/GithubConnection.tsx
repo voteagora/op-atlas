@@ -2,6 +2,7 @@
 
 import { usePrivy } from "@privy-io/react-auth"
 import { X } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 import { Button } from "@/components/common/Button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -142,13 +143,13 @@ const GithubConnectionInteractive = ({
 
 export const GithubNotDeveloperToggle = ({ userId }: { userId: string }) => {
   const { data: session } = useSession()
-  if (session?.impersonation?.isActive) {
-    return null
-  }
-
   const { user } = useUser({ id: userId, enabled: true })
   const { user: privyUser } = usePrivy()
   const { toggleIsDeveloper } = usePrivyLinkGithub(userId)
+
+  if (session?.impersonation?.isActive) {
+    return null
+  }
 
   const isConnected = Boolean(user?.github || privyUser?.github?.username)
   if (isConnected) return null

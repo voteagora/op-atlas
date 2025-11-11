@@ -141,7 +141,7 @@ export function AdminImpersonationButton() {
           <DialogTitle>Admin: View as User</DialogTitle>
           <DialogDescription>
             Search for a user to view the app from their perspective.
-            You'll be using yesterday's data snapshot - changes won't affect production.
+            You&apos;ll be using yesterday&apos;s data snapshot - changes won&apos;t affect production.
           </DialogDescription>
         </DialogHeader>
 
