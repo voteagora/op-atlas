@@ -285,7 +285,7 @@ const InteractiveRequirements = ({
           isMet={
             !!userPassports?.find(
               (passport: UserPassport) =>
-                passport.score >= VALID_PASSPORT_THRESHOLD,
+                Number(passport.score) >= VALID_PASSPORT_THRESHOLD,
             )
           }
         >
