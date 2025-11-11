@@ -67,10 +67,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         }
       }
 
+      const adminId = token.id as string | undefined
+      const impersonation = token.impersonation ?? null
       if (
-        token.impersonation &&
-        !isSignedImpersonationSessionValid(token.impersonation, {
-          currentAdminUserId: token.id as string,
+        impersonation &&
+        !isSignedImpersonationSessionValid(impersonation, {
+          currentAdminUserId: adminId,
         })
       ) {
         token.impersonation = undefined
