@@ -87,7 +87,7 @@ export default async function Page({ params }: PageProps) {
         <div className="mt-[88px] lg:mt-0 lg:space-y-20 px-6 lg:px-12 lg:pt-12">
           <Description
             projectId={projectId}
-            userId={userId}
+            userId={userId ?? undefined}
             name={project.name}
             tags={["Project", project.category ?? ""]}
             author={author}
