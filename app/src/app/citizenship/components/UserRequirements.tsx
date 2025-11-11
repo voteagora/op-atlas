@@ -295,12 +295,16 @@ const InteractiveRequirements = ({
           You&apos;ve verified on Worldcoin |{" "}
           {userWorldId?.verified ? (
             <span className="font-normal">Verified</span>
-          ) : (
+          ) : user?.id ? (
             <WorldConnection userId={user.id}>
               <span className="font-normal underline">
                 Verify with World ID
               </span>
             </WorldConnection>
+          ) : (
+            <span className="font-normal text-muted-foreground">
+              World ID verification unavailable
+            </span>
           )}
         </ConditionRow>
       </div>
