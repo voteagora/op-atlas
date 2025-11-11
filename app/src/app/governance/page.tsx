@@ -1,6 +1,6 @@
-import { auth } from "@/auth"
 import ProposalsPage from "@/components/proposals/proposalsPage/ProposalsPage"
 import { getAllRoles } from "@/db/role"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import RolesPage from "./roles/components/RolesPage"
 
@@ -12,12 +12,12 @@ export const metadata = {
 }
 
 export default async function Page() {
-  const [roles, session] = await Promise.all([getAllRoles(), auth()])
+  const { db, userId } = await withImpersonation()
+  const roles = await getAllRoles(db)
   const hasRoles = roles.length > 0
   const securityRoles = roles.filter((role) =>
     role.isSecurityRole,
   )
-  const userId = session?.user?.id
 
   return (
     <main className="flex flex-col flex-1 h-full items-center pb-12 relative">
@@ -28,7 +28,7 @@ export default async function Page() {
           </h1>
         </div>
         {hasRoles && <RolesPage roles={roles} />}
-        <ProposalsPage userId={userId} securityRoles={securityRoles} />
+        <ProposalsPage userId={userId ?? undefined} securityRoles={securityRoles} />
       </div>
     </main>
   )

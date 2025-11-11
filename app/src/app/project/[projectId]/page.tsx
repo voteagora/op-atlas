@@ -2,11 +2,11 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import { getCitizen } from "@/lib/actions/citizens"
 import { getProjectMetadataAction } from "@/lib/actions/projects"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { getProjectDeployedChains } from "@/lib/oso/utils"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { Contributors, Description, Header } from "./components"
 import MissionSection from "./components/MissionSection"
@@ -45,8 +45,9 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
 
-  const [session, project, citizen] = await Promise.all([
-    auth(),
+  const { userId } = await withImpersonation()
+
+  const [project, citizen] = await Promise.all([
     getProjectMetadataAction({ projectId }),
     getCitizen({ type: CITIZEN_TYPES.app, id: projectId }),
   ])
@@ -54,8 +55,6 @@ export default async function Page({ params }: PageProps) {
   if (!project) {
     return notFound()
   }
-
-  const userId = session?.user?.id
 
   const deployedOn = getProjectDeployedChains(project.contracts)
 

@@ -6,7 +6,6 @@ import { redirect } from "next/navigation"
 import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequirements"
 import { Sidebar } from "@/app/citizenship/components/Sidebar"
 import { UserRequirements } from "@/app/citizenship/components/UserRequirements"
-import { auth } from "@/auth"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,6 +21,7 @@ import {
   s8CitizenshipQualification,
 } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { AnalyticsTracker } from "./components/AnalyticsTracker"
 import { SidebarActiveCitizen } from "./components/SidebarActiveCitizen"
@@ -31,8 +31,7 @@ export default async function Page({
 }: {
   searchParams: { redirectUrl?: string }
 }) {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { session, db, userId } = await withImpersonation()
 
   if (!userId) {
     redirect("/")
@@ -40,7 +39,7 @@ export default async function Page({
 
   const [user, citizen, qualification, isCitizenshipLimitReached] =
     await Promise.all([
-      getUserById(userId),
+      getUserById(userId, db, session),
       getCitizen({ type: CITIZEN_TYPES.user, id: userId }),
       s8CitizenshipQualification(userId),
       checkCitizenshipLimit(),

@@ -2,6 +2,7 @@
 
 import { UserAddress, UserPassport } from "@prisma/client"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
@@ -18,6 +19,7 @@ import { truncateAddress } from "@/lib/utils/string"
 import { useAppDialogs } from "@/providers/DialogProvider"
 
 const LINK_STYLE = "inline-block cursor-pointer underline"
+type HookedUser = ReturnType<typeof useUser>["user"]
 
 export const UserRequirements = ({
   userId,
@@ -26,10 +28,48 @@ export const UserRequirements = ({
   userId: string
   qualification: CitizenshipQualification | null
 }) => {
+  const { data: session } = useSession()
+  const impersonationMode = !!session?.impersonation?.isActive
   const { user } = useUser({ id: userId })
   const { data: userPassports } = useUserPassports({ id: userId })
   const { data: userWorldId } = useUserWorldId({ id: userId })
 
+  if (impersonationMode) {
+    return (
+      <ReadOnlyRequirements
+        user={user}
+        userPassports={userPassports}
+        userWorldId={userWorldId}
+      />
+    )
+  }
+
+  return (
+    <InteractiveRequirements
+      userId={userId}
+      user={user}
+      userPassports={userPassports}
+      userWorldId={userWorldId}
+      qualification={qualification}
+    />
+  )
+}
+
+const InteractiveRequirements = ({
+  userId,
+  user,
+  userPassports,
+  userWorldId,
+  qualification,
+}: {
+  userId: string
+  user: HookedUser
+  userPassports: UserPassport[] | undefined
+  userWorldId:
+    | ReturnType<typeof useUserWorldId>["data"]
+    | undefined
+  qualification: CitizenshipQualification | null
+}) => {
   const { linkEmail, updateEmail } = usePrivyEmail(userId)
   const { refreshPassport } = useRefreshPassport(userId)
   const { linkWallet } = usePrivyLinkWallet(userId)
@@ -39,11 +79,12 @@ export const UserRequirements = ({
 
   const email = user?.emails?.[0]
   const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
+  const connectedAddress = user?.addresses?.[0]
 
   const renderEmail = () => {
     if (email) {
       return (
-        <ConditionRow isMet={true}>
+        <ConditionRow isMet>
           You&apos;ve added email in Atlas:{" "}
           <span className="font-normal">{email.email}</span> |{" "}
           <button
@@ -73,11 +114,9 @@ export const UserRequirements = ({
   }
 
   const renderAddress = () => {
-    const connectedAddress = user?.addresses?.[0]
-
     if (govAddress) {
       return (
-        <ConditionRow isMet={true}>
+        <ConditionRow isMet>
           You&apos;ve added a governance address in Atlas:{" "}
           <span className="font-normal">
             {truncateAddress(govAddress.address as string)}
@@ -123,7 +162,9 @@ export const UserRequirements = ({
           type="button"
           className={LINK_STYLE}
           onClick={() => linkWallet({ primary: true })}
-          onKeyDown={(e) => e.key === "Enter" && linkWallet({ primary: true })}
+          onKeyDown={(e) =>
+            e.key === "Enter" && linkWallet({ primary: true })
+          }
         >
           Add your address
         </button>
@@ -134,7 +175,7 @@ export const UserRequirements = ({
   const renderGithub = () => {
     if (user?.github) {
       return (
-        <ConditionRow isMet={true}>
+        <ConditionRow isMet>
           You&apos;ve connected your GitHub account in Atlas:{" "}
           <span className="font-normal">@{user?.github}</span> |{" "}
           <button
@@ -151,7 +192,7 @@ export const UserRequirements = ({
 
     if (user?.notDeveloper) {
       return (
-        <ConditionRow isMet={true}>
+        <ConditionRow isMet>
           You&apos;ve identified yourself as not a developer in Atlas |{" "}
           <button
             type="button"
@@ -198,210 +239,143 @@ export const UserRequirements = ({
     )
   }
 
-  const renderPassport = () => {
-    if (!userPassports) {
-      return null
-    }
-
-    const passport = userPassports.find(
-      (passport: UserPassport) =>
-        Number(passport.score) >= VALID_PASSPORT_THRESHOLD,
+  const refreshPassportText =
+    qualification?.type === "citizen" &&
+    (qualification.identifier === "citizen" ||
+      qualification.identifier === "user") ? (
+      <>
+        <button
+          type="button"
+          onClick={() => refreshPassport()}
+          className={LINK_STYLE}
+        >
+          Refresh your passport
+        </button>{" "}
+        if you enabled{" "}
+        <Link
+          className={LINK_STYLE}
+          href="https://passport.gitcoin.co/"
+          target="_blank"
+        >
+          Optimism stamps
+        </Link>{" "}
+        in the Gitcoin Scorer section
+      </>
+    ) : (
+      <>
+        <Link
+          className={LINK_STYLE}
+          href="https://passport.gitcoin.co/"
+          target="_blank"
+        >
+          Build your passport
+        </Link>{" "}
+        with Optimism stamps to level up your score
+      </>
     )
-    const invalidPassport = userPassports.length > 0 && !passport
-    const hasAddress = user?.addresses.length
-
-    if (passport) {
-      return (
-        <ConditionRow isMet={true}>
-          <Link
-            href="https://app.passport.xyz"
-            target="_blank"
-            className={LINK_STYLE}
-          >
-            Passport
-          </Link>{" "}
-          found, and your score is {Number(passport?.score).toFixed(2)}
-          {"! "}
-          <span className="font-normal">
-            {truncateAddress(passport?.address as string)}
-          </span>
-        </ConditionRow>
-      )
-    }
-
-    if (invalidPassport) {
-      return (
-        <ConditionRow isMet={false}>
-          <Link
-            href="https://app.passport.xyz"
-            target="_blank"
-            className={LINK_STYLE}
-          >
-            Passport
-          </Link>{" "}
-          found, but your score is under {VALID_PASSPORT_THRESHOLD}:{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => linkWallet({ primary: true })}
-            onKeyDown={(e) =>
-              e.key === "Enter" && linkWallet({ primary: true })
-            }
-          >
-            Verify another address
-          </button>{" "}
-          |{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => refreshPassport()}
-            onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
-          >
-            Check addresses for{" "}
-            <Link
-              href="https://app.passport.xyz"
-              target="_blank"
-              className={LINK_STYLE}
-            >
-              Passport
-            </Link>
-          </button>
-        </ConditionRow>
-      )
-    }
-
-    if (hasAddress) {
-      return (
-        <ConditionRow isMet={false}>
-          Connect your wallet with a{" "}
-          <Link
-            href="https://app.passport.xyz"
-            target="_blank"
-            className={LINK_STYLE}
-          >
-            Passport
-          </Link>{" "}
-          score of over {VALID_PASSPORT_THRESHOLD}:{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => linkWallet({ primary: true })}
-            onKeyDown={(e) =>
-              e.key === "Enter" && linkWallet({ primary: true })
-            }
-          >
-            Verify an address
-          </button>{" "}
-          |{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => refreshPassport()}
-            onKeyDown={(e) => e.key === "Enter" && refreshPassport()}
-          >
-            Check addresses for{" "}
-            <Link
-              href="https://app.passport.xyz"
-              target="_blank"
-              className={LINK_STYLE}
-            >
-              Passport
-            </Link>
-          </button>
-        </ConditionRow>
-      )
-    } else {
-      return (
-        <ConditionRow isMet={false}>
-          Connect your wallet with a{" "}
-          <Link
-            href="https://app.passport.xyz"
-            target="_blank"
-            className={LINK_STYLE}
-          >
-            Passport
-          </Link>{" "}
-          score of over {VALID_PASSPORT_THRESHOLD}:{" "}
-          <button
-            type="button"
-            className={LINK_STYLE}
-            onClick={() => linkWallet({ primary: true })}
-            onKeyDown={(e) =>
-              e.key === "Enter" && linkWallet({ primary: true })
-            }
-          >
-            Verify an address
-          </button>
-        </ConditionRow>
-      )
-    }
-  }
-
-  const renderWorld = () => {
-    if (userWorldId?.verified) {
-      return (
-        <ConditionRow isMet={true}>
-          You&apos;ve connected your World ID
-        </ConditionRow>
-      )
-    }
-
-    return (
-      <ConditionRow isMet={false}>
-        <WorldConnection userId={userId}>
-          <span className={LINK_STYLE}>Connect your World ID</span>
-        </WorldConnection>
-      </ConditionRow>
-    )
-  }
-
-  const renderEligibility = () => {
-    return (
-      <div className="flex flex-col gap-6">
-        <div className="font-normal text-xl">Eligibility</div>
-        <div>
-          <div className="font-normal">Onchain activity</div>
-          <div>
-            One of your verified addresses must meet these criteria.{" "}
-            <Link href="/profile/verified-addresses" className={LINK_STYLE}>
-              Verify more addresses
-            </Link>
-          </div>
-        </div>
-
-        <div>
-          <ConditionRow isMet={qualification?.eligible || false}>
-            Your first Superchain transaction happened before June 2024
-          </ConditionRow>
-          <ConditionRow isMet={qualification?.eligible || false}>
-            You&apos;ve had 2 transactions per month, in at least 3 of 6
-            previous months.
-          </ConditionRow>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="flex flex-col gap-6">
-      {renderEligibility()}
-
       <div className="font-normal text-xl text-foreground">Requirements</div>
-      <div className="font-normal text-foreground">Atlas Profile</div>
-      <div className="text-secondary-foreground">
-        {renderGithub()}
+      <div className="flex flex-col gap-1 text-secondary-foreground">
         {renderEmail()}
         {renderAddress()}
+        {renderGithub()}
+        <ConditionRow
+          isMet={
+            !!userPassports?.find(
+              (passport: UserPassport) =>
+                passport.score >= VALID_PASSPORT_THRESHOLD,
+            )
+          }
+        >
+          You&apos;ve added an Optimism Passport | {refreshPassportText}
+        </ConditionRow>
+        <ConditionRow isMet={!!userWorldId?.verified}>
+          You&apos;ve verified on Worldcoin |{" "}
+          {userWorldId?.verified ? (
+            <span className="font-normal">Verified</span>
+          ) : (
+            <WorldConnection userVerified={false} />
+          )}
+        </ConditionRow>
       </div>
-      <div className="text-secondary-foreground">
-        <div className="font-normal text-foreground">Proof of personhood</div>
-        <div className="text-secondary-foreground">
-          Complete at least one of these options.
-        </div>
+    </div>
+  )
+}
+
+const ReadOnlyRequirements = ({
+  user,
+  userPassports,
+  userWorldId,
+}: {
+  user: HookedUser
+  userPassports: UserPassport[] | undefined
+  userWorldId:
+    | ReturnType<typeof useUserWorldId>["data"]
+    | undefined
+}) => {
+  const email = user?.emails?.[0]
+  const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
+
+  return (
+    <div className="flex flex-col gap-6 text-secondary-foreground">
+      <div className="font-normal text-xl text-foreground">
+        Requirements (Read Only)
       </div>
-      <div className="text-secondary-foreground">
-        {renderPassport()}
-        {renderWorld()}
+      <ConditionRow isMet={!!email}>
+        {email ? (
+          <>
+            You&apos;ve added email in Atlas:{" "}
+            <span className="font-normal">{email.email}</span>
+          </>
+        ) : (
+          <>You haven&apos;t added an email in Atlas.</>
+        )}
+      </ConditionRow>
+      <ConditionRow isMet={!!govAddress}>
+        {govAddress ? (
+          <>
+            Governance address:{" "}
+            <span className="font-normal">
+              {truncateAddress(govAddress.address as string)}
+            </span>
+          </>
+        ) : (
+          <>No governance address linked.</>
+        )}
+      </ConditionRow>
+      <ConditionRow isMet={!!user?.github || user?.notDeveloper}>
+        {user?.github ? (
+          <>
+            GitHub connected: <span className="font-normal">@{user?.github}</span>
+          </>
+        ) : user?.notDeveloper ? (
+          <>Marked as not a developer.</>
+        ) : (
+          <>GitHub not connected.</>
+        )}
+      </ConditionRow>
+      <ConditionRow
+        isMet={!!userPassports?.find(
+          (passport: UserPassport) =>
+            passport.score >= VALID_PASSPORT_THRESHOLD,
+        )}
+      >
+        {userPassports?.find(
+          (passport: UserPassport) =>
+            passport.score >= VALID_PASSPORT_THRESHOLD,
+        )
+          ? "Passport linked."
+          : "Optimism Passport not linked."}
+      </ConditionRow>
+      <ConditionRow isMet={!!userWorldId?.verified}>
+        {userWorldId?.verified
+          ? "World ID verified."
+          : "World ID not verified."}
+      </ConditionRow>
+      <div className="text-xs text-muted-foreground">
+        Profile updates are disabled while impersonating.
       </div>
     </div>
   )

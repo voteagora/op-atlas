@@ -2,11 +2,11 @@ import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import { ContractsForm } from "@/components/projects/contracts/ContractsForm"
-import { getProjectContracts } from "@/db/projects"
+import { getProjectContractsWithClient } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 // Heavy verification flows (OSO fetch + large contract batches) can exceed the
 // default execution window, so request the extended limit.
@@ -40,21 +40,27 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const session = await auth()
-  const userId = session?.user.id
+  const { db, userId, impersonating } = await withImpersonation()
 
   if (!userId) {
     redirect("/")
   }
 
+  const membershipPromise = impersonating
+    ? Promise.resolve(null)
+    : verifyMembership(params.projectId, userId, db)
+
   const [projectContracts, membership] = await Promise.all([
-    getProjectContracts({
-      projectId: params.projectId,
-    }),
-    verifyMembership(params.projectId, userId),
+    getProjectContractsWithClient(
+      {
+        projectId: params.projectId,
+      },
+      db,
+    ),
+    membershipPromise,
   ])
 
-  if (membership?.error || !projectContracts) {
+  if (!projectContracts || (!impersonating && membership?.error)) {
     redirect("/dashboard")
   }
 

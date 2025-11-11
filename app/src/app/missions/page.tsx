@@ -1,9 +1,10 @@
 import { Metadata } from "next"
+import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import { Rounds } from "@/components/rounds/Rounds"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { sharedMetadata } from "../shared-metadata"
 
@@ -21,14 +22,18 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
-
-  const userId = session?.user.id ?? ""
-  const [user] = await Promise.all([getUserById(userId)])
-
-  if (session?.user) {
-    updateInteractions({ userId: session.user?.id, homePageViewCount: 1 })
+  const { session, db, userId } = await withImpersonation()
+  if (!userId) {
+    return <Rounds user={null} />
   }
+
+  const user = await getUserById(userId, db, session)
+
+  if (!user) {
+    redirect("/")
+  }
+
+  void updateInteractions({ userId, homePageViewCount: 1 })
 
   return <Rounds user={user} />
 }

@@ -3,9 +3,9 @@ import { notFound, redirect } from "next/navigation"
 import React from "react"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import { MissionApplication } from "@/components/missions/application/MissionApplication"
 import { MISSIONS } from "@/lib/MissionsAndRoundData"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
@@ -34,8 +34,7 @@ export default async function MissionApplicationPage({
   const round = MISSIONS.find((page) => page.pageName === params.id)
   if (!round) notFound()
 
-  const session = await auth()
-  const userId = session?.user.id
+  const { userId } = await withImpersonation()
 
   if (!userId) {
     redirect("/")

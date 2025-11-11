@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { ProjectStatusSidebar } from "@/components/projects/ProjectStatusSidebar"
-import { getAdminOrganizations } from "@/db/organizations"
+import { getAdminOrganizationsWithClient } from "@/db/organizations"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export const maxDuration = 60
 export const metadata = {
@@ -14,13 +14,12 @@ export const metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
-
-  if (!session?.user?.id) {
+  const { db, userId } = await withImpersonation()
+  if (!userId) {
     redirect("/")
   }
 
-  const userOrganizations = await getAdminOrganizations(session?.user.id)
+  const userOrganizations = await getAdminOrganizationsWithClient(userId, db)
 
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">

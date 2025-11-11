@@ -1,12 +1,12 @@
 import { Role, User } from "@prisma/client"
 import { useEffect } from "react"
+import { useSession } from "next-auth/react"
 
 import { Button } from "@/components/common/Button"
 import { Github } from "@/components/icons/socials"
 import { GithubDisplay } from "@/components/profile/GithubDisplay"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserAdminProjects } from "@/hooks/db/useUserAdminProjects"
-import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { useApplyForRole } from "@/hooks/role/useApplyForRole"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { SecurityCouncilForm } from "./SecurityCouncilForm"
@@ -53,9 +53,10 @@ export const UserForm = ({
   })
 
   const user = loadedUser || initialUser
+  const { data: session } = useSession()
+  const isImpersonating = !!session?.impersonation?.isActive
 
   const { track } = useAnalytics()
-  const { linkGithub } = usePrivyLinkGithub(user.id)
   const { applyForRole, isLoading } = useApplyForRole()
 
   const { data: userProjects } = useUserAdminProjects({ userId: user.id })
@@ -99,25 +100,21 @@ export const UserForm = ({
                     Connect your GitHub account to show your code contributions
                     to the Optimism Collective
                   </div>
-                  {user.github ? (
-                    <div className="flex flex-col gap-2">
-                      <div className="text-sm text-foreground">
-                        Your GitHub account
-                      </div>
-                      <div>
-                        <GithubDisplay userId={user.id} />
-                      </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="text-sm text-foreground">
+                      Your GitHub account
                     </div>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      onClick={() => {
-                        linkGithub()
-                      }}
-                    >
-                      <Github className="w-4 h-4 mr-1" fill="#FFFFFF" />
-                      Connect GitHub
-                    </Button>
+                    <div>
+                      <GithubDisplay userId={user.id} />
+                    </div>
+                  </div>
+                  {!isImpersonating && !user.github && (
+                    <GithubRequirementButton userId={user.id} />
+                  )}
+                  {isImpersonating && !user.github && (
+                    <p className="text-xs text-muted-foreground">
+                      GitHub connection unavailable while impersonating.
+                    </p>
                   )}
                 </div>
               )
@@ -192,5 +189,20 @@ export const UserForm = ({
       {renderRequiredModules()}
       {renderFormByRoleType()}
     </div>
+  )
+}
+
+const GithubRequirementButton = ({ userId }: { userId: string }) => {
+  const { linkGithub } = usePrivyLinkGithub(userId)
+  return (
+    <Button
+      variant="primary"
+      onClick={() => {
+        linkGithub()
+      }}
+    >
+      <Github className="w-4 h-4 mr-1" fill="#FFFFFF" />
+      Connect GitHub
+    </Button>
   )
 }

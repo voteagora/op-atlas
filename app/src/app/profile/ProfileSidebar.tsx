@@ -1,18 +1,17 @@
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
-import { getOrganizations } from "@/db/organizations"
+import { getOrganizationsWithClient } from "@/db/organizations"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { UserProfileSidebar } from "./UserProfileSidebar"
 
 export async function ProfileSidebar() {
-  const user = await auth()
-
-  if (!user?.user.id) {
+  const { db, userId } = await withImpersonation()
+  if (!userId) {
     return redirect("/dashboard")
   }
 
-  const organizations = await getOrganizations(user.user.id)
+  const organizations = await getOrganizationsWithClient(userId, db)
 
   return <UserProfileSidebar organizations={organizations} />
 }

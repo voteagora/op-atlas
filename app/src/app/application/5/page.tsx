@@ -1,26 +1,26 @@
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import { ApplicationFlow } from "@/components/application/5"
-import { getCategories } from "@/db/category"
+import { getCategoriesWithClient } from "@/db/category"
 import {
   getAdminProjects,
   getUserApplicationsForRound,
 } from "@/lib/actions/projects"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export const maxDuration = 120
 
 export default async function Page() {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { session, db, userId } = await withImpersonation()
+  if (!userId) {
     redirect("/")
   }
 
   const [projects, applications, categories] = session
     ? await Promise.all([
-        getAdminProjects(session.user.id, "5"),
-        getUserApplicationsForRound(session.user.id, 5),
-        getCategories(),
+        getAdminProjects(userId, "5"),
+        getUserApplicationsForRound(userId, 5),
+        getCategoriesWithClient(db),
       ])
     : [[], [], []]
 

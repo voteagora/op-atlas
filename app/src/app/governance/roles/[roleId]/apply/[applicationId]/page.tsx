@@ -2,9 +2,10 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { getOrganization } from "@/db/organizations"
+import { getOrganizationWithClient } from "@/db/organizations"
 import { getRoleApplicationById, getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { formatMMMd } from "@/lib/utils/date"
 
 import { SuccessPageClient } from "./components/SuccessPageClient"
@@ -31,9 +32,11 @@ export async function generateMetadata({
 }
 
 export default async function Page({ params }: PageProps) {
+  const { session, db } = await withImpersonation()
+
   const [role, application] = await Promise.all([
-    getRoleById(parseInt(params.roleId)),
-    getRoleApplicationById(parseInt(params.applicationId)),
+    getRoleById(parseInt(params.roleId), db),
+    getRoleApplicationById(parseInt(params.applicationId), db),
   ])
   if (!role || !application) {
     notFound()
@@ -44,9 +47,12 @@ export default async function Page({ params }: PageProps) {
   let org = null
 
   if (isUser) {
-    user = await getUserById(application.userId!)
+    user = await getUserById(application.userId!, db, session)
   } else {
-    org = await getOrganization({ id: application?.organizationId! })
+    org = await getOrganizationWithClient(
+      { id: application?.organizationId! },
+      db,
+    )
   }
 
   const forumText = `I'm a candidate for ${

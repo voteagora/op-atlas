@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import GrantEligibilityWizard from "@/components/grant-eligibility/GrantEligibilityWizard"
 import { getGrantEligibilityForm } from "@/lib/actions/grantEligibility"
 import { getUserProjectRole, getUserOrganizationRole } from "@/lib/actions/utils"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 interface PageProps {
   params: {
@@ -12,12 +12,10 @@ interface PageProps {
 }
 
 export default async function Page({ params }: PageProps) {
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { userId } = await withImpersonation()
+  if (!userId) {
     notFound()
   }
-
-  const userId = session.user.id
 
   const result = await getGrantEligibilityForm(params.formId)
   if (result.error || !result.form) {

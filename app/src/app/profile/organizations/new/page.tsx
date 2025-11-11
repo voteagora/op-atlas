@@ -1,9 +1,9 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import MakeOrganizationForm from "@/components/organizations/MakeOrganizationForm"
 import { getUserById } from "@/db/users"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export const maxDuration = 120
 
@@ -14,13 +14,13 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
+  const { session, db, userId } = await withImpersonation()
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect("/")
   }
 
-  const user = await getUserById(session.user.id)
+  const user = await getUserById(userId, db, session)
 
   if (!user) {
     redirect("/")

@@ -2,19 +2,19 @@ import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import MakeOrganizationForm from "@/components/organizations/MakeOrganizationForm"
 import MakeOrganizationFormHeader from "@/components/organizations/MakeOrganizationFormHeader"
-import { getOrganization } from "@/db/organizations"
+import { getOrganizationWithClient } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
 }: {
   params: { organizationId: string }
 }): Promise<Metadata> {
-  const organization = await getOrganization({ id: params.organizationId })
+  const organization = await getOrganizationWithClient({ id: params.organizationId })
   const title = `Profile Organizations: ${organization?.name ?? ""} - OP Atlas`
   const description = organization?.description ?? ""
   return {
@@ -36,22 +36,23 @@ export default async function Page({
 }: {
   params: { organizationId: string }
 }) {
-  const session = await auth()
-
-  if (!session?.user?.id) {
+  const { session, db, userId } = await withImpersonation()
+  if (!userId) {
     redirect("/")
   }
 
   const [user, organization] = await Promise.all([
-    getUserById(session.user.id),
-    getOrganization({ id: params.organizationId }),
+    getUserById(userId, db, session),
+    getOrganizationWithClient({ id: params.organizationId }, db),
   ])
 
   if (!organization || !user) {
     redirect("/dashboard")
   }
 
-  updateInteractions({ userId: session.user.id, orgSettingsVisited: true })
+  if (!session?.impersonation?.isActive) {
+    updateInteractions({ userId, orgSettingsVisited: true })
+  }
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">

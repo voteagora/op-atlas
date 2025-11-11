@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache"
 import { getAddress } from "viem"
 
-import { auth } from "@/auth"
 import { updateCitizen } from "@/db/citizens"
 import {
   addUserSafeAddress,
@@ -22,6 +21,7 @@ import {
 import { clients } from "@/lib/eth"
 import { Chain } from "@/lib/utils/contracts"
 import { getSafeAddressVerificationMessage } from "@/lib/utils/safeAddresses"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { AddressData } from "./content"
 
@@ -54,19 +54,18 @@ async function fetchSafeInfoFromMainnet(safeAddress: `0x${string}`) {
 }
 
 export async function makeUserAddressPrimaryAction(address: string) {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { session, db, userId } = await withImpersonation()
 
   if (!userId) {
     return
   }
 
-  await makeUserAddressPrimary(address, userId)
+  await makeUserAddressPrimary(address, userId, db, session)
   const citizen = await getCitizen({ type: CITIZEN_TYPES.user, id: userId })
 
   // If user is a citizen and with an active attestation, revoke it and create a new one
   if (citizen?.attestationId && citizen.address !== address) {
-    const user = await getUserById(userId)
+    const user = await getUserById(userId, db, session)
     await revokeCitizenAttestation(citizen.attestationId)
 
     const attestationId = await createCitizenAttestation({
@@ -84,10 +83,13 @@ export async function makeUserAddressPrimaryAction(address: string) {
       newCitizenUID: attestationId,
     })
 
-    await updateCitizen({
-      id: userId,
-      citizen: { attestationId, address },
-    })
+    await updateCitizen(
+      {
+        id: userId,
+        citizen: { attestationId, address },
+      },
+      db,
+    )
   }
 }
 
@@ -106,11 +108,10 @@ export async function verifySafeAddressAction({
   } catch (_) {
     return { error: "Invalid Safe address" as const }
   }
-  const [session, safeInfo] = await Promise.all([
-    auth(),
+  const [{ db, userId }, safeInfo] = await Promise.all([
+    withImpersonation(),
     fetchSafeInfoFromMainnet(formattedSafe),
   ])
-  const userId = session?.user?.id
   if (!userId) {
     return { error: "Unauthorized" as const }
   }
@@ -169,7 +170,7 @@ export async function verifySafeAddressAction({
     return { error: "Invalid signature" as const }
   }
 
-  await addUserSafeAddress({ userId, safeAddress: formattedSafe })
+  await addUserSafeAddress({ userId, safeAddress: formattedSafe }, db)
 
   revalidatePath("/dashboard")
   revalidatePath("/profile/verified-addresses")
@@ -178,15 +179,14 @@ export async function verifySafeAddressAction({
 }
 
 export async function removeSafeAddressAction(safeAddress: string) {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { db, userId } = await withImpersonation()
 
   if (!userId) {
     return { error: "Unauthorized" as const }
   }
 
   try {
-    await removeUserSafeAddress({ userId, safeAddress })
+    await removeUserSafeAddress({ userId, safeAddress }, db)
   } catch (error) {
     console.error("Failed to remove Safe address", error)
     return { error: "Failed to remove Safe address" as const }
