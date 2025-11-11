@@ -1,4 +1,6 @@
-import { prisma } from "@/db/client"
+import type { PrismaClient } from "@prisma/client"
+
+import { prisma } from "./client"
 
 export async function createEndorsement({
   context,
@@ -10,8 +12,8 @@ export async function createEndorsement({
   nomineeApplicationId: number
   endorserAddress: string
   endorserUserId?: string
-}) {
-  return prisma.endorsement.upsert({
+}, db: PrismaClient = prisma) {
+  return db.endorsement.upsert({
     where: {
       context_nomineeApplicationId_endorserAddress: {
         context,
@@ -40,8 +42,8 @@ export async function hasEndorsed({
   context: string
   nomineeApplicationId: number
   endorserAddress: string
-}) {
-  const existing = await prisma.endorsement.findUnique({
+}, db: PrismaClient = prisma) {
+  const existing = await db.endorsement.findUnique({
     where: {
       context_nomineeApplicationId_endorserAddress: {
         context,
@@ -60,9 +62,9 @@ export async function getEndorsementCounts({
 }: {
   context: string
   nomineeApplicationIds: number[]
-}) {
+}, db: PrismaClient = prisma) {
   if (nomineeApplicationIds.length === 0) return new Map<number, number>()
-  const rows = await prisma.endorsement.groupBy({
+  const rows = await db.endorsement.groupBy({
     by: ["nomineeApplicationId"],
     where: {
       context,
@@ -81,13 +83,16 @@ export async function getEndorsementCountsByRole({
 }: {
   context: string
   roleId: number
-}) {
-  const apps = await prisma.roleApplication.findMany({
+}, db: PrismaClient = prisma) {
+  const apps = await db.roleApplication.findMany({
     where: { roleId },
     select: { id: true },
   })
   const nomineeApplicationIds = apps.map((a) => a.id)
-  const map = await getEndorsementCounts({ context, nomineeApplicationIds })
+  const map = await getEndorsementCounts(
+    { context, nomineeApplicationIds },
+    db,
+  )
   return map
 }
 
@@ -99,10 +104,10 @@ export async function deleteEndorsementsForAddresses({
   context: string
   nomineeApplicationId: number
   addresses: string[]
-}) {
+}, db: PrismaClient = prisma) {
   if (addresses.length === 0) return 0
   const lower = Array.from(new Set(addresses.map((a) => a.toLowerCase())))
-  const res = await prisma.endorsement.deleteMany({
+  const res = await db.endorsement.deleteMany({
     where: {
       context,
       nomineeApplicationId,
@@ -120,18 +125,18 @@ export async function getEndorsedNomineeIdsForAddressesByRole({
   context: string
   roleId: number
   addresses: string[]
-}) {
+}, db: PrismaClient = prisma) {
   if (addresses.length === 0) return [] as number[]
   const lower = Array.from(new Set(addresses.map((a) => a.toLowerCase())))
 
-  const apps = await prisma.roleApplication.findMany({
+  const apps = await db.roleApplication.findMany({
     where: { roleId },
     select: { id: true },
   })
   const nomineeApplicationIds = apps.map((a) => a.id)
   if (nomineeApplicationIds.length === 0) return []
 
-  const rows = await prisma.endorsement.findMany({
+  const rows = await db.endorsement.findMany({
     where: {
       context,
       nomineeApplicationId: { in: nomineeApplicationIds },
@@ -148,9 +153,9 @@ export async function getApproversForNominee({
 }: {
   context: string
   nomineeApplicationId: number
-}) {
+}, db: PrismaClient = prisma) {
   // Fetch endorsements with direct relation to endorser user if available
-  const endorsements = await prisma.endorsement.findMany({
+  const endorsements = await db.endorsement.findMany({
     where: { context, nomineeApplicationId },
     include: {
       endorserUser: {
@@ -168,7 +173,7 @@ export async function getApproversForNominee({
   const addressToUser = new Map<string, { username: string | null; name: string | null; imageUrl: string | null }>()
 
   if (unresolvedAddresses.length > 0) {
-    const users = await prisma.user.findMany({
+    const users = await db.user.findMany({
       where: {
         addresses: {
           some: { address: { in: unresolvedAddresses } },

@@ -1,6 +1,6 @@
 "use server"
 
-import { Organization, Prisma } from "@prisma/client"
+import { Organization, Prisma, PrismaClient } from "@prisma/client"
 import { cache } from "react"
 
 import {
@@ -10,8 +10,8 @@ import {
 
 import { prisma } from "./client"
 
-async function getOrganizationsFn(userId: string) {
-  const result = await prisma.$queryRaw<
+async function getOrganizationsFn(userId: string, db: PrismaClient) {
+  const result = await db.$queryRaw<
     {
       result: {
         organizations: Array<{
@@ -47,10 +47,19 @@ async function getOrganizationsFn(userId: string) {
   )
 }
 
-export const getOrganizations = cache(getOrganizationsFn)
+export const getOrganizations = cache((userId: string) =>
+  getOrganizationsFn(userId, prisma),
+)
 
-async function getAdminOrganizationsFn(userId: string) {
-  const result = await prisma.$queryRaw<
+export async function getOrganizationsWithClient(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
+  return getOrganizationsFn(userId, db)
+}
+
+async function getAdminOrganizationsFn(userId: string, db: PrismaClient = prisma) {
+  const result = await db.$queryRaw<
     {
       result: {
         organizations: Array<{
@@ -88,13 +97,23 @@ async function getAdminOrganizationsFn(userId: string) {
   return transformed
 }
 
-export const getAdminOrganizations = cache(getAdminOrganizationsFn)
+export const getAdminOrganizations = cache((userId: string) =>
+  getAdminOrganizationsFn(userId, prisma),
+)
+
+export async function getAdminOrganizationsWithClient(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
+  return getAdminOrganizationsFn(userId, db)
+}
 
 async function getUserProjectOrganizationsFn(
   userId: string,
   projectId: string,
+  db: PrismaClient = prisma,
 ) {
-  const result = await prisma.$queryRaw<
+  const result = await db.$queryRaw<
     {
       result: {
         organizations: Array<
@@ -161,13 +180,25 @@ async function getUserProjectOrganizationsFn(
   )
 }
 
-export const getUserProjectOrganizations = cache(getUserProjectOrganizationsFn)
+export const getUserProjectOrganizations = cache(
+  (userId: string, projectId: string) =>
+    getUserProjectOrganizationsFn(userId, projectId),
+)
+
+export async function getUserProjectOrganizationsWithClient(
+  userId: string,
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return getUserProjectOrganizationsFn(userId, projectId, db)
+}
 
 // Get all organizations with detail a user is part of
 async function getUserOrganizationsWithDetailsFn(
   userId: string,
+  db: PrismaClient = prisma,
 ): Promise<{ organizations: UserOrganizationsWithDetails[] }> {
-  const result = await prisma.$queryRaw<
+  const result = await db.$queryRaw<
     {
       result: {
         organizations: UserOrganizationsWithDetails[]
@@ -308,9 +339,16 @@ async function getUserOrganizationsWithDetailsFn(
   return result[0]?.result || { organizations: [] }
 }
 
-export const getUserOrganizationsWithDetails = cache(
-  getUserOrganizationsWithDetailsFn,
+export const getUserOrganizationsWithDetails = cache((userId: string) =>
+  getUserOrganizationsWithDetailsFn(userId, prisma),
 )
+
+export async function getUserOrganizationsWithDetailsWithClient(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
+  return getUserOrganizationsWithDetailsFn(userId, db)
+}
 
 export type CreateOrganizationParams = Partial<
   Omit<Organization, "id" | "createdAt" | "updatedAt" | "deletedAt">
@@ -323,17 +361,20 @@ export type CreateTeamMemberParams = {
   role: string
 }
 
-export async function createOrganization({
-  organizationId,
-  organization,
-  teamMembers,
-}: {
-  organizationId: string
-  organization: CreateOrganizationParams
-  teamMembers: CreateTeamMemberParams[]
-}) {
+export async function createOrganization(
+  {
+    organizationId,
+    organization,
+    teamMembers,
+  }: {
+    organizationId: string
+    organization: CreateOrganizationParams
+    teamMembers: CreateTeamMemberParams[]
+  },
+  db: PrismaClient = prisma,
+) {
   // Start a transaction to ensure atomicity
-  return prisma.organization.create({
+  return db.organization.create({
     data: {
       id: organizationId,
       ...organization,
@@ -354,14 +395,17 @@ export type UpdateOrganizationParams = Partial<
   Omit<Organization, "id" | "createdAt" | "updatedAt" | "deletedAt">
 >
 
-export async function updateOrganization({
-  id,
-  organization,
-}: {
-  id: string
-  organization: UpdateOrganizationParams
-}) {
-  return prisma.organization.update({
+export async function updateOrganization(
+  {
+    id,
+    organization,
+  }: {
+    id: string
+    organization: UpdateOrganizationParams
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.organization.update({
     where: { id },
     data: {
       ...organization,
@@ -371,12 +415,15 @@ export async function updateOrganization({
 }
 
 // Soft delete an organization
-export async function deleteOrganization({
-  organizationId,
-}: {
-  organizationId: string
-}) {
-  return prisma.organization.update({
+export async function deleteOrganization(
+  {
+    organizationId,
+  }: {
+    organizationId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.organization.update({
     where: {
       id: organizationId,
     },
@@ -387,8 +434,11 @@ export async function deleteOrganization({
 }
 
 // Get detailed information about an organization
-async function getOrganizationFn({ id }: { id: string }) {
-  return prisma.organization.findUnique({
+async function getOrganizationFn(
+  { id }: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return db.organization.findUnique({
     where: { id },
     include: {
       team: { where: { deletedAt: null }, include: { user: true } },
@@ -401,10 +451,22 @@ async function getOrganizationFn({ id }: { id: string }) {
   })
 }
 
-export const getOrganization = cache(getOrganizationFn)
+export const getOrganization = cache((params: { id: string }) =>
+  getOrganizationFn(params, prisma),
+)
 
-async function getOrganizationWithDetailsFn({ id }: { id: string }) {
-  const result = await prisma.$queryRaw<
+export async function getOrganizationWithClient(
+  params: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return getOrganizationFn(params, db)
+}
+
+async function getOrganizationWithDetailsFn(
+  { id }: { id: string },
+  db: PrismaClient = prisma,
+) {
+  const result = await db.$queryRaw<
     {
       result: Prisma.OrganizationGetPayload<{
         include: {
@@ -515,18 +577,30 @@ async function getOrganizationWithDetailsFn({ id }: { id: string }) {
   return result[0]?.result || { organization: null }
 }
 
-export const getOrganizationWithDetails = cache(getOrganizationWithDetailsFn)
+export const getOrganizationWithDetails = cache((params: { id: string }) =>
+  getOrganizationWithDetailsFn(params, prisma),
+)
 
-export async function addOrganizationSnapshot({
-  organizationId,
-  ipfsHash,
-  attestationId,
-}: {
-  organizationId: string
-  ipfsHash: string
-  attestationId: string
-}) {
-  return prisma.organizationSnapshot.create({
+export async function getOrganizationWithDetailsWithClient(
+  params: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return getOrganizationWithDetailsFn(params, db)
+}
+
+export async function addOrganizationSnapshot(
+  {
+    organizationId,
+    ipfsHash,
+    attestationId,
+  }: {
+    organizationId: string
+    ipfsHash: string
+    attestationId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.organizationSnapshot.create({
     data: {
       ipfsHash,
       attestationId,
@@ -540,16 +614,19 @@ export async function addOrganizationSnapshot({
 }
 
 // Add members to an organization
-export async function addOrganizationMembers({
-  organizationId,
-  userIds,
-  role = "member",
-}: {
-  organizationId: string
-  userIds: string[]
-  role?: string
-}) {
-  return prisma.userOrganization.createMany({
+export async function addOrganizationMembers(
+  {
+    organizationId,
+    userIds,
+    role = "member",
+  }: {
+    organizationId: string
+    userIds: string[]
+    role?: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.userOrganization.createMany({
     data: userIds.map((userId) => ({
       organizationId,
       userId,
@@ -559,16 +636,19 @@ export async function addOrganizationMembers({
 }
 
 // Update a member's role within an organization
-export async function updateOrganizationMemberRole({
-  organizationId,
-  userId,
-  role,
-}: {
-  organizationId: string
-  userId: string
-  role: string
-}) {
-  return prisma.userOrganization.update({
+export async function updateOrganizationMemberRole(
+  {
+    organizationId,
+    userId,
+    role,
+  }: {
+    organizationId: string
+    userId: string
+    role: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.userOrganization.update({
     where: {
       userId_organizationId: {
         organizationId,
@@ -580,14 +660,17 @@ export async function updateOrganizationMemberRole({
 }
 
 // Remove a member from an organization
-export async function removeOrganizationMember({
-  organizationId,
-  userId,
-}: {
-  organizationId: string
-  userId: string
-}) {
-  return prisma.userOrganization.delete({
+export async function removeOrganizationMember(
+  {
+    organizationId,
+    userId,
+  }: {
+    organizationId: string
+    userId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.userOrganization.delete({
     where: {
       userId_organizationId: {
         organizationId,
@@ -598,8 +681,11 @@ export async function removeOrganizationMember({
 }
 
 // Get organization contributors
-async function getOrganizationTeamFn({ id }: { id: string }) {
-  return prisma.organization.findUnique({
+async function getOrganizationTeamFn(
+  { id }: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return db.organization.findUnique({
     where: {
       id,
     },
@@ -613,14 +699,24 @@ async function getOrganizationTeamFn({ id }: { id: string }) {
   })
 }
 
-export const getOrganizationTeam = cache(getOrganizationTeamFn)
+export const getOrganizationTeam = cache((params: { id: string }) =>
+  getOrganizationTeamFn(params, prisma),
+)
+
+export async function getOrganizationTeamWithClient(
+  params: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return getOrganizationTeamFn(params, db)
+}
 
 //  Checks if a user is an admin of an organization
 export async function isUserAdminOfOrganization(
   userId: string,
   organizationId: string,
+  db: PrismaClient = prisma,
 ) {
-  const userOrganization = await prisma.userOrganization.findFirst({
+  const userOrganization = await db.userOrganization.findFirst({
     where: {
       userId,
       organizationId,
@@ -632,16 +728,19 @@ export async function isUserAdminOfOrganization(
   return userOrganization !== null
 }
 
-export async function createOrganizationKycTeam({
-  walletAddress,
-  organizationId,
-}: {
-  walletAddress: string
-  organizationId: string
-}) {
+export async function createOrganizationKycTeam(
+  {
+    walletAddress,
+    organizationId,
+  }: {
+    walletAddress: string
+    organizationId: string
+  },
+  db: PrismaClient = prisma,
+) {
   try {
     const [orgProjects, orgProjectWithDeletedKycTeam] = await Promise.all([
-      prisma.projectOrganization.findMany({
+      db.projectOrganization.findMany({
         where: {
           AND: [
             {
@@ -662,7 +761,7 @@ export async function createOrganizationKycTeam({
           projectId: true,
         },
       }),
-      prisma.projectOrganization.findMany({
+      db.projectOrganization.findMany({
         where: {
           organizationId,
           project: {
@@ -703,7 +802,7 @@ export async function createOrganizationKycTeam({
     let createdKycTeam: { id: string; walletAddress: string }
 
     if (orgProjectWithDeletedKycTeam.length > 0) {
-      createdKycTeam = await prisma.$transaction(async (tx) => {
+      createdKycTeam = await db.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -755,7 +854,7 @@ export async function createOrganizationKycTeam({
         return kycTeam
       })
     } else {
-      createdKycTeam = await prisma.$transaction(async (tx) => {
+      createdKycTeam = await db.$transaction(async (tx) => {
         const kycTeam = await tx.kYCTeam.create({
           data: {
             walletAddress: walletAddress.toLowerCase(),
@@ -800,12 +899,15 @@ export async function createOrganizationKycTeam({
   }
 }
 
-export async function getOrganizationKYCTeams({
-  organizationId,
-}: {
-  organizationId: string
-}) {
-  return prisma.organizationKYCTeam.findMany({
+export async function getOrganizationKYCTeams(
+  {
+    organizationId,
+  }: {
+    organizationId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.organizationKYCTeam.findMany({
     where: { organizationId, team: { deletedAt: null } },
     include: {
       team: {
