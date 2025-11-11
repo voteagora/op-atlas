@@ -12,6 +12,8 @@ import {
 } from "@/lib/auth/adminConfig"
 import { withImpersonation } from "@/lib/db/sessionContext"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const { session, userId } = await withImpersonation()

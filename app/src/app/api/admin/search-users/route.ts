@@ -8,6 +8,8 @@ import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
 import { withImpersonation } from "@/lib/db/sessionContext"
 import { impersonationService } from "@/lib/services/impersonationService"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     if (!isImpersonationEnabled()) {
