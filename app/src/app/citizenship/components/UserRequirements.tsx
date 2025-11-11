@@ -296,7 +296,11 @@ const InteractiveRequirements = ({
           {userWorldId?.verified ? (
             <span className="font-normal">Verified</span>
           ) : (
-            <WorldConnection userVerified={false} />
+            <WorldConnection userId={user.id}>
+              <span className="font-normal underline">
+                Verify with World ID
+              </span>
+            </WorldConnection>
           )}
         </ConditionRow>
       </div>
