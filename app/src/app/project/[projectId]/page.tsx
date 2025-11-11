@@ -77,7 +77,7 @@ export default async function Page({ params }: PageProps) {
         <div className="w-full lg:mt-8">
           <Header
             projectId={projectId}
-            userId={userId}
+            userId={userId ?? undefined}
             thumbnail={project.thumbnailUrl}
             banner={project.bannerUrl}
             citizenAttested={citizen?.attestationId ? true : false}
