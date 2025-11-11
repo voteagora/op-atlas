@@ -2,7 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getVoteForCitizen } from "@/db/votes"
+import { fetchVoteForCitizen } from "@/lib/actions/hookFetchers"
 
 import { useUserCitizen } from "../citizen/useUserCitizen"
 
@@ -20,7 +20,7 @@ const useMyVote = (proposalId: string) => {
     queryKey: [MY_VOTE_QUERY_KEY, proposalId, citizen?.address],
     queryFn: () => {
       if (!citizen?.id) return null
-      return getVoteForCitizen(proposalId, citizen.id)
+      return fetchVoteForCitizen(proposalId, citizen.id)
     },
     enabled: !!citizen?.id && !!citizen?.address,
   })
