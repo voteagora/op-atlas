@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react"
 
 import { Button } from "@/components/common/Button"
 import { Github } from "@/components/icons/socials"
+import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { GithubDisplay } from "@/components/profile/GithubDisplay"
 import { useUser } from "@/hooks/db/useUser"
 import { useUserAdminProjects } from "@/hooks/db/useUserAdminProjects"
