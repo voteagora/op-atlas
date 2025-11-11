@@ -89,13 +89,17 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       session.user.farcasterId = token.farcasterId
 
       // Include impersonation metadata in session
+      const tokenImpersonation = token.impersonation ?? null
       if (
-        token.impersonation &&
-        isSignedImpersonationSessionValid(token.impersonation, {
-          currentAdminUserId: token.id as string,
-        })
+        tokenImpersonation &&
+        isSignedImpersonationSessionValid(
+          tokenImpersonation as SignedImpersonationSession,
+          {
+            currentAdminUserId: token.id as string,
+          },
+        )
       ) {
-        session.impersonation = token.impersonation
+        session.impersonation = tokenImpersonation
       } else {
         session.impersonation = undefined
       }
