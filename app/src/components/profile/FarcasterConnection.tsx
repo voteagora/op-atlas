@@ -23,9 +23,10 @@ export const FarcasterConnection = ({
 }: Props) => {
   if (readOnly) {
     return (
-      <FarcasterConnectionReadOnly userId={userId}>
-        {children}
-      </FarcasterConnectionReadOnly>
+      <FarcasterConnectionReadOnly
+        userId={userId}
+        disabledLabel={children}
+      />
     )
   }
 
@@ -36,7 +37,13 @@ export const FarcasterConnection = ({
   )
 }
 
-const FarcasterConnectionReadOnly = ({ userId }: { userId: string }) => {
+const FarcasterConnectionReadOnly = ({
+  userId,
+  disabledLabel,
+}: {
+  userId: string
+  disabledLabel?: React.ReactNode
+}) => {
   const { user } = useUser({ id: userId, enabled: true })
 
   const username = user?.farcasterId ? user.username : undefined
@@ -56,7 +63,7 @@ const FarcasterConnectionReadOnly = ({ userId }: { userId: string }) => {
         )}
       </div>
       <Button variant="secondary" disabled className="whitespace-nowrap">
-        Editing disabled
+        {disabledLabel ?? "Editing disabled"}
       </Button>
     </div>
   )
