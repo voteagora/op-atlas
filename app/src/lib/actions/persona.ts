@@ -36,7 +36,7 @@ export const createPersonaInquiryLink = async (
     return withImpersonationProtection(
       "Persona",
       `Create inquiry link for ${personaEntity.type}`,
-      async () => {
+      async (): Promise<PersonaInquiryLinkResponse> => {
         try {
           if (!templateId) {
             return {

@@ -856,7 +856,6 @@ export async function restartKYCForExpiredLegalEntity({
           where: { id: legalEntityId },
           include: {
             kycLegalEntityController: true,
-            kYCLegalEntityTeams: true,
           },
         })
 
@@ -973,7 +972,7 @@ export async function restartAllExpiredKYCForTeam({
 
         const expiredEntities = await db.kYCLegalEntity.findMany({
           where: {
-            KYCLegalEntityTeams: {
+            teamLinks: {
               some: {
                 kycTeamId,
               },

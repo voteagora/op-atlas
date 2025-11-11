@@ -198,18 +198,20 @@ export const refreshUserPassport = async () =>
     return withImpersonationProtection(
       "Passport API",
       `Refresh passport scores for user ${userId}`,
-      async () => {
+      async (): Promise<{ error: string | null; success: boolean; mocked?: boolean }> => {
         const user = await getUserById(userId, db, session)
 
         if (!user) {
           return {
             error: "User not found",
+            success: false,
           }
         }
 
         if (!user.addresses || user.addresses.length === 0) {
           return {
             error: "No addresses found",
+            success: false,
           }
         }
 
@@ -219,6 +221,7 @@ export const refreshUserPassport = async () =>
         if (!apiKey || !scorerId) {
           return {
             error: "Passport API configuration is missing",
+            success: false,
           }
         }
 
