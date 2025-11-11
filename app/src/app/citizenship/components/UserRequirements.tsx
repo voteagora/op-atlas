@@ -353,7 +353,7 @@ const ReadOnlyRequirements = ({
           <>No governance address linked.</>
         )}
       </ConditionRow>
-      <ConditionRow isMet={!!user?.github || user?.notDeveloper}>
+      <ConditionRow isMet={!!user?.github || !!user?.notDeveloper}>
         {user?.github ? (
           <>
             GitHub connected: <span className="font-normal">@{user?.github}</span>
@@ -365,14 +365,16 @@ const ReadOnlyRequirements = ({
         )}
       </ConditionRow>
       <ConditionRow
-        isMet={!!userPassports?.find(
-          (passport: UserPassport) =>
-            passport.score >= VALID_PASSPORT_THRESHOLD,
-        )}
+        isMet={
+          !!userPassports?.some(
+            (passport: UserPassport) =>
+              Number(passport.score) >= VALID_PASSPORT_THRESHOLD,
+          )
+        }
       >
-        {userPassports?.find(
+        {userPassports?.some(
           (passport: UserPassport) =>
-            passport.score >= VALID_PASSPORT_THRESHOLD,
+            Number(passport.score) >= VALID_PASSPORT_THRESHOLD,
         )
           ? "Passport linked."
           : "Optimism Passport not linked."}
