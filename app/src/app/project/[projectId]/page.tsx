@@ -112,7 +112,7 @@ export default async function Page({ params }: PageProps) {
             />
           )}
 
-          <MissionSection projectId={projectId} userId={userId} />
+          <MissionSection projectId={projectId} userId={userId ?? undefined} />
         </div>
       </div>
     </div>
