@@ -68,16 +68,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
 
       const adminId = token.id as string | undefined
-      const impersonation = token.impersonation ?? null
-      if (impersonation) {
-        token.impersonation = isSignedImpersonationSessionValid(
-          impersonation as SignedImpersonationSession,
-          {
-            currentAdminUserId: adminId,
-          },
-        )
-          ? impersonation
-          : undefined
+      const impersonation = token.impersonation
+      if (
+        impersonation &&
+        !isSignedImpersonationSessionValid(impersonation, {
+          currentAdminUserId: adminId,
+        })
+      ) {
+        token.impersonation = undefined
       }
 
       return token
@@ -89,20 +87,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       session.user.farcasterId = token.farcasterId
 
       // Include impersonation metadata in session
-      const tokenImpersonation = token.impersonation ?? null
-      if (
+      const tokenImpersonation = token.impersonation
+      session.impersonation =
         tokenImpersonation &&
-        isSignedImpersonationSessionValid(
-          tokenImpersonation as SignedImpersonationSession,
-          {
-            currentAdminUserId: token.id as string,
-          },
-        )
-      ) {
-        session.impersonation = tokenImpersonation
-      } else {
-        session.impersonation = undefined
-      }
+        isSignedImpersonationSessionValid(tokenImpersonation, {
+          currentAdminUserId: token.id as string,
+        })
+          ? tokenImpersonation
+          : undefined
 
       return session
     },
