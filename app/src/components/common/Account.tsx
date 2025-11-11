@@ -192,30 +192,6 @@ const SafeWalletsMenuItems = ({
 
 // Wrapper component that handles conditional hook usage
 const AccountContent = () => {
-  // Always call hooks - they will be mocked by the TestModeProvider when in test mode
-  const isLinking = useRef(false)
-  const isLoggingIn = useRef(false)
-
-  const { data: session, status: authStatus } = useSession()
-  const { user, invalidate: invalidateUser } = useUser({
-    id: session?.user?.id || "",
-    enabled: !!session?.user,
-  })
-
-  const username = useUsername(user)
-
-  // Safe wallet integration
-  const {
-    currentAddress,
-    currentContext,
-    signerWallet,
-    selectedSafeWallet,
-    availableSafeWallets,
-    switchToSafe,
-    switchToEOA,
-    isLoadingSafeWallets,
-  } = useWallet()
-
   // Privy hooks (kept after refs/session/wallet for clarity; production path only)
   const { user: privyUser, getAccessToken } = usePrivy()
   const { login: privyLogin } = useLogin({
@@ -246,6 +222,34 @@ const AccountContent = () => {
     },
   })
 
+  const isLinking = useRef(false)
+  const isLoggingIn = useRef(false)
+
+  const { data: session, status: authStatus } = useSession()
+  const viewerId =
+    session?.impersonation?.isActive && session?.impersonation?.targetUserId
+      ? session.impersonation.targetUserId
+      : session?.user?.id
+  const adminUserId = session?.user?.id ?? null
+  const { user, invalidate: invalidateUser } = useUser({
+    id: viewerId || "",
+    enabled: !!viewerId,
+  })
+
+  const username = useUsername(user)
+
+  // Safe wallet integration
+  const {
+    currentAddress,
+    currentContext,
+    signerWallet,
+    selectedSafeWallet,
+    availableSafeWallets,
+    switchToSafe,
+    switchToEOA,
+    isLoadingSafeWallets,
+  } = useWallet()
+
   const prevAuthStatus = usePrevious(authStatus)
 
   const { isBadgeholder } = useIsBadgeholder()
@@ -271,6 +275,9 @@ const AccountContent = () => {
   }
 
   const onPrivyLogin = (user: PrivyUser) => {
+    if (session?.impersonation?.isActive) {
+      return
+    }
     isLoggingIn.current = true
     getAccessToken()
       .then((token) => {
@@ -292,7 +299,8 @@ const AccountContent = () => {
       isLoggingIn.current = false
       saveLogInDate()
       track("Successful Sign In", {
-        userId: session.user.id,
+        userId: viewerId ?? undefined,
+        actingAdminId: adminUserId ?? undefined,
         elementType: "auth",
         elementName: "Sign In",
       })
@@ -320,7 +328,8 @@ const AccountContent = () => {
         }
       } else {
         track("Profile created", {
-          userId: session.user.id,
+          userId: viewerId ?? undefined,
+          actingAdminId: adminUserId ?? undefined,
           elementType: "auth",
           elementName: "Profile Creation",
         })
@@ -490,9 +499,14 @@ const TestModeAccount = () => {
   const isLoggingIn = useRef(false)
 
   const { data: session, status: authStatus } = useSession()
+  const viewerId =
+    session?.impersonation?.isActive && session?.impersonation?.targetUserId
+      ? session.impersonation.targetUserId
+      : session?.user?.id
+  const adminUserId = session?.user?.id ?? null
   const { user, invalidate: invalidateUser } = useUser({
-    id: session?.user?.id || "",
-    enabled: !!session?.user,
+    id: viewerId || "",
+    enabled: !!viewerId,
   })
 
   const username = useUsername(user)
@@ -534,6 +548,9 @@ const TestModeAccount = () => {
   }
 
   const onPrivyLogin = (user: PrivyUser) => {
+    if (session?.impersonation?.isActive) {
+      return
+    }
     isLoggingIn.current = true
     // Mock implementation for test mode
     Promise.resolve("mock-token")
@@ -541,6 +558,8 @@ const TestModeAccount = () => {
         signIn("credentials", {
           privy: JSON.stringify(user),
           privyAccessToken: token,
+          testMode: "true",
+          testUserId: user.id,
           redirect: false,
         }).catch(() => {
           toast.error("Unable to login at this time. Try again later.")
@@ -556,7 +575,8 @@ const TestModeAccount = () => {
       isLoggingIn.current = false
       saveLogInDate()
       track("Successful Sign In", {
-        userId: session.user.id,
+        userId: viewerId ?? undefined,
+        actingAdminId: adminUserId ?? undefined,
         elementType: "auth",
         elementName: "Sign In",
       })
@@ -573,7 +593,8 @@ const TestModeAccount = () => {
         checkBadgeholderStatus()
       } else {
         track("Profile created", {
-          userId: session.user.id,
+          userId: viewerId ?? undefined,
+          actingAdminId: adminUserId ?? undefined,
           elementType: "auth",
           elementName: "Profile Creation",
         })
