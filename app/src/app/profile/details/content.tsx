@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useUser } from "@/hooks/db/useUser"
 
 type ProfileDetailsContentProps = {
-  session: Session
+  session: Session | null
   userId: string
   isImpersonating?: boolean
 }
