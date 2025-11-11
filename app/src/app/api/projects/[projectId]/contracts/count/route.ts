@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getAddress } from "viem"
 
-import { prisma } from "@/db/client"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -10,6 +10,7 @@ export async function GET(
   request: Request,
   { params }: { params: { projectId: string } },
 ) {
+  const { db } = await withImpersonation()
   const { searchParams } = new URL(request.url)
   const deployer = searchParams.get("deployer")
 
@@ -29,7 +30,7 @@ export async function GET(
       }
     }
 
-    const count = await prisma.projectContract.count({ where })
+    const count = await db.projectContract.count({ where })
 
     return NextResponse.json({ count })
   } catch (error) {

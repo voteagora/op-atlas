@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/db/client"
+
 import { verifyKYCToken, isKYCLinkExpired } from "@/lib/utils/kycToken"
 import { personaClient } from "@/lib/persona"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { token: string } },
 ) {
   try {
+    const { db } = await withImpersonation({ forceProd: true, session: null })
     const { token } = params
 
     // Verify and decode the token
@@ -27,12 +29,12 @@ export async function POST(
     let personaTemplateId: string | undefined
 
     if (entityType === "kycUser") {
-      entity = await prisma.kYCUser.findUnique({
+      entity = await db.kYCUser.findUnique({
         where: { id: entityId },
       })
       personaTemplateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
     } else {
-      entity = await prisma.kYCLegalEntity.findUnique({
+      entity = await db.kYCLegalEntity.findUnique({
         where: { id: entityId },
       })
       personaTemplateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
@@ -81,12 +83,12 @@ export async function POST(
 
         // Update the entity with the new reference ID
         if (entityType === "kycUser") {
-          await prisma.kYCUser.update({
+          await db.kYCUser.update({
             where: { id: entityId },
             data: { personaReferenceId: referenceId },
           })
         } else {
-          await prisma.kYCLegalEntity.update({
+          await db.kYCLegalEntity.update({
             where: { id: entityId },
             data: { personaReferenceId: referenceId },
           })
@@ -103,7 +105,7 @@ export async function POST(
 
       // Store the inquiry ID and creation timestamp in database atomically
       if (entityType === "kycUser") {
-        await prisma.kYCUser.update({
+        await db.kYCUser.update({
           where: { id: entityId },
           data: {
             personaInquiryId: inquiryId,
@@ -111,7 +113,7 @@ export async function POST(
           },
         })
       } else {
-        await prisma.kYCLegalEntity.update({
+        await db.kYCLegalEntity.update({
           where: { id: entityId },
           data: {
             personaInquiryId: inquiryId,
