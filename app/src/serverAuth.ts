@@ -2,7 +2,6 @@ import { createHash } from "crypto"
 import { NextRequest } from "next/server"
 
 import { getApiUser } from "./db/apiUser"
-import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 const HASH_FN = "sha256"
 
@@ -29,8 +28,8 @@ export async function authenticateApiUser(
     }
   }
 
-  const { db } = await getImpersonationContext({ forceProd: true, session: null })
-  const apiUser = await getApiUser({ apiKey: hashApiKey(key) }, db)
+  // Query the authoritative production database directly
+  const apiUser = await getApiUser({ apiKey: hashApiKey(key) })
 
   if (!apiUser) {
     return {
