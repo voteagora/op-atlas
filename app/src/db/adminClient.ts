@@ -83,37 +83,6 @@ class AdminDatabaseClient {
       await this.d1Client.$disconnect()
     }
   }
-
-  /**
-   * Get database metrics for monitoring
-   * Returns user and project counts from both databases
-   */
-  async getMetrics() {
-    try {
-      const prodMetrics = await this.prodClient.$queryRaw<Array<{ user_count: bigint; project_count: bigint }>>`
-        SELECT
-          (SELECT count(*) FROM "User") as user_count,
-          (SELECT count(*) FROM "Project") as project_count
-      `
-
-      let d1Metrics = null
-      if (this.d1Client) {
-        d1Metrics = await this.d1Client.$queryRaw<Array<{ user_count: bigint; project_count: bigint }>>`
-          SELECT
-            (SELECT count(*) FROM "User") as user_count,
-            (SELECT count(*) FROM "Project") as project_count
-        `
-      }
-
-      return {
-        production: prodMetrics[0],
-        d1: d1Metrics ? d1Metrics[0] : null
-      }
-    } catch (error) {
-      console.error('Error fetching database metrics:', error)
-      return { production: null, d1: null }
-    }
-  }
 }
 
 // Export singleton instance
