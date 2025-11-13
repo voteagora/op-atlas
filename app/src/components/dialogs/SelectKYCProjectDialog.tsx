@@ -28,6 +28,8 @@ export default function SelectKYCProjectDialog({
   const queryClient = useQueryClient()
 
   const session = useSession()
+  const viewerId =
+    session.data?.impersonation?.targetUserId ?? session.data?.user?.id
 
   const { organizationId } = useParams()
 
@@ -42,8 +44,8 @@ export default function SelectKYCProjectDialog({
   } = useQuery({
     queryKey: ["userProjects", organizationId],
     queryFn: async () => {
-      if (!session.data?.user.id) return []
-      const allProjects = (await getAdminProjects(session.data.user.id)).filter(
+      if (!viewerId) return []
+      const allProjects = (await getAdminProjects(viewerId)).filter(
         (project) => project.organization?.organization?.id === organizationId,
       )
 

@@ -3,7 +3,6 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import { Button } from "@/components/common/Button"
 import KYCStatusContainer, {
   KYCStatusTitle,
@@ -13,6 +12,7 @@ import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeli
 import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { getUserProjectRole, verifyMembership } from "@/lib/actions/utils"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
@@ -42,24 +42,30 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const session = await auth()
-  const userId = session?.user.id
+  const { db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")
   }
 
   // Check user membership - redirect non-members to homepage
-  const membershipCheck = await verifyMembership(params.projectId, userId)
+  const membershipCheck = await verifyMembership(
+    params.projectId,
+    userId,
+    db,
+  )
   if (membershipCheck?.error) {
     redirect("/")
   }
 
   // Get user role
-  const userRole = await getUserProjectRole(params.projectId, userId)
+  const userRole = await getUserProjectRole(params.projectId, userId, db)
   const isAdmin = userRole === "admin"
 
-  const project = await getKycTeamForProject({ projectId: params.projectId })
+  const project = await getKycTeamForProject(
+    { projectId: params.projectId },
+    db,
+  )
   const kycTeam = project?.kycTeam ?? undefined
   const hasKycTeamWithUsers = !!(
     kycTeam &&

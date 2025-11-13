@@ -4,18 +4,18 @@ import { Application } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { sortBy } from "ramda"
 
-import { auth } from "@/auth"
 import {
   createApplication,
-  getProject,
-  getProjectContracts,
+  getProjectContractsWithClient,
+  getProjectWithClient,
+  getUserApplicationsWithClient,
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import { createApplicationAttestation } from "../eas/serverOnly"
 import { CategoryWithImpact } from "../types"
 import { getProjectStatus } from "../utils"
-import { getUserApplicationsForRound } from "./projects"
 import { verifyAdminStatus } from "./utils"
 
 const whitelist: string[] = []
@@ -27,21 +27,24 @@ interface SubmitApplicationRequest {
   projectDescriptionOptions: string[]
 }
 
-export const publishAndSaveApplication = async ({
-  project,
-  category,
-  farcasterId,
-  metadataSnapshotId,
-  round,
-  roundName,
-}: {
-  project: SubmitApplicationRequest
-  category: CategoryWithImpact
-  farcasterId: string
-  metadataSnapshotId: string
-  round: number
-  roundName?: string
-}): Promise<Application> => {
+export const publishAndSaveApplication = async (
+  {
+    project,
+    category,
+    farcasterId,
+    metadataSnapshotId,
+    round,
+    roundName,
+  }: {
+    project: SubmitApplicationRequest
+    category: CategoryWithImpact
+    farcasterId: string
+    metadataSnapshotId: string
+    round: number
+    roundName?: string
+  },
+  ctx: SessionContext,
+): Promise<Application> => {
   // Publish attestation (must reference an existing metadata snapshot)
   const attestationId = await createApplicationAttestation({
     farcasterId: parseInt(farcasterId),
@@ -52,38 +55,49 @@ export const publishAndSaveApplication = async ({
   })
 
   // Create application in database
-  return createApplication({
-    round: round,
-    ...project,
-    attestationId,
-  })
+  return createApplication(
+    {
+      round: round,
+      ...project,
+      attestationId,
+    },
+    { db: ctx.db, session: ctx.session },
+  )
 }
 
 const createProjectApplication = async (
+  ctx: SessionContext,
   applicationData: SubmitApplicationRequest,
   farcasterId: string,
   round: number,
   category: CategoryWithImpact,
   roundName?: string,
 ) => {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { db, userId } = ctx
+
   if (!userId) {
     return {
       error: "Unauthorized",
     }
   }
 
-  const isInvalid = await verifyAdminStatus(applicationData.projectId, userId)
+  const isInvalid = await verifyAdminStatus(
+    applicationData.projectId,
+    userId,
+    ctx.db,
+  )
   if (isInvalid?.error) {
     return isInvalid
   }
 
   const [project, contracts] = await Promise.all([
-    getProject({ id: applicationData.projectId }),
-    getProjectContracts({
-      projectId: applicationData.projectId,
-    }),
+    getProjectWithClient({ id: applicationData.projectId }, db),
+    getProjectContractsWithClient(
+      {
+        projectId: applicationData.projectId,
+      },
+      db,
+    ),
   ])
 
   if (!project) {
@@ -101,9 +115,9 @@ const createProjectApplication = async (
     }
   }
 
-  const applications = await getUserApplicationsForRound(
-    session?.user?.id,
-    round,
+  const applications = await getUserApplicationsWithClient(
+    { userId, roundId: round.toString() },
+    db,
   )
 
   const result = applications.find(
@@ -127,19 +141,22 @@ const createProjectApplication = async (
     return { error: "Project has no snapshot" }
   }
 
-  const application = await publishAndSaveApplication({
-    project: {
-      projectId: project.id,
-      categoryId: applicationData.categoryId,
-      impactStatement: applicationData.impactStatement,
-      projectDescriptionOptions: applicationData.projectDescriptionOptions,
+  const application = await publishAndSaveApplication(
+    {
+      project: {
+        projectId: project.id,
+        categoryId: applicationData.categoryId,
+        impactStatement: applicationData.impactStatement,
+        projectDescriptionOptions: applicationData.projectDescriptionOptions,
+      },
+      category,
+      farcasterId,
+      metadataSnapshotId: latestSnapshot.attestationId,
+      round,
+      roundName,
     },
-    category,
-    farcasterId,
-    metadataSnapshotId: latestSnapshot.attestationId,
-    round,
-    roundName,
-  })
+    ctx,
+  )
 
   return {
     application,
@@ -160,60 +177,58 @@ export const submitApplications = async (
   roundNumber: number,
   categories?: CategoryWithImpact[],
 ) => {
-  const session = await auth()
+  return withImpersonation(
+    async (ctx) => {
+      const { userId, db, session } = ctx
 
-  if (!session?.user?.id) {
-    return {
-      applications: [],
-      error: "Unauthorized",
-    }
-  }
+      if (!userId) {
+        return {
+          applications: [],
+          error: "Unauthorized",
+        }
+      }
 
-  const user = await getUserById(session.user.id)
+      const user = await getUserById(userId, db, session)
 
-  if (user?.emails.length === 0) {
-    return {
-      applications: [],
-      error: "You must provide an email to apply.",
-    }
-  }
+      if (user?.emails.length === 0) {
+        return {
+          applications: [],
+          error: "You must provide an email to apply.",
+        }
+      }
 
-  // const isWhitelisted = projects.some((project) =>
-  //   whitelist.includes(project.projectId),
-  // )
+      const isOpenForEnrollment = roundStartDate < new Date()
 
-  // if (APPLICATIONS_CLOSED && !isWhitelisted) {
-  //   throw new Error("Applications are closed")
-  // }
+      if (!isOpenForEnrollment) {
+        throw new Error("Applications are closed")
+      }
 
-  const isOpenForEnrollment = roundStartDate < new Date()
+      const applications: Application[] = []
+      let error: string | null = null
 
-  if (!isOpenForEnrollment) {
-    throw new Error("Applications are closed")
-  }
+      for (const project of projects) {
+        const result = await createProjectApplication(
+          ctx,
+          project,
+          user?.farcasterId ?? "0",
+          roundNumber,
+          categories?.find((category) => category.id === project.categoryId)!,
+          roundName,
+        )
+        if (result.error === null && result.application) {
+          applications.push(result.application)
+        } else if (result.error) {
+          error = result.error
+        }
+      }
 
-  const applications: Application[] = []
-  let error: string | null = null
+      revalidatePath("/dashboard")
 
-  for (const project of projects) {
-    const result = await createProjectApplication(
-      project,
-      session.user?.farcasterId ?? 0,
-      roundNumber,
-      categories?.find((category) => category.id === project.categoryId)!,
-      roundName,
-    )
-    if (result.error === null && result.application) {
-      applications.push(result.application)
-    } else if (result.error) {
-      error = result.error
-    }
-  }
-
-  revalidatePath("/dashboard")
-
-  return {
-    applications,
-    error,
-  }
+      return {
+        applications,
+        error,
+      }
+    },
+    { requireUser: true },
+  )
 }

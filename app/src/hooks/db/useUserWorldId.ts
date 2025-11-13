@@ -1,7 +1,7 @@
 import { UserWorldId } from "@prisma/client"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getUserWorldId } from "@/db/users"
+import { fetchUserWorldId } from "@/lib/actions/hookFetchers"
 
 export const WORLD_VERIFICATION_QUERY_KEY = "worldVerification"
 
@@ -21,7 +21,7 @@ export const useUserWorldId = ({
     queryKey: [WORLD_VERIFICATION_QUERY_KEY, id],
     queryFn: async () => {
       if (!id) throw new Error("User ID is required")
-      return await getUserWorldId(id)
+      return await fetchUserWorldId(id)
     },
     enabled: isEnabled,
   })

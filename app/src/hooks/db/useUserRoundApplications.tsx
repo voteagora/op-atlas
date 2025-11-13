@@ -30,5 +30,7 @@ export function useSessionRoundApplications(roundNumber: number | undefined): {
   ) => Promise<QueryObserverResult<ApplicationWithDetails[]>>
 } {
   const session = useSession()
-  return useUserRoundApplications(session?.data?.user.id, roundNumber)
+  const viewerId =
+    session.data?.impersonation?.targetUserId ?? session.data?.user?.id
+  return useUserRoundApplications(viewerId, roundNumber)
 }

@@ -5,6 +5,7 @@ import {
 } from "@/components/proposals/proposal.types"
 import { ProposalBadgeType } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { getCitizenByType, getCitizenProposalVote } from "@/db/citizens"
+import type { PrismaClient } from "@prisma/client"
 
 import { formatMMMd } from "./utils/date"
 
@@ -200,12 +201,18 @@ export const enrichProposalData = async (
     selfNominations: UIProposal[]
   },
   citizenId: number,
+  options: { db?: PrismaClient } = {},
 ) => {
+  const { db } = options
   // Helper function to enrich a single proposal with vote information
   const enrichSingleProposal = async (
     proposal: UIProposal,
   ): Promise<UIProposal> => {
-    const offchainVote = await getCitizenProposalVote(citizenId, proposal.id)
+    const offchainVote = await getCitizenProposalVote(
+      citizenId,
+      proposal.id,
+      db,
+    )
 
     // Check if we have a valid citizen with vote data
     const hasVoted = !!offchainVote?.vote && Array.isArray(offchainVote.vote)
@@ -278,13 +285,17 @@ export const enrichProposalData = async (
   }
 }
 
-export const getEnrichedProposalData = async ({
-  userId,
-  offset,
-}: {
-  userId?: string
-  offset?: number
-}) => {
+export const getEnrichedProposalData = async (
+  {
+    userId,
+    offset,
+  }: {
+    userId?: string
+    offset?: number
+  },
+  options: { db?: PrismaClient } = {},
+) => {
+  const { db } = options
   try {
     // Get the proposal data from the API
     const proposalData = await getProposals(offset)
@@ -294,13 +305,13 @@ export const getEnrichedProposalData = async ({
       }
 
       // Get the citizen data from DB
-      const citizen = await getCitizenByType({ type: "user", id: userId })
+      const citizen = await getCitizenByType({ type: "user", id: userId }, db)
       if (!citizen) {
         return proposalData
       }
 
       // Enrich the proposal data with citizen data for conditional vote status rendering
-      return enrichProposalData(proposalData, citizen.id)
+      return enrichProposalData(proposalData, citizen.id, { db })
     } catch (error) {
       console.error(`Failed to fetch Citizen Data: ${error}`)
       // If we can't get citizen data, just return the proposal data as is

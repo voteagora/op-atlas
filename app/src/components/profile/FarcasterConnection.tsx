@@ -1,7 +1,6 @@
 "use client"
 
 import { usePrivy } from "@privy-io/react-auth"
-import Image from "next/image"
 import { X } from "lucide-react"
 
 import { CheckboxCircleFIll } from "@/components/icons/remix"
@@ -11,13 +10,69 @@ import { cn } from "@/lib/utils"
 
 import { Button } from "../common/Button"
 
+type Props = {
+  userId: string
+  children: React.ReactNode
+  readOnly?: boolean
+}
+
 export const FarcasterConnection = ({
   userId,
   children,
+  readOnly = false,
+}: Props) => {
+  if (readOnly) {
+    return (
+      <FarcasterConnectionReadOnly
+        userId={userId}
+        disabledLabel={children}
+      />
+    )
+  }
+
+  return (
+    <FarcasterConnectionInteractive userId={userId}>
+      {children}
+    </FarcasterConnectionInteractive>
+  )
+}
+
+const FarcasterConnectionReadOnly = ({
+  userId,
+  disabledLabel,
 }: {
   userId: string
-  children: React.ReactNode
+  disabledLabel?: React.ReactNode
 }) => {
+  const { user } = useUser({ id: userId, enabled: true })
+
+  const username = user?.farcasterId ? user.username : undefined
+
+  return (
+    <div className="flex flex-row gap-2 items-center">
+      <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
+        {username ? (
+          <>
+            <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
+            <p className="text-sm truncate">@{username}</p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Farcaster not connected.
+          </p>
+        )}
+      </div>
+      <Button variant="secondary" disabled className="whitespace-nowrap">
+        {disabledLabel ?? "Editing disabled"}
+      </Button>
+    </div>
+  )
+}
+
+const FarcasterConnectionInteractive = ({
+  userId,
+  children,
+}: Props) => {
   const { user } = useUser({
     id: userId,
     enabled: true,

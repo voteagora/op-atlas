@@ -46,6 +46,8 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
     useCitizenQualification(user?.id)
   const { citizen, isLoading: isCitizenLoading } = useUserByContext()
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
   useEffect(() => {
     if (!isEligibilityLoading && !isCitizenLoading) {
       const timer = setTimeout(() => {
@@ -66,7 +68,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
           ? "registered"
           : citizenEligibility?.eligible
           ? "eligible"
-          : user?.id
+          : viewerId
           ? "not signed in"
           : "ineligible",
         user_group: citizenEligibility?.type,
@@ -80,7 +82,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
     track,
     citizen,
     citizenEligibility,
-    session?.user?.id,
+    viewerId,
     isInitialLoad,
   ])
 

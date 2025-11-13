@@ -5,7 +5,7 @@ import {
   UseQueryResult,
 } from "@tanstack/react-query"
 
-import { getAllProjectContracts } from "@/db/projects"
+import { fetchAllProjectContracts } from "@/lib/actions/hookFetchers"
 
 export function useProjectContracts(
   projectId: string,
@@ -13,7 +13,7 @@ export function useProjectContracts(
 ): UseQueryResult<ProjectContract[], Error> {
   return useQuery({
     queryKey: ["projectContracts", projectId],
-    queryFn: () => getAllProjectContracts({ projectId }),
+    queryFn: () => fetchAllProjectContracts(projectId),
     ...queryOptions, // Merge custom options
   })
 }

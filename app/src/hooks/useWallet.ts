@@ -37,10 +37,13 @@ export const useWallet = (): UseWalletReturn => {
     error,
   } = safeContext
 
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id ?? ""
+
   // Get user database data
   const { user } = useUser({
-    id: session?.user?.id || "",
-    enabled: !!session?.user,
+    id: viewerId || "",
+    enabled: !!viewerId,
   })
 
   const { user: userFromAddress } = useUserAddresses({

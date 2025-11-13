@@ -1,7 +1,6 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import {
   Discord,
   Farcaster,
@@ -15,6 +14,7 @@ import {
   GithubNotDeveloperToggle,
 } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const metadata: Metadata = {
   title: "Connected Apps - OP Atlas",
@@ -23,15 +23,20 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
-
-  if (!session?.user?.id) {
+  const { session, userId } = await getImpersonationContext()
+  if (!userId) {
     redirect("/")
   }
+  const isImpersonating = !!session?.impersonation?.isActive
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
       <h2 className="text-foreground text-2xl font-semibold">Connected Apps</h2>
+      {isImpersonating && (
+        <p className="text-sm text-muted-foreground">
+          You&apos;re viewing another user, so connections are read-only.
+        </p>
+      )}
 
       <div className="flex flex-col gap-8">
         {/* Farcaster */}
@@ -49,7 +54,7 @@ export default async function Page() {
             </div>
           </div>
           <div className="flex-shrink-0 self-center">
-            <FarcasterConnection userId={session.user.id}>
+            <FarcasterConnection userId={userId} readOnly={isImpersonating}>
               Connect
             </FarcasterConnection>
           </div>
@@ -67,7 +72,7 @@ export default async function Page() {
             </div>
           </div>
           <div className="flex-shrink-0 self-center">
-            <DiscordConnection userId={session.user.id} />
+            <DiscordConnection userId={userId} readOnly={isImpersonating} />
           </div>
         </div>
 
@@ -81,10 +86,16 @@ export default async function Page() {
             <div className="text-secondary-foreground text-base">
               Connect your GitHub account to show your code contributions.
             </div>
-            <GithubNotDeveloperToggle userId={session.user.id} />
+            {!isImpersonating && (
+              <GithubNotDeveloperToggle userId={userId} />
+            )}
           </div>
           <div className="flex-shrink-0 self-center">
-            <GithubConnection userId={session.user.id} hideNotDeveloperToggle />
+            <GithubConnection
+              userId={userId}
+              hideNotDeveloperToggle
+              readOnly={isImpersonating}
+            />
           </div>
         </div>
 
@@ -111,7 +122,7 @@ export default async function Page() {
             </div>
           </div>
           <div className="flex-shrink-0 self-center">
-            <GovForumConnection userId={session.user.id} />
+            <GovForumConnection userId={userId} readOnly={isImpersonating} />
           </div>
         </div>
       </div>

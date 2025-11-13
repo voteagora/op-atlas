@@ -1,4 +1,7 @@
-import { getCitizenByAddress, getCitizenForUser } from "@/db/citizens"
+import {
+  fetchCitizenByAddress,
+  fetchCitizenForUser,
+} from "@/lib/actions/hookFetchers"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useEffect } from "react"
@@ -10,13 +13,15 @@ export const USER_CITIZEN_BY_ADDRESS_QUERY_KEY = "citizen-by-address"
 export const useUserCitizen = () => {
   const queryClient = useQueryClient()
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
   useEffect(() => {
-    if (session?.user?.id) {
+    if (viewerId) {
       queryClient.invalidateQueries({
-        queryKey: [USER_CITIZEN_QUERY_KEY, session?.user?.id],
+        queryKey: [USER_CITIZEN_QUERY_KEY, viewerId],
       })
     }
-  }, [session?.user?.id, queryClient])
+  }, [viewerId, queryClient])
 
   const {
     data: citizen,
@@ -24,15 +29,15 @@ export const useUserCitizen = () => {
     isSuccess,
     isError,
   } = useQuery({
-    queryKey: [USER_CITIZEN_QUERY_KEY, session?.user?.id],
+    queryKey: [USER_CITIZEN_QUERY_KEY, viewerId],
     queryFn: async () => {
-      if (!session?.user?.id) {
+      if (!viewerId) {
         return null
       } else {
-        return await getCitizenForUser(session?.user?.id)
+        return await fetchCitizenForUser(viewerId)
       }
     },
-    enabled: !!session?.user?.id,
+    enabled: !!viewerId,
   })
 
   return { citizen, isLoading, isSuccess, isError }
@@ -60,7 +65,7 @@ export const useUserByAddress = (address: string | null) => {
       if (!address) {
         return null
       } else {
-        return await getCitizenByAddress(address)
+        return await fetchCitizenByAddress(address)
       }
     },
     enabled: !!address,

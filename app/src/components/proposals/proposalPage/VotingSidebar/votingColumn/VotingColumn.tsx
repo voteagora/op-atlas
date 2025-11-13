@@ -274,6 +274,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   >(undefined)
 
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
   const { user } = useWallet()
 
   const { citizen, isLoading: isCitizenLoading } = useUserByContext()
@@ -305,7 +307,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       : myVoteSelections
 
   const votingActions = getVotingActions(
-    !!session?.user?.id,
+    !!viewerId,
     !!citizen,
     !!citizenEligibility?.eligible,
   )
@@ -319,7 +321,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   }, [myVoteType])
 
   const canVote =
-    !!session?.user?.id &&
+    !!viewerId &&
     !!citizen &&
     proposalData.status === ProposalStatus.ACTIVE &&
     !myVote
@@ -912,7 +914,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                 citizen &&
                 !myVote &&
                 !justVoted &&
-                !!session?.user?.id && (
+                !!viewerId && (
                   <div className="text-red-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2">
                     Your citizen wallet is not connected. Try signing out and
                     signing in with your Citizen wallet:{" "}
@@ -925,7 +927,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
                 citizen &&
                 !myVote &&
                 !justVoted &&
-                !!session?.user?.id && (
+                !!viewerId && (
                   <div className="text-blue-500 text-xs text-center transition-all duration-300 ease-in-out animate-in slide-in-from-bottom-2 flex items-center justify-center gap-2">
                     <Lock className="text-blue-500 w-4 h-4" />
                     Smart contract wallet detected

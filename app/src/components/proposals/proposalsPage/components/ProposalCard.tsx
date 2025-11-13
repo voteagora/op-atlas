@@ -206,9 +206,11 @@ const ProposalDates = ({
   passed,
 }: ProposalDatesProps) => {
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
 
   const voteText = () => {
-    if (!session?.user?.id) {
+    if (!viewerId) {
       return null
     }
     if (badgeType === ProposalBadgeType.now) {
