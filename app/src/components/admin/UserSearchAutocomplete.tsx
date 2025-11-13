@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Button } from "@/components/ui/button"
-import { Badge, BriefcaseBusiness, FileText, Search, UserRound } from "lucide-react"
+import { Building2, FolderGit, Loader2, Search, UserRound } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { CitizenshipBadge } from "@/components/common/CitizenshipBadge"
 
 interface User {
   id: string
@@ -16,6 +17,7 @@ interface User {
   organizationCount: number
   hasApplications: boolean
   isCitizen: boolean
+  hasApprovedKYC: boolean
 }
 
 interface Props {
@@ -23,6 +25,10 @@ interface Props {
   disabled?: boolean
   placeholder?: string
   currentUserId?: string
+  autoFocus?: boolean
+  align?: "left" | "right"
+  loading?: boolean
+  loadingText?: string
 }
 
 // Simple debounce implementation
@@ -41,13 +47,18 @@ export function UserSearchAutocomplete({
   onSelectUser,
   disabled,
   placeholder,
-  currentUserId
+  currentUserId,
+  autoFocus,
+  align = "left",
+  loading = false,
+  loadingText
 }: Props) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(false)
+  const [searching, setSearching] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const searchUsers = useCallback(
     debounce(async (searchQuery: string) => {
@@ -57,7 +68,7 @@ export function UserSearchAutocomplete({
       }
 
       try {
-        setLoading(true)
+        setSearching(true)
         const response = await fetch(
           `/api/admin/search-users?q=${encodeURIComponent(searchQuery)}`
         )
@@ -71,7 +82,7 @@ export function UserSearchAutocomplete({
       } catch (error) {
         console.error('Search failed:', error)
       } finally {
-        setLoading(false)
+        setSearching(false)
       }
     }, 300),
     []
@@ -103,6 +114,16 @@ export function UserSearchAutocomplete({
     return () => document.removeEventListener("mousedown", handler)
   }, [open])
 
+  useEffect(() => {
+    if (open && autoFocus && inputRef.current) {
+      // Small delay to ensure the input is rendered
+      const timeout = setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+      return () => clearTimeout(timeout)
+    }
+  }, [open, autoFocus])
+
   return (
     <div ref={containerRef} className="relative w-full">
       <Button
@@ -111,24 +132,46 @@ export function UserSearchAutocomplete({
         disabled={disabled}
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
-          "justify-start w-full sm:w-[260px] min-w-0",
+          "justify-start",
           disabled ? "opacity-70" : "",
         )}
       >
-        <Search className="h-4 w-4 mr-2" />
-        {placeholder || "Search users..."}
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            {loadingText || placeholder || "Search users..."}
+          </>
+        ) : (
+          <>
+            <Search className="h-4 w-4 mr-2" />
+            {placeholder || "Search users..."}
+          </>
+        )}
       </Button>
       {open && (
-        <div className="absolute z-[360] mt-2 w-full sm:w-[420px] max-h-[360px] overflow-hidden rounded-md border border-border bg-popover shadow-lg">
+        <div className={cn(
+          "absolute z-[360] mt-2 w-full sm:w-[420px] max-h-[360px] overflow-hidden rounded-md border border-border bg-popover shadow-lg",
+          align === "right" && "right-0"
+        )}>
           <Command shouldFilter={false}>
             <CommandInput
+              ref={inputRef as any}
               placeholder="Search by name, username, email, or ID..."
               value={query}
               onValueChange={setQuery}
             />
             <CommandList className="max-h-[18rem] overflow-y-auto">
               <CommandEmpty>
-                {loading ? 'Searching...' : query.length < 2 ? 'Type at least 2 characters' : 'No users found'}
+                {searching ? (
+                  <div className="flex items-center justify-center gap-2 py-6">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Searching</span>
+                  </div>
+                ) : query.length < 2 ? (
+                  'Type at least 2 characters'
+                ) : (
+                  'No users found'
+                )}
               </CommandEmpty>
               <CommandGroup>
                 {users.map((user) => {
@@ -174,23 +217,38 @@ export function UserSearchAutocomplete({
                           {user.email}
                         </div>
                       )}
-                      <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
-                        {user.projectCount > 0 && (
-                          <span className="flex items-center gap-1">
-                            <BriefcaseBusiness className="h-3 w-3" />
-                            {user.projectCount}
-                          </span>
-                        )}
+                      <div className="flex gap-2 mt-1.5 items-center flex-wrap">
                         {user.organizationCount > 0 && (
-                          <span className="flex items-center gap-1">
-                            <FileText className="h-3 w-3" />
+                          <span
+                            className="flex items-center gap-1 text-xs text-muted-foreground cursor-default"
+                            title={`${user.organizationCount} ${user.organizationCount === 1 ? 'organization' : 'organizations'}`}
+                          >
+                            <Building2 className="h-5 w-5" />
                             {user.organizationCount}
                           </span>
                         )}
+                        {user.projectCount > 0 && (
+                          <span
+                            className="flex items-center gap-1 text-xs text-muted-foreground cursor-default"
+                            title={`${user.projectCount} ${user.projectCount === 1 ? 'project' : 'projects'}`}
+                          >
+                            <FolderGit className="h-5 w-5" />
+                            {user.projectCount}
+                          </span>
+                        )}
                         {user.isCitizen && (
-                          <span className="flex items-center gap-1">
-                            <Badge className="h-3 w-3" />
-                            Citizen
+                          <CitizenshipBadge variant="icon" />
+                        )}
+                        {user.hasApprovedKYC && (
+                          <span
+                            className="flex items-center gap-1 text-xs text-muted-foreground cursor-default"
+                            title="KYC Verified"
+                          >
+                            <img
+                              src="/assets/icons/verified-badge.svg"
+                              alt="verified"
+                              className="w-5 h-5"
+                            />
                           </span>
                         )}
                       </div>

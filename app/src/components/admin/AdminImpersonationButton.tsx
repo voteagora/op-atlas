@@ -1,14 +1,12 @@
 "use client"
 
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Eye } from "lucide-react"
@@ -24,6 +22,7 @@ type ImpersonationStatus = {
 
 export function AdminImpersonationButton() {
   const { data: session, status, update } = useSession()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [starting, setStarting] = useState(false)
   const [checkingAccess, setCheckingAccess] = useState(true)
@@ -110,9 +109,9 @@ export function AdminImpersonationButton() {
         impersonation: data.impersonation,
       })
 
-      // Close dialog and reload
+      // Close dialog and navigate to home
       setOpen(false)
-      window.location.reload()
+      router.push('/')
     } catch (error) {
       console.error('Failed to start impersonation:', error)
       alert(error instanceof Error ? error.message : 'Failed to start impersonation')
@@ -127,7 +126,7 @@ export function AdminImpersonationButton() {
         <Button
           variant="outline"
           size="sm"
-          className="gap-2 px-2"
+          className="gap-1.5 px-2 w-auto whitespace-nowrap"
           aria-label="View as user"
           disabled={starting}
         >
@@ -136,26 +135,31 @@ export function AdminImpersonationButton() {
           <span className="sm:hidden text-xs font-medium">View</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Admin: View as User</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-md">
+        <div className="flex flex-col text-center">
+          <div className="font-semibold text-xl">
+            Admin: View as User
+          </div>
+
+          <div className="text-base text-secondary-foreground mt-2">
             Search for a user to view the app from their perspective.
             You&apos;ll be using yesterday&apos;s data snapshot - changes won&apos;t affect production.
-          </DialogDescription>
-        </DialogHeader>
+          </div>
 
-        <div className="py-4">
-          <UserSearchAutocomplete
-            onSelectUser={handleStartImpersonation}
-            disabled={starting}
-            placeholder={starting ? "Starting..." : "Search for user..."}
-          />
-        </div>
+          <div className="mt-6">
+            <UserSearchAutocomplete
+              onSelectUser={handleStartImpersonation}
+              disabled={starting}
+              placeholder="Search for user"
+              loading={starting}
+              loadingText="Starting"
+              autoFocus={open}
+            />
+          </div>
 
-        <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-          <strong>Note:</strong> External services (emails, KYC, payments) will be mocked during impersonation.
-          All actions are logged for audit purposes.
+          <div className="text-sm text-secondary-foreground bg-muted p-3 rounded-md mt-4">
+            <strong>Note:</strong> External services (emails, KYC, payments) will be mocked during impersonation.
+          </div>
         </div>
       </DialogContent>
     </Dialog>

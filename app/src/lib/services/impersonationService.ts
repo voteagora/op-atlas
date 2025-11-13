@@ -22,6 +22,7 @@ export interface UserSearchResult {
   organizationCount: number
   hasApplications: boolean
   isCitizen: boolean
+  hasApprovedKYC: boolean
   lastActive?: Date
 }
 
@@ -72,6 +73,21 @@ class ImpersonationService {
         },
         citizen: {
           select: { id: true }
+        },
+        userKYCUsers: {
+          take: 1,
+          where: {
+            kycUser: {
+              expiry: { gt: new Date() }
+            }
+          },
+          select: {
+            kycUser: {
+              select: {
+                status: true
+              }
+            }
+          }
         }
       },
       take: limit,
@@ -90,6 +106,7 @@ class ImpersonationService {
       organizationCount: user._count.organizations,
       hasApplications: user._count.roleApplications > 0,
       isCitizen: !!user.citizen,
+      hasApprovedKYC: user.userKYCUsers[0]?.kycUser?.status === 'APPROVED',
       lastActive: user.updatedAt
     }))
   }
