@@ -39,15 +39,13 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const { db, userId, impersonating } = await getImpersonationContext()
+  const { db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")
   }
 
-  const membershipPromise = impersonating
-    ? Promise.resolve(null)
-    : verifyMembership(params.projectId, userId, db)
+  const membershipPromise = verifyMembership(params.projectId, userId, db)
 
   const [project, team, membership] = await Promise.all([
     getProjectWithClient({ id: params.projectId }, db),
@@ -55,7 +53,7 @@ export default async function Page({
     membershipPromise,
   ])
 
-  if (!project || (!impersonating && membership?.error)) {
+  if (!project || membership?.error) {
     redirect("/dashboard")
   }
 
