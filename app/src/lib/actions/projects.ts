@@ -35,7 +35,7 @@ import {
   UpdateProjectParams,
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
-import { SessionDbContext, withSessionDb } from "@/lib/db/sessionContext"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import { createEntityAttestation } from "../eas/serverOnly"
 import { ProjectContracts, ProjectWithDetails, TeamRole } from "../types"
@@ -47,13 +47,13 @@ import {
 } from "./utils"
 
 export const getProjects = async (userId: string) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const teams = await getUserProjectsWithDetailsWithClient({ userId }, db)
     return (teams?.projects ?? []).map(({ project }) => project)
   })
 
 export const getAllPublishedProjects = async (userId: string) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const projects = await getAllPublishedUserProjectsWithClient(
       { userId },
       db,
@@ -71,7 +71,7 @@ export const getAllPublishedProjects = async (userId: string) =>
   })
 
 export const getAdminProjects = async (userId: string, roundId?: string) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const teams = await getUserAdminProjectsWithDetailWithClient(
       { userId, roundId },
       db,
@@ -99,7 +99,7 @@ export const getAdminProjects = async (userId: string, roundId?: string) =>
   })
 
 export const getApplications = async (userId: string) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const userApplications = await getUserApplicationsWithClient(
       { userId },
       db,
@@ -108,7 +108,7 @@ export const getApplications = async (userId: string) =>
   })
 
 export const getApplicationsForRound = async (roundId: number) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const userApplications = await getAllApplicationsForRoundWithClient(
       {
         roundId: roundId.toString(),
@@ -122,7 +122,7 @@ export const getUserApplicationsForRound = async (
   userId: string,
   roundId: number,
 ) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const userApplications = await getUserApplicationsWithClient(
       {
         userId,
@@ -137,7 +137,7 @@ export const getUnpublishedContractChanges = async (
   projectId: string,
   existingProject?: ProjectContracts | null,
 ) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const project =
       existingProject ??
       (await getProjectContractsWithClient({ projectId }, db))
@@ -172,7 +172,7 @@ export const getUnpublishedContractChanges = async (
   })
 
 async function setProjectOrganizationInternal(
-  ctx: SessionDbContext,
+  ctx: SessionContext,
   projectId: string,
   oldOrganizationId?: string,
   organizationId?: string,
@@ -243,7 +243,7 @@ export const createNewProject = async (
   details: CreateProjectParams,
   organizationId?: string,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async (ctx) => {
       const { db, session, userId } = ctx
 
@@ -299,7 +299,7 @@ export const createNewProjectOnBehalf = async (
   details: CreateProjectParams,
   userId: string,
 ) =>
-  withSessionDb(async ({ db, session }) => {
+  withImpersonation(async ({ db, session }) => {
     const user = await getUserById(userId, db, session)
     if (!user) {
       return {
@@ -326,7 +326,7 @@ export const updateProjectDetails = async (
   projectId: string,
   details: UpdateProjectParams,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return {
@@ -363,7 +363,7 @@ export const setProjectOrganization = async (
   oldOrganizationId?: string,
   organizationId?: string,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async (ctx) => {
       const result = await setProjectOrganizationInternal(
         ctx,
@@ -383,7 +383,7 @@ export const setProjectOrganization = async (
   )
 
 export const deleteUserProject = async (projectId: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return {
@@ -412,7 +412,7 @@ export const addMembersToProject = async (
   projectId: string,
   userIds: string[],
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return {
@@ -438,7 +438,7 @@ export const removeMemberFromProject = async (
   projectId: string,
   memberId: string,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId || userId === memberId) {
         return {
@@ -468,7 +468,7 @@ export const removeMemberFromProject = async (
   )
 
 export const getKycTeamAction = async (projectId: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -491,7 +491,7 @@ export const setMemberRole = async (
   userId: string,
   role: TeamRole,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId: sessionUserId, session }) => {
       if (!sessionUserId) {
         return {
@@ -524,7 +524,7 @@ export const setProjectFunding = async (
   projectId: string,
   funding: Prisma.ProjectFundingCreateManyInput[],
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -553,7 +553,7 @@ export const createProjectKycTeamAction = async ({
   projectId: string
   walletAddress: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -578,7 +578,7 @@ export const createProjectKYCTeamsAction = async ({
   projectIds: string[]
   kycTeamId: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -605,7 +605,7 @@ export const deleteProjectKYCTeamsAction = async ({
   projectIds: string[]
   kycTeamId: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -632,7 +632,7 @@ export const detachProjectsFromKycTeamAction = async ({
   projectIds: string[]
   kycTeamId: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -653,7 +653,7 @@ export const detachProjectsFromKycTeamAction = async ({
   )
 
 export const getProjectsForKycTeamAction = async (kycTeamId: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -673,7 +673,7 @@ export const deleteProjectKYCTeamAction = async ({
   kycTeamId: string
   hasActiveStream: boolean
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -697,7 +697,7 @@ export const getPublicProjectAction = async ({
 }: {
   projectId: string
 }) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const rawProject = await getPublicProjectWithClient(projectId, db)
     if (!rawProject) return null
 
@@ -709,12 +709,12 @@ export const getProjectMetadataAction = async ({
 }: {
   projectId: string
 }) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     return getProjectMetadataWithClient(projectId, db)
   })
 
 export const checkWalletAddressExistsAction = async (walletAddress: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -731,7 +731,7 @@ export const checkWalletAddressExistsAction = async (walletAddress: string) =>
 export const getKycTeamByWalletAddressAction = async (
   walletAddress: string,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {

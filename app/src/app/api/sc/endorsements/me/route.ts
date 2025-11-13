@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import {
   getEndorsedNomineeIdsForAddressesByRole,
   hasEndorsed,
 } from "@/db/endorsements"
 
 export async function GET(req: NextRequest) {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   if (!userId) return new Response("Unauthorized", { status: 401 })
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")

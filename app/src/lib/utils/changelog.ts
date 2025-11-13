@@ -1,7 +1,7 @@
 import { prisma as defaultPrisma } from "../../db/client"
 import { Prisma, PrismaClient } from "@prisma/client"
 import { Session } from "next-auth"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 type TransactionOptions = {
   maxWait?: number
@@ -20,7 +20,7 @@ export async function withChangelogTracking<T>(
   context: ChangelogContext = {},
 ): Promise<T> {
   const client = context.db ?? defaultPrisma
-  const { session, userId } = await withImpersonation({
+  const { session, userId } = await getImpersonationContext({
     session: context.session,
   })
   const runWithTracking = async (tx: Prisma.TransactionClient) => {

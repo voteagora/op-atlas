@@ -7,7 +7,7 @@ import KYCStatusContainer, {
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
 import { getOrganizationWithClient, getOrganizationKYCTeams } from "@/db/organizations"
 import { getUserOrganizationRole } from "@/lib/actions/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import GrantAddressForm from "./components/GrantAddressForm"
 
@@ -39,7 +39,7 @@ export default async function Page({
   params: { organizationId: string }
 }) {
   // Authenticate user
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   if (!userId) {
     redirect("/")
   }

@@ -5,22 +5,19 @@ import { Session } from "next-auth"
 
 import { auth } from "@/auth"
 import {
-  DatabaseType,
-  getDatabaseType,
   getEffectiveUserId,
   getSessionDatabase,
   isImpersonating,
 } from "@/lib/db/helpers"
 
-export type SessionDbContext = {
+export type SessionContext = {
   session: Session | null
   db: PrismaClient
   userId: string | null
   impersonating: boolean
-  databaseType: DatabaseType
 }
 
-export type WithSessionDbOptions = {
+export type SessionContextOptions = {
   /**
    * Throw if no authenticated (or impersonated) user ID is present.
    */
@@ -36,10 +33,23 @@ export type WithSessionDbOptions = {
   forceProd?: boolean
 }
 
-export async function withSessionDb<T>(
-  handler: (ctx: SessionDbContext) => Promise<T>,
-  options: WithSessionDbOptions = {}
-): Promise<T> {
+/**
+ * Get impersonation context for current request.
+ * Use in Server Components, API routes, or when you need context in outer scope.
+ *
+ * @example
+ * ```typescript
+ * // Server Component
+ * export default async function Page() {
+ *   const { db, userId, impersonating } = await getImpersonationContext({ requireUser: true })
+ *   const projects = await db.project.findMany({ where: { ownerId: userId } })
+ *   return <div>{projects.length} projects</div>
+ * }
+ * ```
+ */
+export async function getImpersonationContext(
+  options: SessionContextOptions = {}
+): Promise<SessionContext> {
   const hasSessionOverride = Object.prototype.hasOwnProperty.call(
     options,
     "session",
@@ -52,35 +62,32 @@ export async function withSessionDb<T>(
     throw new Error("Unauthorized")
   }
 
-  return handler({
+  return {
     session,
     db,
     userId,
     impersonating: isImpersonating(session),
-    databaseType: getDatabaseType(session, { forceProd: options.forceProd }),
-  })
+  }
 }
 
-export function withImpersonation(
-  options?: WithSessionDbOptions,
-): Promise<SessionDbContext>
-export function withImpersonation<T>(
-  handler: (ctx: SessionDbContext) => Promise<T>,
-  options?: WithSessionDbOptions,
-): Promise<T>
+/**
+ * Execute a handler with impersonation context.
+ * Use in Server Actions or when logic is self-contained.
+ *
+ * @example
+ * ```typescript
+ * // Server Action
+ * export async function createProject(name: string) {
+ *   return withImpersonation(async ({ db, userId }) => {
+ *     return db.project.create({ data: { name, ownerId: userId } })
+ *   }, { requireUser: true })
+ * }
+ * ```
+ */
 export async function withImpersonation<T>(
-  handlerOrOptions?:
-    | ((ctx: SessionDbContext) => Promise<T>)
-    | WithSessionDbOptions,
-  maybeOptions: WithSessionDbOptions = {},
-): Promise<T | SessionDbContext> {
-  if (typeof handlerOrOptions === "function") {
-    return await withSessionDb(handlerOrOptions, maybeOptions)
-  }
-
-  const options = handlerOrOptions ?? {}
-  return await withSessionDb(
-    async (ctx) => ctx,
-    options as WithSessionDbOptions,
-  )
+  handler: (ctx: SessionContext) => Promise<T>,
+  options: SessionContextOptions = {}
+): Promise<T> {
+  const ctx = await getImpersonationContext(options)
+  return handler(ctx)
 }

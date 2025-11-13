@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import {
   createEndorsement,
   deleteEndorsementsForAddresses,
@@ -18,7 +18,7 @@ const payloadSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   if (!userId) return new Response("Unauthorized", { status: 401 })
 
   const json = await req.json().catch(() => null)
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const { db } = await withImpersonation()
+  const { db } = await getImpersonationContext()
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
   const roleId = Number(searchParams.get("roleId"))
@@ -154,7 +154,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   if (!userId) return new Response("Unauthorized", { status: 401 })
 
   const { searchParams } = new URL(req.url)

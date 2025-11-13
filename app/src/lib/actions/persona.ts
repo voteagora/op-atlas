@@ -4,7 +4,7 @@ import { randomBytes } from "crypto"
 
 import { KYCUser, KYCLegalEntity } from "@prisma/client"
 
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { withImpersonationProtection } from "@/lib/impersonationContext"
 
 export interface PersonaInquiryLinkResponse {
@@ -27,7 +27,7 @@ export const createPersonaInquiryLink = async (
   personaEntity: PersonaEntity,
   templateId: string,
 ): Promise<PersonaInquiryLinkResponse> => {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     const mockReferenceId = `${personaEntity.entity.id}-impersonation`
     const mockSearchParams = new URLSearchParams({
       "reference-id": mockReferenceId,

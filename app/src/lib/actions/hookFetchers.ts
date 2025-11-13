@@ -29,60 +29,60 @@ import {
   getUserWorldId,
 } from "@/db/users"
 import { getVoteForCitizen } from "@/db/votes"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export async function fetchProject(projectId: string) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getProjectWithClient({ id: projectId }, db),
   )
 }
 
 export async function fetchProjectContracts(projectId: string) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getProjectContractsWithClient({ projectId }, db),
   )
 }
 
 export async function fetchAllProjectContracts(projectId: string) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getAllProjectContractsWithClient({ projectId }, db),
   )
 }
 
 export async function fetchOrganization(organizationId: string) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getOrganizationWithClient({ id: organizationId }, db),
   )
 }
 
 export async function fetchOrganizationKycTeams(organizationId: string) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getOrganizationKYCTeams({ organizationId }, db),
   )
 }
 
 export async function fetchUser(userId: string) {
-  return withSessionDb(({ db, session }) =>
+  return withImpersonation(({ db, session }) =>
     getUserById(userId, db, session),
   )
 }
 
 export async function fetchUserByAddress(address: string) {
-  return withSessionDb(({ db }) => getUserByAddress(address, db))
+  return withImpersonation(({ db }) => getUserByAddress(address, db))
 }
 
 export async function fetchCitizenForUser(userId: string) {
-  return withSessionDb(({ db }) => getCitizenForUser(userId, db))
+  return withImpersonation(({ db }) => getCitizenForUser(userId, db))
 }
 
 export async function fetchCitizenByAddress(address: string) {
-  return withSessionDb(({ db }) => getCitizenByAddress(address, db))
+  return withImpersonation(({ db }) => getCitizenByAddress(address, db))
 }
 
 export async function fetchProposalCandidates(
   identifiers: Array<string | { id?: string; name?: string }>,
 ) {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     const results = await Promise.all(
       identifiers.map(async (identifier, index) => {
         const stringIdentifier =
@@ -142,7 +142,7 @@ export async function fetchVoteForCitizen(
   proposalId: string,
   citizenId: number,
 ) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getVoteForCitizen(proposalId, citizenId, db),
   )
 }
@@ -151,25 +151,25 @@ export async function fetchGithubProximity(username: string | null) {
   if (!username) {
     return null
   }
-  return withSessionDb(({ db }) => getGithubProximity(username, db))
+  return withImpersonation(({ db }) => getGithubProximity(username, db))
 }
 
 export async function fetchRandomProjects() {
-  return withSessionDb(({ db }) => getRandomProjectsWithClient(db))
+  return withImpersonation(({ db }) => getRandomProjectsWithClient(db))
 }
 
 export async function fetchKycProjectUsers(projectId: string) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getKYCUsersByProjectId({ projectId }, db),
   )
 }
 
 export async function fetchUserPassports(userId: string) {
-  return withSessionDb(({ db }) => getUserPassports(userId, db))
+  return withImpersonation(({ db }) => getUserPassports(userId, db))
 }
 
 export async function fetchExpiredKycCountForProject(projectId: string) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getExpiredKYCCountForProject({ projectId }, db),
   )
 }
@@ -177,20 +177,20 @@ export async function fetchExpiredKycCountForProject(projectId: string) {
 export async function fetchExpiredKycCountForOrganization(
   organizationId: string,
 ) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getExpiredKYCCountForOrganization({ organizationId }, db),
   )
 }
 
 export async function fetchUserWorldId(userId: string) {
-  return withSessionDb(({ db }) => getUserWorldId(userId, db))
+  return withImpersonation(({ db }) => getUserWorldId(userId, db))
 }
 
 export async function fetchUserAdminProjects(
   userId: string,
   roundId?: string,
 ) {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getUserAdminProjectsWithDetailWithClient(
       {
         userId,

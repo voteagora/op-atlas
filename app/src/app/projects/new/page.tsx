@@ -4,7 +4,7 @@ import { FeedbackButton } from "@/components/common/FeedbackButton"
 import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { ProjectStatusSidebar } from "@/components/projects/ProjectStatusSidebar"
 import { getAdminOrganizationsWithClient } from "@/db/organizations"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const maxDuration = 60
 export const metadata = {
@@ -14,7 +14,7 @@ export const metadata = {
 }
 
 export default async function Page() {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   if (!userId) {
     redirect("/")
   }

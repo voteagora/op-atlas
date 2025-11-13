@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation"
 import GrantEligibilityWizard from "@/components/grant-eligibility/GrantEligibilityWizard"
 import { getGrantEligibilityForm } from "@/lib/actions/grantEligibility"
 import { getUserProjectRole, getUserOrganizationRole } from "@/lib/actions/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 interface PageProps {
   params: {
@@ -12,7 +12,7 @@ interface PageProps {
 }
 
 export default async function Page({ params }: PageProps) {
-  const { userId } = await withImpersonation()
+  const { userId } = await getImpersonationContext()
   if (!userId) {
     notFound()
   }

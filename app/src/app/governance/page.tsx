@@ -1,6 +1,6 @@
 import ProposalsPage from "@/components/proposals/proposalsPage/ProposalsPage"
 import { getAllRoles } from "@/db/role"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import RolesPage from "./roles/components/RolesPage"
 
@@ -12,7 +12,7 @@ export const metadata = {
 }
 
 export default async function Page() {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   const roles = await getAllRoles(db)
   const hasRoles = roles.length > 0
   const securityRoles = roles.filter((role) =>

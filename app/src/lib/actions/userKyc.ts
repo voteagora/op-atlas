@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { getUserKYCUser, createUserKYCUser, getUserPersonalKYC, linkOrphanedKYCUserToUser } from "@/db/userKyc"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { sendKYCStartedEmail } from "./emails"
 
@@ -20,7 +20,7 @@ export interface UserKYCStatus {
 }
 
 export async function getUserKYCStatus(userId?: string): Promise<UserKYCStatus> {
-  return withSessionDb(async ({ db, userId: sessionUserId }) => {
+  return withImpersonation(async ({ db, userId: sessionUserId }) => {
     const targetUserId = userId ?? sessionUserId
 
     if (!targetUserId) {
@@ -39,7 +39,7 @@ export async function getUserKYCStatus(userId?: string): Promise<UserKYCStatus> 
 }
 
 export async function createUserKYC(params: CreateUserKYCParams) {
-  return withSessionDb(async ({ db, userId }) => {
+  return withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return { error: "Unauthorized" }
     }
@@ -149,7 +149,7 @@ export async function createUserKYC(params: CreateUserKYCParams) {
 }
 
 export async function getPersonalKYCForUser() {
-  return withSessionDb(async ({ db, userId }) => {
+  return withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return { error: "Unauthorized" }
     }
@@ -165,7 +165,7 @@ export async function getPersonalKYCForUser() {
 }
 
 export async function deletePersonalKYC(kycUserId: string) {
-  return withSessionDb(async ({ db, userId }) => {
+  return withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return { error: "Unauthorized" }
     }
@@ -251,7 +251,7 @@ export async function deletePersonalKYC(kycUserId: string) {
 }
 
 export async function validateOrphanedKYCEmail(email: string) {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     try {
       const orphanedKYCUser = await db.kYCUser.findFirst({
         where: {
@@ -287,7 +287,7 @@ export async function validateOrphanedKYCEmail(email: string) {
 }
 
 export async function linkKYCToUser(verificationToken: string) {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     try {
       const userEmail = await db.userEmail.findFirst({
         where: {
@@ -372,7 +372,7 @@ export async function linkKYCToUser(verificationToken: string) {
 }
 
 export async function checkPendingKYCVerification() {
-  return withSessionDb(async ({ db, userId }) => {
+  return withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return { success: false, error: "Unauthorized" }
     }
@@ -409,7 +409,7 @@ export async function checkPendingKYCVerification() {
 // Attempts to link an existing, orphaned KYCUser by email to the current session user.
 // This will NOT create a new KYC record and is safe to call on login.
 export async function linkExistingKYCForEmail(email: string) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return { success: false, error: "Unauthorized" }

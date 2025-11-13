@@ -21,7 +21,7 @@ import {
   s8CitizenshipQualification,
 } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { AnalyticsTracker } from "./components/AnalyticsTracker"
 import { SidebarActiveCitizen } from "./components/SidebarActiveCitizen"
@@ -31,7 +31,7 @@ export default async function Page({
 }: {
   searchParams: { redirectUrl?: string }
 }) {
-  const { session, db, userId } = await withImpersonation()
+  const { session, db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")

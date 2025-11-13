@@ -7,7 +7,7 @@ import {
   getGrantEligibilityExpiration,
   getLatestDraftForm,
 } from "@/db/grantEligibility"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { withChangelogTracking } from "@/lib/utils/changelog"
 import {
   getGrantEligibilityFormStatus,
@@ -54,7 +54,7 @@ export interface UpdateGrantEligibilityFormParams {
 export async function createGrantEligibilityForm(
   params: CreateGrantEligibilityFormParams,
 ) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -143,7 +143,7 @@ export async function createGrantEligibilityForm(
 export async function updateGrantEligibilityForm(
   params: UpdateGrantEligibilityFormParams,
 ) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -234,7 +234,7 @@ export async function updateGrantEligibilityForm(
 }
 
 export async function getGrantEligibilityForm(formId: string) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -306,7 +306,7 @@ export async function submitGrantEligibilityForm(params: {
   formId: string
   finalAttestations: Record<string, boolean>
 }) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -671,7 +671,7 @@ export async function getLatestDraftFormAction(params: {
   projectId?: string
   organizationId?: string
 }) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -707,7 +707,7 @@ export async function getLatestDraftFormAction(params: {
 
 // Cancel a grant eligibility form
 export async function cancelGrantEligibilityForm(formId: string) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -780,7 +780,7 @@ export async function cancelGrantEligibilityForm(formId: string) {
 
 // Clear/reset a grant eligibility form to initial state
 export async function clearGrantEligibilityForm(formId: string) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -872,7 +872,7 @@ export async function clearGrantEligibilityForm(formId: string) {
 
 // Fetch existing reusable legal entities for a given GrantEligibility form
 export async function getExistingLegalEntitiesForForm(formId: string) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         console.warn("getExistingLegalEntitiesForForm: Unauthorized call", {
@@ -989,7 +989,7 @@ export async function getExistingLegalEntitiesForForm(formId: string) {
 
 
 export async function getSelectedExistingLegalEntitiesForForm(formId: string) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         console.warn(

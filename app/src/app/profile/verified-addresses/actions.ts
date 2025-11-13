@@ -21,7 +21,7 @@ import {
 import { clients } from "@/lib/eth"
 import { Chain } from "@/lib/utils/contracts"
 import { getSafeAddressVerificationMessage } from "@/lib/utils/safeAddresses"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { AddressData } from "./content"
 
@@ -54,7 +54,7 @@ async function fetchSafeInfoFromMainnet(safeAddress: `0x${string}`) {
 }
 
 export async function makeUserAddressPrimaryAction(address: string) {
-  const { session, db, userId } = await withImpersonation()
+  const { session, db, userId } = await getImpersonationContext()
 
   if (!userId) {
     return
@@ -179,7 +179,7 @@ export async function verifySafeAddressAction({
 }
 
 export async function removeSafeAddressAction(safeAddress: string) {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
 
   if (!userId) {
     return { error: "Unauthorized" as const }

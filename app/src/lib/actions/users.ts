@@ -16,7 +16,7 @@ import {
   deleteUserPassport,
   getUserPassports,
 } from "@/db/users"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { withImpersonationProtection } from "@/lib/impersonationContext"
 
 const client = createPublicClient({
@@ -35,7 +35,7 @@ async function resolveEnsName(name: string): Promise<string | null> {
 }
 
 export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) =>
-  withSessionDb(async ({ db, userId }) => {
+  withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return {
         error: "Unauthorized",
@@ -57,7 +57,7 @@ export const setUserIsNotDeveloper = async (isNotDeveloper: boolean) =>
   })
 
 export const updateGovForumProfileUrl = async (govForumProfileUrl: string) =>
-  withSessionDb(async ({ db, userId }) => {
+  withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return {
         error: "Unauthorized",
@@ -91,7 +91,7 @@ export const updateGovForumProfileUrl = async (govForumProfileUrl: string) =>
   })
 
 export const clearGovForumProfileUrl = async () =>
-  withSessionDb(async ({ db, userId }) => {
+  withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return {
         error: "Unauthorized",
@@ -117,7 +117,7 @@ export const clearGovForumProfileUrl = async () =>
  * The query must be at least one character long.
  */
 export const searchUsers = async (query: string) =>
-  withSessionDb(async ({ db, userId }) => {
+  withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return {
         error: "Unauthorized",
@@ -165,7 +165,7 @@ export const searchUsers = async (query: string) =>
 export const updateInteractions = async (
   data: Prisma.UserInteractionUncheckedCreateInput,
 ) =>
-  withSessionDb(async ({ db, userId }) => {
+  withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return {
         error: "Unauthorized",
@@ -188,7 +188,7 @@ export const updateInteractions = async (
   })
 
 export const refreshUserPassport = async () =>
-  withSessionDb(async ({ db, userId, session }) => {
+  withImpersonation(async ({ db, userId, session }) => {
     if (!userId) {
       return {
         error: "Unauthorized",
@@ -293,7 +293,7 @@ export const refreshUserPassport = async () =>
   })
 
 export const getCitizenshipEligibility = async () =>
-  withSessionDb(async ({ userId }) => {
+  withImpersonation(async ({ userId }) => {
     if (!userId) {
       return {
         error: "Unauthorized",

@@ -12,7 +12,7 @@ import GrantDeliveryAddressSection from "@/components/projects/rewards/GrantDeli
 import { getKycTeamForProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { getUserProjectRole, verifyMembership } from "@/lib/actions/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
@@ -42,7 +42,7 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const { db, userId, impersonating } = await withImpersonation()
+  const { db, userId, impersonating } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")

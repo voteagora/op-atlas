@@ -7,7 +7,7 @@ import { getAdminOrganizationsWithClient } from "@/db/organizations"
 import { getProjectWithClient } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
@@ -37,7 +37,7 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const { db, userId, impersonating } = await withImpersonation()
+  const { db, userId, impersonating } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")

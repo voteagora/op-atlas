@@ -11,7 +11,7 @@ import {
   getApplications,
   getProjects,
 } from "@/lib/actions/projects"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const metadata = {
   title: "Dashboard - OP Atlas",
@@ -20,7 +20,7 @@ export const metadata = {
 }
 
 export default async function Page() {
-  const { session, db, userId } = await withImpersonation()
+  const { session, db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")

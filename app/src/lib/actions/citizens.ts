@@ -26,7 +26,7 @@ import {
   createCitizenAttestation,
   revokeCitizenAttestation,
 } from "@/lib/eas/serverOnly"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { getImpersonationContext, withImpersonation } from "@/lib/db/sessionContext"
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 interface S8QualifyingUser {
@@ -212,12 +212,12 @@ export const s8CitizenshipQualification = async (
     return null
   }
 
-  return withSessionDb(({ db }) => computeS8CitizenshipQualification(userId, db))
+  return withImpersonation(({ db }) => computeS8CitizenshipQualification(userId, db))
 }
 
 // S8 Citizenship Limit Check
 export const checkCitizenshipLimit = async (): Promise<boolean> => {
-  const citizenCount = await withSessionDb(({ db }) =>
+  const citizenCount = await getImpersonationContext(({ db }) =>
     getCitizenCountByType(CITIZEN_TYPES.user, db),
     { forceProd: true },
   )
@@ -230,7 +230,7 @@ export const updateCitizen = async (citizen: {
   attestationId?: string
   timeCommitment?: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -259,7 +259,7 @@ export const updateCitizen = async (citizen: {
   )
 
 export const deleteCitizen = async (citizenId: number) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -308,11 +308,11 @@ export const deleteCitizen = async (citizenId: number) =>
 export const getCitizen = async (
   lookup: CitizenLookup,
 ): Promise<Citizen | null> => {
-  return withSessionDb(({ db }) => getCitizenByType(lookup, db))
+  return withImpersonation(({ db }) => getCitizenByType(lookup, db))
 }
 
 export const attestCitizen = async () =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {

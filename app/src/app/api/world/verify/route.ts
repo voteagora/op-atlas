@@ -7,11 +7,11 @@ import {
 import { NextResponse } from "next/server"
 
 import { upsertUserWorldId } from "@/db/users"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { withImpersonationProtection } from "@/lib/impersonationContext"
 
 export async function POST(request: Request) {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }

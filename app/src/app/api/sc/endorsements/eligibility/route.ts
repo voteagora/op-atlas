@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { isTop100Delegate } from "@/lib/services/top100"
 
 export async function GET(req: NextRequest) {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   const { searchParams } = new URL(req.url)
   const roleId = Number(searchParams.get("roleId"))
 

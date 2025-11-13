@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getAddress } from "viem"
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -10,7 +10,7 @@ export async function GET(
   request: Request,
   { params }: { params: { projectId: string } },
 ) {
-  const { db } = await withImpersonation()
+  const { db } = await getImpersonationContext()
   const { searchParams } = new URL(request.url)
   const deployer = searchParams.get("deployer")
 

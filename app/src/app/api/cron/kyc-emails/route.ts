@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { withCronObservability } from "@/lib/cron"
 import {
   sendKYBReminderEmail,
@@ -24,7 +24,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     errors: [] as string[],
   }
 
-  const { db } = await withImpersonation({ forceProd: true, session: null })
+  const { db } = await getImpersonationContext({ forceProd: true, session: null })
 
   try {
     console.log("🔍 Processing KYC reminder emails...")

@@ -11,7 +11,7 @@ import {
   updateProjectRepositories,
   updateProjectRepository,
 } from "@/db/projects"
-import { SessionDbContext, withSessionDb } from "@/lib/db/sessionContext"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import { getCrate } from "../crates"
 import {
@@ -26,13 +26,13 @@ import { isOpenSourceLicense } from "../licenses"
 import { getNpmPackage } from "../npm"
 import { verifyMembership } from "./utils"
 
-type ProjectMemberContext = SessionDbContext & { userId: string }
+type ProjectMemberContext = SessionContext & { userId: string }
 
 async function withProjectMember<T>(
   projectId: string,
   handler: (ctx: ProjectMemberContext) => Promise<T>,
 ) {
-  return withSessionDb(async (ctx) => {
+  return withImpersonation(async (ctx) => {
     if (!ctx.userId) {
       return {
         error: "Unauthorized",
@@ -49,7 +49,7 @@ async function withProjectMember<T>(
 }
 
 export const findRepo = async (owner: string, slug: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ userId }) => {
       if (!userId) {
         return {

@@ -10,10 +10,10 @@ import {
   getAllRFVoters,
   getAllS7GovContributors,
 } from "@/db/users"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export async function getAggregatedRecords(records: AggregatedType) {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     const [
       citizen,
       gov_contribution,

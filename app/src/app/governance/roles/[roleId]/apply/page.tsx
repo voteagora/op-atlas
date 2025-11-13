@@ -13,7 +13,7 @@ import {
 import { getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { formatMMMd } from "@/lib/utils/date"
 
 export const metadata = {
@@ -23,7 +23,7 @@ export const metadata = {
 }
 
 export default async function Page({ params }: { params: { roleId: string } }) {
-  const { session, db, userId } = await withImpersonation()
+  const { session, db, userId } = await getImpersonationContext()
 
   if (!userId) {
     return redirect(`/governance/roles/${params.roleId}`)

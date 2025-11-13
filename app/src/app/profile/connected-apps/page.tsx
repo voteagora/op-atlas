@@ -14,7 +14,7 @@ import {
   GithubNotDeveloperToggle,
 } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const metadata: Metadata = {
   title: "Connected Apps - OP Atlas",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const { session, userId } = await withImpersonation()
+  const { session, userId } = await getImpersonationContext()
   if (!userId) {
     redirect("/")
   }

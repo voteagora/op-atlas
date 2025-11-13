@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { impersonationService } from "@/lib/services/impersonationService"
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { session, userId } = await withImpersonation()
+    const { session, userId } = await getImpersonationContext()
     const adminUserId = session?.user?.id
     if (!userId || !adminUserId) {
       return NextResponse.json(

@@ -10,13 +10,13 @@ import {
   isAdminUser,
   isImpersonationEnabled,
 } from "@/lib/auth/adminConfig"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const { session, userId } = await withImpersonation()
+    const { session, userId } = await getImpersonationContext()
     const adminUserId = session?.user?.id
 
     if (!userId || !adminUserId) {

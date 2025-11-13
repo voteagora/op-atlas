@@ -6,7 +6,7 @@ import { getCitizen } from "@/lib/actions/citizens"
 import { getProjectMetadataAction } from "@/lib/actions/projects"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { getProjectDeployedChains } from "@/lib/oso/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { Contributors, Description, Header } from "./components"
 import MissionSection from "./components/MissionSection"
@@ -45,7 +45,7 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
 
-  const { userId } = await withImpersonation()
+  const { userId } = await getImpersonationContext()
 
   const [project, citizen] = await Promise.all([
     getProjectMetadataAction({ projectId }),

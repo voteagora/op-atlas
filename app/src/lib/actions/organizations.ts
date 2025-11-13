@@ -21,7 +21,7 @@ import {
   UpdateOrganizationParams,
 } from "@/db/organizations"
 import { getUserById } from "@/db/users"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { createEntityAttestation } from "../eas/serverOnly"
 import { TeamRole } from "../types"
@@ -29,7 +29,7 @@ import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin, verifyOrganizationMembership } from "./utils"
 
 export const getUserOrganizations = async (userId: string) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const user = await getUserOrganizationsWithDetailsWithClient(userId, db)
     return user?.organizations
   })
@@ -41,7 +41,7 @@ export const createNewOrganization = async ({
   organization: CreateOrganizationParams
   teamMembers: CreateTeamMemberParams[]
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return {
@@ -86,7 +86,7 @@ export const updateOrganizationDetails = async ({
   organization: UpdateOrganizationParams
   id: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return {
@@ -115,7 +115,7 @@ export const updateOrganizationDetails = async ({
   )
 
 export const deleteUserOrganization = async (organizationId: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -148,7 +148,7 @@ export const addMemberToOrganization = async (
   organizationId: string,
   userIds: string[],
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -180,7 +180,7 @@ export const setOrganizationMemberRole = async (
   memberId: string,
   role: TeamRole,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -249,7 +249,7 @@ export const removeMemberFromOrganization = async (
   organizationId: string,
   userId: string,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId: sessionUserId }) => {
       if (!sessionUserId) {
         return {
@@ -298,7 +298,7 @@ export const removeMemberFromOrganization = async (
 export const checkWalletAddressExistsForOrganizationAction = async (
   walletAddress: string,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -315,7 +315,7 @@ export const checkWalletAddressExistsForOrganizationAction = async (
 export const getKycTeamByWalletAddressForOrganizationAction = async (
   walletAddress: string,
 ) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return {
@@ -335,7 +335,7 @@ export const createOrganizationKycTeamAction = async ({
   walletAddress: string
   organizationId: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -370,7 +370,7 @@ export const getOrganizationKycTeamsAction = async ({
 }: {
   organizationId: string
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -399,7 +399,7 @@ export const deleteOrganizationKYCTeam = async ({
   kycTeamId: string
   hasActiveStream: boolean
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")

@@ -14,7 +14,7 @@ import {
   upsertProjectContracts,
 } from "@/db/projects"
 import { getDeployedContractsServerParsed } from "@/lib/oso"
-import { SessionDbContext, withSessionDb } from "@/lib/db/sessionContext"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import { UNIVERSAL_CREATE2_FACTORY } from "../constants"
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
@@ -22,13 +22,13 @@ import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
 
-type ProjectMemberContext = SessionDbContext & { userId: string }
+type ProjectMemberContext = SessionContext & { userId: string }
 
 async function withProjectMember<T>(
   projectId: string,
   handler: (ctx: ProjectMemberContext) => Promise<T>,
 ) {
-  return withSessionDb(async (ctx) => {
+  return withImpersonation(async (ctx) => {
     if (!ctx.userId) {
       return {
         error: "Not authenticated",

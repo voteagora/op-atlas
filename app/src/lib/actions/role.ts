@@ -9,7 +9,7 @@ import {
   getUserRoleApplications,
   upsertRoleApplication,
 } from "@/db/role"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export async function applyForRole(
   id: number,
@@ -19,7 +19,7 @@ export async function applyForRole(
     application: string
   },
 ) {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     try {
       const role = await getRoleById(id, db)
       if (!role) {
@@ -41,14 +41,14 @@ export async function applyForRole(
 }
 
 export async function getRole(id: number): Promise<Role | null> {
-  return withSessionDb(({ db }) => getRoleById(id, db))
+  return withImpersonation(({ db }) => getRoleById(id, db))
 }
 
 export async function activeUserApplications(
   userId?: string,
   organizationId?: string,
 ): Promise<RoleApplication[]> {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getActiveUserRoleApplications(userId, organizationId, db),
   )
 }
@@ -57,7 +57,7 @@ export async function getAllUserRoleApplications(
   userId?: string,
   organizationId?: string,
 ): Promise<RoleApplication[]> {
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     getUserRoleApplications(userId, organizationId, db),
   )
 }

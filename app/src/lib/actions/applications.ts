@@ -11,7 +11,7 @@ import {
   getUserApplicationsWithClient,
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
-import { SessionDbContext, withSessionDb } from "@/lib/db/sessionContext"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import { createApplicationAttestation } from "../eas/serverOnly"
 import { CategoryWithImpact } from "../types"
@@ -43,7 +43,7 @@ export const publishAndSaveApplication = async (
     round: number
     roundName?: string
   },
-  ctx: SessionDbContext,
+  ctx: SessionContext,
 ): Promise<Application> => {
   // Publish attestation (must reference an existing metadata snapshot)
   const attestationId = await createApplicationAttestation({
@@ -66,7 +66,7 @@ export const publishAndSaveApplication = async (
 }
 
 const createProjectApplication = async (
-  ctx: SessionDbContext,
+  ctx: SessionContext,
   applicationData: SubmitApplicationRequest,
   farcasterId: string,
   round: number,
@@ -177,7 +177,7 @@ export const submitApplications = async (
   roundNumber: number,
   categories?: CategoryWithImpact[],
 ) => {
-  return withSessionDb(
+  return withImpersonation(
     async (ctx) => {
       const { userId, db, session } = ctx
 

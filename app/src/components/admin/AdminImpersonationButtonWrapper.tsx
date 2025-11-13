@@ -3,12 +3,12 @@
  * Checks if user is admin before rendering the button
  */
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { isAdminUser } from "@/lib/auth/adminConfig"
 import { AdminImpersonationButton } from "./AdminImpersonationButton"
 
 export async function AdminImpersonationButtonWrapper() {
-  const { session } = await withImpersonation()
+  const { session } = await getImpersonationContext()
 
   // Don't show if not logged in
   if (!session?.user?.id) {

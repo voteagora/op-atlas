@@ -5,7 +5,7 @@ import { sharedMetadata } from "@/app/shared-metadata"
 import { getOrganizationWithClient } from "@/db/organizations"
 import { getRoleApplicationById, getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { formatMMMd } from "@/lib/utils/date"
 
 import { SuccessPageClient } from "./components/SuccessPageClient"
@@ -32,7 +32,7 @@ export async function generateMetadata({
 }
 
 export default async function Page({ params }: PageProps) {
-  const { session, db } = await withImpersonation()
+  const { session, db } = await getImpersonationContext()
 
   const [role, application] = await Promise.all([
     getRoleById(parseInt(params.roleId), db),

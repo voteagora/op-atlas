@@ -22,7 +22,7 @@ import {
   updateAllForProject,
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
-import { SessionDbContext, withSessionDb } from "@/lib/db/sessionContext"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import {
   createContractAttestations,
@@ -44,13 +44,13 @@ import { verifyMembership } from "./utils"
 const NO_BATCHING_CONTRACT_THRESHOLD = 150
 const PUBLISH_CONTRACT_BATCH_LIMIT = 40
 
-type ProjectMemberContext = SessionDbContext & { userId: string }
+type ProjectMemberContext = SessionContext & { userId: string }
 
 async function withProjectMember<T>(
   projectId: string,
   handler: (ctx: ProjectMemberContext) => Promise<T>,
 ) {
-  return withSessionDb(async (ctx) => {
+  return withImpersonation(async (ctx) => {
     if (!ctx.userId) {
       return {
         error: "Unauthorized",
@@ -559,7 +559,7 @@ export const createProjectSnapshotOnBehalf = async (
 }
 
 export const createOrganizationSnapshot = async (organizationId: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId, session }) => {
       if (!userId) {
         return {

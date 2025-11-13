@@ -6,7 +6,7 @@ import { EmailConnection } from "@/components/profile/EmailConnection"
 import { IdentityVerification } from "@/components/profile/IdentityVerification"
 import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { updateInteractions } from "@/lib/actions/users"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { ProfileDetailsContent } from "./content"
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const { session, userId } = await withImpersonation()
+  const { session, userId } = await getImpersonationContext()
   if (!userId) {
     redirect("/")
   }

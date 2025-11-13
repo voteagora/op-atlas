@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { Rounds } from "@/components/rounds/Rounds"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const metadata: Metadata = {
   title: "Rounds - OP Atlas",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
 }
 export default async function Page() {
-  const { session, db, userId } = await withImpersonation()
+  const { session, db, userId } = await getImpersonationContext()
   if (!userId) {
     return <Rounds user={null} />
   }

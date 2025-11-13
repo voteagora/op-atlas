@@ -7,7 +7,7 @@ import MakeOrganizationFormHeader from "@/components/organizations/MakeOrganizat
 import { getOrganizationWithClient } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
@@ -36,7 +36,7 @@ export default async function Page({
 }: {
   params: { organizationId: string }
 }) {
-  const { session, db, userId } = await withImpersonation()
+  const { session, db, userId } = await getImpersonationContext()
   if (!userId) {
     redirect("/")
   }

@@ -20,7 +20,7 @@ import {
   personaClient,
   PersonaInquiry,
 } from "@/lib/persona"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { UserKYCTeam } from "@/lib/types"
 import { KYCStatus } from "@prisma/client"
@@ -368,7 +368,7 @@ export const deleteKYCTeamAction = async ({
   kycTeamId: string
   hasActiveStream?: boolean
 }) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -409,7 +409,7 @@ export const deleteKYCTeamAction = async ({
   )
 
 export const getKYCUsersByProjectId = async (projectId: string) =>
-  withSessionDb(
+  withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
@@ -428,7 +428,7 @@ export const getKYCUsersByProjectId = async (projectId: string) =>
 export async function getUserKycTeams(
   targetUserId?: string,
 ): Promise<UserKYCTeam[]> {
-  return withSessionDb(async ({ db, userId: sessionUserId }) => {
+  return withImpersonation(async ({ db, userId: sessionUserId }) => {
     const userId = targetUserId ?? sessionUserId
     if (!userId) {
       throw new Error("Unauthorized")
@@ -574,7 +574,7 @@ export async function getExistingLegalEntities(
     return fetchExistingLegalEntities(db, kycTeamId)
   }
 
-  return withSessionDb(({ db }) => fetchExistingLegalEntities(db, kycTeamId))
+  return withImpersonation(({ db }) => fetchExistingLegalEntities(db, kycTeamId))
 }
 
 // Fetch distinct, approved, unexpired legal entities associated with any KYCTeam
@@ -667,7 +667,7 @@ export async function getAvailableLegalEntitiesForOrganization(
     return fetchAvailableLegalEntitiesForOrganization(db, organizationId)
   }
 
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     fetchAvailableLegalEntitiesForOrganization(db, organizationId),
   )
 }
@@ -719,7 +719,7 @@ export async function getSelectedLegalEntitiesForTeam(
     return fetchSelectedLegalEntitiesForTeam(db, kycTeamId)
   }
 
-  return withSessionDb(({ db }) =>
+  return withImpersonation(({ db }) =>
     fetchSelectedLegalEntitiesForTeam(db, kycTeamId),
   )
 }
@@ -735,7 +735,7 @@ export async function restartKYCForExpiredUser({
   projectId?: string
   organizationId?: string
 }) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -835,7 +835,7 @@ export async function restartKYCForExpiredLegalEntity({
   projectId?: string
   organizationId?: string
 }) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return { error: "Unauthorized" }
@@ -930,7 +930,7 @@ export async function restartAllExpiredKYCForTeam({
   projectId?: string
   organizationId?: string
 }) {
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
         return { error: "Unauthorized" }

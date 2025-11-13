@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { getProjectContractsFresh } from "@/db/projects"
 import { getUnpublishedContractChanges } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -15,7 +15,7 @@ export async function GET(
   const { projectId } = params
 
   try {
-    const { db, userId } = await withImpersonation()
+    const { db, userId } = await getImpersonationContext()
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

@@ -37,8 +37,6 @@ export type SessionDatabaseOptions = {
   forceProd?: boolean
 }
 
-export type DatabaseType = "production" | "d-1"
-
 /**
  * Get the appropriate database client based on session impersonation state
  *
@@ -112,26 +110,6 @@ export function getImpersonationContext(session: Session | null) {
     startedAt: impersonation.startedAt,
     isActive: true,
   }
-}
-
-/**
- * Get database type being used for current session
- *
- * @param session - NextAuth session object
- * @returns 'production' or 'd-1'
- */
-export function getDatabaseType(
-  session: Session | null,
-  options: SessionDatabaseOptions = {},
-): DatabaseType {
-  if (options.forceProd) {
-    return "production"
-  }
-
-  if (hasValidImpersonationSession(session) && adminDb.isD1Available()) {
-    return "d-1"
-  }
-  return "production"
 }
 
 /**

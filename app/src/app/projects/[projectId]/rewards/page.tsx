@@ -10,7 +10,7 @@ import {
 import { getProjectRecurringRewards } from "@/db/rewards"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { formatRecurringRewards } from "@/lib/utils/rewards"
 
 export async function generateMetadata({
@@ -41,7 +41,7 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const { db, userId, impersonating } = await withImpersonation()
+  const { db, userId, impersonating } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")

@@ -5,7 +5,7 @@ import React from "react"
 import { sharedMetadata } from "@/app/shared-metadata"
 import { MissionApplication } from "@/components/missions/application/MissionApplication"
 import { MISSIONS } from "@/lib/MissionsAndRoundData"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
@@ -34,7 +34,7 @@ export default async function MissionApplicationPage({
   const round = MISSIONS.find((page) => page.pageName === params.id)
   if (!round) notFound()
 
-  const { userId } = await withImpersonation()
+  const { userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")

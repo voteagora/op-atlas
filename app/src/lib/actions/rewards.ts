@@ -14,13 +14,13 @@ import {
   startClaim,
   updateClaim,
 } from "@/db/rewards"
-import { withSessionDb, SessionDbContext } from "@/lib/db/sessionContext"
+import { withImpersonation, SessionContext } from "@/lib/db/sessionContext"
 
 import { getActiveStreams, SuperfluidVestingSchedule } from "../superfluid"
 import { processStream } from "../utils/rewards"
 import { verifyAdminStatus } from "./utils"
 
-type RewardMemberContext = SessionDbContext & {
+type RewardMemberContext = SessionContext & {
   userId: string
   reward: NonNullable<Awaited<ReturnType<typeof getRewardWithClient>>>
 }
@@ -29,7 +29,7 @@ async function withRewardMember<T>(
   rewardId: string,
   handler: (ctx: RewardMemberContext) => Promise<T>,
 ) {
-  return withSessionDb(async (ctx) => {
+  return withImpersonation(async (ctx) => {
     if (!ctx.userId) {
       return {
         error: "Unauthorized",
@@ -155,7 +155,7 @@ export const getRewardStreamsForRound = async (
   roundId: string,
   season: number,
 ): Promise<RewardStream[]> =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const existingStreams = await getRewardStreamsWithRewardsForRound(
       roundId,
       db,
@@ -179,7 +179,7 @@ export const processSuperfluidStream = async (
   stream: SuperfluidVestingSchedule,
   roundId: string,
 ) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     const rewardStreamId = await createRewardStream(stream, roundId, db)
     await createOrUpdateSuperfluidStream(stream, rewardStreamId, db)
   })

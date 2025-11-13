@@ -1,9 +1,9 @@
 import { uploadImage } from "@/lib/actions/storage"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function POST(request: Request) {
   // Don't want this to be public
-  const { userId } = await withImpersonation()
+  const { userId } = await getImpersonationContext()
   if (!userId) {
     return Response.error()
   }

@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { VerifiedAddressesContent } from "./content"
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const { session, userId } = await withImpersonation()
+  const { session, userId } = await getImpersonationContext()
   if (!userId) {
     redirect("/")
   }

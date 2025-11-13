@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { verifyKYCToken, isKYCLinkExpired } from "@/lib/utils/kycToken"
 import { personaClient } from "@/lib/persona"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { token: string } },
 ) {
   try {
-    const { db } = await withImpersonation({ forceProd: true, session: null })
+    const { db } = await getImpersonationContext({ forceProd: true, session: null })
     const { token } = params
 
     // Verify and decode the token

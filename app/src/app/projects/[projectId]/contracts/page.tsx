@@ -6,7 +6,7 @@ import { ContractsForm } from "@/components/projects/contracts/ContractsForm"
 import { getProjectContractsWithClient } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 // Heavy verification flows (OSO fetch + large contract batches) can exceed the
 // default execution window, so request the extended limit.
@@ -40,7 +40,7 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const { db, userId, impersonating } = await withImpersonation()
+  const { db, userId, impersonating } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")

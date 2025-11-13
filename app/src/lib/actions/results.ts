@@ -1,7 +1,7 @@
 "use server"
 
 import { getFundingRewardsByRoundIdsAndSearchWithClient } from "@/db/rewards"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 export const findFundingRewards = async ({
   roundIds,
@@ -16,7 +16,7 @@ export const findFundingRewards = async ({
   page: number
   pageSize: number
 }) =>
-  withSessionDb(async ({ db }) => {
+  withImpersonation(async ({ db }) => {
     try {
       const fundingRewardsData =
         await getFundingRewardsByRoundIdsAndSearchWithClient(

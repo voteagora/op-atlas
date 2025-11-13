@@ -2,12 +2,12 @@ import { redirect } from "next/navigation"
 
 import { ApplicationFlow } from "@/components/application"
 import { getApplications, getProjects } from "@/lib/actions/projects"
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const maxDuration = 120
 
 export default async function Page() {
-  const { userId } = await withImpersonation()
+  const { userId } = await getImpersonationContext()
   if (!userId) {
     redirect("/")
   }

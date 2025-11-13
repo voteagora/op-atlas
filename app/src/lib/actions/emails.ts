@@ -17,7 +17,7 @@ import {
 import { generateKYCToken } from "@/lib/utils/kycToken"
 import { isInImpersonationMode } from "@/lib/impersonationContext"
 
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { getUserOrganizationRole, getUserProjectRole } from "./utils"
 
 const client = mailchimp(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!)
@@ -139,7 +139,7 @@ async function trackEmailNotification(
 export const sendKYCStartedEmail = async (
   kycUser: KYCUser,
 ): Promise<EmailResponse> => {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     try {
       const token = await generateKYCToken("kycUser", kycUser.id, kycUser.email)
       const kycLink = `${BASE_URL}/kyc/verify/${token}`
@@ -193,7 +193,7 @@ export const sendKYBStartedEmail = async (
     }
   },
 ): Promise<EmailResponse> => {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     try {
       const token = await generateKYCToken(
         "legalEntity",
@@ -253,7 +253,7 @@ export const sendKYCReminderEmail = async (
   },
 ): Promise<EmailResponse> => {
   const bypassAuth = !!context?.bypassAuth
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!bypassAuth) {
         if (!userId) {
@@ -354,7 +354,7 @@ export const sendKYBReminderEmail = async (
   const { bypassAuth, projectId, organizationId } = context ?? {}
   const forceProd = !!bypassAuth
 
-  return withSessionDb(
+  return withImpersonation(
     async ({ db, userId }) => {
       if (!bypassAuth) {
         if (!userId) {
@@ -489,7 +489,7 @@ export const sendKYBReminderEmail = async (
 export const sendKYCApprovedEmail = async (
   kycUser: KYCUser,
 ): Promise<EmailResponse> => {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     const html = getKYCApprovedEmailTemplate(kycUser)
 
     const emailParams = {
@@ -517,7 +517,7 @@ export const sendKYBApprovedEmail = async (
   email: string,
   referenceId: string,
 ): Promise<EmailResponse> => {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     const html = getKYBApprovedEmailTemplate(firstName)
 
     const emailParams = {
@@ -543,7 +543,7 @@ export const sendKYBApprovedEmail = async (
 export const sendPersonalKYCReminderEmail = async (
   kycUserId: string,
 ): Promise<EmailResponse> => {
-  return withSessionDb(async ({ db, userId }) => {
+  return withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return {
         success: false,
@@ -640,7 +640,7 @@ export const sendKYCEmailVerificationEmail = async (
   verificationLink: string,
   kycUserId: string,
 ): Promise<EmailResponse> => {
-  return withSessionDb(async ({ db }) => {
+  return withImpersonation(async ({ db }) => {
     const html = getKYCEmailVerificationTemplate(firstName, verificationLink)
 
     const emailParams = {
@@ -666,7 +666,7 @@ export const sendKYCEmailVerificationEmail = async (
 export async function sendFindMyKYCVerificationCode(
   email: string,
 ): Promise<EmailResponse> {
-  return withSessionDb(async ({ db, userId }) => {
+  return withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return { success: false, error: "Unauthorized" }
     }
@@ -850,7 +850,7 @@ export async function validateFindMyKYCCode(
   email: string,
   verificationCode: string,
 ): Promise<EmailResponse & { kycUser?: any }> {
-  return withSessionDb(async ({ db, userId }) => {
+  return withImpersonation(async ({ db, userId }) => {
     if (!userId) {
       return { success: false, error: "Unauthorized" }
     }

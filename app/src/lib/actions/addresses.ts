@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { getAddress } from "viem"
 
 import { addUserAddresses, getUserById, removeUserAddress } from "@/db/users"
-import { withSessionDb } from "@/lib/db/sessionContext"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import { getUserConnectedAddresses } from "../neynar"
 import verifyMessage from "../utils/serverVerifyMessage"
@@ -16,7 +16,7 @@ export const verifyUserAddress = async (
   address: `0x${string}`,
   signature: `0x${string}`,
 ) =>
-  withSessionDb(async ({ db, userId, session }) => {
+  withImpersonation(async ({ db, userId, session }) => {
     const checksumAddress = getAddress(address) as `0x${string}`
 
     if (!userId) {
@@ -76,7 +76,7 @@ export const verifyUserAddress = async (
   })
 
 export const deleteUserAddress = async (address: string) =>
-  withSessionDb(async ({ db, userId, session }) => {
+  withImpersonation(async ({ db, userId, session }) => {
     if (!userId) {
       return {
         error: "Unauthorized",
@@ -103,7 +103,7 @@ export const deleteUserAddress = async (address: string) =>
   })
 
 export const syncFarcasterAddresses = async () =>
-  withSessionDb(async ({ db, userId, session }) => {
+  withImpersonation(async ({ db, userId, session }) => {
     if (!userId) {
       return {
         error: "Unauthorized",

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
 
-import { withImpersonation } from "@/lib/db/sessionContext"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { isTop100Delegate } from "@/lib/services/top100"
 
 export async function GET() {
-  const { db, userId } = await withImpersonation()
+  const { db, userId } = await getImpersonationContext()
   
   if (!userId) {
     return NextResponse.json({ top100: false })
