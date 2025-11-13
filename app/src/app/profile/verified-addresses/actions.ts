@@ -109,7 +109,7 @@ export async function verifySafeAddressAction({
     return { error: "Invalid Safe address" as const }
   }
   const [{ db, userId }, safeInfo] = await Promise.all([
-    withImpersonation(),
+    getImpersonationContext(),
     fetchSafeInfoFromMainnet(formattedSafe),
   ])
   if (!userId) {

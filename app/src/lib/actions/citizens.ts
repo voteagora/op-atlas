@@ -217,7 +217,7 @@ export const s8CitizenshipQualification = async (
 
 // S8 Citizenship Limit Check
 export const checkCitizenshipLimit = async (): Promise<boolean> => {
-  const citizenCount = await getImpersonationContext(({ db }) =>
+  const citizenCount = await withImpersonation(({ db }) =>
     getCitizenCountByType(CITIZEN_TYPES.user, db),
     { forceProd: true },
   )
