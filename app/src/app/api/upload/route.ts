@@ -1,10 +1,10 @@
+import { auth } from "@/auth"
 import { uploadImage } from "@/lib/actions/storage"
-import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function POST(request: Request) {
   // Don't want this to be public
-  const { userId } = await getImpersonationContext()
-  if (!userId) {
+  const session = await auth()
+  if (!session?.user) {
     return Response.error()
   }
 
