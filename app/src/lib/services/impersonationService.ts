@@ -387,18 +387,6 @@ class ImpersonationService {
       eventType,
       ...data
     })
-
-    // TODO: Store in database audit table
-    // Example:
-    // await prisma.impersonationAuditLog.create({
-    //   data: {
-    //     eventType,
-    //     adminUserId: data.adminUserId,
-    //     adminAddress: data.adminAddress,
-    //     targetUserId: data.targetUserId,
-    //     metadata: data,
-    //   }
-    // })
   }
 }
 
