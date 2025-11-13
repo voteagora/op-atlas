@@ -78,20 +78,3 @@ export async function getAdminInfo(userId: string) {
     isAdmin: true
   }
 }
-
-/**
- * Log admin action for audit trail
- */
-export function logAdminAction(
-  action: string,
-  adminUserId: string,
-  data: Record<string, any>
-) {
-  console.log(`🔐 ADMIN ACTION: ${action}`, {
-    timestamp: new Date().toISOString(),
-    adminUserId,
-    ...data
-  })
-
-  // TODO: Store in database audit table if needed
-}
