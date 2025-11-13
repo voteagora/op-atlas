@@ -42,22 +42,20 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const { db, userId, impersonating } = await getImpersonationContext()
+  const { db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")
   }
 
   // Check user membership - redirect non-members to homepage
-  if (!impersonating) {
-    const membershipCheck = await verifyMembership(
-      params.projectId,
-      userId,
-      db,
-    )
-    if (membershipCheck?.error) {
-      redirect("/")
-    }
+  const membershipCheck = await verifyMembership(
+    params.projectId,
+    userId,
+    db,
+  )
+  if (membershipCheck?.error) {
+    redirect("/")
   }
 
   // Get user role
