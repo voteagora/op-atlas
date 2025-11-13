@@ -55,9 +55,17 @@ export function getSessionDatabase(
     return prisma
   }
 
-  if (hasValidImpersonationSession(session) && adminDb.isD1Available()) {
-    return adminDb.getClient(true) // Use d-1 database
+  const impersonation = hasValidImpersonationSession(session)
+  if (impersonation) {
+    if (adminDb.isD1Available()) {
+      return adminDb.getClient(true) // Use d-1 database
+    }
+    // Hard-fail impersonation when D-1 is not configured to prevent writes to prod.
+    throw new Error(
+      "Admin impersonation requested but D-1 database is not configured. Set D1_DATABASE_URL or disable impersonation.",
+    )
   }
+
   return prisma // Use production database (default)
 }
 

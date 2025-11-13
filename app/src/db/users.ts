@@ -11,6 +11,7 @@ import {
 } from "@prisma/client"
 import type { PrismaClient } from "@prisma/client"
 import type { Session } from "next-auth"
+import { isSignedImpersonationSessionValid } from "@/lib/auth/impersonationSession"
 import { AggregatedType } from "eas-indexer/src/types"
 import { getAddress, isAddress } from "viem"
 
@@ -60,19 +61,27 @@ export async function getUserById(
     },
   })
 
-  // If user is not logged in or requesting different user's data, remove sensitive information
-  // but return the same object structure for consistency
-  if (!session?.user || (session.user.id !== userId && user)) {
-    if (user) {
-      user.emails = []
-      user.safeAddresses = []
-      user.privyDid = null
-      user.createdAt = new Date(0)
-      user.deletedAt = new Date(0)
-      user.updatedAt = new Date(0)
-      user.notDeveloper = false
-      return user
-    }
+  // If user is not logged in or requesting different user's data (and not an authorized admin impersonation),
+  // remove sensitive information but keep shape consistent.
+  const isAuthorizedImpersonationTarget = !!session?.impersonation &&
+    isSignedImpersonationSessionValid(session.impersonation as any, {
+      currentAdminUserId: session.user?.id,
+    }) &&
+    (session.impersonation as any).targetUserId === userId
+
+  const isSelfOrAuthorizedTarget = !!session?.user && (
+    session.user.id === userId || isAuthorizedImpersonationTarget
+  )
+
+  if (!isSelfOrAuthorizedTarget && user) {
+    user.emails = []
+    user.safeAddresses = []
+    user.privyDid = null
+    user.createdAt = new Date(0)
+    user.deletedAt = new Date(0)
+    user.updatedAt = new Date(0)
+    user.notDeveloper = false
+    return user
   }
 
   return user
