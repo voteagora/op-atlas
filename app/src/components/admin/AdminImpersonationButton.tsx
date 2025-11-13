@@ -153,7 +153,7 @@ export function AdminImpersonationButton() {
               placeholder="Search for user"
               loading={starting}
               loadingText="Starting"
-              autoFocus={open}
+              focusOnOpen={open}
             />
           </div>
 

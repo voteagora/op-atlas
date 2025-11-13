@@ -25,7 +25,7 @@ interface Props {
   disabled?: boolean
   placeholder?: string
   currentUserId?: string
-  autoFocus?: boolean
+  focusOnOpen?: boolean
   align?: "left" | "right"
   loading?: boolean
   loadingText?: string
@@ -48,7 +48,7 @@ export function UserSearchAutocomplete({
   disabled,
   placeholder,
   currentUserId,
-  autoFocus,
+  focusOnOpen,
   align = "left",
   loading = false,
   loadingText
@@ -115,14 +115,14 @@ export function UserSearchAutocomplete({
   }, [open])
 
   useEffect(() => {
-    if (open && autoFocus && inputRef.current) {
+    if (open && focusOnOpen && inputRef.current) {
       // Small delay to ensure the input is rendered
       const timeout = setTimeout(() => {
         inputRef.current?.focus()
       }, 100)
       return () => clearTimeout(timeout)
     }
-  }, [open, autoFocus])
+  }, [open, focusOnOpen])
 
   return (
     <div ref={containerRef} className="relative w-full">
