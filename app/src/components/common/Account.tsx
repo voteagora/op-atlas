@@ -497,6 +497,7 @@ export const Account = () => {
 const TestModeAccount = () => {
   const isLinking = useRef(false)
   const isLoggingIn = useRef(false)
+  const [holdLoginUI, setHoldLoginUI] = useState(false)
 
   const { data: session, status: authStatus } = useSession()
   const viewerId =
@@ -552,6 +553,9 @@ const TestModeAccount = () => {
       return
     }
     isLoggingIn.current = true
+    // In test mode, keep the button with spinner visible briefly to stabilize UI under test
+    setHoldLoginUI(true)
+    setTimeout(() => setHoldLoginUI(false), 1500)
     // Mock implementation for test mode
     Promise.resolve("mock-token")
       .then((token) => {
@@ -621,6 +625,21 @@ const TestModeAccount = () => {
     didLogIn,
     user?.emails,
   ])
+
+  // During the brief post-click window, keep rendering the Sign in button with spinner
+  if (holdLoginUI) {
+    return (
+      <button
+        type="button"
+        className={`cursor-pointer text-sm text-primary-foreground leading-5 rounded-md px-2 sm:px-4 py-2.5 flex items-center justify-center h-10 w-max ${
+          "bg-gray-300"
+        }`}
+        onClick={() => {}}
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </button>
+    )
+  }
 
   if (session) {
     return (
