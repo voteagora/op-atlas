@@ -7,7 +7,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
-import { getEffectiveUserId } from "@/lib/db/helpers"
 import { impersonationService } from "@/lib/services/impersonationService"
 
 export async function POST(request: NextRequest) {
@@ -22,9 +21,8 @@ export async function POST(request: NextRequest) {
 
     // Get current session
     const session = await auth()
-    const userId = getEffectiveUserId(session)
     const adminUserId = session?.user?.id
-    if (!userId || !adminUserId) {
+    if (!adminUserId) {
       return NextResponse.json(
         { error: "Unauthorized: No active session" },
         { status: 401 },
@@ -77,7 +75,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       impersonation: result.impersonation,
-      viewerId: userId,
+      viewerId: adminUserId,
       message: session.impersonation?.isActive
         ? `Switched to user: ${result.impersonation?.targetUserName}`
         : `Now impersonating: ${result.impersonation?.targetUserName}`,
@@ -98,9 +96,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const session = await auth()
-    const userId = getEffectiveUserId(session)
     const adminUserId = session?.user?.id
-    if (!userId || !adminUserId) {
+    if (!adminUserId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 },
@@ -128,7 +125,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Impersonation stopped. Returning to admin view.",
-      viewerId: userId,
+      viewerId: adminUserId,
       // Client must call update({ impersonation: undefined }) to clear the JWT
       clearImpersonation: true,
     })

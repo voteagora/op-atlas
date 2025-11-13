@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
 import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
-import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { impersonationService } from "@/lib/services/impersonationService"
 
 export const dynamic = 'force-dynamic'
@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { session, userId } = await getImpersonationContext()
+    const session = await auth()
     const adminUserId = session?.user?.id
-    if (!userId || !adminUserId) {
+    if (!adminUserId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 },
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       users,
       count: users.length,
       query,
-      viewerId: userId,
+      viewerId: adminUserId,
     })
   } catch (error) {
     console.error('User Search Error:', error)

@@ -4,22 +4,22 @@
  */
 
 import { NextResponse } from "next/server"
+import { auth } from "@/auth"
 import adminDb from "@/db/adminClient"
 import {
   getAdminWallets,
   isAdminUser,
   isImpersonationEnabled,
 } from "@/lib/auth/adminConfig"
-import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const { session, userId } = await getImpersonationContext()
+    const session = await auth()
     const adminUserId = session?.user?.id
 
-    if (!userId || !adminUserId) {
+    if (!adminUserId) {
       return NextResponse.json(
         { error: "Unauthorized", details: "No active session" },
         { status: 401 },
@@ -42,7 +42,7 @@ export async function GET() {
       impersonation: session?.impersonation || null,
       adminWalletCount: getAdminWallets().length,
       environment: process.env.NODE_ENV || "unknown",
-      viewerId: userId,
+      viewerId: adminUserId,
     }
 
     return NextResponse.json({
