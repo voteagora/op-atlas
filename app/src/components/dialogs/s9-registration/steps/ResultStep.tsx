@@ -3,10 +3,10 @@
 import { ReactNode } from "react"
 
 import Image from "next/image"
-import { AlertCircle, Check, CheckCircle2, Info, Loader2, XCircle } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { CheckboxCircleFIll, CloseCircleFill, InformationFill } from "@/components/icons/remix"
 
 type ResultStepProps = {
   title: string
@@ -25,41 +25,33 @@ export function ResultStep({
   onClose,
   actions,
 }: ResultStepProps) {
-  const Icon = icon
-    ? icon === "loading"
-      ? Loader2
-      : icon === "check"
-      ? Check
-      : icon === "success"
-      ? CheckCircle2
-      : icon === "info"
-      ? Info
-      : icon === "warning"
-      ? AlertCircle
-      : XCircle
-    : null
+  const renderIcon = () => {
+    if (!icon) return null
 
-  const iconClasses = icon
-    ? icon === "loading"
-      ? "text-primary animate-spin"
-      : icon === "check"
-      ? "text-foreground"
-      : icon === "success"
-      ? "text-success-strong"
-      : icon === "info"
-      ? "text-primary"
-      : icon === "warning"
-      ? "text-amber-500"
-      : "text-destructive"
-    : ""
+    switch (icon) {
+      case "loading":
+        return <Loader2 className="h-16 w-16 text-primary animate-spin" />
+      case "check":
+      case "success":
+        return <CheckboxCircleFIll className="h-16 w-16" fill="#0DA529" />
+      case "info":
+        return <InformationFill className="h-16 w-16" fill="hsl(var(--primary))" />
+      case "warning":
+        return <InformationFill className="h-16 w-16" fill="#f59e0b" />
+      case "error":
+        return <CloseCircleFill className="h-16 w-16" fill="hsl(var(--destructive))" />
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="flex flex-col items-center gap-4">
       {customImage ? (
         <Image src={customImage} alt={title} width={64} height={64} className="h-16 w-16" />
-      ) : Icon ? (
-        <Icon className={cn("h-16 w-16", iconClasses)} />
-      ) : null}
+      ) : (
+        renderIcon()
+      )}
 
       <div className="flex flex-col gap-2 text-center">
         <div className="text-lg font-semibold text-foreground">{title}</div>

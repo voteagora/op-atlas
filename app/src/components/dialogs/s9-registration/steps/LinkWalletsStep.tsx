@@ -1,13 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { Loader2, Wallet, XCircle, CheckCircle2 } from "lucide-react"
+import { Loader2, Wallet } from "lucide-react"
 import { isAddress } from "viem"
 
 import { Button as CommonButton } from "@/components/common/Button"
-import { cn } from "@/lib/utils"
 import { truncateAddress } from "@/lib/utils/string"
 import { useEnsName } from "@/hooks/useEnsName"
+import { CheckboxCircleFIll, CloseCircleFill } from "@/components/icons/remix"
 
 type LinkWalletsStepProps = {
   wallets: Array<{ address: string; primary: boolean }>
@@ -25,7 +25,7 @@ export function LinkWalletsStep({
       <h3 className="text-xl font-semibold text-foreground mt-4 text-center">
         Link a wallet with Superchain activity
       </h3>
-      <div className="text-center mt-2">
+      <div className="text-center mt-2 hidden">
         <Link href="#" className="text-base text-foreground underline">
           View requirements
         </Link>
@@ -69,15 +69,6 @@ function WalletEligibilityRow({ address, status }: WalletEligibilityRowProps) {
     address && isAddress(address) ? (address as `0x${string}`) : undefined
   const { data: ensName } = useEnsName(validAddress)
 
-  const StatusIcon =
-    status === "checking" ? Loader2 : status === "pass" ? CheckCircle2 : XCircle
-  const iconClassName = cn(
-    "w-4 h-4",
-    status === "checking" && "animate-spin",
-    status === "pass" && "text-success-strong",
-    status === "fail" && "text-destructive",
-  )
-
   const statusLabel =
     status === "checking" ? "Checking" : status === "pass" ? "Pass" : "Fail"
 
@@ -90,7 +81,9 @@ function WalletEligibilityRow({ address, status }: WalletEligibilityRowProps) {
         </span>
       </div>
       <div className="flex items-center gap-1.5 text-sm text-foreground">
-        <StatusIcon className={iconClassName} />
+        {status === "checking" && <Loader2 className="w-4 h-4 animate-spin" />}
+        {status === "pass" && <CheckboxCircleFIll className="w-4 h-4" fill="#0DA529" />}
+        {status === "fail" && <CloseCircleFill className="w-4 h-4" fill="hsl(var(--destructive))" />}
         <span>{statusLabel}</span>
       </div>
     </div>

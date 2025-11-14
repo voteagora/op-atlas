@@ -2,10 +2,9 @@
 
 import { ReactNode } from "react"
 
-import { CheckCircle2 } from "lucide-react"
-
 import { Button as CommonButton } from "@/components/common/Button"
 import { Farcaster, Github, XOptimism } from "@/components/icons/socials"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 
 type ConnectSocialStepProps = {
   farcasterConnected: boolean
@@ -73,7 +72,7 @@ function SocialRow({
       </div>
       {connected ? (
         <div className="flex items-center gap-1.5 text-sm text-secondary-foreground pr-3 py-3">
-          <CheckCircle2 className="w-4 h-4 text-green-600" />
+          <CheckboxCircleFIll className="w-4 h-4" fill="#0DA529" />
           <span>Connected</span>
         </div>
       ) : (

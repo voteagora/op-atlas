@@ -2,12 +2,13 @@
 
 import { useCallback } from "react"
 
-import { CheckCircle2, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 
 import { DialogProps } from "./types"
 import {
@@ -79,9 +80,10 @@ export function S9RegistrationDialog({
 
     try {
       const success = await handleRegister()
+      toast.dismiss(toastId)
+
       if (!success) {
         toast.error("Failed to set governance wallet", {
-          id: toastId,
           dismissible: true,
           duration: 4000,
         })
@@ -90,14 +92,14 @@ export function S9RegistrationDialog({
 
       toast.success(
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-success-strong" />
+          <CheckboxCircleFIll className="h-4 w-4" fill="#0DA529" />
           <span className="text-sm">Governance wallet set</span>
         </div>,
-        { id: toastId, dismissible: true, duration: 4000 },
+        { dismissible: true, duration: 4000 },
       )
     } catch (error) {
+      toast.dismiss(toastId)
       toast.error("Failed to set governance wallet", {
-        id: toastId,
         dismissible: true,
         duration: 4000,
       })
@@ -306,7 +308,7 @@ export function S9RegistrationDialog({
               <Button
                 onClick={goToNext}
                 disabled={!canContinueSocial}
-                className="button-primary w-full"
+                className="button-primary w-full disabled:!bg-destructive disabled:!text-background disabled:!opacity-50"
               >
                 Next
               </Button>
@@ -318,7 +320,7 @@ export function S9RegistrationDialog({
                   onClick={goToNext}
                   disabled={!canContinueWallets}
                   variant="destructive"
-                  className="w-full"
+                  className="w-full disabled:!bg-destructive disabled:!text-background disabled:!opacity-50"
                 >
                   Next
                 </Button>
@@ -339,7 +341,7 @@ export function S9RegistrationDialog({
                 <Button
                   onClick={handleRegisterClick}
                   disabled={!canContinueGovernance || isRegistering}
-                  className="button-primary w-full"
+                  className="button-primary w-full disabled:!bg-destructive disabled:!text-background disabled:!opacity-50"
                 >
                   {isRegistering && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
