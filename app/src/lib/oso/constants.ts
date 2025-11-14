@@ -67,4 +67,17 @@ export const TRANCHE_MONTHS_MAP = {
   9: "Oct",
 }
 
+// Maps tranche numbers to date strings (1st of each month)
+export const TRANCHE_TO_DATE_MAP = {
+  1: "2025-02-01",
+  2: "2025-03-01",
+  3: "2025-04-01",
+  4: "2025-05-01",
+  5: "2025-06-01",
+  6: "2025-07-01",
+  7: "2025-08-01",
+  8: "2025-09-01",
+  9: "2025-10-01",
+}
+
 export const CHARTS_TRAILING_DAYS = 3

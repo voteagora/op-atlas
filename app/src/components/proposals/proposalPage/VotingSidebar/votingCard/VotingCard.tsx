@@ -62,13 +62,15 @@ const CardText = ({
     if (cardText.descriptionElement === "OFFCHAIN_STANDARD") {
       return (
         <p className="text-base leading-6 md:text-sm md:leading-5 text-center text-secondary-foreground">
-          This proposal requires approval from the Citizen&#39;s House and Token
-          House. Read more about the voting mechanism{" "}
+          Voters are asked to vote for, against, or abstain. The proposal passes
+          if the &apos;for&apos; votes exceed quorum AND if the &apos;for&apos;
+          votes, relative to the total votes, exceed the approval threshold.
+          Read more about the voting mechanism{" "}
           <a
-            href="https://github.com/ethereum-optimism/OPerating-manual/blob/main/manual.md"
-            className="text-base md:text-sm text-center underline"
+            href="https://github.com/ethereum-optimism/OPerating-manual/blob/main/manual.md#voting-mechanism"
             target="_blank"
             rel="noopener noreferrer"
+            className="text-[#404454] hover:opacity-80 transition-opacity duration-200"
           >
             here
           </a>

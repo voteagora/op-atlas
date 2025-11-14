@@ -11,6 +11,23 @@ export default function Performance({
 }: {
   metrics: PerformanceMetrics
 }) {
+  const tvlValues = Object.values(metrics.tvl)
+  const transactionsValues = Object.values(metrics.transactions)
+  const gasFeesValues = Object.values(metrics.gasFees)
+  const activeAddressesValues = Object.values(metrics.activeAddresses)
+
+  // TVL: average across all months (values are already totals per month)
+  const avgTvl = tvlValues.reduce((acc, curr) => acc + curr.value, 0) / tvlValues.length
+
+  // Transactions: sum of all months
+  const totalTransactions = transactionsValues.reduce((acc, curr) => acc + curr.value, 0)
+
+  // Gas Fees: sum of all months
+  const totalGasFees = gasFeesValues.reduce((acc, curr) => acc + curr.value, 0)
+
+  // Active Addresses: average across all months (values are already daily averages)
+  const avgActiveAddresses = activeAddressesValues.reduce((acc, curr) => acc + curr.value, 0) / activeAddressesValues.length
+
   return (
     <div className="w-full space-y-6">
       <div className="w-full flex items-center">
@@ -22,17 +39,10 @@ export default function Performance({
             <div>
               <h4 className="font-normal text-foreground">
                 $
-                {formatNumber(
-                  Object.values(metrics.tvl).reduce(
-                    (acc, curr) => acc + curr.value,
-                    0,
-                  ) / 30,
-                  0,
-                  "compact",
-                )}
+                {formatNumber(avgTvl, 0, "compact")}
               </h4>
               <p className="text-secondary-foreground">
-                TVL across the Superchain
+                Average TVL across the Superchain
               </p>
             </div>
             <Chart data={metrics.tvl} />
@@ -40,49 +50,28 @@ export default function Performance({
           <div className="w-full space-y-6 rounded-lg border p-6">
             <div>
               <h4 className="font-normal text-foreground">
-                {formatNumber(
-                  Object.values(metrics.transactions).reduce(
-                    (acc, curr) => acc + curr.value,
-                    0,
-                  ),
-                  0,
-                  "compact",
-                )}
+                {formatNumber(totalTransactions, 0, "compact")}
               </h4>
-              <p className="text-secondary-foreground">Transactions</p>
+              <p className="text-secondary-foreground">Total Transactions</p>
             </div>
             <Chart data={metrics.transactions} />
           </div>
           <div className="w-full space-y-6 rounded-lg border p-6">
             <div>
               <h4 className="font-normal text-foreground">
-                {formatNumber(
-                  Object.values(metrics.gasFees).reduce(
-                    (acc, curr) => acc + curr.value,
-                    0,
-                  ),
-                  0,
-                  "compact",
-                )}{" "}
+                {formatNumber(totalGasFees, 0, "compact")}{" "}
                 ETH
               </h4>
-              <p className="text-secondary-foreground">Gas consumed</p>
+              <p className="text-secondary-foreground">Total Gas consumed</p>
             </div>
             <Chart data={metrics.gasFees} />
           </div>
           <div className="w-full space-y-6 rounded-lg border p-6">
             <div>
               <h4 className="font-normal text-foreground">
-                {formatNumber(
-                  Object.values(metrics.activeAddresses).reduce(
-                    (acc, curr) => acc + curr.value,
-                    0,
-                  ) / 30,
-                  0,
-                  "compact",
-                )}
+                {formatNumber(avgActiveAddresses, 0, "compact")}
               </h4>
-              <p className="text-secondary-foreground">Unique addresses</p>
+              <p className="text-secondary-foreground">Average Daily Unique addresses</p>
             </div>
             <Chart data={metrics.activeAddresses} />
           </div>

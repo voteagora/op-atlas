@@ -6,6 +6,7 @@ import {
   INDEXED_MONTHS,
   RETROFUNDING_OP_REWARD_MINIMUM,
   TRANCHE_MONTHS_MAP,
+  TRANCHE_TO_DATE_MAP,
 } from "./constants"
 import { MetricValues } from "./types"
 import { Trend } from "./types"
@@ -66,8 +67,8 @@ export const formatActiveAddresses = (
         : 0
 
     result[month] = {
-      value: currentValue,
-      trend: calculateTrend(currentValue, previousValue),
+      value: currentValue / 30,
+      trend: calculateTrend(currentValue / 30, previousValue / 30),
     }
   })
 
@@ -187,6 +188,29 @@ export const formatDevToolingReward = (
     }
     return acc
   }, {})
+}
+
+// Converts month-based metrics to date-based metrics for Performance charts
+export const convertMonthMetricsToDateMetrics = (
+  monthMetrics: Record<string, { value: number; trend: Trend }>,
+): Record<string, { value: number; trend: Trend }> => {
+  const result: Record<string, { value: number; trend: Trend }> = {}
+
+  Object.entries(monthMetrics).forEach(([monthName, data]) => {
+    // Find the tranche number for this month
+    const tranche = Object.entries(TRANCHE_MONTHS_MAP).find(
+      ([_, month]) => month === monthName
+    )?.[0]
+
+    if (tranche) {
+      const dateStr = TRANCHE_TO_DATE_MAP[Number(tranche) as keyof typeof TRANCHE_TO_DATE_MAP]
+      if (dateStr) {
+        result[dateStr] = data
+      }
+    }
+  })
+
+  return result
 }
 
 // TODO: Use this for Performance Metrics

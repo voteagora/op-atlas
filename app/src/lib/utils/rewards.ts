@@ -218,14 +218,3 @@ export function calculateTrancheExpiryDate(tranche: number): Date {
   return expiryDate
 }
 
-/**
- * Format the expiry date as a string for display
- * e.g., "Feb 28, 2026"
- */
-export function formatExpiryDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  })
-}

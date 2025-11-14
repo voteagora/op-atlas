@@ -20,17 +20,12 @@ import {
   getTrustedDevelopersCountFromOSO,
 } from "@/db/projects"
 import {
-  OrderBy,
   Oso_ProjectsByCollectionV1,
   Oso_ProjectsV1,
-  Oso_TimeseriesMetricsByProjectV0,
   QueryOso_ProjectsByCollectionV1Args,
   QueryOso_ProjectsV1Args,
-  QueryOso_TimeseriesMetricsByProjectV0Args,
 } from "@/graphql/__generated__/types"
-import { OSO_METRICS } from "@/lib/constants"
 import { recordExternalApiCall } from "@/lib/metrics"
-import osoGqlClient from "@/lib/oso-client"
 import client from "@/lib/oso-client"
 import {
   OsoDeployerContractsReturnType,
@@ -39,7 +34,6 @@ import {
 
 import {
   BATCH_SIZE,
-  OSO_QUERY_DATES,
   supportedMappings,
   TRANCHE_MONTHS_MAP,
 } from "./constants"
@@ -55,12 +49,12 @@ import {
   formatMetricsData,
   formatOnchainBuilderEligibility,
   formatOnchainBuilderReward,
-  formatPerformanceMetrics,
   formatTransactions,
   formatTvl,
   parseEligibilityResults,
   parseMetricsResults,
   parseRewardsResults,
+  convertMonthMetricsToDateMetrics,
 } from "./utils"
 
 // Create instrumented GraphQL client
@@ -133,49 +127,6 @@ export const getDeployedContractsServerParsed = cache(
   },
 )
 
-const queryMetrics = cache(async function queryMetrics(
-  osoId: string[],
-  key: keyof typeof OSO_METRICS,
-  sampleDate = {
-    _gte: OSO_QUERY_DATES.DEFAULT.start,
-    _lte: OSO_QUERY_DATES.DEFAULT.end,
-  },
-) {
-  try {
-    const query: QueryOso_TimeseriesMetricsByProjectV0Args = {
-      where: {
-        projectId: {
-          _in: osoId,
-        },
-        metricId: {
-          _in: OSO_METRICS[key],
-        },
-        sampleDate: {
-          _gte: sampleDate._gte,
-          _lte: sampleDate._lte,
-        },
-      },
-      order_by: [
-        {
-          sampleDate: OrderBy.Asc,
-        },
-      ],
-    }
-    const select: (keyof Oso_TimeseriesMetricsByProjectV0)[] = [
-      "sampleDate",
-      "amount",
-    ]
-    const result = await osoGqlClient.executeQuery(
-      "oso_timeseriesMetricsByProjectV0",
-      query,
-      select,
-    )
-    return result.oso_timeseriesMetricsByProjectV0
-  } catch (error) {
-    console.error(error)
-    return []
-  }
-})
 
 export const mapOSOProjects = cache(async function mapOSOProjects(
   projectAtlasIds: string[],
@@ -289,8 +240,6 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     }
   }
 
-  const { osoId } = projectOSO
-
   const [
     eligibilityResults,
     metricsResults,
@@ -299,10 +248,6 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     trustedDevelopersCount,
     topProjects,
     tvlResults,
-    activeAddresses,
-    gasFees,
-    transactions,
-    tvl,
   ] = await Promise.all([
     getProjectEligibility(projectId),
     getProjectMetricsFromDB(projectId),
@@ -311,16 +256,22 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     getTrustedDevelopersCount(projectId),
     getTopProjects(projectId),
     getTvl(projectId),
-    queryMetrics([osoId], "activeAddresses"),
-    queryMetrics([osoId], "gasFees"),
-    queryMetrics([osoId], "transactions"),
-    queryMetrics([osoId], "tvl"),
   ])
 
-  const activeAddressesPerformance = formatPerformanceMetrics(activeAddresses)
-  const gasFeesPerformance = formatPerformanceMetrics(gasFees)
-  const transactionsPerformance = formatPerformanceMetrics(transactions)
-  const tvlPerformance = formatPerformanceMetrics(tvl)
+  // Format metrics from database (keyed by month names for Mission components)
+  const activeAddressesFormatted = formatActiveAddresses(
+    formatMetricsData(
+      parseMetricsResults(metricsResults, "ACTIVE_ADDRESSES_COUNT"),
+    ),
+  )
+  const gasFeesFormatted = formatGasFees(
+    formatMetricsData(parseMetricsResults(metricsResults, "GAS_FEES")),
+  )
+  const transactionsFormatted = formatTransactions(
+    formatMetricsData(
+      parseMetricsResults(metricsResults, "TRANSACTION_COUNT"),
+    ),
+  )
 
   return {
     eligibility: {
@@ -347,19 +298,9 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
       ),
     },
     onchainBuilderMetrics: {
-      activeAddresses: formatActiveAddresses(
-        formatMetricsData(
-          parseMetricsResults(metricsResults, "ACTIVE_ADDRESSES_COUNT"),
-        ),
-      ),
-      gasFees: formatGasFees(
-        formatMetricsData(parseMetricsResults(metricsResults, "GAS_FEES")),
-      ),
-      transactions: formatTransactions(
-        formatMetricsData(
-          parseMetricsResults(metricsResults, "TRANSACTION_COUNT"),
-        ),
-      ),
+      activeAddresses: activeAddressesFormatted,
+      gasFees: gasFeesFormatted,
+      transactions: transactionsFormatted,
       tvl: tvlResults,
       onchainBuilderReward: formatOnchainBuilderReward(
         parseRewardsResults(rewardsResults, "8"),
@@ -374,10 +315,11 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
       ),
     },
     performanceMetrics: {
-      activeAddresses: activeAddressesPerformance,
-      gasFees: gasFeesPerformance,
-      transactions: transactionsPerformance,
-      tvl: tvlPerformance,
+      // Convert month-based keys to date strings for Performance charts
+      activeAddresses: convertMonthMetricsToDateMetrics(activeAddressesFormatted),
+      gasFees: convertMonthMetricsToDateMetrics(gasFeesFormatted),
+      transactions: convertMonthMetricsToDateMetrics(transactionsFormatted),
+      tvl: convertMonthMetricsToDateMetrics(tvlResults),
     },
   }
 })
