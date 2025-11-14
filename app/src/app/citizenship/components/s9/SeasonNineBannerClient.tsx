@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useId } from "react"
 import { ArrowRight } from "lucide-react"
 
@@ -19,6 +20,7 @@ export function SeasonNineBannerClient({
 }: SeasonNineBannerClientProps) {
   const { registerTopBanner, unregisterTopBanner } = useTopBanner()
   const bannerId = useId()
+  const router = useRouter()
 
   const shouldShow = priorityWindow || registrationOpen
 
@@ -41,6 +43,12 @@ export function SeasonNineBannerClient({
       </Link>
     )
   }, [priorityWindow, registrationOpen, shouldShow, seasonName])
+
+  useEffect(() => {
+    if (shouldShow) {
+      router.prefetch("/citizenship")
+    }
+  }, [router, shouldShow])
 
   useEffect(() => {
     if (bannerContent) {
