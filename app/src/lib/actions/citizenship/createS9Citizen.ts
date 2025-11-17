@@ -6,7 +6,12 @@ import { CitizenRegistrationStatus } from "@prisma/client"
 import { prisma } from "@/db/client"
 import { findBlockedCitizenSeasonEvaluation } from "@/db/citizenSeasons"
 import { getUserById } from "@/db/users"
-import { CITIZEN_ATTESTATION_CODE, CITIZEN_TYPES } from "@/lib/constants"
+import { updateMailchimpTags } from "@/lib/api/mailchimp"
+import {
+  CITIZEN_ATTESTATION_CODE,
+  CITIZEN_TYPES,
+  S9_CITIZEN_TAGS,
+} from "@/lib/constants"
 import { createCitizenAttestation } from "@/lib/eas/serverOnly"
 
 export async function createS9Citizen({
@@ -66,6 +71,22 @@ export async function createS9Citizen({
         trustBreakdown: trustBreakdown || null,
       },
     })
+
+    // Update Mailchimp tags if user has an email
+    const userEmail = user.emails?.[0]?.email
+    if (userEmail) {
+      try {
+        await updateMailchimpTags([
+          {
+            email: userEmail,
+            tags: [S9_CITIZEN_TAGS[CITIZEN_TYPES.user]],
+          },
+        ])
+      } catch (error) {
+        console.error("Failed to update Mailchimp tags:", error)
+        // Continue even if Mailchimp fails - don't block registration
+      }
+    }
 
     // Invalidate citizenship page cache so user sees updated state
     revalidatePath("/citizenship")
