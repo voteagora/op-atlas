@@ -335,43 +335,70 @@ export async function updateUserEmail({
   email?: string | null
   verified?: boolean
 }) {
-  // Only delete verified emails that don't have pending verification tokens
-  // This preserves unverified emails with verification tokens (like KYC email verification)
-  const currentVerifiedEmail = await prisma.userEmail.findFirst({
-    where: {
-      userId: id,
-      verified: true,
-      verificationToken: null, // Only delete emails without pending verification
-      OR: [
-        { verificationTokenExpiresAt: null },
-        { verificationTokenExpiresAt: { lt: new Date() } }, // Expired tokens
-      ],
-    },
-  })
+  try {
+    // If setting a new email (not clearing it)
+    if (email) {
+      // Check if this email is already in use by another user
+      const existingEmailRecord = await prisma.userEmail.findUnique({
+        where: { email },
+        include: { user: true },
+      })
 
-  const deleteEmails = currentVerifiedEmail
-    ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentVerifiedEmail.id,
-          },
-        }),
-      ]
-    : []
+      if (existingEmailRecord && existingEmailRecord.userId !== id) {
+        // Delete the email from the old user
+        try {
+          await prisma.userEmail.delete({
+            where: { email },
+          })
+        } catch (deleteError) {
+          console.error(
+            `[Auth] Failed to delete email from old user ${existingEmailRecord.userId}:`,
+            deleteError,
+          )
+        }
+      }
+    }
 
-  const createEmail = email
-    ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-            verified: verified ?? false,
-          },
-        }),
-      ]
-    : []
+    // Delete current verified email for this user (if any)
+    const currentVerifiedEmail = await prisma.userEmail.findFirst({
+      where: {
+        userId: id,
+        verified: true,
+        verificationToken: null,
+        OR: [
+          { verificationTokenExpiresAt: null },
+          { verificationTokenExpiresAt: { lt: new Date() } },
+        ],
+      },
+    })
 
-  return prisma.$transaction([...deleteEmails, ...createEmail])
+    const deleteEmails = currentVerifiedEmail
+      ? [
+          prisma.userEmail.delete({
+            where: {
+              id: currentVerifiedEmail.id,
+            },
+          }),
+        ]
+      : []
+
+    const createEmail = email
+      ? [
+          prisma.userEmail.create({
+            data: {
+              email,
+              userId: id,
+              verified: verified ?? false,
+            },
+          }),
+        ]
+      : []
+
+    return prisma.$transaction([...deleteEmails, ...createEmail])
+  } catch (error) {
+    console.error(`[Auth] Failed to update email for user ${id}:`, error)
+    throw error
+  }
 }
 
 export async function addUserAddresses({
@@ -1019,6 +1046,75 @@ export async function updateUser({
       emails: true,
     },
   })
+}
+
+export async function updateUserFarcasterId({
+  userId,
+  farcasterId,
+  name,
+  username,
+  imageUrl,
+  bio,
+}: {
+  userId: string
+  farcasterId: string | null
+  name?: string | null
+  username?: string | null
+  imageUrl?: string | null
+  bio?: string | null
+}) {
+  try {
+    // If trying to set a farcasterId (not clearing it)
+    if (farcasterId) {
+      // Check if this farcasterId is already in use by another user
+      const existingUserWithFid = await getUserByFarcasterId(farcasterId)
+
+      if (existingUserWithFid && existingUserWithFid.id !== userId) {
+        // Clear the farcasterId from the old user
+        try {
+          await prisma.user.update({
+            where: { id: existingUserWithFid.id },
+            data: {
+              farcasterId: null,
+              name: null,
+              username: generateTemporaryUsername(
+                existingUserWithFid.privyDid!,
+              ),
+              imageUrl: null,
+              bio: null,
+            },
+          })
+        } catch (clearError) {
+          console.error(
+            `[Auth] Failed to clear farcasterId from old user ${existingUserWithFid.id}:`,
+            clearError,
+          )
+        }
+      }
+    }
+
+    // Now update the target user with the farcasterId
+    return await prisma.user.update({
+      where: { id: userId },
+      data: {
+        farcasterId,
+        ...(name !== undefined && { name }),
+        ...(username !== undefined && { username }),
+        ...(imageUrl !== undefined && { imageUrl }),
+        ...(bio !== undefined && { bio }),
+      },
+      include: {
+        emails: true,
+        addresses: true,
+      },
+    })
+  } catch (error) {
+    console.error(
+      `[Auth] Failed to update farcasterId for user ${userId}:`,
+      error,
+    )
+    throw error
+  }
 }
 
 export async function createUser(privyDid: string) {
