@@ -11,7 +11,7 @@ export const ADMIN_WALLETS = [
   '0x3B7fe632732c184BCE18E54cD717306Deef54E06', // OP Eleanor
   '0xfD4bBFB34ce81655a5EBf3fB18597d4BbA1087E2', // OP Sara
   '0x57De675bb963b341479F98E7c5418Bb3B3de2088', // OP Emily
-  '0xef297E3c5f5ABDEC0a520C743Db19417deb41a86', // OP Julian
+  '0xa7f8ad892f3e6f25bb042c8ad7a220e74acebad8', // OP Julian
   '0x13ac7d7da4f9063ba7cabc2ad75f90afb3d0877b', // OP Shaun
   '0xc1ef3c8d28f9fadb3d42bb8a0bbbe95c4239f653', // OP Jonas
 ].map(addr => addr.toLowerCase())
