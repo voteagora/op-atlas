@@ -82,10 +82,12 @@ export function RegisteredCard({ seasonName, context }: RegisteredCardProps) {
 
   const description = isUserCard ? (
     <>
-      You’re a citizen for {seasonName}. You’ll receive emails about active proposals.
+      You’re officially a Citizen for Season {seasonName} of Optimism Governance. You'll receive emails about active proposals.
     </>
   ) : (
-    responsibleUserMarkup
+    <>
+      {responsibleUserMarkup}
+    </>
   )
 
   const avatarAlt = isUserCard

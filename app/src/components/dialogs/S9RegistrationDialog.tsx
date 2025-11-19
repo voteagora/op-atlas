@@ -153,14 +153,19 @@ export function S9RegistrationDialog({
           <div className="flex flex-col gap-6">
             {stage === RegistrationStage.ConnectSocial && (
               <>
-                <h3 className="text-xl font-semibold text-foreground mt-4 text-center">
-                  Connect at least one social app
-                </h3>
+                <div className="flex flex-col gap-2 text-center">
+                  <h3 className="text-xl font-semibold text-foreground mt-4 text-center">
+                    Connect at least one social app
+                  </h3>
+                  <p className="text-base text-secondary-foreground">
+                    The more you connect, the better
+                  </p>
+                </div>
                 <ConnectSocialStep
                   farcasterConnected={farcasterConnected}
                   githubConnected={githubConnected}
                   xConnected={xConnected}
-                  onLinkFarcaster={linkFarcaster}
+                  onLinkFarcaster={linkFarcaster} 
                   onLinkGithub={linkGithub}
                   onLinkTwitter={linkTwitter}
                 />

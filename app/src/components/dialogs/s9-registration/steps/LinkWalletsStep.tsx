@@ -22,13 +22,15 @@ export function LinkWalletsStep({
 }: LinkWalletsStepProps) {
   return (
     <>
-      <h3 className="text-xl font-semibold text-foreground mt-4 text-center">
-        Link a wallet with Superchain activity
-      </h3>
-      <div className="text-center mt-2 hidden">
-        <Link href="#" className="text-base text-foreground underline">
-          View requirements
-        </Link>
+      <div className="flex flex-col gap-2">
+        <h3 className="text-xl font-semibold text-foreground mt-4 text-center">
+          Link a wallet with Superchain activity
+        </h3>
+        <div className="text-center text-secondary-foreground underline">
+          <Link href="https://community.optimism.io/citizens-house/citizenship-eligibility-requirements" target="_blank">
+            View requirements
+          </Link>
+        </div>
       </div>
       <div className="flex flex-col gap-2 mt-2">
         {wallets.length === 0 ? (
@@ -70,7 +72,7 @@ function WalletEligibilityRow({ address, status }: WalletEligibilityRowProps) {
   const { data: ensName } = useEnsName(validAddress)
 
   const statusLabel =
-    status === "checking" ? "Checking" : status === "pass" ? "Pass" : "Fail"
+    status === "checking" ? "Checking" : status === "pass" ? "Pass" : "Insufficient activity"
 
   return (
     <div className="flex items-center justify-between rounded-lg border border-border-secondary px-3 py-2.5">
