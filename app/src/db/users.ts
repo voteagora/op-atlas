@@ -410,14 +410,41 @@ export async function addUserAddresses({
   addresses: string[]
   source: UserAddressSource
 }) {
-  return prisma.userAddress.createMany({
-    data: addresses.map((address) => ({
-      userId: id,
-      address,
-      source,
-    })),
-    skipDuplicates: true,
-  })
+  try {
+    // Check for addresses already owned by other users and remove them
+    for (const address of addresses) {
+      const existingAddress = await prisma.userAddress.findUnique({
+        where: { address },
+      })
+
+      if (existingAddress && existingAddress.userId !== id) {
+        // Delete the address from the old user
+        try {
+          await prisma.userAddress.delete({
+            where: { address },
+          })
+        } catch (deleteError) {
+          console.error(
+            `[Auth] Failed to delete address ${address} from old user ${existingAddress.userId}:`,
+            deleteError,
+          )
+        }
+      }
+    }
+
+    // Now add all addresses to the current user
+    return prisma.userAddress.createMany({
+      data: addresses.map((address) => ({
+        userId: id,
+        address,
+        source,
+      })),
+      skipDuplicates: true,
+    })
+  } catch (error) {
+    console.error(`[Auth] Failed to add addresses for user ${id}:`, error)
+    throw error
+  }
 }
 
 export async function removeUserAddress({
