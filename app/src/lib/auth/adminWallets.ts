@@ -8,7 +8,7 @@
 
 export const ADMIN_WALLETS = [
   '0x22EdAAE2Fe5e3AC84D9f25723A4d945D8C4c47aD', // Agora Lucas
-  '0x3B7fe632732c184BCE18E54cD717306Deef54E06', // OP Eleanor
+  '0x8ae9d9cbf802df050de5b2749d30d17aea31b8bf', // OP Eleanor
   '0xfD4bBFB34ce81655a5EBf3fB18597d4BbA1087E2', // OP Sara
   '0x57De675bb963b341479F98E7c5418Bb3B3de2088', // OP Emily
   '0xa7f8ad892f3e6f25bb042c8ad7a220e74acebad8', // OP Julian
