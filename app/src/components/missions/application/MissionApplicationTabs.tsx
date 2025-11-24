@@ -1,6 +1,5 @@
 "use client"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
 import React, { useEffect, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
@@ -27,7 +26,6 @@ export function MissionApplicationTabs({
   onSubmit: () => void
 }) {
   const mission = useMissionFromPath()
-  const session = useSession()
 
   const [currentTab, setCurrentTab] = useState("details")
   const router = useRouter()

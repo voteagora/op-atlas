@@ -25,6 +25,8 @@ const ProfileHeader = ({
   kycStatus?: string
 }) => {
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
   const username = useUsername(user)
 
   const { data: citizen } = useCitizen({
@@ -43,7 +45,7 @@ const ProfileHeader = ({
     }
   }, [citizen])
 
-  const isSelf = session?.user?.id === user.id
+  const isSelf = viewerId === user.id
 
   return (
     <div className={cn("flex w-full flex-col", className)}>

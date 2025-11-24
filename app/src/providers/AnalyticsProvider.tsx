@@ -117,8 +117,12 @@ type Analytics = {
  * These properties are managed by the AnalyticsProvider and do not need to be manually specified when calling track().
  */
 type BaseEventProps = {
-  /** User ID from the application's authentication system */
+  /** Effective user ID (impersonation target or logged-in user) */
+  viewerId?: string
+  /** Legacy property for compatibility (maps to viewerId) */
   userId?: string
+  /** Actual admin user ID when impersonating */
+  actingAdminId?: string
   /** User ID from Privy authentication if available */
   privyId?: string
   /** User's geographic location (when available and enabled) */
@@ -164,10 +168,12 @@ export function useAnalytics() {
 
 function computeBaseProps(args: {
   pathname: string | null
-  user: { id?: string | null; privyId?: string | null } | null
+  viewerId?: string | null
+  adminUserId?: string | null
+  privyId?: string | null
 }) {
   if (isServer) return {}
-  const { pathname, user } = args
+  const { pathname, viewerId, adminUserId, privyId } = args
 
   // Get URL parameters for tracking
   const url =
@@ -179,8 +185,10 @@ function computeBaseProps(args: {
   const utmDetails = url?.searchParams.get("utm") || undefined
 
   return {
-    userId: user?.id ?? undefined,
-    privyId: user?.privyId ?? undefined,
+    viewerId: viewerId ?? undefined,
+    userId: viewerId ?? undefined,
+    actingAdminId: adminUserId ?? undefined,
+    privyId: privyId ?? undefined,
     geolocation: undefined, // Will be populated if we add geolocation tracking
     referringDomain,
     utmDetails,
@@ -226,6 +234,9 @@ export function AnalyticsProvider({ children }: PropsWithChildren) {
   const farcasterId = session?.user?.farcasterId
   const previousUserId = usePrevious(session?.user?.farcasterId)
   const pathname = usePathname()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id ?? null
+  const adminUserId = session?.user?.id ?? null
   
   const privyUser = useUser()
 
@@ -234,12 +245,11 @@ export function AnalyticsProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     basePropsRef.current = computeBaseProps({
       pathname,
-      user: {
-        id: session?.user?.id ?? null,
-        privyId: privyUser.user?.id ?? null,
-      },
+      viewerId,
+      adminUserId,
+      privyId: privyUser.user?.id ?? null,
     })
-  }, [pathname, session?.user, privyUser.user])
+  }, [pathname, viewerId, adminUserId, privyUser.user])
 
   const generateEventData = useCallback(
     (extra?: Record<string, unknown>) => ({

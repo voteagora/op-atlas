@@ -1,9 +1,11 @@
 "use server"
 
+import type { PrismaClient } from "@prisma/client"
+
 import { prisma } from "./client"
 
-export async function getUserKYCUser(userId: string) {
-  return await prisma.userKYCUser.findFirst({
+export async function getUserKYCUser(userId: string, db: PrismaClient = prisma) {
+  return await db.userKYCUser.findFirst({
     where: {
       userId,
       kycUser: {
@@ -18,8 +20,8 @@ export async function getUserKYCUser(userId: string) {
   })
 }
 
-export async function createUserKYCUser(userId: string, kycUserId: string) {
-  return await prisma.userKYCUser.create({
+export async function createUserKYCUser(userId: string, kycUserId: string, db: PrismaClient = prisma) {
+  return await db.userKYCUser.create({
     data: {
       userId,
       kycUserId,
@@ -27,8 +29,8 @@ export async function createUserKYCUser(userId: string, kycUserId: string) {
   })
 }
 
-export async function getUserPersonalKYC(userId: string) {
-  const userKyc = await prisma.userKYCUser.findFirst({
+export async function getUserPersonalKYC(userId: string, db: PrismaClient = prisma) {
+  const userKyc = await db.userKYCUser.findFirst({
     where: {
       userId,
     },
@@ -43,8 +45,8 @@ export async function getUserPersonalKYC(userId: string) {
   return userKyc?.kycUser || null
 }
 
-export async function getKYCUserStatus(userId: string) {
-  return await prisma.userKYCUser.findFirst({
+export async function getKYCUserStatus(userId: string, db: PrismaClient = prisma) {
+  return await db.userKYCUser.findFirst({
     where: {
       userId,
     },
@@ -63,7 +65,11 @@ export interface LinkOrphanedKYCResult {
   reason?: "invalid-email" | "no-user" | "already-linked" | "not-found" | "link-failed"
 }
 
-export async function linkOrphanedKYCUserToUser(userId: string, email: string): Promise<LinkOrphanedKYCResult> {
+export async function linkOrphanedKYCUserToUser(
+  userId: string,
+  email: string,
+  db: PrismaClient = prisma
+): Promise<LinkOrphanedKYCResult> {
   if (!email || !email.trim()) {
     return { linked: false, reason: "invalid-email" }
   }
@@ -75,12 +81,12 @@ export async function linkOrphanedKYCUserToUser(userId: string, email: string): 
   const normalizedEmail = email.trim().toLowerCase()
 
   // Skip if the user already has a non-expired KYC linked
-  const existingUserKYC = await getUserKYCUser(userId)
+  const existingUserKYC = await getUserKYCUser(userId, db)
   if (existingUserKYC) {
     return { linked: false, reason: "already-linked" }
   }
 
-  const orphanedKYCUser = await prisma.kYCUser.findFirst({
+  const orphanedKYCUser = await db.kYCUser.findFirst({
     where: {
       email: normalizedEmail,
       expiry: {
@@ -97,7 +103,7 @@ export async function linkOrphanedKYCUserToUser(userId: string, email: string): 
   }
 
   try {
-    await prisma.userKYCUser.create({
+    await db.userKYCUser.create({
       data: {
         userId,
         kycUserId: orphanedKYCUser.id,

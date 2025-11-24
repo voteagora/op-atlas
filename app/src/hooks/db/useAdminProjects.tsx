@@ -25,5 +25,8 @@ export function useSessionAdminProjects(): {
 } {
   const { data: session } = useSession()
 
-  return useAdminProjects(session?.user.id)
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
+
+  return useAdminProjects(viewerId)
 }

@@ -8,6 +8,9 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export const AnalyticsTracker = ({ role }: { role: Role }) => {
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
+  const adminUserId = session?.user?.id ?? null
 
   const { track } = useAnalytics()
   const isTracked = useRef(false)
@@ -18,7 +21,8 @@ export const AnalyticsTracker = ({ role }: { role: Role }) => {
         role_name: role.title,
         role_id: role.id,
         page_title: "Nomination Form",
-        candidate_user_id: session?.user?.id || null,
+        candidate_user_id: viewerId || null,
+        admin_user_id: adminUserId,
         elementType: "Page View",
         elementName: "Nomination Form",
       })

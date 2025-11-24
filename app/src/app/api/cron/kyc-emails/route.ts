@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 
-import { prisma } from "@/db/client"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { withCronObservability } from "@/lib/cron"
 import {
   sendKYBReminderEmail,
@@ -24,6 +24,8 @@ async function handleKYCEmailsCron(request: NextRequest) {
     errors: [] as string[],
   }
 
+  const { db } = await getImpersonationContext({ forceProd: true, session: null })
+
   try {
     console.log("🔍 Processing KYC reminder emails...")
 
@@ -31,7 +33,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     threshold.setDate(threshold.getDate() - 7)
 
     // Process KYC (individual) reminders
-    const kycReminderCandidates = await prisma.kYCUser.findMany({
+    const kycReminderCandidates = await db.kYCUser.findMany({
       where: {
         status: "PENDING",
         personaStatus: { in: ["created", "pending", "needs_review"] },
@@ -56,7 +58,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     for (const user of kycReminderCandidates) {
       try {
         // Double-check to prevent race conditions
-        const alreadySent = await prisma.emailNotification.findFirst({
+        const alreadySent = await db.emailNotification.findFirst({
           where: { referenceId: user.personaReferenceId || user.id, type: "KYCB_REMINDER" },
         })
 
@@ -85,7 +87,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     // Process KYB (business/legal entity) reminders
     console.log("🔍 Processing KYB reminder emails...")
 
-    const kybReminderCandidates = await prisma.kYCLegalEntity.findMany({
+    const kybReminderCandidates = await db.kYCLegalEntity.findMany({
       where: {
         status: "PENDING",
         createdAt: {
@@ -109,7 +111,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
         }
 
         // Double-check to prevent race conditions
-        const alreadySent = await prisma.emailNotification.findFirst({
+        const alreadySent = await db.emailNotification.findFirst({
           where: { referenceId: entity.personaReferenceId || entity.id, type: "KYCB_REMINDER" },
         })
 
@@ -140,7 +142,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     // Process KYC approval notifications
     console.log("🔍 Processing KYC approval notifications...")
 
-    const kycApprovalCandidates = await prisma.kYCUser.findMany({
+    const kycApprovalCandidates = await db.kYCUser.findMany({
       where: {
         status: "APPROVED",
         createdAt: {
@@ -163,7 +165,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     for (const user of kycApprovalCandidates) {
       try {
         // Double-check to prevent race conditions
-        const alreadySent = await prisma.emailNotification.findFirst({
+        const alreadySent = await db.emailNotification.findFirst({
           where: { referenceId: user.personaReferenceId || user.id, type: "KYCB_APPROVED" },
         })
 
@@ -192,7 +194,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
     // Process KYB approval notifications
     console.log("🔍 Processing KYB approval notifications...")
 
-    const kybApprovalCandidates = await prisma.kYCLegalEntity.findMany({
+    const kybApprovalCandidates = await db.kYCLegalEntity.findMany({
       where: {
         status: "APPROVED",
         createdAt: {
@@ -215,7 +217,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
         }
 
         // Double-check to prevent race conditions
-        const alreadySent = await prisma.emailNotification.findFirst({
+        const alreadySent = await db.emailNotification.findFirst({
           where: { referenceId: entity.personaReferenceId || entity.id, type: "KYCB_APPROVED" },
         })
 

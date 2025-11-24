@@ -2,7 +2,6 @@ import { notFound, redirect } from "next/navigation"
 
 import { AnalyticsTracker } from "@/app/governance/roles/[roleId]/apply/components/AnalyticsTracker"
 import { Form } from "@/app/governance/roles/[roleId]/apply/components/Form"
-import { auth } from "@/auth"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,6 +13,7 @@ import {
 import { getRoleById } from "@/db/role"
 import { getUserById } from "@/db/users"
 import { getUserOrganizations } from "@/lib/actions/organizations"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { formatMMMd } from "@/lib/utils/date"
 
 export const metadata = {
@@ -23,16 +23,15 @@ export const metadata = {
 }
 
 export default async function Page({ params }: { params: { roleId: string } }) {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { session, db, userId } = await getImpersonationContext()
 
   if (!userId) {
     return redirect(`/governance/roles/${params.roleId}`)
   }
 
   const [role, user, userOrgs] = await Promise.all([
-    getRoleById(parseInt(params.roleId)),
-    getUserById(userId),
+    getRoleById(parseInt(params.roleId), db),
+    getUserById(userId, db, session),
     getUserOrganizations(userId),
   ])
 

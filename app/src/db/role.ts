@@ -1,11 +1,18 @@
 "use server"
 
-import { Role, RoleApplication, RoleApplicationStatus } from "@prisma/client"
+import {
+  PrismaClient,
+  Role,
+  RoleApplication,
+  RoleApplicationStatus,
+} from "@prisma/client"
 
 import { prisma } from "./client"
 
-export async function getAllRoles(): Promise<Role[]> {
-  return prisma.role.findMany({
+export async function getAllRoles(
+  db: PrismaClient = prisma,
+): Promise<Role[]> {
+  return db.role.findMany({
     where: {
       voteEndAt: {
         gte: new Date(),
@@ -17,8 +24,11 @@ export async function getAllRoles(): Promise<Role[]> {
   })
 }
 
-export async function getRoleById(id: number): Promise<Role | null> {
-  return prisma.role.findUnique({
+export async function getRoleById(
+  id: number,
+  db: PrismaClient = prisma,
+): Promise<Role | null> {
+  return db.role.findUnique({
     where: {
       id,
     },
@@ -28,8 +38,9 @@ export async function getRoleById(id: number): Promise<Role | null> {
 export async function getUserRoleApplication(
   userId: string,
   roleId: number,
+  db: PrismaClient = prisma,
 ): Promise<RoleApplication | null> {
-  return prisma.roleApplication.findFirst({
+  return db.roleApplication.findFirst({
     where: {
       userId,
       roleId,
@@ -39,8 +50,9 @@ export async function getUserRoleApplication(
 
 export async function getRoleApplications(
   roleId: number,
+  db: PrismaClient = prisma,
 ): Promise<RoleApplication[]> {
-  return prisma.roleApplication.findMany({
+  return db.roleApplication.findMany({
     where: { roleId },
     orderBy: {
       createdAt: "desc",
@@ -50,8 +62,9 @@ export async function getRoleApplications(
 
 export async function getRoleApplicationById(
   id: number,
+  db: PrismaClient = prisma,
 ): Promise<RoleApplication | null> {
-  return prisma.roleApplication.findUnique({
+  return db.roleApplication.findUnique({
     where: { id },
   })
 }
@@ -63,11 +76,12 @@ export async function upsertRoleApplication(
     organizationId?: string
     application: string
   },
+  db: PrismaClient = prisma,
 ): Promise<RoleApplication> {
   const { userId, organizationId, application } = applicationParams
 
   // Check if a role application already exists
-  const existingApplication = await prisma.roleApplication.findFirst({
+  const existingApplication = await db.roleApplication.findFirst({
     where: {
       roleId: id,
       ...(userId && { userId }),
@@ -77,7 +91,7 @@ export async function upsertRoleApplication(
 
   if (existingApplication) {
     // Update existing application
-    return prisma.roleApplication.update({
+    return db.roleApplication.update({
       where: {
         id: existingApplication.id,
       },
@@ -87,7 +101,7 @@ export async function upsertRoleApplication(
     })
   } else {
     // Create new application
-    return prisma.roleApplication.create({
+    return db.roleApplication.create({
       data: {
         roleId: id,
         userId,
@@ -102,12 +116,13 @@ export async function upsertRoleApplication(
 export async function getActiveUserRoleApplications(
   userId?: string,
   organizationId?: string,
+  db: PrismaClient = prisma,
 ): Promise<RoleApplication[]> {
   if (!userId && !organizationId) {
     throw new Error("Either userId or organizationId must be provided")
   }
 
-  const applications = await prisma.roleApplication.findMany({
+  const applications = await db.roleApplication.findMany({
     where: {
       ...(userId && { userId }),
       ...(organizationId && { organizationId }),
@@ -128,12 +143,13 @@ export async function getActiveUserRoleApplications(
 export async function getUserRoleApplications(
   userId?: string,
   organizationId?: string,
+  db: PrismaClient = prisma,
 ): Promise<RoleApplication[]> {
   if (!userId && !organizationId) {
     throw new Error("Either userId or organizationId must be provided")
   }
 
-  const applications = await prisma.roleApplication.findMany({
+  const applications = await db.roleApplication.findMany({
     where: {
       ...(userId && { userId }),
       ...(organizationId && { organizationId }),

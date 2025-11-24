@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { VerifiedAddressesContent } from "./content"
 
@@ -12,11 +12,11 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
-
-  if (!session?.user?.id) {
+  const { session, userId } = await getImpersonationContext()
+  if (!userId) {
     redirect("/")
   }
+  const isImpersonating = !!session?.impersonation?.isActive
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
@@ -48,7 +48,10 @@ export default async function Page() {
         </div>
       </div>
 
-      <VerifiedAddressesContent userId={session.user.id} />
+      <VerifiedAddressesContent
+        userId={userId}
+        impersonationMode={isImpersonating}
+      />
     </div>
   )
 }

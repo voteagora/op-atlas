@@ -22,7 +22,8 @@ import { Farcaster } from "@/components/icons/socials"
 function ImportFromFarcasterDialog({ open, onOpenChange }: DialogProps<object>) {
 
     const { data: session } = useSession()
-    const userId = session?.user?.id
+    const userId =
+        session?.impersonation?.targetUserId ?? session?.user?.id
     const { linkFarcaster } = usePrivyFarcaster(userId ?? "")
 
     const handleImport = async () => {
