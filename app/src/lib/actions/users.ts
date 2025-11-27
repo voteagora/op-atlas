@@ -269,5 +269,27 @@ export const getCitizenshipEligibility = async () => {
   }
 }
 
+export const updateEmailNotificationPreference = async (
+  enabled: boolean,
+) => {
+  const session = await auth()
+
+  if (!session?.user?.id) {
+    return {
+      error: "Unauthorized",
+    }
+  }
+
+  const updated = await updateUser({
+    id: session.user.id,
+    emailNotifEnabled: enabled,
+  })
+
+  return {
+    error: null,
+    user: updated,
+  }
+}
+
 
 
