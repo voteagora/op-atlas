@@ -23,6 +23,7 @@ model User {
   govForumProfileUrl String?
   discord            String?
   privyDid           String?
+  emailNotifEnabled  Boolean            @default(false)
   citizen            Citizen?
   RewardClaim        RewardClaim[]
   roleApplications   RoleApplication[]
@@ -737,18 +738,17 @@ model ProjectOSOAtlasRelatedProjects {
 }
 
 model Citizen {
-  id                Int      @id @default(autoincrement())
-  userId            String   @unique
-  address           String?  @unique
-  type              String
-  attestationId     String?
-  timeCommitment    String?
-  emailNotifEnabled Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  organizationId    String?
-  projectId         String?
-  user              User     @relation(fields: [userId], references: [id])
+  id             Int      @id @default(autoincrement())
+  userId         String   @unique
+  address        String?  @unique
+  type           String
+  attestationId  String?
+  timeCommitment String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organizationId String?
+  projectId      String?
+  user           User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([projectId])
