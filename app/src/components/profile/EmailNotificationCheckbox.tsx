@@ -51,4 +51,3 @@ export const EmailNotificationCheckbox = ({ userId }: { userId: string }) => {
     </div>
   )
 }
-
