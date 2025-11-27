@@ -44,15 +44,15 @@ model User {
 }
 
 model UserEmail {
-  id                           String    @id @default(uuid())
-  email                        String    @unique
-  userId                       String
-  verified                     Boolean   @default(false)
-  verificationToken            String?   @unique
-  verificationTokenExpiresAt   DateTime?
-  createdAt                    DateTime  @default(now())
-  updatedAt                    DateTime  @updatedAt
-  user                         User      @relation(fields: [userId], references: [id])
+  id                         String    @id @default(uuid())
+  email                      String    @unique
+  userId                     String
+  verified                   Boolean   @default(false)
+  verificationToken          String?   @unique
+  verificationTokenExpiresAt DateTime?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+  user                       User      @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([verificationToken])
@@ -330,17 +330,17 @@ model ImpactStatement {
 
 // Reusable business identity
 model KYCLegalEntity {
-  id                       String                  @id @default(uuid())
-  name                     String
-  status                   KYCStatus               @default(PENDING) // APPROVED | REJECTED | PENDING
-  expiry                   DateTime? // valid-through; APPROVED & expiry>now() => reusable
-  createdAt                DateTime                @default(now())
-  updatedAt                DateTime                @updatedAt
-  personaReferenceId       String?                 @unique
-  personaInquiryId         String?                 @unique
-  inquiryCreatedAt         DateTime?
-  teamLinks                KYCLegalEntityTeams[]
-  kycLegalEntityController KYCLegalEntityController? @relation(fields: [kycLegalEntityControllerId], references: [id])
+  id                         String                    @id @default(uuid())
+  name                       String
+  status                     KYCStatus                 @default(PENDING) // APPROVED | REJECTED | PENDING
+  expiry                     DateTime? // valid-through; APPROVED & expiry>now() => reusable
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  personaReferenceId         String?                   @unique
+  personaInquiryId           String?                   @unique
+  inquiryCreatedAt           DateTime?
+  teamLinks                  KYCLegalEntityTeams[]
+  kycLegalEntityController   KYCLegalEntityController? @relation(fields: [kycLegalEntityControllerId], references: [id])
   kycLegalEntityControllerId String?
 
   @@index([name])
@@ -349,12 +349,12 @@ model KYCLegalEntity {
 
 // Used for collecting POC / Controller of legal entity
 model KYCLegalEntityController {
-  id            String        @id @default(uuid())
+  id            String           @id @default(uuid())
   firstName     String
   lastName      String
   email         String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   legalEntities KYCLegalEntity[]
 
   @@index([email])
@@ -364,9 +364,9 @@ model KYCLegalEntityController {
 model KYCLegalEntityTeams {
   kycTeamId     String
   legalEntityId String
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  team          KYCTeam     @relation(fields: [kycTeamId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  team          KYCTeam        @relation(fields: [kycTeamId], references: [id])
   legalEntity   KYCLegalEntity @relation(fields: [legalEntityId], references: [id])
 
   @@id([kycTeamId, legalEntityId])
@@ -532,17 +532,17 @@ model ContactEmailTags {
 }
 
 model KYCUser {
-  id                 String              @id @default(uuid())
+  id                 String         @id @default(uuid())
   email              String
   firstName          String?
   lastName           String?
-  status             KYCStatus           @default(PENDING)
+  status             KYCStatus      @default(PENDING)
   expiry             DateTime
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
   personaStatus      PersonaStatus?
-  personaReferenceId String?           @unique
-  personaInquiryId   String?           @unique
+  personaReferenceId String?        @unique
+  personaInquiryId   String?        @unique
   inquiryCreatedAt   DateTime?
   KYCUserTeams       KYCUserTeams[]
   UserKYCUsers       UserKYCUser[]
@@ -605,9 +605,9 @@ model UserKYCUser {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   kycUser KYCUser @relation(fields: [kycUserId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, kycUserId])
   @@index([userId])
   @@index([kycUserId])
-  @@unique([userId, kycUserId])
 }
 
 model OrganizationKYCTeam {
@@ -737,17 +737,18 @@ model ProjectOSOAtlasRelatedProjects {
 }
 
 model Citizen {
-  id             Int      @id @default(autoincrement())
-  userId         String   @unique
-  address        String?  @unique
-  type           String
-  attestationId  String?
-  timeCommitment String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  organizationId String?
-  projectId      String?
-  user           User     @relation(fields: [userId], references: [id])
+  id                Int      @id @default(autoincrement())
+  userId            String   @unique
+  address           String?  @unique
+  type              String
+  attestationId     String?
+  timeCommitment    String?
+  emailNotifEnabled Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  organizationId    String?
+  projectId         String?
+  user              User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([projectId])
@@ -1023,7 +1024,6 @@ view pg_stat_statements {
 
   @@ignore
 }
-
 
 enum KYCStatus {
   PENDING
