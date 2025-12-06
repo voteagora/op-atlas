@@ -13,22 +13,21 @@
  */
 
 import { auth } from "@/auth"
-import { cache } from "react"
 
 /**
  * Get impersonation context for current request
- * Cached per-request for performance
+ * Note: auth() already handles per-request caching internally
  */
-export const getImpersonationContext = cache(async () => {
+export async function getImpersonationContext() {
   const session = await auth()
 
   return {
     isImpersonating: !!session?.impersonation?.isActive,
     adminUserId: session?.impersonation?.adminUserId,
     targetUserId: session?.impersonation?.targetUserId,
-    session: session
+    session: session,
   }
-})
+}
 
 /**
  * Check if current request is in impersonation mode

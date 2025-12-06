@@ -206,17 +206,19 @@ export function BlacklistManagement() {
             <DialogHeader>
               <DialogTitle>Add Project to Blacklist</DialogTitle>
               <DialogDescription>
-                Search for a project to add to the blacklist. Blacklisted projects may be restricted from certain features.
+                Search for a project to add to the blacklist.
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-4 py-4">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Project</label>
+                <span className="text-sm font-medium">Project</span>
                 {selectedProject ? (
                   <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
                     <div className="flex items-center gap-2">
                       <FolderGit className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{selectedProject.name}</span>
+                      <span className="font-medium">
+                        {selectedProject.name}
+                      </span>
                     </div>
                     <Button
                       variant="ghost"
@@ -236,8 +238,14 @@ export function BlacklistManagement() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Reason (optional)</label>
+                <label
+                  htmlFor="blacklist-reason"
+                  className="text-sm font-medium"
+                >
+                  Reason (optional)
+                </label>
                 <Textarea
+                  id="blacklist-reason"
                   placeholder="Enter the reason for blacklisting this project..."
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
