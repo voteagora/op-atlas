@@ -4,6 +4,7 @@ import { UserAddress, UserPassport } from "@prisma/client"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 
+import { usePrivy } from "@privy-io/react-auth"
 import { ConditionRow } from "@/app/citizenship/components/ConditionRow"
 import { WorldConnection } from "@/components/profile/WorldIdConnection"
 import { useUser } from "@/hooks/db/useUser"
@@ -76,8 +77,9 @@ const InteractiveRequirements = ({
   const { linkGithub, unlinkGithub, toggleIsDeveloper } =
     usePrivyLinkGithub(userId)
   const { setOpenDialog } = useAppDialogs()
+  const { user: privyUser } = usePrivy()
 
-  const email = user?.emails?.[0]
+  const email = user?.emails?.[0] || (privyUser?.email?.address ? { email: privyUser.email.address } : undefined)
   const govAddress = user?.addresses?.find((addr: UserAddress) => addr.primary)
   const connectedAddress = user?.addresses?.[0]
 

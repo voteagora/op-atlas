@@ -32,11 +32,7 @@ import {
   ParsedOsoDeployerContract,
 } from "@/lib/types"
 
-import {
-  BATCH_SIZE,
-  supportedMappings,
-  TRANCHE_MONTHS_MAP,
-} from "./constants"
+import { BATCH_SIZE, supportedMappings, TRANCHE_MONTHS_MAP } from "./constants"
 import { Trend } from "./types"
 import {
   formatActiveAddresses,
@@ -92,9 +88,15 @@ export const getDeployedContractsServer = cache(
   ): Promise<OsoDeployerContractsReturnType> {
     const variables = {
       where: {
-        _or: [
-          { rootDeployerAddress: { _eq: deployer.toLowerCase() } },
-          { originatingAddress: { _eq: deployer.toLowerCase() } },
+        _and: [
+          {
+            _or: [
+              { rootDeployerAddress: { _eq: deployer.toLowerCase() } },
+              { originatingAddress: { _eq: deployer.toLowerCase() } },
+            ],
+          },
+          // Only get contracts where factoryAddress is empty (direct deployments)
+          { factoryAddress: { _eq: "" } },
         ],
       },
     }
@@ -126,7 +128,6 @@ export const getDeployedContractsServerParsed = cache(
     return parseOsoDeployerContract(contracts)
   },
 )
-
 
 export const mapOSOProjects = cache(async function mapOSOProjects(
   projectAtlasIds: string[],
@@ -268,9 +269,7 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     formatMetricsData(parseMetricsResults(metricsResults, "GAS_FEES")),
   )
   const transactionsFormatted = formatTransactions(
-    formatMetricsData(
-      parseMetricsResults(metricsResults, "TRANSACTION_COUNT"),
-    ),
+    formatMetricsData(parseMetricsResults(metricsResults, "TRANSACTION_COUNT")),
   )
 
   return {
@@ -316,7 +315,9 @@ export const getProjectMetrics = cache(async function getProjectMetrics(
     },
     performanceMetrics: {
       // Convert month-based keys to date strings for Performance charts
-      activeAddresses: convertMonthMetricsToDateMetrics(activeAddressesFormatted),
+      activeAddresses: convertMonthMetricsToDateMetrics(
+        activeAddressesFormatted,
+      ),
       gasFees: convertMonthMetricsToDateMetrics(gasFeesFormatted),
       transactions: convertMonthMetricsToDateMetrics(transactionsFormatted),
       tvl: convertMonthMetricsToDateMetrics(tvlResults),
