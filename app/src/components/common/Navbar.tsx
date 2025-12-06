@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
+import { AdminBlacklistButton } from "../admin/AdminBlacklistButton"
 import { AdminImpersonationButton } from "../admin/AdminImpersonationButton"
 import ExternalLink from "../ExternalLink"
 import {
@@ -224,6 +225,7 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <AdminBlacklistButton />
             <AdminImpersonationButton />
             <Account />
           </div>
