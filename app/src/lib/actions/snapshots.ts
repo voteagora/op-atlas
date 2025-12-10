@@ -24,7 +24,6 @@ import {
   createContractAttestations,
   createOrganizationMetadataAttestation,
   createProjectMetadataAttestation,
-  revokeContractAttestations,
 } from "../eas/serverOnly"
 import { uploadToPinata } from "../pinata"
 import { ProjectTeam, ProjectWithFullDetails } from "../types"
@@ -52,8 +51,10 @@ async function publishContractsWithoutBatching({
   farcasterId: string | null
 }) {
   if (toRevoke.length > 0) {
+    // Note: On-chain revocation is disabled because EAS only allows the original
+    // attester to revoke attestations, and the signer address has changed over time.
+    // We still mark them as revoked in our database for bookkeeping.
     const revokeIds = toRevoke.map((contract) => contract.id)
-    await revokeContractAttestations(revokeIds)
     await revokePublishedContracts(revokeIds)
   }
 
@@ -338,8 +339,10 @@ export const publishProjectContractsBatch = async ({
   const contractRefUID = projectContracts.id
 
   if (revokeBatch.length > 0) {
+    // Note: On-chain revocation is disabled because EAS only allows the original
+    // attester to revoke attestations, and the signer address has changed over time.
+    // We still mark them as revoked in our database for bookkeeping.
     const revokeIds = revokeBatch.map((contract) => contract.id)
-    await revokeContractAttestations(revokeIds)
     await revokePublishedContracts(revokeIds)
     revokedThisBatch = revokeBatch.length
   }
