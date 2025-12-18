@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { Badge } from "@/components/common/Badge"
 import { EmailConnection } from "@/components/profile/EmailConnection"
+import { EmailNotificationCheckbox } from "@/components/profile/EmailNotificationCheckbox"
 import { IdentityVerification } from "@/components/profile/IdentityVerification"
 import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { updateInteractions } from "@/lib/actions/users"
@@ -42,6 +43,9 @@ export default async function Page() {
           It should be a personal email where we can reliably reach you.
         </div>
         <EmailConnection userId={session.user.id} />
+        <div className="mt-4">
+          <EmailNotificationCheckbox userId={session.user.id} />
+        </div>
       </div>
       <div className="flex flex-col">
         <div className="flex items-center gap-2">

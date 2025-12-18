@@ -51,6 +51,7 @@ export async function getUserById(userId: string) {
       },
       emails: true,
       safeAddresses: true,
+      citizen: true,
     },
   })
 
@@ -1010,6 +1011,7 @@ export async function updateUser({
   github?: string | null
   notDeveloper?: boolean
   govForumProfileUrl?: string | null
+  emailNotifEnabled?: boolean
 }) {
   return prisma.user.update({
     where: { id },
