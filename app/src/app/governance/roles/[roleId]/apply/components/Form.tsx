@@ -15,8 +15,6 @@ import {
 import { useUsername } from "@/hooks/useUsername"
 import { UserOrganizationsWithDetails } from "@/lib/types"
 
-import { UserForm } from "./UserForm"
-
 type SelectedEntity = {
   name: string
   avatar?: string
@@ -121,8 +119,6 @@ export const Form = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      <UserForm user={user} role={role} selectedEntity={selectedEntity} />
     </div>
   )
 }

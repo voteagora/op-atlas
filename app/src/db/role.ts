@@ -56,49 +56,6 @@ export async function getRoleApplicationById(
   })
 }
 
-export async function upsertRoleApplication(
-  id: number,
-  applicationParams: {
-    userId?: string
-    organizationId?: string
-    application: string
-  },
-): Promise<RoleApplication> {
-  const { userId, organizationId, application } = applicationParams
-
-  // Check if a role application already exists
-  const existingApplication = await prisma.roleApplication.findFirst({
-    where: {
-      roleId: id,
-      ...(userId && { userId }),
-      ...(organizationId && { organizationId }),
-    },
-  })
-
-  if (existingApplication) {
-    // Update existing application
-    return prisma.roleApplication.update({
-      where: {
-        id: existingApplication.id,
-      },
-      data: {
-        application,
-      },
-    })
-  } else {
-    // Create new application
-    return prisma.roleApplication.create({
-      data: {
-        roleId: id,
-        userId,
-        organizationId,
-        application,
-        status: RoleApplicationStatus.pending,
-      },
-    })
-  }
-}
-
 export async function getActiveUserRoleApplications(
   userId?: string,
   organizationId?: string,
