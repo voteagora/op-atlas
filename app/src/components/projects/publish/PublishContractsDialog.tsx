@@ -175,10 +175,10 @@ export function PublishContractsDialog({
         }
 
         current = {
-          verifiedTotal: batchResult.totalVerified,
-          publishedTotal: batchResult.totalPublished,
-          pendingPublish: batchResult.remainingPublish,
-          pendingRevoke: batchResult.remainingRevoke,
+          verifiedTotal: batchResult.totalVerified ?? previous.verifiedTotal,
+          publishedTotal: batchResult.totalPublished ?? previous.publishedTotal,
+          pendingPublish: batchResult.remainingPublish ?? previous.pendingPublish,
+          pendingRevoke: batchResult.remainingRevoke ?? previous.pendingRevoke,
         }
 
         const madeProgress =

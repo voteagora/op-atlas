@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
-import { auth } from "@/auth"
-import { prisma } from "@/db/client"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import {
   createEndorsement,
   deleteEndorsementsForAddresses,
@@ -19,8 +18,8 @@ const payloadSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) return new Response("Unauthorized", { status: 401 })
+  const { db, userId } = await getImpersonationContext()
+  if (!userId) return new Response("Unauthorized", { status: 401 })
 
   const json = await req.json().catch(() => null)
   const parsed = payloadSchema.safeParse(json)
@@ -30,12 +29,12 @@ export async function POST(req: NextRequest) {
 
   let start: Date | null = null
   let end: Date | null = null
-  const appRole = await prisma.roleApplication.findUnique({
+  const appRole = await db.roleApplication.findUnique({
     where: { id: nomineeApplicationId },
     select: { roleId: true },
   })
   if (!appRole?.roleId) return new Response("Not Found", { status: 404 })
-  const roleWindow = await prisma.role.findUnique({
+  const roleWindow = await db.role.findUnique({
     where: { id: appRole.roleId },
     select: {
       endorsementStartAt: true,
@@ -72,35 +71,39 @@ export async function POST(req: NextRequest) {
   }
 
   const [userWallets, safeWallets] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: session.user.id },
+    db.user.findUnique({
+      where: { id: userId },
       include: { addresses: true },
     }),
-    prisma.userSafeAddress.findMany({
-      where: { userId: session.user.id },
+    db.userSafeAddress.findMany({
+      where: { userId },
     }),
   ])
 
   const walletAddresses = userWallets?.addresses?.map((a) => a.address) || []
   const safeAddresses = safeWallets?.map((a) => a.safeAddress) || []
   const addresses = [...walletAddresses, ...safeAddresses]
-  const allowed = await isTop100Delegate(addresses)
+  const allowed = await isTop100Delegate(addresses, db)
   if (!allowed) return new Response("Forbidden", { status: 403 })
 
   const endorserAddress =
     userWallets?.addresses?.find((a) => a.primary)?.address || addresses[0]
   if (!endorserAddress) return new Response("No address", { status: 400 })
 
-  const endorsement = await createEndorsement({
-    context,
-    nomineeApplicationId,
-    endorserAddress,
-    endorserUserId: session.user.id,
-  })
+  const endorsement = await createEndorsement(
+    {
+      context,
+      nomineeApplicationId,
+      endorserAddress,
+      endorserUserId: userId,
+    },
+    db,
+  )
   return NextResponse.json({ id: endorsement.id })
 }
 
 export async function GET(req: NextRequest) {
+  const { db } = await getImpersonationContext()
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
   const roleId = Number(searchParams.get("roleId"))
@@ -111,15 +114,18 @@ export async function GET(req: NextRequest) {
 
   // Return full approver list for a specific nominee id
   if (Number.isFinite(approversFor) && approversFor > 0) {
-    const approvers = await getApproversForNominee({
-      context,
-      nomineeApplicationId: approversFor,
-    })
+    const approvers = await getApproversForNominee(
+      {
+        context,
+        nomineeApplicationId: approversFor,
+      },
+      db,
+    )
     return NextResponse.json(approvers)
   }
 
   if (Number.isFinite(roleId) && roleId > 0) {
-    const map = await getEndorsementCountsByRole({ context, roleId })
+    const map = await getEndorsementCountsByRole({ context, roleId }, db)
     return NextResponse.json(
       Array.from(map.entries()).map(([id, count]) => ({
         nomineeApplicationId: id,
@@ -129,10 +135,13 @@ export async function GET(req: NextRequest) {
   }
 
   if (nomineeIds.length > 0) {
-    const map = await getEndorsementCounts({
-      context,
-      nomineeApplicationIds: nomineeIds,
-    })
+    const map = await getEndorsementCounts(
+      {
+        context,
+        nomineeApplicationIds: nomineeIds,
+      },
+      db,
+    )
     return NextResponse.json(
       nomineeIds.map((id) => ({
         nomineeApplicationId: id,
@@ -145,8 +154,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) return new Response("Unauthorized", { status: 401 })
+  const { db, userId } = await getImpersonationContext()
+  if (!userId) return new Response("Unauthorized", { status: 401 })
 
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
@@ -154,16 +163,19 @@ export async function DELETE(req: NextRequest) {
   if (!context || !nomineeId)
     return new Response("Bad Request", { status: 400 })
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+  const user = await db.user.findUnique({
+    where: { id: userId },
     include: { addresses: true },
   })
   const addresses = (user?.addresses || []).map((a) => a.address)
 
-  const removed = await deleteEndorsementsForAddresses({
-    context,
-    nomineeApplicationId: nomineeId,
-    addresses,
-  })
+  const removed = await deleteEndorsementsForAddresses(
+    {
+      context,
+      nomineeApplicationId: nomineeId,
+      addresses,
+    },
+    db,
+  )
   return NextResponse.json({ removed })
 }

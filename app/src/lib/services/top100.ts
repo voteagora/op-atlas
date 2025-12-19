@@ -1,4 +1,6 @@
-import { prisma } from "@/db/client"
+import type { PrismaClient } from "@prisma/client"
+
+import { prisma } from "../../db/client"
 
 const DEV_TOP100_BYPASS = new Set([
   "0xbb8dbd9cc7ada9f4e31d4bd8c7a0410f2333c81a",
@@ -12,7 +14,10 @@ const DEV_TOP100_BYPASS = new Set([
   "0xb47d0c4a565f05b77e42f14fe4be56afae60b67f",
 ])
 
-export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
+export async function isTop100Delegate(
+  addresses: string[],
+  db: PrismaClient = prisma,
+): Promise<boolean> {
   const lower = addresses.map((a) => a.toLowerCase())
   if (lower.length === 0) return false
 
@@ -28,7 +33,7 @@ export async function isTop100Delegate(addresses: string[]): Promise<boolean> {
     const padded = lower.map(
       (address) => ("0x" + "0".repeat(24) + address.slice(2)) as string,
     )
-    const rows = await prisma.$queryRaw<{ is_top100: boolean }[]>`
+    const rows = await db.$queryRaw<{ is_top100: boolean }[]>`
       SELECT EXISTS (
         SELECT 1
         FROM public."TopDelegates"

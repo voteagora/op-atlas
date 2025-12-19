@@ -1,3 +1,5 @@
+import type { PrismaClient } from "@prisma/client"
+
 import { prisma } from "./client"
 
 export function getGrantEligibilityExpiration(): Date {
@@ -7,8 +9,8 @@ export function getGrantEligibilityExpiration(): Date {
 export async function getLatestDraftForm(params: {
   projectId?: string
   organizationId?: string
-}) {
-  return await prisma.grantEligibility.findFirst({
+}, db: PrismaClient = prisma) {
+  return await db.grantEligibility.findFirst({
     where: {
       ...(params.projectId ? { projectId: params.projectId } : {}),
       ...(params.organizationId ? { organizationId: params.organizationId } : {}),

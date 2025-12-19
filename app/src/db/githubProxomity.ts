@@ -1,11 +1,16 @@
 "use server"
 
+import type { PrismaClient } from "@prisma/client"
+
 import { prisma } from "./client"
 
-export async function getGithubProximity(username: string | null) {
+export async function getGithubProximity(
+  username: string | null,
+  db: PrismaClient = prisma,
+) {
   if (!username) return null
 
-  return prisma.githubProximity.findFirst({
+  return db.githubProximity.findFirst({
     where: { peer: username },
   })
 }

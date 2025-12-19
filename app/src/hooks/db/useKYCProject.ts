@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { getKYCUsersByProjectId } from "@/db/kyc"
+import { fetchKycProjectUsers } from "@/lib/actions/hookFetchers"
 
 export const KYC_PROJECT_USERS_QUERY_KEY = "kycProjectUsers"
 
@@ -14,7 +14,7 @@ export const useKYCProject = ({
   const { data, isLoading, isSuccess, isError, error } = useQuery({
     queryKey: [KYC_PROJECT_USERS_QUERY_KEY, projectId],
     queryFn: async () => {
-      return await getKYCUsersByProjectId({ projectId })
+      return await fetchKycProjectUsers(projectId)
     },
     enabled: enabled && !!projectId,
     refetchInterval: 300000, // Refetch every 5 minutes (300000 ms)

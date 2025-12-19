@@ -1,12 +1,12 @@
 import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import { Badge } from "@/components/common/Badge"
 import { EmailConnection } from "@/components/profile/EmailConnection"
 import { IdentityVerification } from "@/components/profile/IdentityVerification"
 import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { updateInteractions } from "@/lib/actions/users"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { ProfileDetailsContent } from "./content"
 
@@ -16,16 +16,17 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
-
-  if (!session?.user?.id) {
+  const { session, userId } = await getImpersonationContext()
+  if (!userId) {
     redirect("/")
   }
 
-  updateInteractions({ userId: session.user.id, profileVisitCount: 1 })
+  if (!session?.impersonation?.isActive) {
+    updateInteractions({ userId, profileVisitCount: 1 })
+  }
 
   // Fetch KYC status
-  const kycStatus = await getUserKYCStatus(session.user.id)
+  const kycStatus = await getUserKYCStatus(userId)
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
@@ -41,7 +42,7 @@ export default async function Page() {
           Email is required for grants, citizenship, and identity verification.
           It should be a personal email where we can reliably reach you.
         </div>
-        <EmailConnection userId={session.user.id} />
+        <EmailConnection userId={userId} />
       </div>
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
@@ -53,13 +54,14 @@ export default async function Page() {
         <div className="mb-4 text-base text-secondary-foreground">
           Complete KYC to add proof of personhood to your Atlas account.
         </div>
-        <IdentityVerification
-          userId={session.user.id}
-          kycUser={kycStatus.kycUser}
-        />
+        <IdentityVerification userId={userId} kycUser={kycStatus.kycUser} />
       </div>
       <div className="flex flex-col gap-6">
-        <ProfileDetailsContent session={session} />
+        <ProfileDetailsContent
+          session={session}
+          userId={userId}
+          isImpersonating={!!session?.impersonation?.isActive}
+        />
       </div>
     </div>
   )

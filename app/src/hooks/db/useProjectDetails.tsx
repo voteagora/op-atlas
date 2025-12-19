@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { getProject } from "@/db/projects"
+import { fetchProject } from "@/lib/actions/hookFetchers"
 import { ProjectWithFullDetails } from "@/lib/types"
 
 export function useProjectDetails(projectId: string): {
@@ -10,7 +10,7 @@ export function useProjectDetails(projectId: string): {
 } {
   return useQuery({
     queryKey: ["projectDetails", projectId],
-    queryFn: () => getProject({ id: projectId }),
+    queryFn: () => fetchProject(projectId),
     enabled: !!projectId,
   })
 }

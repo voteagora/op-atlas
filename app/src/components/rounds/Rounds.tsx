@@ -12,6 +12,8 @@ import { Sidebar } from "./Sidebar"
 
 export function Rounds({ user }: { user?: UserWithAddresses | null }) {
   const { data } = useSession()
+  const viewerId =
+    data?.impersonation?.targetUserId ?? data?.user?.id ?? null
 
   const { data: userProjects } = useSessionAdminProjects()
 
@@ -63,7 +65,7 @@ export function Rounds({ user }: { user?: UserWithAddresses | null }) {
           />
         </div>
       </div>
-      {data?.user && (
+      {viewerId && (
         <div className="fixed bottom-4 left-4 z-50">
           <FeedbackButton />
         </div>

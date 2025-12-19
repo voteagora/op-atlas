@@ -1,8 +1,8 @@
 "use server"
 
-import { Citizen } from "@prisma/client"
+import type { Citizen, PrismaClient } from "@prisma/client"
 
-import { prisma } from "@/db/client"
+import { prisma } from "./client"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { CitizenLookup } from "@/lib/types"
 
@@ -19,8 +19,8 @@ export async function upsertCitizen({
     projectId?: string | null
     organizationId?: string | null
   }
-}) {
-  return prisma.citizen.upsert({
+}, db: PrismaClient = prisma) {
+  return db.citizen.upsert({
     where: {
       userId: id,
     },
@@ -47,8 +47,8 @@ export async function updateCitizen({
     projectId?: string | null
     organizationId?: string | null
   }
-}) {
-  return prisma.citizen.update({
+}, db: PrismaClient = prisma) {
+  return db.citizen.update({
     where: {
       userId: id,
     },
@@ -58,33 +58,38 @@ export async function updateCitizen({
 
 export async function getCitizenForUser(
   userId: string,
+  db: PrismaClient = prisma,
 ): Promise<Citizen | null> {
-  return prisma.citizen.findUnique({
+  return db.citizen.findUnique({
     where: { userId },
   })
 }
 
 export async function getCitizenByType(
   lookup: CitizenLookup,
+  db: PrismaClient = prisma,
 ): Promise<Citizen | null> {
   switch (lookup.type) {
     case CITIZEN_TYPES.user:
-      return prisma.citizen.findUnique({
+      return db.citizen.findUnique({
         where: { userId: lookup.id },
       })
     case CITIZEN_TYPES.chain:
-      return prisma.citizen.findFirst({
+      return db.citizen.findFirst({
         where: { organizationId: lookup.id },
       })
     case CITIZEN_TYPES.app:
-      return prisma.citizen.findFirst({
+      return db.citizen.findFirst({
         where: { projectId: lookup.id },
       })
   }
 }
 
-export async function getCitizenCountByType(type: string): Promise<number> {
-  return prisma.citizen.count({
+export async function getCitizenCountByType(
+  type: string,
+  db: PrismaClient = prisma,
+): Promise<number> {
+  return db.citizen.count({
     where: {
       type,
       attestationId: {
@@ -94,8 +99,11 @@ export async function getCitizenCountByType(type: string): Promise<number> {
   })
 }
 
-export async function getCitizenById(id: number): Promise<Citizen | null> {
-  return prisma.citizen.findUnique({
+export async function getCitizenById(
+  id: number,
+  db: PrismaClient = prisma,
+): Promise<Citizen | null> {
+  return db.citizen.findUnique({
     where: { id },
   })
 }
@@ -103,8 +111,9 @@ export async function getCitizenById(id: number): Promise<Citizen | null> {
 export async function getCitizenProposalVote(
   citizenId: number,
   proposalId: string,
+  db: PrismaClient = prisma,
 ): Promise<any> {
-  return prisma.offChainVote.findFirst({
+  return db.offChainVote.findFirst({
     where: {
       citizenId: citizenId,
       proposalId: proposalId,
@@ -112,16 +121,20 @@ export async function getCitizenProposalVote(
   })
 }
 
-export async function deleteCitizen(id: number) {
-  return prisma.citizen.delete({
+export async function deleteCitizen(
+  id: number,
+  db: PrismaClient = prisma,
+) {
+  return db.citizen.delete({
     where: { id },
   })
 }
 
 export async function getCitizenByAddress(
   address: string,
+  db: PrismaClient = prisma,
 ): Promise<Citizen | null> {
-  return prisma.citizen.findUnique({
+  return db.citizen.findUnique({
     where: { address },
   })
 }

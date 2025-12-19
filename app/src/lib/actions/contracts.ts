@@ -3,18 +3,18 @@
 import { revalidatePath } from "next/cache"
 import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
-import { auth } from "@/auth"
 import {
   addProjectContract,
   addProjectContracts,
-  getProjectContracts,
-  getProjectContractsByDeployer,
+  getProjectContractsByDeployerWithClient,
+  getProjectContractsWithClient,
   removeProjectContract,
   removeProjectContractsByDeployer,
   updateProjectContract,
   upsertProjectContracts,
 } from "@/db/projects"
 import { getDeployedContractsServerParsed } from "@/lib/oso"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import { UNIVERSAL_CREATE2_FACTORY } from "../constants"
 import { clients, getTransaction, getTransactionTrace, TraceCall } from "../eth"
@@ -22,37 +22,54 @@ import { Chain, getMessage } from "../utils/contracts"
 import { updateProjectDetails } from "./projects"
 import { verifyMembership } from "./utils"
 
+type ProjectMemberContext = SessionContext & { userId: string }
+
+async function withProjectMember<T>(
+  projectId: string,
+  handler: (ctx: ProjectMemberContext) => Promise<T>,
+) {
+  return withImpersonation(async (ctx) => {
+    if (!ctx.userId) {
+      return {
+        error: "Not authenticated",
+      } as T
+    }
+
+    const membership = await verifyMembership(projectId, ctx.userId, ctx.db)
+    if (membership?.error) {
+      return membership as T
+    }
+
+    return handler({ ...ctx, userId: ctx.userId })
+  }, { requireUser: true })
+}
+
 export const verifyDeployer = async (
   projectId: string,
   deployerAddress: Address,
   chainId: number,
   signature: `0x${string}`,
-) => {
-  const [contracts, result] = await Promise.all([
-    getDeployedContractsServerParsed(deployerAddress),
-    verifyAuthenticatedMember(projectId),
-  ])
-  if (result.error !== null) return result
+) =>
+  withProjectMember(projectId, async ({ db }) => {
+    const contracts = await getDeployedContractsServerParsed(deployerAddress)
 
-  const client = clients[chainId]
+    const client = clients[chainId]
 
-  const isValidSignature = await client.verifyMessage({
-    address: getAddress(deployerAddress),
-    message: getMessage(projectId),
-    signature: signature as `0x${string}`,
-  })
+    const isValidSignature = await client.verifyMessage({
+      address: getAddress(deployerAddress),
+      message: getMessage(projectId),
+      signature: signature as `0x${string}`,
+    })
 
-  if (!isValidSignature) {
-    return {
-      error: "Invalid signature",
-    }
-  }
-
-  // Add all contracts to the DB
-  const addedContracts = await addProjectContracts(
-    projectId,
-    contracts?.map((contract) => {
+    if (!isValidSignature) {
       return {
+        error: "Invalid signature",
+      }
+    }
+
+    const addedContracts = await addProjectContracts(
+      projectId,
+      contracts?.map((contract) => ({
         chainId: contract.chainId,
         contractAddress: getAddress(contract.contractAddress),
         deployerAddress: getAddress(deployerAddress),
@@ -60,18 +77,18 @@ export const verifyDeployer = async (
         deploymentHash: "",
         verificationProof: signature,
         verificationChainId: chainId,
-      }
-    }),
-  )
+      })) ?? [],
+      db,
+    )
 
-  return {
-    error: null,
-    contracts: {
-      included: addedContracts.createdContracts,
-      excluded: addedContracts.failedContracts,
-    },
-  }
-}
+    return {
+      error: null,
+      contracts: {
+        included: addedContracts.createdContracts,
+        excluded: addedContracts.failedContracts,
+      },
+    }
+  })
 
 export const verifyContract = async ({
   projectId,
@@ -92,181 +109,161 @@ export const verifyContract = async ({
   name?: string
   description?: string
 }) => {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Not authenticated",
-    }
-  }
+  return withProjectMember(projectId, async ({ db, userId }) => {
+    const contractAddress = getAddress(contractAddressRaw)
+    const deployerAddress = getAddress(deployerAddressRaw)
 
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  const contractAddress = getAddress(contractAddressRaw)
-  const deployerAddress = getAddress(deployerAddressRaw)
-
-  // Fetch other contracts from this proejct with the same deployer address
-  const existingContracts = await getProjectContractsByDeployer({
-    projectId,
-    deployerAddress,
-  })
-
-  console.log("existingContracts", existingContracts)
-
-  // If the contract is already verified, return
-  if (
-    existingContracts?.find(
-      (contract) =>
-        contract.contractAddress === contractAddress &&
-        contract.chainId === parseInt(chain.toString()),
-    )
-  ) {
-    return {
-      error: "Contract already verified",
-    }
-  }
-
-  if (existingContracts.length === 0) {
-    // Verify that the deployer is the one that signed the message
-    const isValidSignature = await verifyMessage({
-      address: deployerAddress,
-      message: getMessage(projectId),
-      signature: signature as `0x${string}`,
-    })
-
-    if (!isValidSignature) {
-      return {
-        error: "Invalid signature",
-      }
-    }
-  }
-
-  // Get the tx and ensure the deployer is the one who created the contract
-  const tx = await getTransaction(deploymentTxHash, chain)
-  if (!tx) {
-    return {
-      error: "Deployment transaction not found",
-    }
-  }
-
-  // Validate deployer involvement and contract creation
-  const sentByDeployer = isAddressEqual(tx.from, deployerAddress)
-
-  // If receipt provides contractAddress, ensure it matches
-  if (tx.contractAddress) {
-    if (!isAddressEqual(tx.contractAddress, contractAddress)) {
-      return { error: "Contract address doesn't match transaction logs" }
-    }
-  } else {
-    // No contractAddress on receipt. Try trace to locate CREATE/CREATE2 to target
-    const trace = await getTransactionTrace(deploymentTxHash, chain)
-    if (!trace) {
-      // Fallback: contract creation txs often have `to === null`. If so, accept.
-      if (tx.to === null) {
-        // proceed without trace
-      } else {
-        // Additional fallback: Universal CREATE2 Factory
-        if (
-          isAddressEqual(
-            tx.to,
-            getAddress(UNIVERSAL_CREATE2_FACTORY as Address),
-          ) &&
-          sentByDeployer &&
-          (tx.status as unknown as string) === "success"
-        ) {
-          // proceed without trace
-        } else {
-          return { error: "Transaction trace not found" }
-        }
-      }
-    } else {
-      const calls = (trace as any).calls as TraceCall[]
-
-      const findCreation = (nodes: TraceCall[]): boolean => {
-        for (const node of nodes) {
-          if (
-            (node.type === "CREATE" || node.type === "CREATE2") &&
-            node.to !== null &&
-            isAddressEqual(node.to, contractAddress)
-          ) {
-            return true
-          }
-          const nested: any = (node as any).calls
-          if (Array.isArray(nested) && nested.length > 0) {
-            if (findCreation(nested as TraceCall[])) return true
-          }
-        }
-        return false
-      }
-
-      const findDeployerInvolvement = (nodes: TraceCall[]): boolean => {
-        for (const node of nodes) {
-          if (isAddressEqual(node.from, deployerAddress)) return true
-          const nested: any = (node as any).calls
-          if (Array.isArray(nested) && nested.length > 0) {
-            if (findDeployerInvolvement(nested as TraceCall[])) return true
-          }
-        }
-        return false
-      }
-
-      const created = findCreation(calls)
-      if (!created) {
-        return { error: "Contract creation not found in transaction" }
-      }
-
-      const involved = findDeployerInvolvement(calls)
-      // If the deployer didn't send the tx, ensure they were involved in the call graph
-      if (!sentByDeployer && !involved) {
-        return { error: "Deployer not involved in transaction" }
-      }
-    }
-  }
-
-  // Must be valid!
-
-  try {
-    const contract = await addProjectContract({
-      projectId,
-      contract: {
-        contractAddress,
+    const existingContracts = await getProjectContractsByDeployerWithClient(
+      {
+        projectId,
         deployerAddress,
-        deploymentHash: deploymentTxHash,
-        verificationProof: signature,
-        chainId: parseInt(chain.toString()),
-        name,
-        description,
       },
-    })
+      db,
+    )
 
-    revalidatePath("/dashboard")
-    revalidatePath("/projects", "layout")
-
-    return {
-      error: null,
-      contract,
-    }
-  } catch (error: unknown) {
-    console.error("Error creating contract", error)
-    // Handle the case where another project has used this contract
     if (
-      error instanceof Error &&
-      error.message.includes(
-        "Unique constraint failed on the fields: (`contractAddress`,`chainId`)",
+      existingContracts?.find(
+        (contract) =>
+          contract.contractAddress === contractAddress &&
+          contract.chainId === Number(chain),
       )
     ) {
       return {
-        error: "This contract is already verified",
+        error: "Contract already verified",
       }
     }
 
-    return {
-      error: "Error creating contract",
+    if (existingContracts.length === 0) {
+      const isValidSignature = await verifyMessage({
+        address: deployerAddress,
+        message: getMessage(projectId),
+        signature: signature as `0x${string}`,
+      })
+
+      if (!isValidSignature) {
+        return {
+          error: "Invalid signature",
+        }
+      }
     }
-  }
+
+    const tx = await getTransaction(deploymentTxHash, chain)
+    if (!tx) {
+      return {
+        error: "Deployment transaction not found",
+      }
+    }
+
+    const sentByDeployer = isAddressEqual(tx.from, deployerAddress)
+
+    if (tx.contractAddress) {
+      if (!isAddressEqual(tx.contractAddress, contractAddress)) {
+        return { error: "Contract address doesn't match transaction logs" }
+      }
+    } else {
+      const trace = await getTransactionTrace(deploymentTxHash, chain)
+      if (!trace) {
+        if (tx.to === null) {
+          // proceed
+        } else {
+          if (
+            isAddressEqual(
+              tx.to,
+              getAddress(UNIVERSAL_CREATE2_FACTORY as Address),
+            ) &&
+            sentByDeployer &&
+            (tx.status as unknown as string) === "success"
+          ) {
+            // proceed
+          } else {
+            return { error: "Transaction trace not found" }
+          }
+        }
+      } else {
+        const calls = (trace as any).calls as TraceCall[]
+
+        const findCreation = (nodes: TraceCall[]): boolean => {
+          for (const node of nodes) {
+            if (
+              (node.type === "CREATE" || node.type === "CREATE2") &&
+              node.to !== null &&
+              isAddressEqual(node.to, contractAddress)
+            ) {
+              return true
+            }
+            const nested: any = (node as any).calls
+            if (Array.isArray(nested) && nested.length > 0) {
+              if (findCreation(nested as TraceCall[])) return true
+            }
+          }
+          return false
+        }
+
+        const findDeployerInvolvement = (nodes: TraceCall[]): boolean => {
+          for (const node of nodes) {
+            if (isAddressEqual(node.from, deployerAddress)) return true
+            const nested: any = (node as any).calls
+            if (Array.isArray(nested) && nested.length > 0) {
+              if (findDeployerInvolvement(nested as TraceCall[])) return true
+            }
+          }
+          return false
+        }
+
+        const created = findCreation(calls)
+        if (!created) {
+          return { error: "Contract creation not found in transaction" }
+        }
+
+        const involved = findDeployerInvolvement(calls)
+        if (!sentByDeployer && !involved) {
+          return { error: "Deployer not involved in transaction" }
+        }
+      }
+    }
+
+    try {
+      const contract = await addProjectContract(
+        {
+          projectId,
+          contract: {
+            contractAddress,
+            deployerAddress,
+            deploymentHash: deploymentTxHash,
+            verificationProof: signature,
+            chainId: parseInt(chain.toString()),
+            name,
+            description,
+          },
+        },
+        db,
+      )
+
+      revalidatePath("/dashboard")
+      revalidatePath("/projects", "layout")
+
+      return {
+        error: null,
+        contract,
+      }
+    } catch (error: unknown) {
+      console.error("Error creating contract", error)
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          "Unique constraint failed on the fields: (`contractAddress`,`chainId`)",
+        )
+      ) {
+        return {
+          error: "This contract is already verified",
+        }
+      }
+
+      return {
+        error: "Error creating contract",
+      }
+    }
+  })
 }
 
 export const updateContractDetails = async ({
@@ -282,121 +279,99 @@ export const updateContractDetails = async ({
   name?: string
   description?: string
 }) => {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
+  return withProjectMember(projectId, async ({ db }) => {
+    const contractAddress = getAddress(contractAddressRaw)
+
+    const contract = await updateProjectContract(
+      {
+        projectId,
+        contractAddress,
+        chainId,
+        updates: {
+          name,
+          description,
+        },
+      },
+      db,
+    )
+
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
+
     return {
-      error: "Not authenticated",
+      error: null,
+      contract,
     }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  const contractAddress = getAddress(contractAddressRaw)
-
-  const contract = await updateProjectContract({
-    projectId,
-    contractAddress,
-    chainId,
-    updates: {
-      name,
-      description,
-    },
   })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/projects", "layout")
-
-  return {
-    error: null,
-    contract,
-  }
-}
-
-async function verifyAuthenticatedMember(projectId: string) {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Not authenticated",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  return {
-    error: null,
-  }
 }
 
 export const removeContractsByDeployer = async (
   projectId: string,
   deployerAddress: Address,
-) => {
-  const result = await verifyAuthenticatedMember(projectId)
-  if (result.error !== null) return result.error
+) =>
+  withProjectMember(projectId, async ({ db }) => {
+    await removeProjectContractsByDeployer(
+      projectId,
+      getAddress(deployerAddress),
+      db,
+    )
 
-  await removeProjectContractsByDeployer(projectId, deployerAddress)
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
 
-  revalidatePath("/dashboard")
-  revalidatePath("/projects", "layout")
-
-  return {
-    error: null,
-  }
-}
+    return {
+      error: null,
+    }
+  })
 
 export const addAllExcludedProjectContractsAction = async (
   deployer: string,
   projectId: string,
   signature: string,
   verificationChainId: number,
-) => {
-  const result = await verifyAuthenticatedMember(projectId)
-  if (result.error !== null) return { error: result.error }
-
-  const osoContracts = await getDeployedContractsServerParsed(deployer)
-  const projectContracts = await getProjectContracts({
-    projectId,
-  })
-
-  const excludedContracts = osoContracts.filter((c) => {
-    return !projectContracts?.contracts.some(
-      (pc) =>
-        pc.contractAddress === c.contractAddress && pc.chainId === c.chainId,
+) =>
+  withProjectMember(projectId, async ({ db }) => {
+    const osoContracts = await getDeployedContractsServerParsed(deployer)
+    const projectContracts = await getProjectContractsWithClient(
+      { projectId },
+      db,
     )
-  })
 
-  try {
-    await upsertProjectContracts(
-      projectId,
-      excludedContracts.map((c) => ({
-        contractAddress: c.contractAddress,
-        chainId: c.chainId,
-        verificationProof: signature,
-        verificationChainId,
-        deployerAddress: deployer,
-        deploymentHash: "",
+    const excludedContracts =
+      osoContracts.filter(
+        (c) =>
+          !projectContracts?.contracts.some(
+            (pc) =>
+              pc.contractAddress === c.contractAddress &&
+              pc.chainId === c.chainId,
+          ),
+      ) ?? []
+
+    try {
+      await upsertProjectContracts(
         projectId,
-      })),
-    )
-  } catch (error: unknown) {
-    console.error("Error adding all contracts", error)
-    return {
-      error: "Error adding all contracts",
+        excludedContracts.map((c) => ({
+          contractAddress: c.contractAddress,
+          chainId: c.chainId,
+          verificationProof: signature,
+          verificationChainId,
+          deployerAddress: deployer,
+          deploymentHash: "",
+          projectId,
+        })),
+        db,
+      )
+    } catch (error: unknown) {
+      console.error("Error adding all contracts", error)
+      return {
+        error: "Error adding all contracts",
+      }
     }
-  }
 
-  return {
-    error: null,
-  }
-}
+    return {
+      error: null,
+    }
+  })
 
 export const removeContract = async ({
   projectId,
@@ -406,23 +381,24 @@ export const removeContract = async ({
   projectId: string
   address: string
   chainId: number
-}) => {
-  const result = await verifyAuthenticatedMember(projectId)
-  if (result.error !== null) return result.error
+}) =>
+  withProjectMember(projectId, async ({ db }) => {
+    await removeProjectContract(
+      {
+        projectId,
+        address,
+        chainId,
+      },
+      db,
+    )
 
-  await removeProjectContract({
-    projectId,
-    address,
-    chainId,
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
+
+    return {
+      error: null,
+    }
   })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/projects", "layout")
-
-  return {
-    error: null,
-  }
-}
 
 export const updateProjectOSOStatus = async ({
   projectId,
@@ -432,30 +408,18 @@ export const updateProjectOSOStatus = async ({
   projectId: string
   osoProjectName: string | null
   isSubmittedToOso: boolean
-}) => {
-  const session = await auth()
-  const userId = session?.user?.id
-  if (!userId) {
+}) =>
+  withProjectMember(projectId, async () => {
+    const project = await updateProjectDetails(projectId, {
+      openSourceObserverSlug: osoProjectName,
+      isSubmittedToOso: isSubmittedToOso,
+    })
+
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
+
     return {
-      error: "Not authenticated",
+      error: null,
+      project,
     }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  const project = await updateProjectDetails(projectId, {
-    openSourceObserverSlug: osoProjectName,
-    isSubmittedToOso: isSubmittedToOso,
   })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/projects", "layout")
-
-  return {
-    error: null,
-    project,
-  }
-}
