@@ -10,7 +10,6 @@ export type DialogType =
   | "select_kyc_project"
   | "claim_rewards"
   | "delete_kyc_team"
-  | "import_from_farcaster"
   | "governance_address"
   | "kyc_email_verification"
   | "find_my_kyc"

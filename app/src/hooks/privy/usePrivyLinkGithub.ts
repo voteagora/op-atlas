@@ -27,7 +27,7 @@ export const usePrivyLinkGithub = (userId: string) => {
       track("Github Unlinked", {
         userId,
         elementType: "Hook",
-        elementName: "usePrivyFarcaster",
+        elementName: "usePrivyLinkGithub",
       })
       toast.promise(unlinkGithub(privyUser.github.subject), {
         loading: "Unlinking github...",

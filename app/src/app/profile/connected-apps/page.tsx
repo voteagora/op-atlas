@@ -4,12 +4,10 @@ import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import {
   Discord,
-  Farcaster,
   Github,
   Optimism,
 } from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
-import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
 import {
   GithubConnection,
   GithubNotDeveloperToggle,
@@ -19,7 +17,7 @@ import { GovForumConnection } from "@/components/profile/GovForumConnection"
 export const metadata: Metadata = {
   title: "Connected Apps - OP Atlas",
   description:
-    "Connect apps like Farcaster, Discord, GitHub, and Governance Forum.",
+    "Connect apps like Discord, GitHub, and Governance Forum.",
 }
 
 export default async function Page() {
@@ -34,27 +32,6 @@ export default async function Page() {
       <h2 className="text-foreground text-2xl font-semibold">Connected Apps</h2>
 
       <div className="flex flex-col gap-8">
-        {/* Farcaster */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-1.5">
-              <Farcaster className="w-5 h-5 text-foreground" />
-              <h3 className="font-medium text-foreground text-base">
-                Farcaster
-              </h3>
-            </div>
-            <div className="text-secondary-foreground mb-4 text-base">
-              Connect your Farcaster account to import your username, bio, and
-              avatar.
-            </div>
-          </div>
-          <div className="flex-shrink-0 self-center">
-            <FarcasterConnection userId={session.user.id}>
-              Connect
-            </FarcasterConnection>
-          </div>
-        </div>
-
         {/* Discord */}
         <div className="flex items-start justify-between gap-6">
           <div className="flex-1">
