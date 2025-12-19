@@ -20,7 +20,6 @@ import { cn, profileProgress } from "@/lib/utils"
 
 import ApplicationInterruptiveDialogue from "../application/ApplicationInterruptiveDialogue"
 import ExternalLink from "../ExternalLink"
-import CreateOrganizationDialog from "../organizations/CreateOrganizationDialog"
 import { CompleteProfileCallout } from "../profile/CompleteProfileCallout"
 import AddFirstOrganizationProject from "./AddFirstOrganizationProject"
 import AddFirstProject from "./AddFirstProject"
@@ -29,7 +28,6 @@ import NoRewardsDialog from "./dialogs/NoRewardsDialog"
 import UnclaimedRewardsDialog from "./dialogs/UnclaimedRewardsDialog"
 import JoinProjectDialog from "./JoinProjectDialog"
 import { KYCCalloutsContainer } from "./KYCCallouts"
-import MakeFirstOrganization from "./MakeFirstOrganization"
 import ProfileDetailCard from "./ProfileDetailCard"
 import UserOrganizationInfoRow from "./UserOrganizationInfoRow"
 import UserProjectCard from "./UserProjectCard"
@@ -73,8 +71,6 @@ const Dashboard = ({
     useState(false)
 
   const [showApplicationDialogue, setShowApplicationDialogue] = useState(false)
-  const [showCreateOrganizationDialog, setShowCreateOrganizationDialog] =
-    useState(false)
   const [visibleCardsCount, setVisibleCardsCount] = useState(2)
 
   const profileInitiallyComplete = useRef(profileProgress(user) === 100)
@@ -157,13 +153,6 @@ const Dashboard = ({
         />
       )}
 
-      {showCreateOrganizationDialog && (
-        <CreateOrganizationDialog
-          open
-          onOpenChange={setShowCreateOrganizationDialog}
-        />
-      )}
-
       <div className="card flex flex-col w-full gap-y-12">
         {joinProjectDialogOpen && (
           <JoinProjectDialog
@@ -186,11 +175,6 @@ const Dashboard = ({
                   }
                 />
               )}
-            {!organizations?.length && (
-              <MakeFirstOrganization
-                onClick={() => setShowCreateOrganizationDialog(true)}
-              />
-            )}
 
             {!projects.length && !organizations?.length && (
               <Link href="/projects/new">

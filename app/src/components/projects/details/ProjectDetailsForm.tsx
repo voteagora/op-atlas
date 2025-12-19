@@ -457,12 +457,6 @@ export default function ProjectDetailsForm({
                       >
                         No organization
                       </DropdownMenuCheckboxItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuCheckboxItem className="text-sm font-normal text-secondary-foreground w-full">
-                        <Link href="/profile/organizations/new">
-                          Make an organization
-                        </Link>
-                      </DropdownMenuCheckboxItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <FormMessage />

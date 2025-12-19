@@ -183,11 +183,6 @@ const ProfileDetailCard = ({
               Add a project
             </DropdownMenuItem>
           </Link>
-          <Link href="profile/organizations/new">
-            <DropdownMenuItem className="cursor-pointer">
-              Make an organization
-            </DropdownMenuItem>
-          </Link>
           <DropdownMenuSeparator className="mx-1 opacity-50" />
           <Link href={`/${user.username}`}>
             <DropdownMenuItem className="cursor-pointer flex items-center justify-between">

@@ -434,11 +434,6 @@ const AccountContent = () => {
             currentContext={currentContext}
           />
           <ProfileMenuItem
-            href="/profile/organizations/new"
-            label="Organizations"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
             href="/citizenship"
             label="Citizen Registration"
             currentContext={currentContext}
@@ -688,11 +683,6 @@ const TestModeAccount = () => {
           <ProfileMenuItem
             href="/profile/verified-addresses"
             label="Linked Wallets"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/organizations/new"
-            label="Organizations"
             currentContext={currentContext}
           />
           <ProfileMenuItem

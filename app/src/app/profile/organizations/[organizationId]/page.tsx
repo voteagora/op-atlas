@@ -3,8 +3,6 @@ import { redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
-import MakeOrganizationForm from "@/components/organizations/MakeOrganizationForm"
-import MakeOrganizationFormHeader from "@/components/organizations/MakeOrganizationFormHeader"
 import { getOrganization } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 import { updateInteractions } from "@/lib/actions/users"
@@ -55,8 +53,10 @@ export default async function Page({
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
-      <MakeOrganizationFormHeader organization={organization} />
-      <MakeOrganizationForm user={user} organization={organization} />
+      <div className="text-xl">Organization Settings</div>
+      <div className="text-secondary-foreground">
+        {organization.name}
+      </div>
     </div>
   )
 }
