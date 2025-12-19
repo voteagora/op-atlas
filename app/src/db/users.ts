@@ -381,43 +381,71 @@ export async function updateUserEmail(
   },
   db: PrismaClient = prisma,
 ) {
-  // Only delete verified emails that don't have pending verification tokens
-  // This preserves unverified emails with verification tokens (like KYC email verification)
-  const currentVerifiedEmail = await db.userEmail.findFirst({
-    where: {
-      userId: id,
-      verified: true,
-      verificationToken: null, // Only delete emails without pending verification
-      OR: [
-        { verificationTokenExpiresAt: null },
-        { verificationTokenExpiresAt: { lt: new Date() } }, // Expired tokens
-      ],
-    },
-  })
+  try {
+    // If setting a new email (not clearing it)
+    if (email) {
+      // Check if this email is already in use by another user
+      const existingEmailRecord = await db.userEmail.findUnique({
+        where: { email },
+        include: { user: true },
+      })
 
-  const deleteEmails = currentVerifiedEmail
-    ? [
-        db.userEmail.delete({
-          where: {
-            id: currentVerifiedEmail.id,
-          },
-        }),
-      ]
-    : []
+      if (existingEmailRecord && existingEmailRecord.userId !== id) {
+        // Delete the email from the old user
+        try {
+          await db.userEmail.delete({
+            where: { email },
+          })
+        } catch (deleteError) {
+          console.error(
+            `[Auth] Failed to delete email from old user ${existingEmailRecord.userId}:`,
+            deleteError,
+          )
+        }
+      }
+    }
 
-  const createEmail = email
-    ? [
-        db.userEmail.create({
-          data: {
-            email,
-            userId: id,
-            verified: verified ?? false,
-          },
-        }),
-      ]
-    : []
+    // Only delete verified emails that don't have pending verification tokens
+    // This preserves unverified emails with verification tokens (like KYC email verification)
+    const currentVerifiedEmail = await db.userEmail.findFirst({
+      where: {
+        userId: id,
+        verified: true,
+        verificationToken: null, // Only delete emails without pending verification
+        OR: [
+          { verificationTokenExpiresAt: null },
+          { verificationTokenExpiresAt: { lt: new Date() } }, // Expired tokens
+        ],
+      },
+    })
 
-  return db.$transaction([...deleteEmails, ...createEmail])
+    const deleteEmails = currentVerifiedEmail
+      ? [
+          db.userEmail.delete({
+            where: {
+              id: currentVerifiedEmail.id,
+            },
+          }),
+        ]
+      : []
+
+    const createEmail = email
+      ? [
+          db.userEmail.create({
+            data: {
+              email,
+              userId: id,
+              verified: verified ?? false,
+            },
+          }),
+        ]
+      : []
+
+    return db.$transaction([...deleteEmails, ...createEmail])
+  } catch (error) {
+    console.error(`[Auth] Failed to update email for user ${id}:`, error)
+    throw error
+  }
 }
 
 export async function addUserAddresses(
@@ -432,14 +460,37 @@ export async function addUserAddresses(
   },
   db: PrismaClient = prisma,
 ) {
-  return db.userAddress.createMany({
-    data: addresses.map((address) => ({
-      userId: id,
-      address,
-      source,
-    })),
-    skipDuplicates: true,
-  })
+  try {
+    // Find all addresses that already exist and belong to other users
+    const existingAddresses = await db.userAddress.findMany({
+      where: {
+        address: { in: addresses },
+        userId: { not: id },
+      },
+    })
+
+    // Delete them all in one query
+    if (existingAddresses.length > 0) {
+      await db.userAddress.deleteMany({
+        where: {
+          address: { in: existingAddresses.map((a) => a.address) },
+        },
+      })
+    }
+
+    // Now add all addresses to the current user
+    return db.userAddress.createMany({
+      data: addresses.map((address) => ({
+        userId: id,
+        address,
+        source,
+      })),
+      skipDuplicates: true,
+    })
+  } catch (error) {
+    console.error(`[Auth] Failed to add addresses for user ${id}:`, error)
+    throw error
+  }
 }
 
 export async function removeUserAddress(

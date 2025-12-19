@@ -11,7 +11,6 @@ import {
   isAdminUser,
   isImpersonationEnabled,
 } from "@/lib/auth/adminConfig"
-import { prisma } from "@/db/client"
 
 export const dynamic = 'force-dynamic'
 
@@ -28,34 +27,8 @@ export async function GET() {
     }
 
     const userIsAdmin = await isAdminUser(adminUserId)
-    if (!userIsAdmin) {
-      // Debug: fetch user's addresses to see why they're not admin
-      const user = await prisma.user.findUnique({
-        where: { id: adminUserId },
-        include: { addresses: true }
-      })
 
-      const debugInfo = {
-        userId: adminUserId,
-        userFound: !!user,
-        addressCount: user?.addresses?.length || 0,
-        addresses: user?.addresses?.map(a => a.address) || [],
-        adminWallets: getAdminWallets(),
-        impersonationEnabled: isImpersonationEnabled(),
-      }
-
-      console.error("Admin check failed:", debugInfo)
-
-      return NextResponse.json(
-        {
-          error: "Forbidden",
-          details: "Admin access required",
-          debug: debugInfo
-        },
-        { status: 403 },
-      )
-    }
-
+    // Return status for all authenticated users (don't 403 for non-admins)
     const status = {
       enabled: isImpersonationEnabled(),
       d1Available: adminDb.isD1Available(),
