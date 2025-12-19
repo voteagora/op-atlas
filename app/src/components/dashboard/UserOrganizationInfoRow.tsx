@@ -66,12 +66,6 @@ const UserOrganizationInfoRow = ({
           alt="arrow"
         />
       </Link>
-      <Link href={`/projects/new?orgId=${organization.organizationId}`}>
-        <Button className="flex items-center gap-2" variant="secondary">
-          <Image src="/assets/icons/plus.svg" width={9} height={9} alt="Plus" />
-          Add project
-        </Button>
-      </Link>
     </div>
   )
 }

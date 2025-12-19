@@ -54,16 +54,14 @@ function ApplicationInterruptiveDialogue({
               Review the application
             </Button>
           </Link>
-          <Link href="/projects/new">
-            <Button
-              onClick={() => onOpenChange(false)}
-              className="w-full !ml-0"
-              type="button"
-              variant="outline"
-            >
-              Continue to project
-            </Button>
-          </Link>
+          <Button
+            onClick={() => onOpenChange(false)}
+            className="w-full !ml-0"
+            type="button"
+            variant="outline"
+          >
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

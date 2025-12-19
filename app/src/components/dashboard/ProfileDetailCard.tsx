@@ -178,11 +178,6 @@ const ProfileDetailCard = ({
               Edit your profile
             </DropdownMenuItem>
           </Link>
-          <Link href="/projects/new">
-            <DropdownMenuItem className="cursor-pointer">
-              Add a project
-            </DropdownMenuItem>
-          </Link>
           <Link href="profile/organizations/new">
             <DropdownMenuItem className="cursor-pointer">
               Make an organization

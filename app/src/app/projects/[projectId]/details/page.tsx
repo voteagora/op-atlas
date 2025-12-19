@@ -3,7 +3,6 @@ import { redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
 import { auth } from "@/auth"
-import ProjectDetailsForm from "@/components/projects/details/ProjectDetailsForm"
 import { getAdminOrganizations } from "@/db/organizations"
 import { getProject } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
@@ -54,12 +53,5 @@ export default async function Page({
     redirect("/dashboard")
   }
 
-  return (
-    <ProjectDetailsForm
-      project={project}
-      organizations={
-        userOrganizations?.organizations.map((org) => org.organization) ?? []
-      }
-    />
-  )
+  return null
 }

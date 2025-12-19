@@ -104,8 +104,6 @@ export const retroFundingDevToolingData: MissionData = {
       number: 1,
       title: "Create a project in Atlas where you'll connect your GitHub repos",
       description: "Complete all the steps and publish your project.",
-      subDetails: "Add project",
-      subDetailsLink: "/projects/new",
       enforceSignIn: true,
     },
     {

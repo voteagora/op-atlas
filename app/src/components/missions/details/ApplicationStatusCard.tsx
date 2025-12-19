@@ -322,17 +322,6 @@ export const ApplicationStatusCard = ({
           </p>
 
           <div className="flex flex-col w-full gap-2">
-            <div>
-              <div>
-                <ExtendedLink
-                  as="button"
-                  href="/projects/new"
-                  text="Add Project"
-                  variant="primary"
-                  className="w-full"
-                />
-              </div>
-            </div>
             <Button
               variant={"ghost"}
               onClick={() => {

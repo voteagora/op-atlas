@@ -46,8 +46,6 @@ export const ProjectSelectionModal = ({
     onOpenChange(false)
     if (onAddProject) {
       onAddProject()
-    } else {
-      window.open("/projects/new", "_blank")
     }
   }
 

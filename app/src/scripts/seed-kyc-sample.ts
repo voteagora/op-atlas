@@ -312,7 +312,7 @@ async function main() {
       continue
     }
 
-    // Create a minimal project using ProjectDetailsForm defaults where applicable
+    // Create a minimal project
     const project = await createProject(user.id)
     if (project?.id) {
       // Branch behavior based on STOP_AT

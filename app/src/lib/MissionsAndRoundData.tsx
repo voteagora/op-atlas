@@ -104,7 +104,6 @@ export const PAST_FUNDING_ROUNDS: FundingRoundData[] = [
       "Retro Funding: This category will reward onchain builders who contribute to the success of Optimism. This round seeks to expand the...",
     ],
     status: "past",
-    link: "/projects/new",
     resultsLink: "/round/results?rounds=4",
     iconUrl: "/assets/images/round-4.svg",
     startsAt: new Date("2024-05-14T21:53:13.300Z"),

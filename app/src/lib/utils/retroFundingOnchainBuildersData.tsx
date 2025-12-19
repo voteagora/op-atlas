@@ -157,8 +157,6 @@ export const retroFundingOnchainBuildersData: MissionData = {
       title:
         "Create a project in Atlas to which you'll add your onchain contracts",
       description: "Complete all the steps and publish your project.",
-      subDetails: "Add project",
-      subDetailsLink: "/projects/new",
       enforceSignIn: true,
     },
     {

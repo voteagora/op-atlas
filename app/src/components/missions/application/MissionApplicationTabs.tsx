@@ -158,13 +158,6 @@ export function MissionApplicationTabs({
                   </p>
 
                   <div className="flex gap-4">
-                    <ExtendedLink
-                      as="button"
-                      href="/projects/new"
-                      text="Add Project"
-                      variant="primary"
-                      className="w-full"
-                    />
                     {viewMissionDetailsBtn}
                   </div>
                 </div>

@@ -163,12 +163,7 @@ export const StandardRoleForm = ({
       <div className="text-foreground">
         Which projects demonstrate your expertise in this area?
         <div className="text-muted-foreground">
-          Choose from your projects in Atlas. If your project isn&apos;t in
-          Atlas, then{" "}
-          <Link href="/projects/new" className="underline">
-            add your project
-          </Link>{" "}
-          before continuing here. To join a project or organization that
+          Choose from your projects in Atlas. To join a project or organization that
           already exists in Atlas, please have their admin add you.{" "}
         </div>
       </div>
