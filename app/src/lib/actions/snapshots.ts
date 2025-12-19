@@ -417,77 +417,9 @@ export const publishProjectContractsBatch = async ({
           projectId: string
         }[]
 
-<<<<<<< HEAD
-  const publishBatch = toPublish.slice(0, normalizedBatchSize)
-  const revokeBatch = toRevoke.slice(0, normalizedBatchSize)
-
-  let publishedThisBatch = 0
-  let revokedThisBatch = 0
-  let errorMessage: string | null = null
-  const contractRefUID = projectContracts.id
-
-  if (revokeBatch.length > 0) {
-    // Note: On-chain revocation is disabled because EAS only allows the original
-    // attester to revoke attestations, and the signer address has changed over time.
-    // We still mark them as revoked in our database for bookkeeping.
-    const revokeIds = revokeBatch.map((contract) => contract.id)
-    await revokePublishedContracts(revokeIds)
-    revokedThisBatch = revokeBatch.length
-  }
-
-  if (publishBatch.length > 0) {
-    const attestationIds = await createContractAttestations({
-      contracts: publishBatch.map((contract) => ({
-        contractAddress: contract.contractAddress,
-        chainId: contract.chainId,
-        deployer: contract.deployerAddress,
-        deploymentTx: contract.deploymentHash,
-        signature: contract.verificationProof,
-        verificationChainId:
-          contract.verificationChainId || contract.chainId,
-      })),
-      projectId: projectContracts.id,
-      farcasterId: session?.user?.farcasterId
-        ? parseInt(session.user.farcasterId)
-        : 0,
-      refUID: contractRefUID,
-    })
-
-    if (attestationIds.length > 0) {
-      const records = attestationIds
-        .map((attestationId, index) => {
-          const contract = publishBatch[index]
-          if (!contract) return null
-          return {
-            id: attestationId,
-            contract: contract.contractAddress,
-            deploymentTx: contract.deploymentHash,
-            deployer: contract.deployerAddress,
-            verificationChainId:
-              contract.verificationChainId || contract.chainId,
-            signature: contract.verificationProof,
-            chainId: contract.chainId,
-            projectId,
-          }
-        })
-        .filter(Boolean) as {
-        id: string
-        contract: string
-        deploymentTx: string
-        deployer: string
-        verificationChainId: number
-        signature: string
-        chainId: number
-        projectId: string
-      }[]
-
-      await addPublishedContracts(records)
-      publishedThisBatch = records.length
-=======
         await addPublishedContracts(records, db)
         publishedThisBatch = records.length
       }
->>>>>>> 11d86146ad34b94c247a2cf79da97781d3f1c4b1
     }
 
     const updatedProjectContracts = await getProjectContractsFresh(
