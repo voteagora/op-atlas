@@ -45,6 +45,8 @@ export function MissionApplication({ userId }: { userId: string }) {
   const { data: applications } = useSessionRoundApplications(mission?.number)
   const { linkEmail } = usePrivyEmail(userId)
   const { data: session } = useSession()
+  const viewerEmail =
+    session?.impersonation?.targetUserEmail ?? session?.user?.email
 
   const [submittedApplications, setSubmittedApplications] = useState<
     Application[]
@@ -53,7 +55,7 @@ export function MissionApplication({ userId }: { userId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const submitApplication = async () => {
-    if (!session?.user.email) {
+    if (!viewerEmail) {
       linkEmail()
       return
     }

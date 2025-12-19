@@ -1,27 +1,30 @@
 import {
-  getConsolidatedProjectTeam,
-  getProject,
-  getProjectContracts,
+  getConsolidatedProjectTeamWithClient,
+  getProjectContractsWithClient,
+  getProjectWithClient,
 } from "@/db/projects"
 import { getProjectRecurringRewards } from "@/db/rewards"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { formatRecurringRewards } from "@/lib/utils/rewards"
 
 import { ProjectStatusSidebar } from "./ProjectStatusSidebar"
 
 export async function ProjectSidebar({ projectId }: { projectId: string }) {
-  const [project, team, contracts, recurringRewards] = await Promise.all([
-    getProject({ id: projectId }),
-    getConsolidatedProjectTeam({ projectId }),
-    getProjectContracts({ projectId }),
-    getProjectRecurringRewards(projectId),
-  ])
+  return withImpersonation(async ({ db }) => {
+    const [project, team, contracts, recurringRewards] = await Promise.all([
+      getProjectWithClient({ id: projectId }, db),
+      getConsolidatedProjectTeamWithClient({ projectId }, db),
+      getProjectContractsWithClient({ projectId }, db),
+      getProjectRecurringRewards(projectId, db),
+    ])
 
-  return (
-    <ProjectStatusSidebar
-      project={project}
-      team={team}
-      contracts={contracts}
-      recurringRewards={formatRecurringRewards(recurringRewards)}
-    />
-  )
+    return (
+      <ProjectStatusSidebar
+        project={project}
+        team={team}
+        contracts={contracts}
+        recurringRewards={formatRecurringRewards(recurringRewards)}
+      />
+    )
+  })
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import { X } from "lucide-react"
-import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -15,12 +14,59 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useUser } from "@/hooks/db/useUser"
-import { clearGovForumProfileUrl, updateGovForumProfileUrl } from "@/lib/actions/users"
+import {
+  clearGovForumProfileUrl,
+  updateGovForumProfileUrl,
+} from "@/lib/actions/users"
 import { cn } from "@/lib/utils"
 
 import { Input } from "../ui/input"
 
-export function GovForumConnection({ userId }: { userId: string }) {
+export function GovForumConnection({
+  userId,
+  readOnly = false,
+}: {
+  userId: string
+  readOnly?: boolean
+}) {
+  if (readOnly) {
+    return <GovForumConnectionReadOnly userId={userId} />
+  }
+
+  return <GovForumConnectionInteractive userId={userId} />
+}
+
+function GovForumConnectionReadOnly({ userId }: { userId: string }) {
+  const { user } = useUser({ id: userId, enabled: true })
+  const url = user?.govForumProfileUrl
+  return (
+    <div className="flex gap-x-2">
+      <div className="relative flex-1">
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+          <CheckboxCircleFIll
+            className="w-5 h-5"
+            fill={url ? "#1DBA6A" : "#CBD5F5"}
+          />
+        </div>
+        <Input
+          placeholder="https://gov.optimism.io/u/yourname/summary"
+          value={
+            url
+              ? url.replace(/^https:\/\/gov\.optimism\.io\/u\//, "../")
+              : ""
+          }
+          readOnly
+          className={cn("pl-10", !url && "text-muted-foreground")}
+        />
+      </div>
+      <Button variant="secondary" disabled className="whitespace-nowrap">
+        Editing disabled
+      </Button>
+    </div>
+  )
+}
+
+function GovForumConnectionInteractive({ userId }: { userId: string }) {
   const { user, invalidate: invalidateUser } = useUser({
     id: userId,
     enabled: true,
@@ -36,8 +82,6 @@ export function GovForumConnection({ userId }: { userId: string }) {
   useEffect(() => {
     setGovForumProfileUrl(user?.govForumProfileUrl || "")
   }, [user])
-
-  const [isEditing, setIsEditing] = useState(false)
 
   const isValidGovForumUrl = (url: string) => {
     const pattern = /^https:\/\/gov\.optimism\.io\/u\/[a-zA-Z0-9-_.]+\/summary$/

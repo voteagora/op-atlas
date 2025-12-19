@@ -1,24 +1,28 @@
 "use server"
 
 import {
+  PrismaClient,
   ProjectContract,
   ProjectSnapshot,
   PublishedContract,
 } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 
-import { auth } from "@/auth"
-import { addOrganizationSnapshot, getOrganization } from "@/db/organizations"
+import {
+  addOrganizationSnapshot,
+  getOrganizationWithClient,
+} from "@/db/organizations"
 import {
   addProjectSnapshot,
   addPublishedContracts,
-  getConsolidatedProjectTeam,
-  getProject,
+  getConsolidatedProjectTeamWithClient,
   getProjectContractsFresh,
+  getProjectWithClient,
   revokePublishedContracts,
   updateAllForProject,
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
+import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import {
   createContractAttestations,
@@ -39,23 +43,48 @@ import { verifyMembership } from "./utils"
 const NO_BATCHING_CONTRACT_THRESHOLD = 150
 const PUBLISH_CONTRACT_BATCH_LIMIT = 40
 
-async function publishContractsWithoutBatching({
-  projectId,
-  toPublish,
-  toRevoke,
-  farcasterId,
-}: {
-  projectId: string
-  toPublish: ProjectContract[]
-  toRevoke: PublishedContract[]
-  farcasterId: string | null
-}) {
+type ProjectMemberContext = SessionContext & { userId: string }
+
+async function withProjectMember<T>(
+  projectId: string,
+  handler: (ctx: ProjectMemberContext) => Promise<T>,
+) {
+  return withImpersonation(async (ctx) => {
+    if (!ctx.userId) {
+      return {
+        error: "Unauthorized",
+      } as T
+    }
+
+    const membership = await verifyMembership(projectId, ctx.userId, ctx.db)
+    if (membership?.error) {
+      return membership as T
+    }
+
+    return handler({ ...ctx, userId: ctx.userId })
+  }, { requireUser: true })
+}
+
+async function publishContractsWithoutBatching(
+  {
+    projectId,
+    toPublish,
+    toRevoke,
+    farcasterId,
+  }: {
+    projectId: string
+    toPublish: ProjectContract[]
+    toRevoke: PublishedContract[]
+    farcasterId: string | null
+  },
+  db: PrismaClient,
+) {
   if (toRevoke.length > 0) {
     // Note: On-chain revocation is disabled because EAS only allows the original
     // attester to revoke attestations, and the signer address has changed over time.
     // We still mark them as revoked in our database for bookkeeping.
     const revokeIds = toRevoke.map((contract) => contract.id)
-    await revokePublishedContracts(revokeIds)
+    await revokePublishedContracts(revokeIds, db)
   }
 
   if (toPublish.length > 0) {
@@ -104,12 +133,15 @@ async function publishContractsWithoutBatching({
       }[]
 
       if (records.length > 0) {
-        await addPublishedContracts(records)
+        await addPublishedContracts(records, db)
       }
     }
   }
 
-  const updatedProjectContracts = await getProjectContractsFresh({ projectId })
+  const updatedProjectContracts = await getProjectContractsFresh(
+    { projectId },
+    db,
+  )
   const updatedDiff = await getUnpublishedContractChanges(
     projectId,
     updatedProjectContracts,
@@ -121,15 +153,18 @@ async function publishContractsWithoutBatching({
   }
 }
 
-async function createMetadataSnapshotRecord({
-  project,
-  team,
-  farcasterId,
-}: {
-  project: ProjectWithFullDetails
-  team: ProjectTeam
-  farcasterId: string | null
-}) {
+async function createMetadataSnapshotRecord(
+  {
+    project,
+    team,
+    farcasterId,
+  }: {
+    project: ProjectWithFullDetails
+    team: ProjectTeam
+    farcasterId: string | null
+  },
+  db: PrismaClient,
+) {
   const metadata = formatProjectMetadata(project, team)
   const ipfsHash = await uploadToPinata(project.id, metadata)
   const attestationId = await createProjectMetadataAttestation({
@@ -141,93 +176,55 @@ async function createMetadataSnapshotRecord({
     refUID: project.id,
   })
 
-  const snapshot = await addProjectSnapshot({
-    projectId: project.id,
-    ipfsHash,
-    attestationId,
-  })
+  const snapshot = await addProjectSnapshot(
+    {
+      projectId: project.id,
+      ipfsHash,
+      attestationId,
+    },
+    db,
+  )
 
   revalidatePath("/dashboard")
   revalidatePath("/projects", "layout")
 
   return { snapshot }
 }
-export const createProjectSnapshot = async (projectId: string) => {
-  const session = await auth()
-
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  const [project, team, unpublishedContractChanges] = await Promise.all([
-    getProject({ id: projectId }),
-    getConsolidatedProjectTeam({ projectId }),
-    getUnpublishedContractChanges(projectId),
-  ])
-  if (!project) {
-    return {
-      error: "Project not found",
-    }
-  }
-
-  const snapshots = (project.snapshots ?? []) as ProjectSnapshot[]
-  const latestSnapshot = getLatestSnapshot(snapshots)
-  const hasUnpublishedMetadataChanges = projectHasUnpublishedChanges(
-    snapshots,
-    project.lastMetadataUpdate,
-  )
-  const contractsToPublish = unpublishedContractChanges?.toPublish ?? []
-  const contractsToRevoke = unpublishedContractChanges?.toRevoke ?? []
-
-  const shouldCreateSnapshot =
-    hasUnpublishedMetadataChanges ||
-    contractsToPublish.length > 0 ||
-    contractsToRevoke.length > 0
-
-  if (!shouldCreateSnapshot && latestSnapshot) {
-    return {
-      snapshot: latestSnapshot,
-      pendingContracts: {
-        toPublish: 0,
-        toRevoke: 0,
-      },
-      metadataPending: false,
-      requiresBatching: false,
-      error: null,
-    }
-  }
-
-  const shouldPublishWithoutBatching =
-    contractsToPublish.length <= NO_BATCHING_CONTRACT_THRESHOLD
-
-  try {
-    if (shouldPublishWithoutBatching) {
-      const updatedPending = await publishContractsWithoutBatching({
-        projectId: project.id,
-        toPublish: contractsToPublish,
-        toRevoke: contractsToRevoke,
-        farcasterId: session?.user?.farcasterId ?? null,
-      })
-
-      const { snapshot } = await createMetadataSnapshotRecord({
-        project,
-        team,
-        farcasterId: session?.user?.farcasterId ?? null,
-      })
-
+export const createProjectSnapshot = async (projectId: string) =>
+  withProjectMember(projectId, async ({ db, session, userId }) => {
+    const [project, team, unpublishedContractChanges, actingUser] =
+      await Promise.all([
+        getProjectWithClient({ id: projectId }, db),
+        getConsolidatedProjectTeamWithClient({ projectId }, db),
+        getUnpublishedContractChanges(projectId),
+        getUserById(userId, db, session),
+      ])
+    if (!project || !team) {
       return {
-        snapshot,
+        error: "Project not found",
+      }
+    }
+
+    const snapshots = (project.snapshots ?? []) as ProjectSnapshot[]
+    const latestSnapshot = getLatestSnapshot(snapshots)
+    const hasUnpublishedMetadataChanges = projectHasUnpublishedChanges(
+      snapshots,
+      project.lastMetadataUpdate,
+    )
+    const contractsToPublish = unpublishedContractChanges?.toPublish ?? []
+    const contractsToRevoke = unpublishedContractChanges?.toRevoke ?? []
+
+    const shouldCreateSnapshot =
+      hasUnpublishedMetadataChanges ||
+      contractsToPublish.length > 0 ||
+      contractsToRevoke.length > 0
+
+    if (!shouldCreateSnapshot && latestSnapshot) {
+      return {
+        snapshot: latestSnapshot,
         pendingContracts: {
-          toPublish: updatedPending.toPublish,
-          toRevoke: updatedPending.toRevoke,
+          toPublish: 0,
+          toRevoke: 0,
         },
         metadataPending: false,
         requiresBatching: false,
@@ -235,35 +232,71 @@ export const createProjectSnapshot = async (projectId: string) => {
       }
     }
 
-    return {
-      snapshot: null,
-      pendingContracts: {
-        toPublish: contractsToPublish.length,
-        toRevoke: contractsToRevoke.length,
-      },
-      metadataPending: true,
-      requiresBatching: true,
-      error: null,
-    }
-  } catch (error) {
-    const errorType = error instanceof Error ? error.name : "UnknownError"
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const errorCode = errorMessage.match(/0x[a-fA-F0-9]+/)?.[0] ?? ""
+    const farcasterId = actingUser?.farcasterId ?? null
+    const shouldPublishWithoutBatching =
+      contractsToPublish.length <= NO_BATCHING_CONTRACT_THRESHOLD
 
-    const errorDetails = {
-      errorOrigination: "createProjectSnapshot",
-      errorType,
-      errorMessage,
-      errorCode,
-      error: error,
-    }
-    console.error("Error creating snapshot", errorDetails)
+    try {
+      if (shouldPublishWithoutBatching) {
+        const updatedPending = await publishContractsWithoutBatching(
+          {
+            projectId: project.id,
+            toPublish: contractsToPublish,
+            toRevoke: contractsToRevoke,
+            farcasterId,
+          },
+          db,
+        )
 
-    return {
-      error: errorMessage || "Failed to create snapshot",
+        const { snapshot } = await createMetadataSnapshotRecord(
+          {
+            project,
+            team,
+            farcasterId,
+          },
+          db,
+        )
+
+        return {
+          snapshot,
+          pendingContracts: {
+            toPublish: updatedPending.toPublish,
+            toRevoke: updatedPending.toRevoke,
+          },
+          metadataPending: false,
+          requiresBatching: false,
+          error: null,
+        }
+      }
+
+      return {
+        snapshot: null,
+        pendingContracts: {
+          toPublish: contractsToPublish.length,
+          toRevoke: contractsToRevoke.length,
+        },
+        metadataPending: true,
+        requiresBatching: true,
+        error: null,
+      }
+    } catch (error) {
+      const errorType = error instanceof Error ? error.name : "UnknownError"
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorCode = errorMessage.match(/0x[a-fA-F0-9]+/)?.[0] ?? ""
+
+      console.error("Error creating snapshot", {
+        errorOrigination: "createProjectSnapshot",
+        errorType,
+        errorMessage,
+        errorCode,
+        error,
+      })
+
+      return {
+        error: errorMessage || "Failed to create snapshot",
+      }
     }
-  }
-}
+  })
 
 const sortContractsForPublishing = (contracts: ProjectContract[]) => {
   return contracts
@@ -289,201 +322,187 @@ export const publishProjectContractsBatch = async ({
 }: {
   projectId: string
   batchSize?: number
-}) => {
-  const session = await auth()
+}) =>
+  withProjectMember(projectId, async ({ db, session, userId }) => {
+    const normalizedBatchSize = Math.max(
+      1,
+      Math.min(
+        PUBLISH_CONTRACT_BATCH_LIMIT,
+        batchSize ?? PUBLISH_CONTRACT_BATCH_LIMIT,
+      ),
+    )
 
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
+    const [projectContracts, actingUser] = await Promise.all([
+      getProjectContractsFresh({ projectId }, db),
+      getUserById(userId, db, session),
+    ])
+
+    if (!projectContracts) {
+      return {
+        error: "Project not found",
+      }
     }
-  }
 
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
+    const unpublishedContractChanges = await getUnpublishedContractChanges(
+      projectId,
+      projectContracts,
+    )
 
-  const normalizedBatchSize = Math.max(
-    1,
-    Math.min(
-      PUBLISH_CONTRACT_BATCH_LIMIT,
-      batchSize ?? PUBLISH_CONTRACT_BATCH_LIMIT,
-    ),
-  )
+    const toPublish = sortContractsForPublishing(
+      unpublishedContractChanges?.toPublish ?? [],
+    )
+    const toRevoke = (unpublishedContractChanges?.toRevoke ?? []).slice()
 
-  const projectContracts = await getProjectContractsFresh({ projectId })
+    const publishBatch = toPublish.slice(0, normalizedBatchSize)
+    const revokeBatch = toRevoke.slice(0, normalizedBatchSize)
 
-  if (!projectContracts) {
-    return {
-      error: "Project not found",
+    let publishedThisBatch = 0
+    let revokedThisBatch = 0
+    let errorMessage: string | null = null
+    const contractRefUID = projectContracts.id
+
+    if (revokeBatch.length > 0) {
+      // Note: On-chain revocation is disabled because EAS only allows the original
+      // attester to revoke attestations, and the signer address has changed over time.
+      // We still mark them as revoked in our database for bookkeeping.
+      const revokeIds = revokeBatch.map((contract) => contract.id)
+      await revokePublishedContracts(revokeIds, db)
+      revokedThisBatch = revokeBatch.length
     }
-  }
 
-  const unpublishedContractChanges = await getUnpublishedContractChanges(
-    projectId,
-    projectContracts,
-  )
+    if (publishBatch.length > 0) {
+      const farcasterNumeric = actingUser?.farcasterId
+        ? parseInt(actingUser.farcasterId, 10) || 0
+        : 0
+      const attestationIds = await createContractAttestations({
+        contracts: publishBatch.map((contract) => ({
+          contractAddress: contract.contractAddress,
+          chainId: contract.chainId,
+          deployer: contract.deployerAddress,
+          deploymentTx: contract.deploymentHash,
+          signature: contract.verificationProof,
+          verificationChainId:
+            contract.verificationChainId || contract.chainId,
+        })),
+        projectId: projectContracts.id,
+        farcasterId: farcasterNumeric,
+        refUID: contractRefUID,
+      })
 
-  const toPublish = sortContractsForPublishing(
-    unpublishedContractChanges?.toPublish ?? [],
-  )
-  const toRevoke = (unpublishedContractChanges?.toRevoke ?? []).slice()
+      if (attestationIds.length > 0) {
+        const records = attestationIds
+          .map((attestationId, index) => {
+            const contract = publishBatch[index]
+            if (!contract) return null
+            return {
+              id: attestationId,
+              contract: contract.contractAddress,
+              deploymentTx: contract.deploymentHash,
+              deployer: contract.deployerAddress,
+              verificationChainId:
+                contract.verificationChainId || contract.chainId,
+              signature: contract.verificationProof,
+              chainId: contract.chainId,
+              projectId,
+            }
+          })
+          .filter(Boolean) as {
+          id: string
+          contract: string
+          deploymentTx: string
+          deployer: string
+          verificationChainId: number
+          signature: string
+          chainId: number
+          projectId: string
+        }[]
 
-  const publishBatch = toPublish.slice(0, normalizedBatchSize)
-  const revokeBatch = toRevoke.slice(0, normalizedBatchSize)
-
-  let publishedThisBatch = 0
-  let revokedThisBatch = 0
-  let errorMessage: string | null = null
-  const contractRefUID = projectContracts.id
-
-  if (revokeBatch.length > 0) {
-    // Note: On-chain revocation is disabled because EAS only allows the original
-    // attester to revoke attestations, and the signer address has changed over time.
-    // We still mark them as revoked in our database for bookkeeping.
-    const revokeIds = revokeBatch.map((contract) => contract.id)
-    await revokePublishedContracts(revokeIds)
-    revokedThisBatch = revokeBatch.length
-  }
-
-  if (publishBatch.length > 0) {
-    const attestationIds = await createContractAttestations({
-      contracts: publishBatch.map((contract) => ({
-        contractAddress: contract.contractAddress,
-        chainId: contract.chainId,
-        deployer: contract.deployerAddress,
-        deploymentTx: contract.deploymentHash,
-        signature: contract.verificationProof,
-        verificationChainId:
-          contract.verificationChainId || contract.chainId,
-      })),
-      projectId: projectContracts.id,
-      farcasterId: session?.user?.farcasterId
-        ? parseInt(session.user.farcasterId)
-        : 0,
-      refUID: contractRefUID,
-    })
-
-    if (attestationIds.length > 0) {
-      const records = attestationIds
-        .map((attestationId, index) => {
-          const contract = publishBatch[index]
-          if (!contract) return null
-          return {
-            id: attestationId,
-            contract: contract.contractAddress,
-            deploymentTx: contract.deploymentHash,
-            deployer: contract.deployerAddress,
-            verificationChainId:
-              contract.verificationChainId || contract.chainId,
-            signature: contract.verificationProof,
-            chainId: contract.chainId,
-            projectId,
-          }
-        })
-        .filter(Boolean) as {
-        id: string
-        contract: string
-        deploymentTx: string
-        deployer: string
-        verificationChainId: number
-        signature: string
-        chainId: number
-        projectId: string
-      }[]
-
-      await addPublishedContracts(records)
-      publishedThisBatch = records.length
+        await addPublishedContracts(records, db)
+        publishedThisBatch = records.length
+      }
     }
-  }
 
-  const updatedProjectContracts = await getProjectContractsFresh({ projectId })
-  const updatedDiff = await getUnpublishedContractChanges(
-    projectId,
-    updatedProjectContracts,
-  )
-
-  return {
-    error: errorMessage,
-    publishedThisBatch,
-    revokedThisBatch,
-    remainingPublish: updatedDiff?.toPublish?.length ?? 0,
-    remainingRevoke: updatedDiff?.toRevoke?.length ?? 0,
-    totalVerified: updatedProjectContracts?.contracts.length ?? 0,
-    totalPublished: updatedProjectContracts?.publishedContracts.length ?? 0,
-  }
-}
-
-export const finalizeProjectSnapshot = async (projectId: string) => {
-  const session = await auth()
-
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
-
-  const isInvalid = await verifyMembership(projectId, userId)
-  if (isInvalid?.error) {
-    return isInvalid
-  }
-
-  const [project, team, unpublishedContractChanges] = await Promise.all([
-    getProject({ id: projectId }),
-    getConsolidatedProjectTeam({ projectId }),
-    getUnpublishedContractChanges(projectId),
-  ])
-
-  if (!project) {
-    return {
-      error: "Project not found",
-    }
-  }
-
-  const pendingPublish = unpublishedContractChanges?.toPublish?.length ?? 0
-  const pendingRevoke = unpublishedContractChanges?.toRevoke?.length ?? 0
-
-  if (pendingPublish > 0 || pendingRevoke > 0) {
-    return {
-      error: "Contracts are still pending publication",
-    }
-  }
-
-  const snapshots = (project.snapshots ?? []) as ProjectSnapshot[]
-  const latestSnapshot = getLatestSnapshot(snapshots)
-  const hasUnpublishedMetadataChanges = projectHasUnpublishedChanges(
-    snapshots,
-    project.lastMetadataUpdate,
-  )
-
-  if (!hasUnpublishedMetadataChanges && latestSnapshot) {
-    return {
-      snapshot: latestSnapshot,
-      error: null,
-    }
-  }
-
-  try {
-    const { snapshot } = await createMetadataSnapshotRecord({
-      project,
-      team,
-      farcasterId: session?.user?.farcasterId ?? null,
-    })
+    const updatedProjectContracts = await getProjectContractsFresh(
+      { projectId },
+      db,
+    )
+    const updatedDiff = await getUnpublishedContractChanges(
+      projectId,
+      updatedProjectContracts,
+    )
 
     return {
-      snapshot,
-      error: null,
+      error: errorMessage,
+      publishedThisBatch,
+      revokedThisBatch,
+      remainingPublish: updatedDiff?.toPublish?.length ?? 0,
+      remainingRevoke: updatedDiff?.toRevoke?.length ?? 0,
+      totalVerified: updatedProjectContracts?.contracts.length ?? 0,
+      totalPublished: updatedProjectContracts?.publishedContracts.length ?? 0,
     }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error("Error finalizing snapshot", error)
-    return {
-      error: errorMessage || "Failed to finalize snapshot",
+  })
+
+export const finalizeProjectSnapshot = async (projectId: string) =>
+  withProjectMember(projectId, async ({ db, session, userId }) => {
+    const [project, team, unpublishedContractChanges, actingUser] =
+      await Promise.all([
+        getProjectWithClient({ id: projectId }, db),
+        getConsolidatedProjectTeamWithClient({ projectId }, db),
+        getUnpublishedContractChanges(projectId),
+        getUserById(userId, db, session),
+      ])
+
+    if (!project) {
+      return {
+        error: "Project not found",
+      }
     }
-  }
-}
+
+    const pendingPublish = unpublishedContractChanges?.toPublish?.length ?? 0
+    const pendingRevoke = unpublishedContractChanges?.toRevoke?.length ?? 0
+
+    if (pendingPublish > 0 || pendingRevoke > 0) {
+      return {
+        error: "Contracts are still pending publication",
+      }
+    }
+
+    const snapshots = (project.snapshots ?? []) as ProjectSnapshot[]
+    const latestSnapshot = getLatestSnapshot(snapshots)
+    const hasUnpublishedMetadataChanges = projectHasUnpublishedChanges(
+      snapshots,
+      project.lastMetadataUpdate,
+    )
+
+    if (!hasUnpublishedMetadataChanges && latestSnapshot) {
+      return {
+        snapshot: latestSnapshot,
+        error: null,
+      }
+    }
+
+    try {
+      const { snapshot } = await createMetadataSnapshotRecord(
+        {
+          project,
+          team,
+          farcasterId: actingUser?.farcasterId ?? null,
+        },
+        db,
+      )
+
+      return {
+        snapshot,
+        error: null,
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      console.error("Error finalizing snapshot", error)
+      return {
+        error: errorMessage || "Failed to finalize snapshot",
+      }
+    }
+  })
 
 function getLatestSnapshot<T extends { createdAt: string | Date }>(
   snapshots: T[] | null | undefined,
@@ -542,61 +561,66 @@ export const createProjectSnapshotOnBehalf = async (
   })
 }
 
-export const createOrganizationSnapshot = async (organizationId: string) => {
-  const session = await auth()
+export const createOrganizationSnapshot = async (organizationId: string) =>
+  withImpersonation(
+    async ({ db, userId, session }) => {
+      if (!userId) {
+        return {
+          error: "Unauthorized",
+        }
+      }
 
-  const userId = session?.user?.id
-  if (!userId) {
-    return {
-      error: "Unauthorized",
-    }
-  }
+      const organization = await getOrganizationWithClient(
+        { id: organizationId },
+        db,
+      )
+      if (!organization) {
+        return {
+          error: "Organization not found",
+        }
+      }
 
-  const organization = await getOrganization({ id: organizationId })
-  if (!organization) {
-    return {
-      error: "Organization not found",
-    }
-  }
+      const user = await getUserById(userId, db, session)
+      if (!user) {
+        return {
+          error: "User not found",
+        }
+      }
 
-  const user = await getUserById(userId)
-  if (!user) {
-    return {
-      error: "User not found",
-    }
-  }
+      try {
+        const metadata = formatOrganizationMetadata(organization)
+        const ipfsHash = await uploadToPinata(organizationId, metadata)
 
-  try {
-    // Upload metadata to IPFS
-    const metadata = formatOrganizationMetadata(organization)
-    const ipfsHash = await uploadToPinata(organizationId, metadata)
+        const attestationId = await createOrganizationMetadataAttestation({
+          farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
+          organizationId: organization.id,
+          name: organization.name,
+          projectIds: organization.projects.map((p) => p.projectId),
+          ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+        })
 
-    // Create attestation
-    const attestationId = await createOrganizationMetadataAttestation({
-      farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
-      organizationId: organization.id,
-      name: organization.name,
-      projectIds: organization.projects.map((p) => p.projectId),
-      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
-    })
+        const snapshot = await addOrganizationSnapshot(
+          {
+            organizationId,
+            ipfsHash,
+            attestationId,
+          },
+          db,
+        )
 
-    const snapshot = await addOrganizationSnapshot({
-      organizationId,
-      ipfsHash,
-      attestationId,
-    })
+        revalidatePath("/dashboard")
+        revalidatePath("/organizations", "layout")
 
-    revalidatePath("/dashboard")
-    revalidatePath("/organizations", "layout")
-
-    return {
-      snapshot,
-      error: null,
-    }
-  } catch (error) {
-    console.error("Error creating snapshot", error)
-    return {
-      error,
-    }
-  }
-}
+        return {
+          snapshot,
+          error: null,
+        }
+      } catch (error) {
+        console.error("Error creating snapshot", error)
+        return {
+          error,
+        }
+      }
+    },
+    { requireUser: true },
+  )

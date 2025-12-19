@@ -1,7 +1,7 @@
 import { Project } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 
-import { getRandomProjects } from "@/db/projects"
+import { fetchRandomProjects } from "@/lib/actions/hookFetchers"
 
 export function useGetRandomProjects(): {
   data: Project[] | undefined
@@ -10,7 +10,7 @@ export function useGetRandomProjects(): {
 } {
   const { data, isLoading, error } = useQuery({
     queryKey: ["randomProjects"],
-    queryFn: () => getRandomProjects(),
+    queryFn: () => fetchRandomProjects(),
   })
 
   return { data, isLoading, error }

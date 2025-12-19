@@ -10,11 +10,13 @@ export function useUserApplications(): {
   error: Error | null
 } {
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["userApplications", session?.user?.id],
-    queryFn: () => getApplications(session?.user?.id!),
-    enabled: !!session,
+    queryKey: ["userApplications", viewerId],
+    queryFn: () => getApplications(viewerId!),
+    enabled: !!viewerId,
   })
 
   return { data, isLoading, error }

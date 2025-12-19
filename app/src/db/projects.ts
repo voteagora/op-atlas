@@ -3,6 +3,7 @@
 import {
   KYCUser,
   Prisma,
+  PrismaClient,
   Project,
   ProjectContract,
   PublishedContract,
@@ -10,6 +11,7 @@ import {
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
 import { Address, getAddress } from "viem"
+import type { Session } from "next-auth"
 
 import {
   Oso_ProjectsByCollectionV1,
@@ -36,8 +38,16 @@ import { ProjectMetadata } from "@/lib/utils/metadata"
 
 import { prisma } from "./client"
 
-async function getUserProjectsFn({ userId }: { userId: string }) {
-  const result = await prisma.$queryRaw<{ result: UserWithProjects }[]>`
+type DbContext = {
+  db?: PrismaClient
+  session?: Session | null
+}
+
+async function getUserProjectsFn(
+  { userId }: { userId: string },
+  db: PrismaClient = prisma,
+) {
+  const result = await db.$queryRaw<{ result: UserWithProjects }[]>`
     SELECT jsonb_build_object(
       'id', u.id,
       'projects', COALESCE(
@@ -64,17 +74,28 @@ async function getUserProjectsFn({ userId }: { userId: string }) {
 
   return result[0]?.result
 }
+export const getUserProjects = cache((params: { userId: string }) =>
+  getUserProjectsFn(params),
+)
 
-export const getUserProjects = cache(getUserProjectsFn)
+export async function getUserProjectsWithClient(
+  params: { userId: string },
+  db: PrismaClient = prisma,
+) {
+  return getUserProjectsFn(params, db)
+}
 
-async function getUserAdminProjectsWithDetailFn({
-  userId,
-  roundId,
-}: {
-  userId: string
-  roundId?: string
-}): Promise<UserProjectsWithDetails | null> {
-  const result = await prisma.$queryRaw<{ result: UserProjectsWithDetails }[]>`
+async function getUserAdminProjectsWithDetailFn(
+  {
+    userId,
+    roundId,
+  }: {
+    userId: string
+    roundId?: string
+  },
+  db: PrismaClient = prisma,
+): Promise<UserProjectsWithDetails | null> {
+  const result = await db.$queryRaw<{ result: UserProjectsWithDetails }[]>`
     WITH user_projects AS (
       SELECT 
         p.*,
@@ -236,11 +257,19 @@ async function getUserAdminProjectsWithDetailFn({
 }
 
 export const getUserAdminProjectsWithDetail = cache(
-  getUserAdminProjectsWithDetailFn,
+  (params: { userId: string; roundId?: string }) =>
+    getUserAdminProjectsWithDetailFn(params, prisma),
 )
 
-const getRandomProjectsFn = () => {
-  return prisma.$queryRaw<Project[]>`
+export async function getUserAdminProjectsWithDetailWithClient(
+  params: { userId: string; roundId?: string },
+  db: PrismaClient = prisma,
+) {
+  return getUserAdminProjectsWithDetailFn(params, db)
+}
+
+const getRandomProjectsFn = (db: PrismaClient) => {
+  return db.$queryRaw<Project[]>`
     SELECT * 
     FROM "Project" 
     WHERE "deletedAt" IS NULL 
@@ -251,10 +280,18 @@ const getRandomProjectsFn = () => {
   `
 }
 
-export const getRandomProjects = cache(getRandomProjectsFn)
+export const getRandomProjects = cache(() => getRandomProjectsFn(prisma))
 
-const getWeightedRandomGrantRecipientsFn = (): Promise<ProjectWithReward[]> => {
-  return prisma.$queryRaw<ProjectWithReward[]>`
+export async function getRandomProjectsWithClient(
+  db: PrismaClient = prisma,
+): Promise<Project[]> {
+  return getRandomProjectsFn(db)
+}
+
+const getWeightedRandomGrantRecipientsFn = (
+  db: PrismaClient,
+): Promise<ProjectWithReward[]> => {
+  return db.$queryRaw<ProjectWithReward[]>`
     SELECT 
         p.id,
         p.name,
@@ -279,15 +316,24 @@ const getWeightedRandomGrantRecipientsFn = (): Promise<ProjectWithReward[]> => {
 }
 
 export const getWeightedRandomGrantRecipients = unstable_cache(
-  getWeightedRandomGrantRecipientsFn,
+  () => getWeightedRandomGrantRecipientsFn(prisma),
   ["projects"],
   {
     revalidate: 60 * 60,
   },
 )
 
-async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
-  const result = await prisma.$queryRaw<
+export async function getWeightedRandomGrantRecipientsWithClient(
+  db: PrismaClient = prisma,
+): Promise<ProjectWithReward[]> {
+  return getWeightedRandomGrantRecipientsFn(db)
+}
+
+async function getUserProjectsWithDetailsFn(
+  { userId }: { userId: string },
+  db: PrismaClient = prisma,
+) {
+  const result = await db.$queryRaw<
     { result: { projects: { project: ProjectWithDetails }[] } }[]
   >`
     WITH project_data AS (
@@ -368,14 +414,26 @@ async function getUserProjectsWithDetailsFn({ userId }: { userId: string }) {
   return result[0]?.result
 }
 
-export const getUserProjectsWithDetails = cache(getUserProjectsWithDetailsFn)
+export const getUserProjectsWithDetails = cache(
+  (params: { userId: string }) => getUserProjectsWithDetailsFn(params, prisma),
+)
 
-async function getAllPublishedUserProjectsFn({
-  userId,
-}: {
-  userId: string
-}): Promise<PublishedUserProjectsResult> {
-  const result = await prisma.$queryRaw<
+export async function getUserProjectsWithDetailsWithClient(
+  params: { userId: string },
+  db: PrismaClient = prisma,
+) {
+  return getUserProjectsWithDetailsFn(params, db)
+}
+
+async function getAllPublishedUserProjectsFn(
+  {
+    userId,
+  }: {
+    userId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<PublishedUserProjectsResult> {
+  const result = await db.$queryRaw<
     [{ result: PublishedUserProjectsResult }]
   >`
     WITH "user_projects" AS (
@@ -480,14 +538,27 @@ async function getAllPublishedUserProjectsFn({
   return transformed
 }
 
-export const getAllPublishedUserProjects = cache(getAllPublishedUserProjectsFn)
+export const getAllPublishedUserProjects = cache(
+  (params: { userId: string }) =>
+    getAllPublishedUserProjectsFn(params, prisma),
+)
 
-async function getProjectFn({
-  id,
-}: {
-  id: string
-}): Promise<ProjectWithFullDetails | null> {
-  const result = await prisma.$queryRaw<{ result: ProjectWithFullDetails }[]>`
+export async function getAllPublishedUserProjectsWithClient(
+  params: { userId: string },
+  db: PrismaClient = prisma,
+) {
+  return getAllPublishedUserProjectsFn(params, db)
+}
+
+async function getProjectFn(
+  {
+    id,
+  }: {
+    id: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ProjectWithFullDetails | null> {
+  const result = await db.$queryRaw<{ result: ProjectWithFullDetails }[]>`
     WITH impact_statements AS (
       SELECT 
         cat."id" as category_id,
@@ -552,7 +623,16 @@ async function getProjectFn({
   return result[0]?.result
 }
 
-export const getProject = cache(getProjectFn)
+export const getProject = cache((params: { id: string }) =>
+  getProjectFn(params, prisma),
+)
+
+export async function getProjectWithClient(
+  params: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return getProjectFn(params, db)
+}
 
 export async function getProjectFresh({
   id,
@@ -562,12 +642,15 @@ export async function getProjectFresh({
   return getProjectFn({ id })
 }
 
-async function getProjectTeamFn({
-  id,
-}: {
-  id: string
-}): Promise<ProjectWithTeam | null> {
-  const result = await prisma.$queryRaw<{ result: ProjectWithTeam }[]>`
+async function getProjectTeamFn(
+  {
+    id,
+  }: {
+    id: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ProjectWithTeam | null> {
+  const result = await db.$queryRaw<{ result: ProjectWithTeam }[]>`
     WITH project_data AS (
       SELECT 
         p.*,
@@ -584,14 +667,26 @@ async function getProjectTeamFn({
   return result[0]?.result
 }
 
-export const getProjectTeam = cache(getProjectTeamFn)
+export const getProjectTeam = cache((params: { id: string }) =>
+  getProjectTeamFn(params, prisma),
+)
 
-async function getConsolidatedProjectTeamFn({
-  projectId,
-}: {
-  projectId: string
-}): Promise<ProjectTeam> {
-  const result = await prisma.$queryRaw<{ result: ProjectTeam }[]>`
+export async function getProjectTeamWithClient(
+  params: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return getProjectTeamFn(params, db)
+}
+
+async function getConsolidatedProjectTeamFn(
+  {
+    projectId,
+  }: {
+    projectId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ProjectTeam> {
+  const result = await db.$queryRaw<{ result: ProjectTeam }[]>`
     WITH project_data AS (
       SELECT 
         p.*,
@@ -656,26 +751,51 @@ async function getConsolidatedProjectTeamFn({
   return result[0]?.result || []
 }
 
-export const getConsolidatedProjectTeam = cache(getConsolidatedProjectTeamFn)
+export const getConsolidatedProjectTeam = cache(
+  (params: { projectId: string }) =>
+    getConsolidatedProjectTeamFn(params, prisma),
+)
 
-async function getAllProjectContractsFn({ projectId }: { projectId: string }) {
-  return prisma.projectContract.findMany({
+export async function getConsolidatedProjectTeamWithClient(
+  params: { projectId: string },
+  db: PrismaClient = prisma,
+) {
+  return getConsolidatedProjectTeamFn(params, db)
+}
+
+async function getAllProjectContractsFn(
+  { projectId }: { projectId: string },
+  db: PrismaClient = prisma,
+) {
+  return db.projectContract.findMany({
     where: {
       projectId: projectId,
     },
   })
 }
 
-export const getAllProjectContracts = cache(getAllProjectContractsFn)
+export const getAllProjectContracts = cache((params: { projectId: string }) =>
+  getAllProjectContractsFn(params, prisma),
+)
 
-async function getProjectContractsByDeployerFn({
-  projectId,
-  deployerAddress,
-}: {
-  projectId: string
-  deployerAddress: string
-}): Promise<ProjectContractWithProject[]> {
-  const result = await prisma.$queryRaw<
+export async function getAllProjectContractsWithClient(
+  params: { projectId: string },
+  db: PrismaClient = prisma,
+) {
+  return getAllProjectContractsFn(params, db)
+}
+
+async function getProjectContractsByDeployerFn(
+  {
+    projectId,
+    deployerAddress,
+  }: {
+    projectId: string
+    deployerAddress: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ProjectContractWithProject[]> {
+  const result = await db.$queryRaw<
     { result: ProjectContractWithProject[] }[]
   >`
     WITH contract_data AS (
@@ -695,15 +815,26 @@ async function getProjectContractsByDeployerFn({
 }
 
 export const getProjectContractsByDeployer = cache(
-  getProjectContractsByDeployerFn,
+  (params: { projectId: string; deployerAddress: string }) =>
+    getProjectContractsByDeployerFn(params, prisma),
 )
 
-async function getProjectContractsFn({
-  projectId,
-}: {
-  projectId: string
-}): Promise<ProjectContracts | null> {
-  return prisma.project.findFirst({
+export async function getProjectContractsByDeployerWithClient(
+  params: { projectId: string; deployerAddress: string },
+  db: PrismaClient = prisma,
+) {
+  return getProjectContractsByDeployerFn(params, db)
+}
+
+async function getProjectContractsFn(
+  {
+    projectId,
+  }: {
+    projectId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ProjectContracts | null> {
+  return db.project.findFirst({
     where: {
       id: projectId,
     },
@@ -718,26 +849,41 @@ async function getProjectContractsFn({
   })
 }
 
-export const getProjectContracts = cache(getProjectContractsFn)
+export const getProjectContracts = cache((params: { projectId: string }) =>
+  getProjectContractsFn(params),
+)
 
-export async function getProjectContractsFresh({
-  projectId,
-}: {
-  projectId: string
-}): Promise<ProjectContracts | null> {
-  return getProjectContractsFn({ projectId })
+export async function getProjectContractsWithClient(
+  params: { projectId: string },
+  db: PrismaClient = prisma,
+) {
+  return getProjectContractsFn(params, db)
 }
 
-async function getPublishedProjectContractsFn({
-  projectId,
-  contacts,
-}: {
-  projectId: string
-  contacts: {
-    chainId: number
-    contractAddress: string
-  }[]
-}): Promise<PublishedContract[]> {
+export async function getProjectContractsFresh(
+  {
+    projectId,
+  }: {
+    projectId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ProjectContracts | null> {
+  return getProjectContractsFn({ projectId }, db)
+}
+
+async function getPublishedProjectContractsFn(
+  {
+    projectId,
+    contacts,
+  }: {
+    projectId: string
+    contacts: {
+      chainId: number
+      contractAddress: string
+    }[]
+  },
+  db: PrismaClient = prisma,
+): Promise<PublishedContract[]> {
   const normalizedContacts = contacts.map((c) => ({
     chainId: c.chainId,
     contractAddress: getAddress(c.contractAddress),
@@ -749,7 +895,7 @@ async function getPublishedProjectContractsFn({
     ),
   )
 
-  const projectContractsAll = await prisma.publishedContract.findMany({
+  const projectContractsAll = await db.publishedContract.findMany({
     where: {
       projectId,
       revokedAt: null,
@@ -776,7 +922,7 @@ async function getPublishedProjectContractsFn({
     for (const chunk of addressChunks) {
       if (chunk.length === 0) continue
 
-      const chunkResults = await prisma.publishedContract.findMany({
+      const chunkResults = await db.publishedContract.findMany({
         where: {
           revokedAt: null,
           chainId,
@@ -799,17 +945,33 @@ async function getPublishedProjectContractsFn({
 }
 
 export const getPublishedProjectContracts = cache(
-  getPublishedProjectContractsFn,
+  (params: {
+    projectId: string
+    contacts: { chainId: number; contractAddress: string }[]
+  }) => getPublishedProjectContractsFn(params, prisma),
 )
 
-async function getUserApplicationsFn({
-  userId,
-  roundId,
-}: {
-  userId: string
-  roundId?: string
-}): Promise<ApplicationWithDetails[]> {
-  const result = await prisma.$queryRaw<{ result: ApplicationWithDetails[] }[]>`
+export async function getPublishedProjectContractsWithClient(
+  params: {
+    projectId: string
+    contacts: { chainId: number; contractAddress: string }[]
+  },
+  db: PrismaClient = prisma,
+) {
+  return getPublishedProjectContractsFn(params, db)
+}
+
+async function getUserApplicationsFn(
+  {
+    userId,
+    roundId,
+  }: {
+    userId: string
+    roundId?: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ApplicationWithDetails[]> {
+  const result = await db.$queryRaw<{ result: ApplicationWithDetails[] }[]>`
     WITH user_applications AS (
       SELECT DISTINCT
         a.*,
@@ -856,7 +1018,17 @@ async function getUserApplicationsFn({
   return result[0]?.result || []
 }
 
-export const getUserApplications = cache(getUserApplicationsFn)
+export const getUserApplications = cache(
+  (params: { userId: string; roundId?: string }) =>
+    getUserApplicationsFn(params),
+)
+
+export async function getUserApplicationsWithClient(
+  params: { userId: string; roundId?: string },
+  db: PrismaClient = prisma,
+) {
+  return getUserApplicationsFn(params, db)
+}
 
 export type CreateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
@@ -864,193 +1036,243 @@ export type CreateProjectParams = Partial<
   name: string
 }
 
-export async function createProject({
-  userId,
-  projectId,
-  organizationId,
-  project,
-}: {
-  userId: string
-  projectId: string
-  organizationId?: string
-  project: CreateProjectParams
-}) {
-  return withChangelogTracking(async (tx) => {
-    const orgMembers = organizationId
-      ? await tx.userOrganization
-          .findMany({
-            where: { organizationId, deletedAt: null },
-            select: { userId: true },
-          })
-          .then((members) =>
-            members
-              .filter((member) => member.userId !== userId)
-              .map((member) => ({
-                role: "member",
-                user: { connect: { id: member.userId } },
-              })),
-          )
-      : []
-    return tx.project.create({
-      data: {
-        id: projectId,
-        ...project,
-        team: {
-          create: [
-            {
-              role: "admin" satisfies TeamRole,
-              user: { connect: { id: userId } },
-            },
-            ...orgMembers,
-          ],
+export async function createProject(
+  {
+    userId,
+    projectId,
+    organizationId,
+    project,
+  }: {
+    userId: string
+    projectId: string
+    organizationId?: string
+    project: CreateProjectParams
+  },
+  context: DbContext = {},
+) {
+  return withChangelogTracking(
+    async (tx) => {
+      const orgMembers = organizationId
+        ? await tx.userOrganization
+            .findMany({
+              where: { organizationId, deletedAt: null },
+              select: { userId: true },
+            })
+            .then((members) =>
+              members
+                .filter((member) => member.userId !== userId)
+                .map((member) => ({
+                  role: "member",
+                  user: { connect: { id: member.userId } },
+                })),
+            )
+        : []
+      return tx.project.create({
+        data: {
+          id: projectId,
+          ...project,
+          team: {
+            create: [
+              {
+                role: "admin" satisfies TeamRole,
+                user: { connect: { id: userId } },
+              },
+              ...orgMembers,
+            ],
+          },
+          organization: organizationId
+            ? { create: { organization: { connect: { id: organizationId } } } }
+            : undefined,
         },
-        organization: organizationId
-          ? { create: { organization: { connect: { id: organizationId } } } }
-          : undefined,
-      },
-    })
-  })
+      })
+    },
+    undefined,
+    { db: context.db, session: context.session },
+  )
 }
 
 export type UpdateProjectParams = Partial<
   Omit<Project, "id" | "createdAt" | "updatedAt" | "deletedAt">
 >
 
-export async function updateProject({
-  id,
-  project,
-}: {
-  id: string
-  project: UpdateProjectParams
-}) {
-  return withChangelogTracking(async (tx) => {
-    return tx.project.update({
-      where: { id },
-      data: { ...project, lastMetadataUpdate: new Date() },
-    })
-  })
+export async function updateProject(
+  {
+    id,
+    project,
+  }: {
+    id: string
+    project: UpdateProjectParams
+  },
+  context: DbContext = {},
+) {
+  return withChangelogTracking(
+    async (tx) => {
+      return tx.project.update({
+        where: { id },
+        data: { ...project, lastMetadataUpdate: new Date() },
+      })
+    },
+    undefined,
+    { db: context.db, session: context.session },
+  )
 }
 
-export async function updateProjectOrganization({
-  projectId,
-  organizationId,
-}: {
-  projectId: string
-  organizationId: string
-}) {
-  return prisma.projectOrganization.upsert({
+export async function updateProjectOrganization(
+  {
+    projectId,
+    organizationId,
+  }: {
+    projectId: string
+    organizationId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.projectOrganization.upsert({
     where: { projectId },
     update: { organizationId },
     create: { projectId, organizationId },
   })
 }
 
-export async function removeProjectOrganization({
-  projectId,
-}: {
-  projectId: string
-}) {
-  return prisma.projectOrganization.deleteMany({
+export async function removeProjectOrganization(
+  {
+    projectId,
+  }: {
+    projectId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.projectOrganization.deleteMany({
     where: { projectId },
   })
 }
 
-export async function deleteProject({ id }: { id: string }) {
-  return withChangelogTracking(async (tx) => {
-    const updatedProject = await tx.project.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    })
-    const deletedRepositories = await tx.projectRepository.deleteMany({
-      where: { projectId: id },
-    })
-    return { updatedProject, deletedRepositories }
-  })
-}
-
-export async function addTeamMembers({
-  projectId,
-  userIds,
-  role = "member",
-}: {
-  projectId: string
-  userIds: string[]
-  role?: TeamRole
-}) {
-  // There may be users who were previously soft deleted, so this is complex
-  return withChangelogTracking(async (tx) => {
-    const deletedMembers = await tx.userProjects.findMany({
-      where: { projectId, userId: { in: userIds } },
-    })
-    const updateMemberIds = deletedMembers.map((m) => m.userId)
-    const createMemberIds = userIds.filter(
-      (id) => !updateMemberIds.includes(id),
-    )
-
-    await tx.userProjects.updateMany({
-      where: { projectId, userId: { in: updateMemberIds } },
-      data: { deletedAt: null },
-    })
-
-    if (createMemberIds.length > 0) {
-      await tx.userProjects.createMany({
-        data: createMemberIds.map((userId) => ({ role, userId, projectId })),
+export async function deleteProject(
+  { id }: { id: string },
+  context: DbContext = {},
+) {
+  return withChangelogTracking(
+    async (tx) => {
+      const updatedProject = await tx.project.update({
+        where: { id },
+        data: { deletedAt: new Date() },
       })
-    }
-
-    await tx.project.update({
-      where: { id: projectId },
-      data: { lastMetadataUpdate: new Date() },
-    })
-  })
+      const deletedRepositories = await tx.projectRepository.deleteMany({
+        where: { projectId: id },
+      })
+      return { updatedProject, deletedRepositories }
+    },
+    undefined,
+    { db: context.db, session: context.session },
+  )
 }
 
-export async function updateMemberRole({
-  projectId,
-  userId,
-  role,
-}: {
-  projectId: string
-  userId: string
-  role: TeamRole
-}) {
-  return withChangelogTracking(async (tx) => {
-    await tx.userProjects.update({
-      where: { userId_projectId: { projectId, userId } },
-      data: { role },
-    })
+export async function addTeamMembers(
+  {
+    projectId,
+    userIds,
+    role = "member",
+  }: {
+    projectId: string
+    userIds: string[]
+    role?: TeamRole
+  },
+  context: DbContext = {},
+) {
+  // There may be users who were previously soft deleted, so this is complex
+  return withChangelogTracking(
+    async (tx) => {
+      const deletedMembers = await tx.userProjects.findMany({
+        where: { projectId, userId: { in: userIds } },
+      })
+      const updateMemberIds = deletedMembers.map((m) => m.userId)
+      const createMemberIds = userIds.filter(
+        (id) => !updateMemberIds.includes(id),
+      )
 
-    await tx.project.update({
-      where: { id: projectId },
-      data: { lastMetadataUpdate: new Date() },
-    })
-  })
+      await tx.userProjects.updateMany({
+        where: { projectId, userId: { in: updateMemberIds } },
+        data: { deletedAt: null },
+      })
+
+      if (createMemberIds.length > 0) {
+        await tx.userProjects.createMany({
+          data: createMemberIds.map((userId) => ({ role, userId, projectId })),
+        })
+      }
+
+      await tx.project.update({
+        where: { id: projectId },
+        data: { lastMetadataUpdate: new Date() },
+      })
+    },
+    undefined,
+    { db: context.db, session: context.session },
+  )
 }
 
-export async function removeTeamMember({
-  projectId,
-  userId,
-}: {
-  projectId: string
-  userId: string
-}) {
-  return withChangelogTracking(async (tx) => {
-    await tx.userProjects.update({
-      where: { userId_projectId: { projectId, userId } },
-      data: { role: "member", deletedAt: new Date() },
-    })
+export async function updateMemberRole(
+  {
+    projectId,
+    userId,
+    role,
+  }: {
+    projectId: string
+    userId: string
+    role: TeamRole
+  },
+  context: DbContext = {},
+) {
+  return withChangelogTracking(
+    async (tx) => {
+      await tx.userProjects.update({
+        where: { userId_projectId: { projectId, userId } },
+        data: { role },
+      })
 
-    await tx.project.update({
-      where: { id: projectId },
-      data: { lastMetadataUpdate: new Date() },
-    })
-  })
+      await tx.project.update({
+        where: { id: projectId },
+        data: { lastMetadataUpdate: new Date() },
+      })
+    },
+    undefined,
+    { db: context.db, session: context.session },
+  )
+}
+
+export async function removeTeamMember(
+  {
+    projectId,
+    userId,
+  }: {
+    projectId: string
+    userId: string
+  },
+  context: DbContext = {},
+) {
+  return withChangelogTracking(
+    async (tx) => {
+      await tx.userProjects.update({
+        where: { userId_projectId: { projectId, userId } },
+        data: { role: "member", deletedAt: new Date() },
+      })
+
+      await tx.project.update({
+        where: { id: projectId },
+        data: { lastMetadataUpdate: new Date() },
+      })
+    },
+    undefined,
+    { db: context.db, session: context.session },
+  )
 }
 
 export async function addProjectContracts(
   projectId: string,
   contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
+  db: PrismaClient = prisma,
 ) {
+  const client = db
   const normalizedContracts = contracts.map((contract) => ({
     ...contract,
     contractAddress: getAddress(contract.contractAddress),
@@ -1084,7 +1306,7 @@ export async function addProjectContracts(
   for (const chunk of lookupChunks) {
     if (chunk.length === 0) continue
 
-    const existing = await prisma.projectContract.findMany({
+    const existing = await client.projectContract.findMany({
       where: {
         OR: chunk.map(({ contractAddress, chainId }) => ({
           contractAddress,
@@ -1128,7 +1350,7 @@ export async function addProjectContracts(
     if (chunk.length === 0) continue
 
     try {
-      await prisma.projectContract.createMany({
+      await client.projectContract.createMany({
         data: chunk,
         skipDuplicates: true,
       })
@@ -1152,7 +1374,7 @@ export async function addProjectContracts(
     const fetchChunks = chunkArray(keysToFetch, 500)
     for (const chunk of fetchChunks) {
       if (chunk.length === 0) continue
-      const results = await prisma.projectContract.findMany({
+      const results = await client.projectContract.findMany({
         where: {
           projectId,
           OR: chunk.map(({ contractAddress, chainId }) => ({
@@ -1165,7 +1387,7 @@ export async function addProjectContracts(
     }
   }
 
-  await prisma.project.update({
+  await client.project.update({
     where: {
       id: projectId,
     },
@@ -1183,10 +1405,12 @@ export async function addProjectContracts(
 export async function upsertProjectContracts(
   projectId: string,
   contracts: Omit<Prisma.ProjectContractCreateManyInput, "project">[],
+  db: PrismaClient = prisma,
 ) {
+  const client = db
   const createOperations = contracts.map(async (contract) => {
     try {
-      const result = await prisma.projectContract.upsert({
+      const result = await client.projectContract.upsert({
         where: {
           contractAddress_chainId: {
             contractAddress: getAddress(contract.contractAddress),
@@ -1213,7 +1437,7 @@ export async function upsertProjectContracts(
     succeeded: results.filter((r) => r.success).map((r) => r.data),
     failed: results.filter((r) => !r.success).map((r) => r.data),
   }
-  await prisma.project.update({
+  await client.project.update({
     where: {
       id: projectId,
     },
@@ -1227,14 +1451,18 @@ export async function upsertProjectContracts(
   }
 }
 
-export async function addProjectContract({
-  projectId,
-  contract,
-}: {
-  projectId: string
-  contract: Omit<Prisma.ProjectContractCreateInput, "project">
-}) {
-  const contractCreate = prisma.projectContract.upsert({
+export async function addProjectContract(
+  {
+    projectId,
+    contract,
+  }: {
+    projectId: string
+    contract: Omit<Prisma.ProjectContractCreateInput, "project">
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
+  const contractCreate = client.projectContract.upsert({
     where: {
       contractAddress_chainId: {
         contractAddress: getAddress(contract.contractAddress),
@@ -1260,7 +1488,7 @@ export async function addProjectContract({
     },
   })
 
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = client.project.update({
     where: {
       id: projectId,
     },
@@ -1269,21 +1497,25 @@ export async function addProjectContract({
     },
   })
 
-  return prisma.$transaction([contractCreate, projectUpdate])
+  return client.$transaction([contractCreate, projectUpdate])
 }
 
-export async function updateProjectContract({
-  projectId,
-  contractAddress,
-  chainId,
-  updates,
-}: {
-  projectId: string
-  contractAddress: Address
-  chainId: number
-  updates: Prisma.ProjectContractUpdateInput
-}) {
-  const contractUpdate = prisma.projectContract.update({
+export async function updateProjectContract(
+  {
+    projectId,
+    contractAddress,
+    chainId,
+    updates,
+  }: {
+    projectId: string
+    contractAddress: Address
+    chainId: number
+    updates: Prisma.ProjectContractUpdateInput
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
+  const contractUpdate = client.projectContract.update({
     where: {
       projectId,
       contractAddress_chainId: {
@@ -1294,7 +1526,7 @@ export async function updateProjectContract({
     data: updates,
   })
 
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = client.project.update({
     where: {
       id: projectId,
     },
@@ -1303,21 +1535,23 @@ export async function updateProjectContract({
     },
   })
 
-  return prisma.$transaction([contractUpdate, projectUpdate])
+  return client.$transaction([contractUpdate, projectUpdate])
 }
 
 export async function removeProjectContractsByDeployer(
   projectId: string,
   deployer: string,
+  db: PrismaClient = prisma,
 ) {
-  const contractDelete = prisma.projectContract.deleteMany({
+  const client = db
+  const contractDelete = client.projectContract.deleteMany({
     where: {
       projectId: projectId,
       deployerAddress: getAddress(deployer),
     },
   })
 
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = client.project.update({
     where: {
       id: projectId,
     },
@@ -1326,19 +1560,23 @@ export async function removeProjectContractsByDeployer(
     },
   })
 
-  return prisma.$transaction([contractDelete, projectUpdate])
+  return client.$transaction([contractDelete, projectUpdate])
 }
 
-export async function removeProjectContract({
-  projectId,
-  address,
-  chainId,
-}: {
-  projectId: string
-  address: string
-  chainId: number
-}) {
-  const contractDelete = prisma.projectContract.delete({
+export async function removeProjectContract(
+  {
+    projectId,
+    address,
+    chainId,
+  }: {
+    projectId: string
+    address: string
+    chainId: number
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
+  const contractDelete = client.projectContract.delete({
     where: {
       projectId,
       contractAddress_chainId: {
@@ -1348,7 +1586,7 @@ export async function removeProjectContract({
     },
   })
 
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = client.project.update({
     where: {
       id: projectId,
     },
@@ -1357,17 +1595,21 @@ export async function removeProjectContract({
     },
   })
 
-  return prisma.$transaction([contractDelete, projectUpdate])
+  return client.$transaction([contractDelete, projectUpdate])
 }
 
-export async function addProjectRepository({
-  projectId,
-  repo,
-}: {
-  projectId: string
-  repo: Omit<Prisma.ProjectRepositoryCreateInput, "project">
-}) {
-  const repoCreate = prisma.projectRepository.upsert({
+export async function addProjectRepository(
+  {
+    projectId,
+    repo,
+  }: {
+    projectId: string
+    repo: Omit<Prisma.ProjectRepositoryCreateInput, "project">
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
+  const repoCreate = client.projectRepository.upsert({
     where: {
       url: repo.url,
       projectId,
@@ -1390,7 +1632,7 @@ export async function addProjectRepository({
     },
   })
 
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = client.project.update({
     where: {
       id: projectId,
     },
@@ -1399,7 +1641,7 @@ export async function addProjectRepository({
     },
   })
 
-  const [repository, project] = await prisma.$transaction([
+  const [repository] = await client.$transaction([
     repoCreate,
     projectUpdate,
   ])
@@ -1407,21 +1649,25 @@ export async function addProjectRepository({
   return repository
 }
 
-export async function removeProjectRepository({
-  projectId,
-  repositoryUrl,
-}: {
-  projectId: string
-  repositoryUrl: string
-}) {
-  const repoDelete = prisma.projectRepository.delete({
+export async function removeProjectRepository(
+  {
+    projectId,
+    repositoryUrl,
+  }: {
+    projectId: string
+    repositoryUrl: string
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
+  const repoDelete = client.projectRepository.delete({
     where: {
       projectId: projectId,
       url: repositoryUrl,
     },
   })
 
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = client.project.update({
     where: {
       id: projectId,
     },
@@ -1430,19 +1676,23 @@ export async function removeProjectRepository({
     },
   })
 
-  return prisma.$transaction([repoDelete, projectUpdate])
+  return client.$transaction([repoDelete, projectUpdate])
 }
 
-export async function updateProjectRepository({
-  projectId,
-  url,
-  updates,
-}: {
-  projectId: string
-  url: string
-  updates: Prisma.ProjectRepositoryUpdateInput
-}) {
-  const repoUpdate = prisma.projectRepository.update({
+export async function updateProjectRepository(
+  {
+    projectId,
+    url,
+    updates,
+  }: {
+    projectId: string
+    url: string
+    updates: Prisma.ProjectRepositoryUpdateInput
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
+  const repoUpdate = client.projectRepository.update({
     where: {
       projectId,
       url,
@@ -1450,7 +1700,7 @@ export async function updateProjectRepository({
     data: updates,
   })
 
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = client.project.update({
     where: {
       id: projectId,
     },
@@ -1459,34 +1709,38 @@ export async function updateProjectRepository({
     },
   })
 
-  return prisma.$transaction([repoUpdate, projectUpdate])
+  return client.$transaction([repoUpdate, projectUpdate])
 }
 
-export async function updateProjectRepositories({
-  projectId,
-  type,
-  repositories,
-}: {
-  projectId: string
-  type: string
-  repositories: Prisma.ProjectRepositoryCreateManyInput[]
-}) {
+export async function updateProjectRepositories(
+  {
+    projectId,
+    type,
+    repositories,
+  }: {
+    projectId: string
+    type: string
+    repositories: Prisma.ProjectRepositoryCreateManyInput[]
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
   // Delete the existing repositories and replace it
-  const remove = prisma.projectRepository.deleteMany({
+  const remove = client.projectRepository.deleteMany({
     where: {
       projectId,
       type,
     },
   })
 
-  const create = prisma.projectRepository.createMany({
+  const create = client.projectRepository.createMany({
     data: repositories.map((r) => ({
       ...r,
       projectId,
     })),
   })
 
-  const update = prisma.project.update({
+  const update = client.project.update({
     where: {
       id: projectId,
     },
@@ -1495,31 +1749,35 @@ export async function updateProjectRepositories({
     },
   })
 
-  return prisma.$transaction([remove, create, update])
+  return client.$transaction([remove, create, update])
 }
 
-export async function updateProjectLinks({
-  projectId,
-  links,
-}: {
-  projectId: string
-  links: Prisma.ProjectLinksCreateManyInput[]
-}) {
+export async function updateProjectLinks(
+  {
+    projectId,
+    links,
+  }: {
+    projectId: string
+    links: Prisma.ProjectLinksCreateManyInput[]
+  },
+  db: PrismaClient = prisma,
+) {
+  const client = db
   // Delete the existing links and replace it
-  const remove = prisma.projectLinks.deleteMany({
+  const remove = client.projectLinks.deleteMany({
     where: {
       projectId,
     },
   })
 
-  const create = prisma.projectLinks.createMany({
+  const create = client.projectLinks.createMany({
     data: links.map((l) => ({
       ...l,
       projectId,
     })),
   })
 
-  const update = prisma.project.update({
+  const update = client.project.update({
     where: {
       id: projectId,
     },
@@ -1528,24 +1786,27 @@ export async function updateProjectLinks({
     },
   })
 
-  return await prisma.$transaction([remove, create, update])
+  return client.$transaction([remove, create, update])
 }
 
-export async function updateProjectFunding({
-  projectId,
-  funding,
-}: {
-  projectId: string
-  funding: Prisma.ProjectFundingCreateManyInput[]
-}) {
+export async function updateProjectFunding(
+  {
+    projectId,
+    funding,
+  }: {
+    projectId: string
+    funding: Prisma.ProjectFundingCreateManyInput[]
+  },
+  db: PrismaClient = prisma,
+) {
   // Delete the existing funding and replace it
-  const remove = prisma.projectFunding.deleteMany({
+  const remove = db.projectFunding.deleteMany({
     where: {
       projectId,
     },
   })
 
-  const create = prisma.projectFunding.createMany({
+  const create = db.projectFunding.createMany({
     data: funding.map((f) => ({
       ...f,
       projectId,
@@ -1553,7 +1814,7 @@ export async function updateProjectFunding({
   })
 
   // Mark that the project was funded
-  const update = prisma.project.update({
+  const update = db.project.update({
     where: {
       id: projectId,
     },
@@ -1563,19 +1824,22 @@ export async function updateProjectFunding({
     },
   })
 
-  return prisma.$transaction([remove, create, update])
+  return db.$transaction([remove, create, update])
 }
 
-export async function addProjectSnapshot({
-  projectId,
-  ipfsHash,
-  attestationId,
-}: {
-  projectId: string
-  ipfsHash: string
-  attestationId: string
-}) {
-  return prisma.projectSnapshot.create({
+export async function addProjectSnapshot(
+  {
+    projectId,
+    ipfsHash,
+    attestationId,
+  }: {
+    projectId: string
+    ipfsHash: string
+    attestationId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.projectSnapshot.create({
     data: {
       ipfsHash,
       attestationId,
@@ -1599,15 +1863,19 @@ export async function addPublishedContracts(
     chainId: number
     projectId: string
   }[],
+  db: PrismaClient = prisma,
 ) {
-  return prisma.publishedContract.createMany({
+  return db.publishedContract.createMany({
     data: contracts,
     skipDuplicates: true,
   })
 }
 
-export async function revokePublishedContracts(attestationIds: string[]) {
-  return prisma.publishedContract.updateMany({
+export async function revokePublishedContracts(
+  attestationIds: string[],
+  db: PrismaClient = prisma,
+) {
+  return db.publishedContract.updateMany({
     where: {
       id: {
         in: attestationIds,
@@ -1619,52 +1887,62 @@ export async function revokePublishedContracts(attestationIds: string[]) {
   })
 }
 
-export async function createApplication({
-  round,
-  projectId,
-  attestationId,
-  categoryId,
-  impactStatement,
-  projectDescriptionOptions,
-}: {
-  round: number
-  projectId: string
-  attestationId: string
-  categoryId: string
-  projectDescriptionOptions: string[]
-  impactStatement: Record<string, string>
-}) {
-  return withChangelogTracking(async (tx) => {
-    return tx.application.create({
-      data: {
-        attestationId,
-        projectDescriptionOptions: projectDescriptionOptions ?? [],
-        project: { connect: { id: projectId } },
-        round: { connect: { id: round.toString() } },
-        category: categoryId ? { connect: { id: categoryId } } : undefined,
-        impactStatementAnswer: {
-          createMany: {
-            data: impactStatement
-              ? Object.entries(impactStatement).map(
-                  ([impactStatementId, answer]) => ({
-                    impactStatementId,
-                    answer,
-                  }),
-                )
-              : [],
+export async function createApplication(
+  {
+    round,
+    projectId,
+    attestationId,
+    categoryId,
+    impactStatement,
+    projectDescriptionOptions,
+  }: {
+    round: number
+    projectId: string
+    attestationId: string
+    categoryId: string
+    projectDescriptionOptions: string[]
+    impactStatement: Record<string, string>
+  },
+  context?: { db?: PrismaClient; session?: Session | null },
+) {
+  return withChangelogTracking(
+    async (tx) => {
+      return tx.application.create({
+        data: {
+          attestationId,
+          projectDescriptionOptions: projectDescriptionOptions ?? [],
+          project: { connect: { id: projectId } },
+          round: { connect: { id: round.toString() } },
+          category: categoryId ? { connect: { id: categoryId } } : undefined,
+          impactStatementAnswer: {
+            createMany: {
+              data: impactStatement
+                ? Object.entries(impactStatement).map(
+                    ([impactStatementId, answer]) => ({
+                      impactStatementId,
+                      answer,
+                    }),
+                  )
+                : [],
+            },
           },
         },
-      },
-    })
-  })
+      })
+    },
+    undefined,
+    { db: context?.db, session: context?.session },
+  )
 }
 
-async function getAllApplicationsForRoundFn({
-  roundId,
-}: {
-  roundId: string
-}): Promise<ApplicationWithDetails[]> {
-  const applications = await prisma.application.findMany({
+async function getAllApplicationsForRoundFn(
+  {
+    roundId,
+  }: {
+    roundId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<ApplicationWithDetails[]> {
+  const applications = await db.application.findMany({
     where: {
       roundId,
     },
@@ -1682,7 +1960,17 @@ async function getAllApplicationsForRoundFn({
   return applications
 }
 
-export const getAllApplicationsForRound = cache(getAllApplicationsForRoundFn)
+export const getAllApplicationsForRound = cache(
+  (params: { roundId: string }) =>
+    getAllApplicationsForRoundFn(params, prisma),
+)
+
+export async function getAllApplicationsForRoundWithClient(
+  params: { roundId: string },
+  db: PrismaClient = prisma,
+) {
+  return getAllApplicationsForRoundFn(params, db)
+}
 
 export async function updateAllForProject(
   project: ProjectMetadata & {
@@ -1695,9 +1983,10 @@ export async function updateAllForProject(
     }[]
   },
   projectId: string,
+  db: PrismaClient = prisma,
 ) {
   // Update project
-  const projectUpdate = prisma.project.update({
+  const projectUpdate = db.project.update({
     where: {
       id: projectId,
     },
@@ -1716,13 +2005,13 @@ export async function updateAllForProject(
     },
   })
 
-  const cleanupContracts = prisma.projectContract.deleteMany({
+  const cleanupContracts = db.projectContract.deleteMany({
     where: {
       projectId,
     },
   })
 
-  const contractsCreate = prisma.projectContract.createMany({
+  const contractsCreate = db.projectContract.createMany({
     data: project.contracts.map((contract) => ({
       contractAddress: contract.address,
       deploymentHash: contract.deploymentTxHash,
@@ -1733,13 +2022,13 @@ export async function updateAllForProject(
     })),
   })
 
-  const cleanupRepositories = prisma.projectRepository.deleteMany({
+  const cleanupRepositories = db.projectRepository.deleteMany({
     where: {
       projectId,
     },
   })
 
-  const createRepositories = prisma.projectRepository.createMany({
+  const createRepositories = db.projectRepository.createMany({
     data: [
       ...project.github.map((repo) => ({
         url: repo.url,
@@ -1754,13 +2043,13 @@ export async function updateAllForProject(
     ],
   })
 
-  const cleanupFunding = prisma.projectFunding.deleteMany({
+  const cleanupFunding = db.projectFunding.deleteMany({
     where: {
       projectId,
     },
   })
 
-  const createFunding = prisma.projectFunding.createMany({
+  const createFunding = db.projectFunding.createMany({
     data: [
       ...project.grantsAndFunding.ventureFunding.map((funding) => ({
         amount: funding.amount,
@@ -1786,7 +2075,7 @@ export async function updateAllForProject(
     ],
   })
 
-  return prisma.$transaction([
+  return db.$transaction([
     projectUpdate,
     cleanupContracts,
     contractsCreate,
@@ -1797,15 +2086,18 @@ export async function updateAllForProject(
   ])
 }
 
-export async function createProjectKycTeam({
-  projectId,
-  walletAddress,
-}: {
-  projectId: string
-  walletAddress: string
-}) {
+export async function createProjectKycTeam(
+  {
+    projectId,
+    walletAddress,
+  }: {
+    projectId: string
+    walletAddress: string
+  },
+  db: PrismaClient = prisma,
+) {
   try {
-    const kycTeam = await prisma.$transaction(async (tx) => {
+    const kycTeam = await db.$transaction(async (tx) => {
       // Check if project already has a kyc team
       const project = await tx.project.findUnique({
         where: {
@@ -1871,12 +2163,15 @@ export async function createProjectKycTeam({
   }
 }
 
-export async function getKycTeamForProject({
-  projectId,
-}: {
-  projectId: string
-}) {
-  const projectKycTeam = await prisma.project.findFirst({
+export async function getKycTeamForProject(
+  {
+    projectId,
+  }: {
+    projectId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  const projectKycTeam = await db.project.findFirst({
     where: {
       id: projectId,
     },
@@ -1919,35 +2214,43 @@ export async function getKycTeamForProject({
   return projectKycTeam ?? undefined
 }
 
-export async function addKYCTeamMembers({
-  kycTeamId,
-  individuals,
-  businesses,
-}: {
-  kycTeamId: string
-  individuals: {
-    firstName: string
-    lastName: string
-    email: string
-  }[]
-  businesses: {
-    firstName: string
-    lastName: string
-    email: string
-    companyName: string
-  }[]
-}) {
+export async function addKYCTeamMembers(
+  {
+    kycTeamId,
+    individuals,
+    businesses,
+  }: {
+    kycTeamId: string
+    individuals: {
+      firstName: string
+      lastName: string
+      email: string
+    }[]
+    businesses: {
+      firstName: string
+      lastName: string
+      email: string
+      companyName: string
+    }[]
+  },
+  db: PrismaClient = prisma,
+) {
   const individualEmails = individuals.map((i) => i.email)
   const businessControllerEmails = businesses.map((b) => b.email)
 
-  const [existingUsers, existingEntities, currentUserTeam, currentEntityTeam] = await Promise.all([
-    prisma.kYCUser.findMany({
+  const [
+    existingUsers,
+    existingEntities,
+    currentUserTeam,
+    currentEntityTeam,
+  ] = await Promise.all([
+    db.kYCUser.findMany({
       where: { email: { in: individualEmails } },
       include: {
         KYCUserTeams: true,
       },
     }),
-    prisma.kYCLegalEntity.findMany({
+    db.kYCLegalEntity.findMany({
       where: {
         kycLegalEntityController: {
           email: { in: businessControllerEmails },
@@ -1958,10 +2261,10 @@ export async function addKYCTeamMembers({
         teamLinks: true,
       },
     }),
-    prisma.kYCUserTeams.findMany({
+    db.kYCUserTeams.findMany({
       where: { kycTeamId, team: { deletedAt: null } },
     }),
-    prisma.kYCLegalEntityTeams.findMany({
+    db.kYCLegalEntityTeams.findMany({
       where: { kycTeamId },
     }),
   ])
@@ -2012,7 +2315,7 @@ export async function addKYCTeamMembers({
     .filter((e) => e.teamLinks.every((t) => t.kycTeamId !== kycTeamId))
     .filter((e) => !newBusinesses.some((b) => b.email === e.kycLegalEntityController?.email))
 
-  await prisma.$transaction(async (tx) => {
+  await db.$transaction(async (tx) => {
     // Create new individual KYC users
     const createdIndividuals = await tx.kYCUser.createManyAndReturn({
       data: newIndividuals.map((i) => ({
@@ -2093,15 +2396,18 @@ export async function addKYCTeamMembers({
   })
 }
 
-export async function createProjectKycTeams({
-  projectIds,
-  kycTeamId,
-}: {
-  projectIds: string[]
-  kycTeamId: string
-}) {
+export async function createProjectKycTeams(
+  {
+    projectIds,
+    kycTeamId,
+  }: {
+    projectIds: string[]
+    kycTeamId: string
+  },
+  db: PrismaClient = prisma,
+) {
   // Check for projects with active reward streams before reassignment
-  const projectsToCheck = await prisma.project.findMany({
+  const projectsToCheck = await db.project.findMany({
     where: {
       id: { in: projectIds },
     },
@@ -2130,7 +2436,7 @@ export async function createProjectKycTeams({
     )
   }
 
-  const updates = await prisma.project.updateMany({
+  const updates = await db.project.updateMany({
     where: {
       id: { in: projectIds },
     },
@@ -2142,15 +2448,18 @@ export async function createProjectKycTeams({
   return updates
 }
 
-export async function detachProjectsFromKycTeam({
-  projectIds,
-  kycTeamId,
-}: {
-  projectIds: string[]
-  kycTeamId: string
-}) {
+export async function detachProjectsFromKycTeam(
+  {
+    projectIds,
+    kycTeamId,
+  }: {
+    projectIds: string[]
+    kycTeamId: string
+  },
+  db: PrismaClient = prisma,
+) {
   // Check for projects with active reward streams before detaching
-  const projectsToCheck = await prisma.project.findMany({
+  const projectsToCheck = await db.project.findMany({
     where: {
       id: { in: projectIds },
     },
@@ -2180,7 +2489,7 @@ export async function detachProjectsFromKycTeam({
   }
 
   // Just detach the projects from the KYC team, don't delete the team
-  const updates = await prisma.project.updateMany({
+  const updates = await db.project.updateMany({
     where: {
       id: { in: projectIds },
       kycTeamId: kycTeamId, // Ensure we only detach projects that are actually assigned to this team
@@ -2193,15 +2502,18 @@ export async function detachProjectsFromKycTeam({
   return updates
 }
 
-export async function deleteProjectKycTeams({
-  projectIds,
-  kycTeamId,
-}: {
-  projectIds: string[]
-  kycTeamId: string
-}) {
+export async function deleteProjectKycTeams(
+  {
+    projectIds,
+    kycTeamId,
+  }: {
+    projectIds: string[]
+    kycTeamId: string
+  },
+  db: PrismaClient = prisma,
+) {
   // Check for projects with active reward streams before removal
-  const projectsToCheck = await prisma.project.findMany({
+  const projectsToCheck = await db.project.findMany({
     where: {
       id: { in: projectIds },
     },
@@ -2230,7 +2542,7 @@ export async function deleteProjectKycTeams({
     )
   }
 
-  return await prisma.$transaction(async (tx) => {
+  return await db.$transaction(async (tx) => {
     await tx.kYCTeam.update({
       where: {
         id: kycTeamId,
@@ -2250,20 +2562,26 @@ export async function deleteProjectKycTeams({
   })
 }
 
-export async function getProjectsForKycTeam({
-  kycTeamId,
-}: {
-  kycTeamId: string
-}) {
-  return prisma.project.findMany({
+export async function getProjectsForKycTeam(
+  {
+    kycTeamId,
+  }: {
+    kycTeamId: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.project.findMany({
     where: {
       kycTeamId,
     },
   })
 }
 
-export const getPublicProject = cache(async (projectId: string) => {
-  return prisma.project.findFirst({
+async function getPublicProjectFn(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.project.findFirst({
     where: { id: projectId },
     include: {
       applications: {
@@ -2300,10 +2618,24 @@ export const getPublicProject = cache(async (projectId: string) => {
       },
     },
   })
-})
+}
 
-export const getProjectMetadata = cache(async (projectId: string) => {
-  return prisma.project.findFirst({
+export const getPublicProject = cache((projectId: string) =>
+  getPublicProjectFn(projectId),
+)
+
+export async function getPublicProjectWithClient(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return getPublicProjectFn(projectId, db)
+}
+
+async function getProjectMetadataFn(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.project.findFirst({
     where: { id: projectId, snapshots: { some: {} } },
     select: {
       id: true,
@@ -2347,10 +2679,24 @@ export const getProjectMetadata = cache(async (projectId: string) => {
       },
     },
   })
-})
+}
 
-export async function getProjectsOSO(projectId: string) {
-  return await prisma.projectOSO.findFirst({
+export const getProjectMetadata = cache((projectId: string) =>
+  getProjectMetadataFn(projectId),
+)
+
+export async function getProjectMetadataWithClient(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return getProjectMetadataFn(projectId, db)
+}
+
+export async function getProjectsOSO(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return await db.projectOSO.findFirst({
     where: {
       projectId,
     },
@@ -2361,9 +2707,12 @@ export async function getProjectsOSO(projectId: string) {
 }
 
 // Combined OSO data query
-export async function getProjectOSOData(projectId: string) {
+export async function getProjectOSOData(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
   const [metrics, rewards] = await Promise.all([
-    prisma.projectOSOMetrics.findMany({
+    db.projectOSOMetrics.findMany({
       where: {
         projectId,
         OR: [
@@ -2391,7 +2740,7 @@ export async function getProjectOSOData(projectId: string) {
         tranche: true,
       },
     }),
-    prisma.recurringReward.findMany({
+    db.recurringReward.findMany({
       where: {
         projectId,
         roundId: {
@@ -2418,31 +2767,46 @@ export async function getProjectOSOData(projectId: string) {
 }
 
 // Updated eligibility queries
-export async function getProjectEligibility(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getProjectEligibility(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter(
     (e) => e.metric.startsWith("IS_") || e.metric === "HAS_DEFILLAMA_ADAPTER",
   )
 }
 
-export async function getDevToolingEligibility(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getDevToolingEligibility(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter((e) => e.metric === "IS_DEV_TOOLING_ELIGIBLE")
 }
 
-export async function getOnchainBuilderEligibility(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getOnchainBuilderEligibility(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter((e) => e.metric === "IS_ONCHAIN_BUILDER_ELIGIBLE")
 }
 
-export async function getDefillamaAdapter(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getDefillamaAdapter(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter((e) => e.metric === "HAS_DEFILLAMA_ADAPTER")
 }
 
 // Updated metrics queries
-export async function getProjectMetrics(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getProjectMetrics(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter((m) =>
     ["ACTIVE_ADDRESSES_COUNT", "GAS_FEES", "TRANSACTION_COUNT"].includes(
       m.metric,
@@ -2450,39 +2814,60 @@ export async function getProjectMetrics(projectId: string) {
   )
 }
 
-export async function getProjectActiveAddressesCount(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getProjectActiveAddressesCount(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter((m) => m.metric === "ACTIVE_ADDRESSES_COUNT")
 }
 
-export async function getProjectGasFees(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getProjectGasFees(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter((m) => m.metric === "GAS_FEES")
 }
 
-export async function getProjectTransactions(projectId: string) {
-  const { metrics } = await getProjectOSOData(projectId)
+export async function getProjectTransactions(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { metrics } = await getProjectOSOData(projectId, db)
   return metrics.filter((m) => m.metric === "TRANSACTION_COUNT")
 }
 
 // Updated rewards queries
-export async function getProjectRewards(projectId: string) {
-  const { rewards } = await getProjectOSOData(projectId)
+export async function getProjectRewards(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { rewards } = await getProjectOSOData(projectId, db)
   return rewards
 }
 
-export async function getOnchainBuilderRecurringReward(projectId: string) {
-  const { rewards } = await getProjectOSOData(projectId)
+export async function getOnchainBuilderRecurringReward(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { rewards } = await getProjectOSOData(projectId, db)
   return rewards.filter((r) => r.roundId === "8")
 }
 
-export async function getDevToolingRecurringReward(projectId: string) {
-  const { rewards } = await getProjectOSOData(projectId)
+export async function getDevToolingRecurringReward(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const { rewards } = await getProjectOSOData(projectId, db)
   return rewards.filter((r) => r.roundId === "7")
 }
 
-export async function getTrustedDevelopersCountFromOSO(projectId: string) {
-  const result = await prisma.projectOSOMetrics.findMany({
+export async function getTrustedDevelopersCountFromOSO(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const result = await db.projectOSOMetrics.findMany({
     where: { projectId, metric: "DEVELOPER_CONNECTION_COUNT" },
     select: {
       value: true,
@@ -2493,9 +2878,12 @@ export async function getTrustedDevelopersCountFromOSO(projectId: string) {
   return result
 }
 
-export async function getTopProjectsFromOSO(projectId: string) {
+export async function getTopProjectsFromOSO(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
   const projectOSOAtlasRelatedProjects =
-    await prisma.projectOSOAtlasRelatedProjects.findMany({
+    await db.projectOSOAtlasRelatedProjects.findMany({
       where: {
         projectId,
       },
@@ -2515,12 +2903,15 @@ export async function getTopProjectsFromOSO(projectId: string) {
   return projectOSOAtlasRelatedProjects
 }
 
-export async function getProjectOSOByIds({
-  projectIds,
-}: {
-  projectIds: string[]
-}) {
-  return await prisma.projectOSO.findMany({
+export async function getProjectOSOByIds(
+  {
+    projectIds,
+  }: {
+    projectIds: string[]
+  },
+  db: PrismaClient = prisma,
+) {
+  return await db.projectOSO.findMany({
     where: {
       projectId: {
         in: projectIds,
@@ -2536,8 +2927,9 @@ export async function getProjectOSOByIds({
 export async function createOSOProjects(
   osoProjects: Oso_ProjectsV1[],
   collections: Oso_ProjectsByCollectionV1[],
+  db: PrismaClient = prisma,
 ) {
-  return await prisma.projectOSO.createManyAndReturn({
+  return await db.projectOSO.createManyAndReturn({
     data: osoProjects.map((project) => {
       const funded = collections.find(
         (p) => p.projectName === project.projectName,
@@ -2555,8 +2947,8 @@ export async function createOSOProjects(
   })
 }
 
-export async function getOSOMappedProjectIds() {
-  return await prisma.$transaction(async (tx) => {
+export async function getOSOMappedProjectIds(db: PrismaClient = prisma) {
+  return await db.$transaction(async (tx) => {
     const existingOSO = await tx.projectOSO.findMany({
       select: { projectId: true },
     })
@@ -2572,8 +2964,11 @@ export async function getOSOMappedProjectIds() {
   })
 }
 
-export async function getProjectOSORelatedProjects(projectId: string) {
-  return await prisma.projectOSORelatedProjects.findMany({
+export async function getProjectOSORelatedProjects(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return await db.projectOSORelatedProjects.findMany({
     where: { projectId },
     select: {
       osoId: true,
@@ -2583,22 +2978,32 @@ export async function getProjectOSORelatedProjects(projectId: string) {
   })
 }
 
-export async function getProjectTvl(projectId: string) {
-  return await prisma.projectOSOMetrics.findMany({
+export async function getProjectTvl(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return await db.projectOSOMetrics.findMany({
     where: { projectId, metric: "TVL" },
     select: { value: true, tranche: true },
   })
 }
 
-export async function getProjectGasConsumption(projectId: string) {
-  return await prisma.projectOSOMetrics.findMany({
+export async function getProjectGasConsumption(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return await db.projectOSOMetrics.findMany({
     where: { projectId, metric: "DOWNSTREAM_GAS" },
     select: { value: true, tranche: true },
   })
 }
 
-export async function blacklistProject(projectId: string, reason?: string) {
-  return prisma.projectBlacklist.upsert({
+export async function blacklistProject(
+  projectId: string,
+  reason?: string,
+  db: PrismaClient = prisma,
+) {
+  return db.projectBlacklist.upsert({
     where: { projectId },
     update: {
       reason,
@@ -2611,8 +3016,11 @@ export async function blacklistProject(projectId: string, reason?: string) {
   })
 }
 
-export async function isProjectBlacklisted(projectId: string) {
-  const blacklistEntry = await prisma.projectBlacklist.findUnique({
+export async function isProjectBlacklisted(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  const blacklistEntry = await db.projectBlacklist.findUnique({
     where: { projectId },
   })
   return !!blacklistEntry
@@ -2621,8 +3029,9 @@ export async function isProjectBlacklisted(projectId: string) {
 export async function getEarliestRewardTranche(
   projectId: string,
   roundId: string,
+  db: PrismaClient = prisma,
 ): Promise<number | null> {
-  const earliestReward = await prisma.recurringReward.findFirst({
+  const earliestReward = await db.recurringReward.findFirst({
     where: {
       projectId,
       roundId,

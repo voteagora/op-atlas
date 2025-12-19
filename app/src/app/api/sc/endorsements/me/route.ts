@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { auth } from "@/auth"
-import { prisma } from "@/db/client"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import {
   getEndorsedNomineeIdsForAddressesByRole,
   hasEndorsed,
 } from "@/db/endorsements"
 
 export async function GET(req: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) return new Response("Unauthorized", { status: 401 })
+  const { db, userId } = await getImpersonationContext()
+  if (!userId) return new Response("Unauthorized", { status: 401 })
   const { searchParams } = new URL(req.url)
   const context = searchParams.get("context")
   const nomineeId = Number(searchParams.get("nomineeId"))
   const roleId = Number(searchParams.get("roleId"))
   if (!context) return new Response("Bad Request", { status: 400 })
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+  const user = await db.user.findUnique({
+    where: { id: userId },
     include: { addresses: true },
   })
   const addresses = Array.from(
@@ -29,11 +28,14 @@ export async function GET(req: NextRequest) {
     let endorsed = false
     for (const addr of addresses) {
       if (
-        await hasEndorsed({
-          context,
-          nomineeApplicationId: nomineeId,
-          endorserAddress: addr,
-        })
+        await hasEndorsed(
+          {
+            context,
+            nomineeApplicationId: nomineeId,
+            endorserAddress: addr,
+          },
+          db,
+        )
       ) {
         endorsed = true
         break
@@ -44,11 +46,14 @@ export async function GET(req: NextRequest) {
 
   // If roleId is provided, return all nominee ids endorsed by this user for the role
   if (Number.isFinite(roleId) && roleId > 0) {
-    const endorsedIds = await getEndorsedNomineeIdsForAddressesByRole({
-      context,
-      roleId,
-      addresses,
-    })
+    const endorsedIds = await getEndorsedNomineeIdsForAddressesByRole(
+      {
+        context,
+        roleId,
+        addresses,
+      },
+      db,
+    )
     return NextResponse.json({ endorsedIds })
   }
 

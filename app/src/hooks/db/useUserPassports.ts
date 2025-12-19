@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getUserPassports } from "@/db/users"
+import { fetchUserPassports } from "@/lib/actions/hookFetchers"
 import { UserPassport } from "@prisma/client"
 
 export const USER_PASSPORT_QUERY_KEY = "userPassport"
@@ -21,7 +21,7 @@ export const useUserPassports = ({
         queryKey: [USER_PASSPORT_QUERY_KEY, id],
         queryFn: async () => {
             if (!id) throw new Error("User ID is required")
-            return await getUserPassports(id)
+            return await fetchUserPassports(id)
         },
         enabled: isEnabled,
     })

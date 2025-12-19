@@ -8,8 +8,10 @@ import {
 } from "@ethereum-attestation-service/eas-sdk"
 
 import { ethers, Wallet } from "ethers"
+import { randomBytes } from "crypto"
 
 import { OFFCHAIN_VOTE_SCHEMA_ID } from "@/lib/eas/clientSafe"
+import { withImpersonationProtection } from "@/lib/impersonationContext"
 
 const ENTITY_SCHEMA_ID =
   process.env.NEXT_PUBLIC_ENV === "dev"
@@ -80,6 +82,10 @@ const provider = new ethers.AlchemyProvider(
 const signer = new Wallet(EAS_SIGNER_PRIVATE_KEY, provider)
 
 eas.connect(signer)
+
+function mockUID(): string {
+  return "0x" + randomBytes(32).toString("hex")
+}
 
 async function createAttestation(
   schemaId: string,
@@ -217,15 +223,22 @@ export async function createEntityAttestation({
   farcasterId: number
   type: "project" | "organization"
 }) {
-  const data = entitySchema.encodeData([
-    { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "type", value: type, type: "string" },
-  ])
+  return withImpersonationProtection(
+    "EAS",
+    `Create entity attestation (${type})`,
+    async () => {
+      const data = entitySchema.encodeData([
+        { name: "farcasterID", value: farcasterId, type: "uint256" },
+        { name: "type", value: type, type: "string" },
+      ])
 
-  const attestationId = await createAttestation(ENTITY_SCHEMA_ID, data)
-  console.info("Created entity attestation:", attestationId)
+      const attestationId = await createAttestation(ENTITY_SCHEMA_ID, data)
+      console.info("Created entity attestation:", attestationId)
 
-  return attestationId
+      return attestationId
+    },
+    mockUID(),
+  )
 }
 
 export async function createProjectMetadataAttestation({
@@ -243,24 +256,31 @@ export async function createProjectMetadataAttestation({
   ipfsUrl: string
   refUID?: string
 }) {
-  const attestation = buildProjectMetadataAttestation({
-    farcasterId,
-    projectId,
-    name,
-    category,
-    ipfsUrl,
-    refUID,
-  })
+  return withImpersonationProtection(
+    "EAS",
+    `Create project metadata attestation (${projectId})`,
+    async () => {
+      const attestation = buildProjectMetadataAttestation({
+        farcasterId,
+        projectId,
+        name,
+        category,
+        ipfsUrl,
+        refUID,
+      })
 
-  const attestationId = await createAttestation(
-    attestation.schema,
-    attestation.data,
-    attestation.refUID,
+      const attestationId = await createAttestation(
+        attestation.schema,
+        attestation.data,
+        attestation.refUID,
+      )
+
+      console.info("Created project metadata attestation:", attestationId)
+
+      return attestationId
+    },
+    mockUID(),
   )
-
-  console.info("Created project metadata attestation:", attestationId)
-
-  return attestationId
 }
 
 export async function createOrganizationMetadataAttestation({
@@ -276,24 +296,31 @@ export async function createOrganizationMetadataAttestation({
   projectIds: string[]
   ipfsUrl: string
 }) {
-  const data = organizationMetadataSchema.encodeData([
-    { name: "refUID", value: organizationId, type: "bytes32" },
-    { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "name", value: name, type: "string" },
-    { name: "parentOrgUID", value: "", type: "bytes32" },
-    { name: "projects", value: projectIds, type: "bytes32[]" },
-    { name: "metadataType", value: "0", type: "uint8" },
-    { name: "metadataUrl", value: ipfsUrl, type: "string" },
-  ])
+  return withImpersonationProtection(
+    "EAS",
+    `Create organization metadata attestation (${organizationId})`,
+    async () => {
+      const data = organizationMetadataSchema.encodeData([
+        { name: "refUID", value: organizationId, type: "bytes32" },
+        { name: "farcasterID", value: farcasterId, type: "uint256" },
+        { name: "name", value: name, type: "string" },
+        { name: "parentOrgUID", value: "", type: "bytes32" },
+        { name: "projects", value: projectIds, type: "bytes32[]" },
+        { name: "metadataType", value: "0", type: "uint8" },
+        { name: "metadataUrl", value: ipfsUrl, type: "string" },
+      ])
 
-  const attestationId = await createAttestation(
-    ORGANIZATION_METADATA_SCHEMA_ID,
-    data,
-    organizationId,
+      const attestationId = await createAttestation(
+        ORGANIZATION_METADATA_SCHEMA_ID,
+        data,
+        organizationId,
+      )
+      console.info("Created organization metadata attestation:", attestationId)
+
+      return attestationId
+    },
+    mockUID(),
   )
-  console.info("Created organization metadata attestation:", attestationId)
-
-  return attestationId
 }
 
 export async function createApplicationAttestation({
@@ -309,15 +336,22 @@ export async function createApplicationAttestation({
   snapshotRef: string
   ipfsUrl: string
 }) {
-  const data = applicationSchema.encodeData([
-    { name: "round", value: round, type: "string" },
-    { name: "farcasterID", value: farcasterId, type: "uint256" },
-    { name: "metadataSnapshotRefUID", value: snapshotRef, type: "bytes32" },
-    { name: "metadataType", value: "0", type: "uint8" },
-    { name: "metadataUrl", value: ipfsUrl, type: "string" },
-  ])
+  return withImpersonationProtection(
+    "EAS",
+    `Create application attestation (${projectId})`,
+    async () => {
+      const data = applicationSchema.encodeData([
+        { name: "round", value: round, type: "string" },
+        { name: "farcasterID", value: farcasterId, type: "uint256" },
+        { name: "metadataSnapshotRefUID", value: snapshotRef, type: "bytes32" },
+        { name: "metadataType", value: "0", type: "uint8" },
+        { name: "metadataUrl", value: ipfsUrl, type: "string" },
+      ])
 
-  return await createAttestation(APPLICATION_SCHEMA_ID, data, projectId)
+      return await createAttestation(APPLICATION_SCHEMA_ID, data, projectId)
+    },
+    mockUID(),
+  )
 }
 
 export async function createContractAttestations({
@@ -338,17 +372,24 @@ export async function createContractAttestations({
   farcasterId: number
   refUID?: string
 }) {
-  const attestations = buildContractAttestations({
-    contracts,
-    projectId,
-    farcasterId,
-    refUID,
-  })
+  return withImpersonationProtection(
+    "EAS",
+    `Create ${contracts.length} contract attestations for ${projectId}`,
+    async () => {
+      const attestations = buildContractAttestations({
+        contracts,
+        projectId,
+        farcasterId,
+        refUID,
+      })
 
-  return await processAttestationsInBatches(
-    attestations,
-    createMultiAttestations,
-    60,
+      return await processAttestationsInBatches(
+        attestations,
+        createMultiAttestations,
+        60,
+      )
+    },
+    contracts.map(() => mockUID()),
   )
 }
 
@@ -359,14 +400,21 @@ export async function createCitizenWalletChangeAttestation({
   oldCitizenUID: string
   newCitizenUID: string
 }) {
-  const data = citizenWalletChangeSchema.encodeData([
-    { name: "oldCitizenUID", value: oldCitizenUID, type: "bytes32" },
-  ])
+  return withImpersonationProtection(
+    "EAS",
+    `Create citizen wallet change attestation`,
+    async () => {
+      const data = citizenWalletChangeSchema.encodeData([
+        { name: "oldCitizenUID", value: oldCitizenUID, type: "bytes32" },
+      ])
 
-  return await createAttestation(
-    CITIZEN_WALLET_CHANGE_SCHEMA_ID,
-    data,
-    newCitizenUID,
+      return await createAttestation(
+        CITIZEN_WALLET_CHANGE_SCHEMA_ID,
+        data,
+        newCitizenUID,
+      )
+    },
+    mockUID(),
   )
 }
 
@@ -374,24 +422,36 @@ export async function revokeContractAttestations(attestationIds: string[]) {
   if (attestationIds.length === 0) {
     return
   }
-
-  return processAttestationsInBatches(
-    attestationIds,
-    async (batch) => revokeMultiAttestations(CONTRACT_SCHEMA_ID, batch),
-    20,
+  return withImpersonationProtection(
+    "EAS",
+    `Revoke ${attestationIds.length} contract attestations`,
+    async () =>
+      processAttestationsInBatches(
+        attestationIds,
+        async (batch) => revokeMultiAttestations(CONTRACT_SCHEMA_ID, batch),
+        20,
+      ),
+    [],
   )
 }
 
 export async function revokeCitizenAttestation(attestationId: string) {
-  const isActive = await isAttestationActive(attestationId)
-  if (!isActive) {
-    return
-  }
+  return withImpersonationProtection(
+    "EAS",
+    `Revoke citizen attestation`,
+    async () => {
+      const isActive = await isAttestationActive(attestationId)
+      if (!isActive) {
+        return
+      }
 
-  return processAttestationsInBatches(
-    [attestationId],
-    async (batch) => revokeMultiAttestations(CITIZEN_SCHEMA_ID, batch),
-    20,
+      return processAttestationsInBatches(
+        [attestationId],
+        async (batch) => revokeMultiAttestations(CITIZEN_SCHEMA_ID, batch),
+        20,
+      )
+    },
+    [],
   )
 }
 
@@ -544,23 +604,30 @@ export async function createCitizenAttestation({
   selectionMethod: string
   refUID?: string
 }) {
-  const data = citizenSchema.encodeData([
-    { name: "farcasterId", value: farcasterId, type: "uint256" },
-    { name: "selectionMethod", value: selectionMethod, type: "string" },
-  ])
+  return withImpersonationProtection(
+    "EAS",
+    `Create citizen attestation`,
+    async () => {
+      const data = citizenSchema.encodeData([
+        { name: "farcasterId", value: farcasterId, type: "uint256" },
+        { name: "selectionMethod", value: selectionMethod, type: "string" },
+      ])
 
-  const tx = await eas.attest({
-    schema: CITIZEN_SCHEMA_ID,
-    data: {
-      recipient: to,
-      expirationTime: BigInt(0),
-      revocable: true,
-      data,
-      refUID,
+      const tx = await eas.attest({
+        schema: CITIZEN_SCHEMA_ID,
+        data: {
+          recipient: to,
+          expirationTime: BigInt(0),
+          revocable: true,
+          data,
+          refUID,
+        },
+      })
+
+      return await tx.wait()
     },
-  })
-
-  return await tx.wait()
+    mockUID(),
+  )
 }
 
 export async function isAttestationActive(
@@ -581,37 +648,44 @@ export async function createDelegatedVoteAttestation(
   signerAddress: string,
   citizenRefUID: string,
 ): Promise<string> {
-  console.log("createDelegatedVoteAttestation: ", {
-    data,
-    delegateAttestationSignature,
-    signerAddress,
-    citizenRefUID,
-  })
+  return withImpersonationProtection(
+    "EAS",
+    `Create delegated vote attestation`,
+    async () => {
+      console.log("createDelegatedVoteAttestation: ", {
+        data,
+        delegateAttestationSignature,
+        signerAddress,
+        citizenRefUID,
+      })
 
-  try {
-    // Use attestByDelegation to create the attestation
-    const tx = await eas.attestByDelegation({
-      schema: OFFCHAIN_VOTE_SCHEMA_ID,
-      data: {
-        recipient: signerAddress,
-        expirationTime: BigInt(0), // NO_EXPIRATION
-        revocable: false,
-        refUID: citizenRefUID as `0x${string}`,
-        data: data,
-      },
-      signature: delegateAttestationSignature,
-      attester: signerAddress,
-      deadline: BigInt(0), // NO_EXPIRATION
-    })
+      try {
+        // Use attestByDelegation to create the attestation
+        const tx = await eas.attestByDelegation({
+          schema: OFFCHAIN_VOTE_SCHEMA_ID,
+          data: {
+            recipient: signerAddress,
+            expirationTime: BigInt(0), // NO_EXPIRATION
+            revocable: false,
+            refUID: citizenRefUID as `0x${string}`,
+            data: data,
+          },
+          signature: delegateAttestationSignature,
+          attester: signerAddress,
+          deadline: BigInt(0), // NO_EXPIRATION
+        })
 
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait()
-    console.log("Vote attestation created with ID:", receipt)
-    return receipt
-  } catch (error) {
-    console.error("Error creating vote attestation:", error)
-    throw error
-  }
+        // Wait for the transaction to be mined
+        const receipt = await tx.wait()
+        console.log("Vote attestation created with ID:", receipt)
+        return receipt
+      } catch (error) {
+        console.error("Error creating vote attestation:", error)
+        throw error
+      }
+    },
+    mockUID(),
+  )
 }
 
 export const validateSignatureAddressIsValid = async (

@@ -9,6 +9,9 @@ import { Suspense, useEffect } from "react"
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id ?? null
+  const adminUserId = session?.user?.id ?? null
 
   useEffect(() => {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
@@ -18,10 +21,13 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       capture_pageview: false, // Disable automatic pageview capture, as we capture manually
     })
 
-    if (session?.user?.id) {
-      posthog.identify(session.user.id)
+    if (viewerId) {
+      posthog.identify(viewerId, {
+        actingAdminId: adminUserId ?? undefined,
+        impersonating: session?.impersonation?.isActive ?? false,
+      })
     }
-  }, [session])
+  }, [viewerId, adminUserId, session?.impersonation?.isActive])
 
   return (
     <PHProvider client={posthog}>

@@ -1,4 +1,5 @@
-import { getProject } from "@/db/projects"
+import { getProjectWithClient } from "@/db/projects"
+import { withImpersonation } from "@/lib/db/sessionContext"
 
 import UnsavedChangesToastClient from "./UnsavedChangesToast.Client"
 
@@ -6,11 +7,12 @@ const UnsavedChangesToastServer = async ({
   projectId,
 }: {
   projectId: string
-}) => {
-  const project = await getProject({ id: projectId })
-  if (!project) return null
+}) =>
+  withImpersonation(async ({ db }) => {
+    const project = await getProjectWithClient({ id: projectId }, db)
+    if (!project) return null
 
-  return <UnsavedChangesToastClient project={project} />
-}
+    return <UnsavedChangesToastClient project={project} />
+  })
 
 export default UnsavedChangesToastServer

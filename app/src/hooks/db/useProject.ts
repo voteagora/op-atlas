@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getProject } from "@/db/projects"
+import { fetchProject } from "@/lib/actions/hookFetchers"
 
 export const PROJECT_QUERY_KEY = "project"
 
@@ -16,7 +16,7 @@ export const useProject = ({
   const { data, isLoading, isSuccess, isError } = useQuery({
     queryKey: [PROJECT_QUERY_KEY, id],
     queryFn: async () => {
-      return await getProject({ id })
+      return await fetchProject(id)
     },
     enabled,
   })

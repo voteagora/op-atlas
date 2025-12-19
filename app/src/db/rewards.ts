@@ -1,6 +1,6 @@
 "use server"
 
-import { Prisma } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 import { cache } from "react"
 
 import { isProjectBlacklisted } from "@/db/projects"
@@ -10,19 +10,22 @@ import { generateRewardStreamId } from "@/lib/utils/rewards"
 
 import { prisma } from "./client"
 
-async function getFundingRewardsByRoundIdsAndSearchFn({
-  roundIds,
-  search,
-  sortBy,
-  page = 1,
-  pageSize = 10,
-}: {
-  roundIds: string[]
-  search: string
-  sortBy: "asc" | "desc"
-  page?: number
-  pageSize?: number
-}) {
+async function getFundingRewardsByRoundIdsAndSearchFn(
+  {
+    roundIds,
+    search,
+    sortBy,
+    page = 1,
+    pageSize = 10,
+  }: {
+    roundIds: string[]
+    search: string
+    sortBy: "asc" | "desc"
+    page?: number
+    pageSize?: number
+  },
+  db: PrismaClient = prisma,
+) {
   const skip = (page - 1) * pageSize
   const take = pageSize
 
@@ -47,8 +50,8 @@ async function getFundingRewardsByRoundIdsAndSearchFn({
     },
   }
 
-  const [rewards, totalCount] = await prisma.$transaction([
-    prisma.fundingReward.findMany({
+  const [rewards, totalCount] = await db.$transaction([
+    db.fundingReward.findMany({
       where: whereClause,
       select: {
         id: true,
@@ -79,7 +82,7 @@ async function getFundingRewardsByRoundIdsAndSearchFn({
       skip,
       take,
     }),
-    prisma.fundingReward.count({
+    db.fundingReward.count({
       where: whereClause,
     }),
   ])
@@ -88,11 +91,33 @@ async function getFundingRewardsByRoundIdsAndSearchFn({
 }
 
 export const getFundingRewardsByRoundIdsAndSearch = cache(
-  getFundingRewardsByRoundIdsAndSearchFn,
+  (params: {
+    roundIds: string[]
+    search: string
+    sortBy: "asc" | "desc"
+    page?: number
+    pageSize?: number
+  }) => getFundingRewardsByRoundIdsAndSearchFn(params, prisma),
 )
 
-async function getRewardFn({ id }: { id: string }) {
-  return prisma.fundingReward.findUnique({
+export async function getFundingRewardsByRoundIdsAndSearchWithClient(
+  params: {
+    roundIds: string[]
+    search: string
+    sortBy: "asc" | "desc"
+    page?: number
+    pageSize?: number
+  },
+  db: PrismaClient = prisma,
+) {
+  return getFundingRewardsByRoundIdsAndSearchFn(params, db)
+}
+
+async function getRewardFn(
+  { id }: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return db.fundingReward.findUnique({
     where: {
       id,
     },
@@ -118,7 +143,16 @@ async function getRewardFn({ id }: { id: string }) {
   })
 }
 
-export const getReward = cache(getRewardFn)
+export const getReward = cache((params: { id: string }) =>
+  getRewardFn(params, prisma),
+)
+
+export async function getRewardWithClient(
+  params: { id: string },
+  db: PrismaClient = prisma,
+) {
+  return getRewardFn(params, db)
+}
 
 export async function insertRewards(
   rewards: {
@@ -126,6 +160,7 @@ export async function insertRewards(
     projectId: string
     amount: number
   }[],
+  db: PrismaClient = prisma,
 ) {
   // Filter out blacklisted projects
   const validRewards = await Promise.all(
@@ -145,7 +180,7 @@ export async function insertRewards(
 
   const filteredRewards = validRewards.filter(Boolean) as typeof rewards
 
-  return prisma.fundingReward.createMany({
+  return db.fundingReward.createMany({
     data: filteredRewards.map((reward) => ({
       roundId: "4",
       ...reward,
@@ -154,20 +189,23 @@ export async function insertRewards(
   })
 }
 
-async function canClaimToAddressFn({
-  address,
-  rewardId,
-}: {
-  address: string
-  rewardId: string
-}) {
+async function canClaimToAddressFn(
+  {
+    address,
+    rewardId,
+  }: {
+    address: string
+    rewardId: string
+  },
+  db: PrismaClient = prisma,
+) {
   const [reward, claim] = await Promise.all([
-    prisma.fundingReward.findFirst({
+    db.fundingReward.findFirst({
       where: {
         id: rewardId,
       },
     }),
-    prisma.rewardClaim.findMany({
+    db.rewardClaim.findMany({
       where: {
         address: address.toLowerCase(),
       },
@@ -184,25 +222,38 @@ async function canClaimToAddressFn({
   )
 }
 
-export const canClaimToAddress = cache(canClaimToAddressFn)
+export const canClaimToAddress = cache(
+  (params: { address: string; rewardId: string }) =>
+    canClaimToAddressFn(params, prisma),
+)
 
-export async function startClaim({
-  rewardId,
-  address,
-  userId,
-}: {
-  rewardId: string
-  userId: string
-  address: string
-}) {
+export async function canClaimToAddressWithClient(
+  params: { address: string; rewardId: string },
+  db: PrismaClient = prisma,
+) {
+  return canClaimToAddressFn(params, db)
+}
+
+export async function startClaim(
+  {
+    rewardId,
+    address,
+    userId,
+  }: {
+    rewardId: string
+    userId: string
+    address: string
+  },
+  db: PrismaClient = prisma,
+) {
   // Deletes any existing claim for the reward
-  const deleteClaim = prisma.rewardClaim.deleteMany({
+  const deleteClaim = db.rewardClaim.deleteMany({
     where: {
       rewardId,
     },
   })
 
-  const createClaim = prisma.rewardClaim.create({
+  const createClaim = db.rewardClaim.create({
     data: {
       rewardId,
       address: address.toLowerCase(),
@@ -212,14 +263,17 @@ export async function startClaim({
     },
   })
 
-  return prisma.$transaction([deleteClaim, createClaim])
+  const [, claim] = await Promise.all([deleteClaim, createClaim])
+
+  return claim
 }
 
 export async function updateClaim(
   rewardId: string,
   data: Prisma.RewardClaimUpdateInput,
+  db: PrismaClient = prisma,
 ) {
-  return prisma.rewardClaim.update({
+  return db.rewardClaim.update({
     where: {
       rewardId,
     },
@@ -227,8 +281,11 @@ export async function updateClaim(
   })
 }
 
-export async function ensureClaim(rewardId: string) {
-  return prisma.rewardClaim.upsert({
+export async function ensureClaim(
+  rewardId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.rewardClaim.upsert({
     where: {
       rewardId,
     },
@@ -240,26 +297,44 @@ export async function ensureClaim(rewardId: string) {
   })
 }
 
-async function getClaimByRewardIdFn({ rewardId }: { rewardId: string }) {
-  return prisma.rewardClaim.findFirst({
+async function getClaimByRewardIdFn(
+  { rewardId }: { rewardId: string },
+  db: PrismaClient = prisma,
+) {
+  return db.rewardClaim.findFirst({
     where: {
       rewardId,
     },
   })
 }
 
-export async function deleteClaim(rewardId: string) {
-  return prisma.rewardClaim.delete({
+export async function deleteClaim(
+  rewardId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.rewardClaim.delete({
     where: {
       rewardId,
     },
   })
 }
 
-export const getClaimByRewardId = cache(getClaimByRewardIdFn)
+export const getClaimByRewardId = cache((params: { rewardId: string }) =>
+  getClaimByRewardIdFn(params, prisma),
+)
 
-export async function getKYCTeamsWithRewardsForRound(roundId: string) {
-  return prisma.kYCTeam.findMany({
+export async function getClaimByRewardIdWithClient(
+  params: { rewardId: string },
+  db: PrismaClient = prisma,
+) {
+  return getClaimByRewardIdFn(params, db)
+}
+
+export async function getKYCTeamsWithRewardsForRound(
+  roundId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.kYCTeam.findMany({
     where: {
       deletedAt: null,
       projects: {
@@ -305,10 +380,13 @@ export async function getKYCTeamsWithRewardsForRound(roundId: string) {
   })
 }
 
-export async function getRewardStreamsWithRewardsForRound(roundId: string) {
+export async function getRewardStreamsWithRewardsForRound(
+  roundId: string,
+  db: PrismaClient = prisma,
+) {
   // IMPORTANT: Must include soft deleted kyc teams and projects
 
-  return prisma.rewardStream.findMany({
+  return db.rewardStream.findMany({
     where: {
       roundId,
     },
@@ -353,10 +431,11 @@ export async function getRewardStreamsWithRewardsForRound(roundId: string) {
 export async function createOrUpdateSuperfluidStream(
   stream: SuperfluidVestingSchedule,
   rewardStreamId?: string,
+  db: PrismaClient = prisma,
 ) {
   // Check if there's an existing stream with the same sender/receiver combination
   // This handles the case where a user might have multiple streams (e.g., one vested, one vesting)
-  const existingStream = await prisma.superfluidStream.findFirst({
+  const existingStream = await db.superfluidStream.findFirst({
     where: {
       sender: stream.sender,
       receiver: stream.receiver.toLowerCase(),
@@ -372,13 +451,13 @@ export async function createOrUpdateSuperfluidStream(
     existingStream.id !== stream.id &&
     parseFloat(stream.flowRate) > 0
   ) {
-    await prisma.superfluidStream.delete({
+    await db.superfluidStream.delete({
       where: {
         id: existingStream.id,
       },
     })
   }
-  return prisma.superfluidStream.upsert({
+  return db.superfluidStream.upsert({
     where: {
       id: stream.id,
     },
@@ -402,8 +481,9 @@ export async function createOrUpdateSuperfluidStream(
 export async function createRewardStream(
   stream: SuperfluidVestingSchedule,
   roundId: string,
+  db: PrismaClient = prisma,
 ) {
-  const kycTeam = await prisma.kYCTeam.findUnique({
+  const kycTeam = await db.kYCTeam.findUnique({
     where: {
       walletAddress: stream.receiver.toLowerCase(),
     },
@@ -438,7 +518,7 @@ export async function createRewardStream(
     return rewardId
   }
 
-  const rewardStream = await prisma.rewardStream.upsert({
+  const rewardStream = await db.rewardStream.upsert({
     where: {
       id: rewardId,
     },
@@ -454,8 +534,11 @@ export async function createRewardStream(
   return rewardStream.id
 }
 
-export async function getProjectRecurringRewards(projectId: string) {
-  return prisma.recurringReward.findMany({
+export async function getProjectRecurringRewards(
+  projectId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.recurringReward.findMany({
     where: {
       projectId,
     },
@@ -488,11 +571,11 @@ export async function getProjectRecurringRewards(projectId: string) {
   })
 }
 
-export async function expireClaims() {
+export async function expireClaims(db: PrismaClient = prisma) {
   const oneYearAgo = new Date()
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
 
-  return prisma.rewardClaim.updateMany({
+  return db.rewardClaim.updateMany({
     where: {
       status: REWARD_CLAIM_STATUS.PENDING,
       reward: {

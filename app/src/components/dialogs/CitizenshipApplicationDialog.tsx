@@ -47,7 +47,8 @@ function CitizenshipApplicationDialog({
   redirectUrl,
 }: DialogProps<object> & { redirectUrl?: string }) {
   const { data: session } = useSession()
-  const userId = session?.user?.id ?? ""
+  const userId =
+    session?.impersonation?.targetUserId ?? session?.user?.id ?? ""
 
   const { data: citizen } = useCitizen({
     query: { type: CITIZEN_TYPES.user, id: userId },
