@@ -136,42 +136,6 @@ export async function updateLegalEntityStatus({
   return updatedByReference
 }
 
-export async function getProjectKycTeam(
-  projectId: string,
-  db: PrismaClient = prisma,
-) {
-  const project = await db.project.findUnique({
-    where: {
-      id: projectId,
-    },
-    select: {
-      kycTeamId: true,
-      kycTeam: {
-        include: {
-          team: {
-            include: {
-              users: true,
-            },
-          },
-          KYCLegalEntityTeams: {
-            include: {
-              legalEntity: true,
-            },
-          },
-          rewardStreams: true,
-          projects: {
-            include: {
-              blacklist: true,
-            },
-          },
-        },
-      },
-    },
-  })
-
-  return project?.kycTeam ?? undefined
-}
-
 export async function checkWalletAddressExists(
   walletAddress: string,
   db: PrismaClient = prisma,
@@ -218,10 +182,9 @@ export async function getKycTeamByWalletAddress(
 
 export async function deleteKycTeam({
   kycTeamId,
-  hasActiveStream,
 }: {
   kycTeamId: string
-  hasActiveStream?: boolean
+  hasActiveStream?: boolean // kept for backwards compatibility, but no longer used
 }, db: PrismaClient = prisma) {
   await db.$transaction(async (tx) => {
     // Mark any active (draft) GrantEligibility forms linked to this KYC team as deleted
@@ -272,31 +235,21 @@ export async function deleteKycTeam({
       })
     }
 
-    // Delete KYCLegalEntityTeams relationships for this KYC team
-    await tx.kYCLegalEntityTeams.deleteMany({
+    // NOTE: We intentionally do NOT delete KYCLegalEntityTeams here.
+    // This preserves the link between KYCLegalEntity and KYCTeam so that
+    // verified legal entities can be discovered and reused in future
+    // GrantEligibility forms for the same organization.
+
+    // Always soft-delete the KYC team to preserve referential integrity
+    // and allow entity reuse through KYCLegalEntityTeams
+    await tx.kYCTeam.update({
       where: {
-        kycTeamId: kycTeamId,
+        id: kycTeamId,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     })
-
-    // Finally, delete the KYC team
-    if (hasActiveStream) {
-      // Soft delete if there's an active stream
-      await tx.kYCTeam.update({
-        where: {
-          id: kycTeamId,
-        },
-        data: {
-          deletedAt: new Date(),
-        },
-      })
-    } else {
-      await tx.kYCTeam.delete({
-        where: {
-          id: kycTeamId,
-        },
-      })
-    }
   })
 }
 
@@ -346,6 +299,9 @@ export async function getExpiredKYCCountForProject({
     where: { id: projectId },
     select: {
       kycTeam: {
+        where: {
+          deletedAt: null,
+        },
         include: {
           team: {
             include: {
@@ -464,6 +420,9 @@ export async function getKYCUsersByProjectId({
     where: { id: projectId },
     select: {
       kycTeam: {
+        where: {
+          deletedAt: null,
+        },
         include: {
           team: {
             include: {
