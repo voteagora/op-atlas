@@ -11,4 +11,5 @@ export const ADMIN_WALLETS = [
   '0x8ae9d9cbf802df050de5b2749d30d17aea31b8bf', // OP Eleanor
   '0x57De675bb963b341479F98E7c5418Bb3B3de2088', // OP Emily
   '0xc1ef3c8d28f9fadb3d42bb8a0bbbe95c4239f653', // OP Jonas
+  '0xA622279f76ddbed4f2CC986c09244262Dba8f4Ba', // Agora Jeff
 ].map(addr => addr.toLowerCase())
