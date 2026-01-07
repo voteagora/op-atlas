@@ -143,7 +143,7 @@ export function AdminImpersonationButton() {
 
           <div className="text-base text-secondary-foreground mt-2">
             Search for a user to view the app from their perspective.
-            You&apos;ll be using yesterday&apos;s data snapshot - changes won&apos;t affect production.
+            You'll be using real-time production data, so do not modify anything accidentally.
           </div>
 
           <div className="mt-6">
