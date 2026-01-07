@@ -137,13 +137,12 @@ export function AdminImpersonationButton() {
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <div className="flex flex-col text-center">
-          <div className="font-semibold text-xl">
-            Admin: View as User
-          </div>
+          <div className="font-semibold text-xl">Admin: View as User</div>
 
           <div className="text-base text-secondary-foreground mt-2">
             Search for a user to view the app from their perspective.
-            You'll be using real-time production data, so do not modify anything accidentally.
+            You&apos;ll be using real-time production data, so do not modify
+            anything accidentally.
           </div>
 
           <div className="mt-6">
@@ -158,7 +157,8 @@ export function AdminImpersonationButton() {
           </div>
 
           <div className="text-sm text-secondary-foreground bg-muted p-3 rounded-md mt-4">
-            <strong>Note:</strong> External services (emails, KYC, payments) will be mocked during impersonation.
+            <strong>Note:</strong> External services (emails, KYC, payments)
+            will be mocked during impersonation.
           </div>
         </div>
       </DialogContent>

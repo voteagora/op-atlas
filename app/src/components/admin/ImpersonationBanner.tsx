@@ -132,10 +132,13 @@ export function ImpersonationBanner() {
         <AlertDescription className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <strong className="text-sm">Admin Mode: Viewing as {session.impersonation.targetUserName}</strong>
+              <strong className="text-sm">
+                Admin Mode: Viewing as {session.impersonation.targetUserName}
+              </strong>
             </div>
             <span className="text-xs text-muted-foreground">
-              Using real time production data.  Do not modify anything accidentally.
+              Using real time production data. Do not modify anything
+              accidentally.
               {session.impersonation.targetUserEmail && (
                 <> • {session.impersonation.targetUserEmail}</>
               )}
