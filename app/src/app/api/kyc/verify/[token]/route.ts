@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { verifyKYCToken, isKYCLinkExpired } from "@/lib/utils/kycToken"
+import { verifyKYCToken } from "@/lib/utils/kycToken"
 import { personaClient } from "@/lib/persona"
 import { getImpersonationContext } from "@/lib/db/sessionContext"
 
@@ -55,16 +55,10 @@ export async function POST(
       )
     }
 
-    // Check if inquiry creation date is expired (> 7 days)
-    if (entity.inquiryCreatedAt && isKYCLinkExpired(entity.inquiryCreatedAt)) {
-      return NextResponse.json(
-        {
-          error:
-            "This verification link has expired. Please restart the KYC process from your profile.",
-        },
-        { status: 410 }, // 410 Gone
-      )
-    }
+    // Note: We no longer check inquiryCreatedAt here because:
+    // 1. The JWT token already has its own 7-day expiration
+    // 2. If the Persona inquiry is expired, generateOneTimeLink() will fail with an appropriate error
+    // This allows users to resume verification via resent emails even for older inquiries
 
     let inquiryId = entity.personaInquiryId
 
