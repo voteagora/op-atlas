@@ -3,6 +3,7 @@ import {
   usePrivy,
   useUpdateAccount,
 } from "@privy-io/react-auth"
+import { useSession } from "next-auth/react"
 import { useRef } from "react"
 import { toast } from "sonner"
 
@@ -19,11 +20,11 @@ type UsePrivyEmailOptions = {
 
 export const usePrivyEmail = (userId: string, options?: UsePrivyEmailOptions) => {
   const isLinking = useRef(false)
-
+  const { data: session } = useSession()
+  const { track } = useAnalytics()
   const onError = useHandlePrivyErrors()
   const { invalidate: invalidateUser } = useUser({ id: userId, enabled: false })
   const { user: privyUser, unlinkEmail } = usePrivy()
-  const { track } = useAnalytics()
 
   const { linkEmail } = useLinkAccount({
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
@@ -72,19 +73,28 @@ export const usePrivyEmail = (userId: string, options?: UsePrivyEmailOptions) =>
     onError,
   })
 
+  const showUnavailableToast = () =>
+    toast.error(
+      "Email linking is unavailable while impersonating or when Privy isn't connected.",
+    )
+
+  if (!privyUser || session?.impersonation?.isActive) {
+    return {
+      linkEmail: showUnavailableToast,
+      updateEmail: showUnavailableToast,
+      unlinkEmail: showUnavailableToast,
+    }
+  }
+
   const handleUnlinkEmail = () => {
     if (privyUser?.email) {
       toast.promise(unlinkEmail(privyUser.email.address), {
         loading: "Deleting email...",
         success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser)
-            .then(() => invalidateUser())
-            .then(() => "User invalidates")
+          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
           return "Email deleted successfully"
         },
-        error: (error) => {
-          return error.message
-        },
+        error: (error) => error.message,
       })
     }
   }

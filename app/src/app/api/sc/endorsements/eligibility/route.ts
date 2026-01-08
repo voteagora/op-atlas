@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { auth } from "@/auth"
-import { prisma } from "@/db/client"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { isTop100Delegate } from "@/lib/services/top100"
 
 export async function GET(req: NextRequest) {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { db, userId } = await getImpersonationContext()
   const { searchParams } = new URL(req.url)
   const roleId = Number(searchParams.get("roleId"))
 
@@ -16,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   let start: Date | null = null
   let end: Date | null = null
-  const roleWindow = await prisma.role.findUnique({
+  const roleWindow = await db.role.findUnique({
     where: { id: roleId },
     select: {
       endorsementStartAt: true,
@@ -41,18 +39,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ eligible: false, reason: "unauthenticated" })
 
   const [userWallets, safeWallets] = await Promise.all([
-    prisma.user.findUnique({
+    db.user.findUnique({
       where: { id: userId },
       include: { addresses: true },
     }),
-    prisma.userSafeAddress.findMany({
+    db.userSafeAddress.findMany({
       where: { userId },
     }),
   ])
   const walletAddresses = userWallets?.addresses?.map((a) => a.address) || []
   const safeAddresses = safeWallets?.map((a) => a.safeAddress) || []
   const addresses = [...walletAddresses, ...safeAddresses]
-  const top100 = await isTop100Delegate(addresses)
+  const top100 = await isTop100Delegate(addresses, db)
   return NextResponse.json({
     eligible: top100,
     reason: top100 ? undefined : "not_top100",

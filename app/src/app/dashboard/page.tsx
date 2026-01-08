@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
@@ -14,6 +13,7 @@ import {
   getProjects,
 } from "@/lib/actions/projects"
 import { getActiveSeason } from "@/lib/seasons"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const metadata = {
   title: "Dashboard - OP Atlas",
@@ -22,8 +22,7 @@ export const metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { session, db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")
@@ -40,7 +39,7 @@ export default async function Page() {
     activeSeason,
   ] =
     await Promise.all([
-      getUserById(userId),
+      getUserById(userId, db, session),
       getProjects(userId),
       getApplications(userId),
       getUserOrganizations(userId),

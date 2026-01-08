@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getUserByAddress, getUserById } from "@/db/users"
+import { fetchUser, fetchUserByAddress } from "@/lib/actions/hookFetchers"
 import { UserWithAddresses } from "@/lib/types"
 import { UserAddress } from "@prisma/client"
 
@@ -24,7 +24,7 @@ export const useUser = ({
     queryKey: [USER_QUERY_KEY, id],
     queryFn: async () => {
       if (!id) throw new Error("User ID is required")
-      return (await getUserById(id)) as UserWithAddresses
+      return (await fetchUser(id)) as UserWithAddresses
     },
     enabled: isEnabled,
     staleTime: 1000 * 60 * 10, // 10 minutes
@@ -54,7 +54,7 @@ export const useUserAddresses = ({
     queryKey: [USER_ADDRESSES_QUERY_KEY, address],
     queryFn: async () => {
       if (!address) throw new Error("User Address is required")
-      return await getUserByAddress(address)
+      return await fetchUserByAddress(address)
     },
     enabled: isEnabled,
     staleTime: 1000 * 60 * 10, // 10 minutes

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
-import { getOrganization } from "@/db/organizations"
+import { fetchOrganization } from "@/lib/actions/hookFetchers"
 
 export const ORGANIZATION_QUERY_KEY = "organization"
 
@@ -16,7 +16,7 @@ export const useOrganization = ({
   const { data, isLoading, isSuccess, isError } = useQuery({
     queryKey: [ORGANIZATION_QUERY_KEY, id],
     queryFn: async () => {
-      return await getOrganization({ id })
+      return await fetchOrganization(id)
     },
     enabled,
   })

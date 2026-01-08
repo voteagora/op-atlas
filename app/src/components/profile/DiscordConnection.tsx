@@ -2,7 +2,6 @@
 
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { X } from "lucide-react"
-import Image from "next/image"
 import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
@@ -12,7 +11,45 @@ import { useUser } from "@/hooks/db/useUser"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
 import { cn } from "@/lib/utils"
 
-export const DiscordConnection = ({ userId }: { userId: string }) => {
+type Props = {
+  userId: string
+  readOnly?: boolean
+}
+
+export const DiscordConnection = ({ userId, readOnly = false }: Props) => {
+  if (readOnly) {
+    return <DiscordConnectionReadOnly userId={userId} />
+  }
+  return <DiscordConnectionInteractive userId={userId} />
+}
+
+const DiscordConnectionReadOnly = ({ userId }: { userId: string }) => {
+  const { user } = useUser({ id: userId, enabled: true })
+
+  const username = user?.discord || undefined
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10">
+        {username ? (
+          <>
+            <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
+            <p className="text-sm truncate">@{username}</p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Discord not connected.
+          </p>
+        )}
+      </div>
+      <Button variant="secondary" disabled className="whitespace-nowrap">
+        Editing disabled
+      </Button>
+    </div>
+  )
+}
+
+const DiscordConnectionInteractive = ({ userId }: { userId: string }) => {
   const { user: privyUser, unlinkDiscord } = usePrivy()
   const { user, invalidate: invalidateUser } = useUser({
     id: userId,

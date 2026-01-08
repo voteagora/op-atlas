@@ -11,13 +11,27 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useUser } from "@/hooks/db/useUser"
 
-export const ProfileDetailsContent = ({ session }: { session: Session }) => {
-  const { user } = useUser({ id: session?.user?.id, enabled: !!session?.user })
+type ProfileDetailsContentProps = {
+  session: Session | null
+  userId: string
+  isImpersonating?: boolean
+}
 
+export const ProfileDetailsContent = ({
+  session,
+  userId,
+  isImpersonating = false,
+}: ProfileDetailsContentProps) => {
+  const { user } = useUser({ id: userId, enabled: !!userId })
+
+  const fallbackName = !isImpersonating ? session?.user?.name ?? "" : ""
+  const fallbackImage = !isImpersonating ? session?.user?.image ?? "" : ""
+
+  const displayName = user?.name ?? fallbackName
+  const displayUsername = user?.username ?? ""
+  const imageUrl = user?.imageUrl ?? fallbackImage
+  const bio = user?.bio ?? ""
   const hasFarcaster = Boolean(user?.farcasterId)
-  const username = hasFarcaster ? user?.username || session?.user?.name : ""
-  const imageUrl = hasFarcaster ? user?.imageUrl || session?.user?.image : ""
-  const bio = hasFarcaster ? user?.bio || "" : ""
 
   return (
     <div className="flex flex-col gap-2">
@@ -44,7 +58,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
           <div className="flex flex-col gap-2">
             <div className="text-secondary-foreground font-normal text-sm">Name</div>
             <Input
-              value={username ?? ""}
+              value={displayName}
               placeholder="Your name"
               disabled
               className="text-secondary-foreground"
@@ -54,7 +68,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
           <div className="flex flex-col gap-2">
             <div className="text-secondary-foreground font-normal text-sm">Username</div>
             <Input
-              value={username ? `@${username}` : ""}
+              value={displayUsername ? `@${displayUsername}` : ""}
               placeholder="Your username"
               disabled
               className="text-secondary-foreground"
@@ -75,7 +89,7 @@ export const ProfileDetailsContent = ({ session }: { session: Session }) => {
 
       {!user?.farcasterId && (
         <div className="mt-2">
-          <FarcasterConnection userId={session.user.id}>
+          <FarcasterConnection userId={userId}>
             <Farcaster className="w-[20px] h-[20px]" />
             Import from Farcaster
           </FarcasterConnection>

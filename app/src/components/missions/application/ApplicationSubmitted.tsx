@@ -86,7 +86,8 @@ export const ApplicationSubmitted = ({
     window.scrollTo(0, 0)
   }, [])
 
-  const email = session?.user?.email
+  const email =
+    session?.impersonation?.targetUserEmail ?? session?.user?.email
 
   return (
     <div

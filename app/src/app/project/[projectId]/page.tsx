@@ -2,11 +2,11 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import { getCitizen } from "@/lib/actions/citizens"
 import { getProjectMetadataAction } from "@/lib/actions/projects"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { getProjectDeployedChains } from "@/lib/oso/utils"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { Contributors, Description, Header } from "./components"
 import MissionSection from "./components/MissionSection"
@@ -45,8 +45,9 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId } = params
 
-  const [session, project, citizen] = await Promise.all([
-    auth(),
+  const { userId } = await getImpersonationContext()
+
+  const [project, citizen] = await Promise.all([
     getProjectMetadataAction({ projectId }),
     getCitizen({ type: CITIZEN_TYPES.app, id: projectId }),
   ])
@@ -54,8 +55,6 @@ export default async function Page({ params }: PageProps) {
   if (!project) {
     return notFound()
   }
-
-  const userId = session?.user?.id
 
   const deployedOn = getProjectDeployedChains(project.contracts)
 
@@ -78,7 +77,7 @@ export default async function Page({ params }: PageProps) {
         <div className="w-full lg:mt-8">
           <Header
             projectId={projectId}
-            userId={userId}
+            userId={userId ?? undefined}
             thumbnail={project.thumbnailUrl}
             banner={project.bannerUrl}
             citizenAttested={citizen?.attestationId ? true : false}
@@ -88,7 +87,7 @@ export default async function Page({ params }: PageProps) {
         <div className="mt-[88px] lg:mt-0 lg:space-y-20 px-6 lg:px-12 lg:pt-12">
           <Description
             projectId={projectId}
-            userId={userId}
+            userId={userId ?? undefined}
             name={project.name}
             tags={["Project", project.category ?? ""]}
             author={author}
@@ -113,7 +112,7 @@ export default async function Page({ params }: PageProps) {
             />
           )}
 
-          <MissionSection projectId={projectId} userId={userId} />
+          <MissionSection projectId={projectId} userId={userId ?? undefined} />
         </div>
       </div>
     </div>

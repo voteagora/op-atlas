@@ -2,12 +2,15 @@ import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import { RewardsSection } from "@/components/projects/rewards/RewardsSection"
-import { getConsolidatedProjectTeam, getProject } from "@/db/projects"
+import {
+  getConsolidatedProjectTeamWithClient,
+  getProjectWithClient,
+} from "@/db/projects"
 import { getProjectRecurringRewards } from "@/db/rewards"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { formatRecurringRewards } from "@/lib/utils/rewards"
 
 export async function generateMetadata({
@@ -38,21 +41,22 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const session = await auth()
-  const userId = session?.user.id
+  const { db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")
   }
 
+  const membershipPromise = verifyMembership(params.projectId, userId, db)
+
   const [project, team, membership, recurringRewards] = await Promise.all([
-    getProject({ id: params.projectId }),
-    getConsolidatedProjectTeam({ projectId: params.projectId }),
-    verifyMembership(params.projectId, userId),
-    getProjectRecurringRewards(params.projectId),
+    getProjectWithClient({ id: params.projectId }, db),
+    getConsolidatedProjectTeamWithClient({ projectId: params.projectId }, db),
+    membershipPromise,
+    getProjectRecurringRewards(params.projectId, db),
   ])
 
-  if (membership?.error || !project) {
+  if (!project || membership?.error) {
     redirect("/dashboard")
   }
 

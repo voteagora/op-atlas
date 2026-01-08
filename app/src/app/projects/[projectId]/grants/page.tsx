@@ -2,11 +2,11 @@ import { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import { GrantsForm } from "@/components/projects/grants/GrantsForm"
-import { getProject } from "@/db/projects"
+import { getProjectWithClient } from "@/db/projects"
 import { getPublicProjectAction } from "@/lib/actions/projects"
 import { verifyMembership } from "@/lib/actions/utils"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function generateMetadata({
   params,
@@ -36,19 +36,20 @@ export default async function Page({
 }: {
   params: { projectId: string }
 }) {
-  const session = await auth()
-  const userId = session?.user.id
+  const { db, userId } = await getImpersonationContext()
 
   if (!userId) {
     redirect("/")
   }
 
+  const membershipPromise = verifyMembership(params.projectId, userId, db)
+
   const [project, membership] = await Promise.all([
-    getProject({ id: params.projectId }),
-    verifyMembership(params.projectId, userId),
+    getProjectWithClient({ id: params.projectId }, db),
+    membershipPromise,
   ])
 
-  if (membership?.error || !project) {
+  if (!project || membership?.error) {
     redirect("/dashboard")
   }
 

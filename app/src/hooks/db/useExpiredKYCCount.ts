@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 
 import {
-  getExpiredKYCCountForProject,
-  getExpiredKYCCountForOrganization,
-} from "@/db/kyc"
+  fetchExpiredKycCountForOrganization,
+  fetchExpiredKycCountForProject,
+} from "@/lib/actions/hookFetchers"
 
 export const EXPIRED_KYC_COUNT_PROJECT_QUERY_KEY = "expiredKYCCountProject"
 export const EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY =
@@ -19,7 +19,7 @@ export const useExpiredKYCCountForProject = ({
   const { data, isLoading, isSuccess, isError, error } = useQuery({
     queryKey: [EXPIRED_KYC_COUNT_PROJECT_QUERY_KEY, projectId],
     queryFn: async () => {
-      return await getExpiredKYCCountForProject({ projectId })
+      return await fetchExpiredKycCountForProject(projectId)
     },
     enabled: enabled && !!projectId,
     refetchInterval: 300000, // Refetch every 5 minutes (300000 ms)
@@ -38,7 +38,7 @@ export const useExpiredKYCCountForOrganization = ({
   const { data, isLoading, isSuccess, isError, error } = useQuery({
     queryKey: [EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY, organizationId],
     queryFn: async () => {
-      return await getExpiredKYCCountForOrganization({ organizationId })
+      return await fetchExpiredKycCountForOrganization(organizationId)
     },
     enabled: enabled && !!organizationId,
     refetchInterval: 300000, // Refetch every 5 minutes (300000 ms)

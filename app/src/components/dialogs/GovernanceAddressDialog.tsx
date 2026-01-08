@@ -10,10 +10,11 @@ import { UserAddressSource } from "@/lib/types"
 
 function GovernanceAddressDialog({ open, onOpenChange }: DialogProps<object>) {
   const { data: session } = useSession()
-  const userId = session?.user?.id ?? ""
+  const userId =
+    session?.impersonation?.targetUserId ?? session?.user?.id ?? ""
 
+  const isImpersonating = !!session?.impersonation?.isActive
   const { user } = useUser({ id: userId })
-  const { linkWallet } = usePrivyLinkWallet(userId)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,12 +41,13 @@ function GovernanceAddressDialog({ open, onOpenChange }: DialogProps<object>) {
             ))}
           </div>
 
-          <Button
-            onClick={() => linkWallet()}
-            className="button-primary w-full"
-          >
-            Add another wallet
-          </Button>
+          {isImpersonating ? (
+            <Button className="button-primary w-full" disabled>
+              Unavailable while impersonating
+            </Button>
+          ) : (
+            <GovernanceAddressLinkButton userId={userId} />
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -53,3 +55,12 @@ function GovernanceAddressDialog({ open, onOpenChange }: DialogProps<object>) {
 }
 
 export default GovernanceAddressDialog
+
+const GovernanceAddressLinkButton = ({ userId }: { userId: string }) => {
+  const { linkWallet } = usePrivyLinkWallet(userId)
+  return (
+    <Button onClick={() => linkWallet()} className="button-primary w-full">
+      Add another wallet
+    </Button>
+  )
+}

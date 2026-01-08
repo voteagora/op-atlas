@@ -17,7 +17,6 @@ import { randomUUID } from "node:crypto"
 import { ChainAppRequirements } from "@/app/citizenship/components/ChainAppRequirements"
 import { Sidebar } from "@/app/citizenship/components/Sidebar"
 import { UserRequirements } from "@/app/citizenship/components/UserRequirements"
-import { auth } from "@/auth"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -54,6 +53,7 @@ import {
 import { hasPriorityAttestation } from "@/lib/services/priorityAttestations"
 import { formatDateRange, formatDateLong } from "@/lib/utils/date"
 import { truncateAddress } from "@/lib/utils/string"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { AnalyticsTracker } from "./components/AnalyticsTracker"
 import { SidebarActiveCitizen } from "./components/SidebarActiveCitizen"
@@ -119,8 +119,7 @@ export default async function Page({
 }: {
   searchParams: Record<string, string | undefined>
 }) {
-  const session = await auth()
-  const userId = session?.user?.id
+  const { session, db, userId } = await getImpersonationContext()
 
   const season = await getActiveSeason()
 
@@ -138,7 +137,7 @@ export default async function Page({
 
   const [user, citizen, qualification, isCitizenshipLimitReached] =
     await Promise.all([
-      getUserById(userId),
+      getUserById(userId, db, session),
       getCitizen({ type: CITIZEN_TYPES.user, id: userId }),
       s8CitizenshipQualification(userId),
       checkCitizenshipLimit(),
@@ -288,7 +287,7 @@ async function renderSeasonNinePage({
   season,
   searchParams,
 }: {
-  userId: string | undefined
+  userId: string | null
   season: SeasonWithConfig
   searchParams: Record<string, string | undefined>
 }) {
@@ -1596,7 +1595,7 @@ async function removeOpenRankSnapshotsRecord(formData: FormData) {
 }
 
 async function ensureCurrentUser(userId: string) {
-  const session = await auth()
+  const { session } = await getImpersonationContext()
 
   if (!session?.user?.id || session.user.id !== userId) {
     throw new Error("Unauthorized Season 9 test mutation")

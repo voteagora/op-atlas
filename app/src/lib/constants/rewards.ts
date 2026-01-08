@@ -5,8 +5,8 @@ export const SEASON_TRANCHES = {
   "7-8": [1, 2, 3, 4, 5, 6], // S7 onchain-builders: tranches 1-6
 
   // Season 8 (same roundIds, continuing tranches)
-  "8-7": [7, 8], // S8 dev-tooling: enable tranches 7-8
-  "8-8": [7, 8], // S8 onchain-builders: enable tranches 7-8
+  "8-7": [7, 8, 9, 10], // S8 dev-tooling: enable tranches 7-8
+  "8-8": [7, 8, 9, 10], // S8 onchain-builders: enable tranches 7-8
 } as const
 
 // Map round names to roundIds (stays the same for both seasons 7 and 8)

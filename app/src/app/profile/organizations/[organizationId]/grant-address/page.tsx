@@ -2,12 +2,12 @@ import { Metadata } from "next"
 import { notFound, redirect } from "next/navigation"
 
 import { sharedMetadata } from "@/app/shared-metadata"
-import { auth } from "@/auth"
 import KYCStatusContainer, {
   KYCStatusTitle,
 } from "@/components/projects/grants/grants/kyc-status/KYCStatusContainer"
-import { getOrganization, getOrganizationKYCTeams } from "@/db/organizations"
-import { getUserOrganizationRole, verifyOrganizationMembership } from "@/lib/actions/utils"
+import { getOrganizationWithClient, getOrganizationKYCTeams } from "@/db/organizations"
+import { getUserOrganizationRole } from "@/lib/actions/utils"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import GrantAddressForm from "./components/GrantAddressForm"
 
@@ -16,7 +16,7 @@ export async function generateMetadata({
 }: {
   params: { organizationId: string }
 }): Promise<Metadata> {
-  const organization = await getOrganization({ id: params.organizationId })
+  const organization = await getOrganizationWithClient({ id: params.organizationId })
   const title = `Profile Organizations: ${
     organization?.name ?? ""
   } | Grant Addresses - OP Atlas`
@@ -39,15 +39,17 @@ export default async function Page({
   params: { organizationId: string }
 }) {
   // Authenticate user
-  const session = await auth()
-  if (!session?.user?.id) {
+  const { db, userId } = await getImpersonationContext()
+  if (!userId) {
     redirect("/")
   }
 
-  const userId = session.user.id
-
   // Check user membership - redirect non-members to homepage
-  const userRole = await getUserOrganizationRole(params.organizationId, userId)
+  const userRole = await getUserOrganizationRole(
+    params.organizationId,
+    userId,
+    db,
+  )
   if (userRole === null) {
     redirect("/")
   }  
@@ -55,12 +57,20 @@ export default async function Page({
   const isAdmin = userRole === "admin"  
 
   // Ensure organization exists
-  const organization = await getOrganization({ id: params.organizationId })
+  const organization = await getOrganizationWithClient(
+    { id: params.organizationId },
+    db,
+  )
   if (!organization) {
     return notFound()
   }
   // Determine if org has any KYC teams with users 
-  const orgKycTeams = await getOrganizationKYCTeams({ organizationId: params.organizationId })
+  const orgKycTeams = await getOrganizationKYCTeams(
+    {
+      organizationId: params.organizationId,
+    },
+    db,
+  )
   const hasAnyKycTeamsWithUsers = orgKycTeams.some(kycOrg => {
     const tamUsers = kycOrg.team.team.flatMap((t: any) => t.users || [])
     return tamUsers.length > 0

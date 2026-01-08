@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 import { ReactNode, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
@@ -60,6 +61,8 @@ const Dashboard = ({
   showCitizenReRegistrationCallout?: boolean
   reRegistrationSeasonName?: string
 }) => {
+  const { data: session } = useSession()
+  const isImpersonating = !!session?.impersonation?.isActive
   // Use last 16 chars of privyDid for user-specific cookie
   const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
   const completeProfileAccordionDismissed = document.cookie.includes(
@@ -200,7 +203,8 @@ const Dashboard = ({
           !!!organizations?.length ||
           !profileInitiallyComplete.current) && (
           <div className="flex flex-col gap-4">
-            {!isCompleteProfileAccordionDismissed &&
+            {!isImpersonating &&
+              !isCompleteProfileAccordionDismissed &&
               !profileInitiallyComplete.current && (
                 <CompleteProfileCallout
                   user={user}
