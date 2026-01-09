@@ -8,7 +8,13 @@ import { useUser } from "@/hooks/db/useUser"
 import { usePrivyLinkTwitter } from "@/hooks/privy/usePrivyLinkTwitter"
 import { cn } from "@/lib/utils"
 
-export const XConnection = ({ userId }: { userId: string }) => {
+export const XConnection = ({
+  userId,
+  readOnly = false,
+}: {
+  userId: string
+  readOnly?: boolean
+}) => {
   const { user: privyUser } = usePrivy()
   const { user, invalidate: invalidateUser } = useUser({
     id: userId,
@@ -48,12 +54,13 @@ export const XConnection = ({ userId }: { userId: string }) => {
         <Button
           variant="secondary"
           onClick={unlinkTwitter}
+          disabled={readOnly}
           className={cn(isSyncing && "opacity-50")}
         >
           Disconnect
         </Button>
       ) : (
-        <Button variant="secondary" onClick={linkTwitter}>
+        <Button variant="secondary" onClick={linkTwitter} disabled={readOnly}>
           Connect
         </Button>
       )}

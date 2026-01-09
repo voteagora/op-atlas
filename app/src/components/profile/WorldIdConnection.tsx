@@ -14,12 +14,14 @@ export function WorldConnection({
   variant = "default",
   className,
   onConnected,
+  readOnly = false,
 }: {
   userId: string
   children: React.ReactNode
   variant?: "default" | "button"
   className?: string
   onConnected?: () => void
+  readOnly?: boolean
 }) {
   const { data: worldId, invalidate } = useUserWorldId({ id: userId, enabled: true })
 
@@ -70,6 +72,16 @@ export function WorldConnection({
         <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
         <p className="text-sm">Verified</p>
       </div>
+    )
+  }
+
+  if (readOnly) {
+    return variant === "button" ? (
+      <Button variant="secondary" disabled className={className}>
+        {children}
+      </Button>
+    ) : (
+      <button disabled>{children}</button>
     )
   }
 
