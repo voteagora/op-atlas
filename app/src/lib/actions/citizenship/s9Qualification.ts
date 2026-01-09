@@ -21,6 +21,7 @@ import {
   serializeTrustScores,
   TrustEvaluationResult,
 } from "@/lib/services/citizenTrust"
+import privy from "@/lib/privy"
 import {
   getActiveSeason,
   getSeasonOrThrow,
@@ -88,10 +89,10 @@ export async function s9Qualification({
   const citizenType = citizenCategory.USER
 
   const wallets = extractUserWallets(user.addresses ?? [])
-  const socialProfiles = buildSocialProfiles({
+  const socialProfiles = await buildSocialProfiles({
     farcasterId: user.farcasterId,
     github: user.github,
-    twitter: user.twitter,
+    privyDid: user.privyDid,
   })
 
   const [kycRecord, worldIdRecord] = await Promise.all([
@@ -361,15 +362,15 @@ function extractUserWallets(
   return Array.from(unique)
 }
 
-function buildSocialProfiles({
+async function buildSocialProfiles({
   farcasterId,
   github,
-  twitter,
+  privyDid,
 }: {
   farcasterId?: string | null
   github?: string | null
-  twitter?: string | null
-}): Array<{ platform: SocialTrustPlatform; identifier: string }> {
+  privyDid?: string | null
+}): Promise<Array<{ platform: SocialTrustPlatform; identifier: string }>> {
   const socials: Array<{ platform: SocialTrustPlatform; identifier: string }> = []
 
   if (farcasterId) {
@@ -380,8 +381,17 @@ function buildSocialProfiles({
     socials.push({ platform: "GITHUB", identifier: github })
   }
 
-  if (twitter) {
-    socials.push({ platform: "X", identifier: twitter })
+  // Fetch Twitter user ID from Privy (OpenRank uses numeric user IDs, not usernames)
+  if (privyDid) {
+    try {
+      const privyUser = await privy.getUser(privyDid)
+      const twitterId = privyUser?.twitter?.subject
+      if (twitterId) {
+        socials.push({ platform: "X", identifier: twitterId })
+      }
+    } catch (error) {
+      console.error("Failed to fetch Privy user for Twitter ID:", error)
+    }
   }
 
   return socials

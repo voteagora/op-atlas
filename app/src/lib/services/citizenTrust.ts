@@ -71,11 +71,13 @@ const WALLET_THRESHOLDS = {
   PLATINUM: 75,
 } as const
 
-const SOCIAL_THRESHOLDS = {
-  BRONZE: 0.2,
-  SILVER: 0.4,
-  GOLD: 0.65,
-  PLATINUM: 0.82,
+// OpenRank uses percentile-based tiers calculated from the score distribution
+// < 50%: Bronze, 50-70%: Silver, 70-90%: Gold, 90%+: Platinum
+const OPENRANK_PERCENTILE_THRESHOLDS = {
+  BRONZE: 0, // >= 0% (any score)
+  SILVER: 50, // >= 50th percentile
+  GOLD: 70, // >= 70th percentile
+  PLATINUM: 90, // >= 90th percentile
 } as const
 
 const WALLET_BATCH_SIZE = 5
@@ -207,7 +209,15 @@ async function evaluateSocialScores({
         identifier,
       })
 
-      const band = mapSocialBand(lookup.score)
+      // Calculate percentile-based band for OpenRank scores
+      let band: TrustBand = "NONE"
+      if (lookup.score !== null) {
+        const percentile = await calculateOpenRankPercentile({
+          seasonId,
+          score: lookup.score,
+        })
+        band = mapPercentileToBand(percentile)
+      }
 
       return {
         platform,
@@ -246,18 +256,6 @@ function mapWalletBand(result: PassportScoreResult): TrustBand {
   return "NONE"
 }
 
-function mapSocialBand(score: number | null): TrustBand {
-  if (score === null) {
-    return "NONE"
-  }
-
-  if (score >= SOCIAL_THRESHOLDS.PLATINUM) return "PLATINUM"
-  if (score >= SOCIAL_THRESHOLDS.GOLD) return "GOLD"
-  if (score >= SOCIAL_THRESHOLDS.SILVER) return "SILVER"
-  if (score >= SOCIAL_THRESHOLDS.BRONZE) return "BRONZE"
-
-  return "NONE"
-}
 
 function mapDecisionToOutcome(
   decision: TrustEvaluationResult["decision"],
@@ -308,4 +306,45 @@ async function mapInBatches<T, R>(
   }
 
   return results
+}
+
+/**
+ * Calculates the percentile rank of a score within the OpenRank distribution for a season.
+ * Returns a value from 0-100 representing what percentage of scores are below the given score.
+ */
+async function calculateOpenRankPercentile({
+  seasonId,
+  score,
+}: {
+  seasonId: string
+  score: number
+}): Promise<number> {
+  const [totalCount, belowCount] = await Promise.all([
+    prisma.openRankSnapshot.count({
+      where: {
+        seasonId,
+        score: { not: null },
+      },
+    }),
+    prisma.openRankSnapshot.count({
+      where: {
+        seasonId,
+        score: { lt: score },
+      },
+    }),
+  ])
+
+  if (totalCount === 0) {
+    return 0
+  }
+
+  return (belowCount / totalCount) * 100
+}
+
+function mapPercentileToBand(percentile: number): TrustBand {
+  if (percentile >= OPENRANK_PERCENTILE_THRESHOLDS.PLATINUM) return "PLATINUM"
+  if (percentile >= OPENRANK_PERCENTILE_THRESHOLDS.GOLD) return "GOLD"
+  if (percentile >= OPENRANK_PERCENTILE_THRESHOLDS.SILVER) return "SILVER"
+  if (percentile >= OPENRANK_PERCENTILE_THRESHOLDS.BRONZE) return "BRONZE"
+  return "NONE"
 }
