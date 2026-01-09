@@ -63,6 +63,8 @@ import { prisma } from "@/db/client"
 import { fetchPassportScore } from "@/lib/integrations/humanPassport"
 import { cn } from "@/lib/utils"
 import { Farcaster, Github, XOptimism } from "@/components/icons/socials"
+import { ADMIN_WALLETS } from "@/lib/auth/adminWallets"
+import { isAdminUser } from "@/lib/auth/adminConfig"
 
 type S9CitizenSeason = NonNullable<Awaited<ReturnType<typeof getCitizenSeasonByUser>>>
 
@@ -477,7 +479,7 @@ async function renderSeasonNinePage({
                 </LinkBox>
               </div>
 
-              {user && (
+              {user && userWallets.some((addr) => ADMIN_WALLETS.includes(addr.toLowerCase())) && (
                 <div className="mt-12">
                   <SeasonNineTestControls
                     userId={user.id}
@@ -547,7 +549,9 @@ async function SeasonNineTestControls({
     entry.address.toLowerCase(),
   )
 
-  const [qualifyingEntries, priorityEntries, testSnapshots] = await Promise.all([
+  const socials = collectUserSocials(userRecord)
+
+  const [qualifyingEntries, priorityEntries, testSnapshots, realSnapshots] = await Promise.all([
     normalizedAddresses.length
       ? prisma.citizenQualifyingUser.findMany({
           where: {
@@ -577,9 +581,19 @@ async function SeasonNineTestControls({
         },
       },
     }),
+    // Query real OpenRank snapshots for the user's social accounts
+    socials.length
+      ? prisma.openRankSnapshot.findMany({
+          where: {
+            seasonId,
+            OR: socials.map((social) => ({
+              platform: social.platform,
+              identifier: social.identifier.toLowerCase().trim(),
+            })),
+          },
+        })
+      : Promise.resolve([]),
   ])
-
-  const socials = collectUserSocials(userRecord)
 
   const hasQualifying = qualifyingEntries.length > 0
   const hasPriority = priorityEntries.length > 0
@@ -666,12 +680,17 @@ async function SeasonNineTestControls({
     normalizedIdentifier: normalizeIdentifier(social.identifier),
   }))
 
+  // Build snapshot map: real data first, then test data overrides
   const snapshotMap = new Map(
-    testSnapshots.map((snapshot) => [
+    realSnapshots.map((snapshot) => [
       `${snapshot.platform}:${snapshot.identifier}`,
       snapshot,
     ]),
   )
+  // Test snapshots override real snapshots
+  for (const snapshot of testSnapshots) {
+    snapshotMap.set(`${snapshot.platform}:${snapshot.identifier}`, snapshot)
+  }
 
   const openRankTierEntries = Object.entries(OPEN_RANK_TIER_OPTIONS) as Array<
     [
@@ -1064,7 +1083,7 @@ async function setSeasonToPriorityPhase(formData: FormData) {
     throw new Error("Missing parameters for season adjustment")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const now = new Date()
   const registrationStartDate = new Date(now.getTime() - 60 * 60 * 1000)
@@ -1095,7 +1114,7 @@ async function setSeasonToGeneralPhase(formData: FormData) {
     throw new Error("Missing parameters for season adjustment")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const now = new Date()
   const registrationStartDate = addDays(now, -7)
@@ -1127,7 +1146,7 @@ async function checkPassportScoreAction(formData: FormData) {
     throw new Error("Missing userId for passport lookup")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const params = new URLSearchParams(existingSearch)
   const keysToReset = [
@@ -1173,7 +1192,7 @@ async function clearSeasonNineData(formData: FormData) {
     throw new Error("Missing parameters for clearing Season 9 data")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const user = await fetchUserForTesting(userId)
   const { normalized, allVariants } = extractAddressVariants(user.addresses)
@@ -1244,7 +1263,7 @@ async function addQualifyingUserEntry(formData: FormData) {
     throw new Error("Missing parameters for qualifying user action")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const user = await fetchUserForTesting(userId)
   const firstAddress = user.addresses[0]?.address
@@ -1282,7 +1301,7 @@ async function addPrioritySnapshotEntry(formData: FormData) {
     throw new Error("Missing parameters for priority snapshot action")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const user = await fetchUserForTesting(userId)
   const firstAddress = user.addresses[0]?.address
@@ -1324,7 +1343,7 @@ async function toggleWorldIdVerification(formData: FormData) {
     throw new Error("Missing userId for World ID action")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const existing = await prisma.userWorldId.findUnique({
     where: {
@@ -1360,7 +1379,7 @@ async function toggleKycRecord(formData: FormData) {
     throw new Error("Missing userId for KYC action")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const links = await prisma.userKYCUser.findMany({
     where: {
@@ -1428,7 +1447,7 @@ async function addBlockedEvaluationRecord(formData: FormData) {
     throw new Error("Missing parameters for evaluation action")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const user = await fetchUserForTesting(userId)
   const wallets = user.addresses.map((entry) => entry.address.toLowerCase())
@@ -1491,7 +1510,7 @@ async function addOpenRankSnapshotsRecord(formData: FormData) {
     throw new Error("Missing social identifier for OpenRank snapshot action")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   const user = await fetchUserForTesting(userId)
   const socials = collectUserSocials(user)
@@ -1553,7 +1572,7 @@ async function removeOpenRankSnapshotsRecord(formData: FormData) {
     throw new Error("Missing parameters for removing OpenRank snapshots")
   }
 
-  await ensureCurrentUser(userId)
+  await ensureAdminUser(userId)
 
   if (platformRaw || identifierRaw) {
     if (
@@ -1594,11 +1613,16 @@ async function removeOpenRankSnapshotsRecord(formData: FormData) {
   await revalidatePath("/citizenship")
 }
 
-async function ensureCurrentUser(userId: string) {
+async function ensureAdminUser(userId: string) {
   const { session } = await getImpersonationContext()
 
   if (!session?.user?.id || session.user.id !== userId) {
     throw new Error("Unauthorized Season 9 test mutation")
+  }
+
+  const isAdmin = await isAdminUser(userId)
+  if (!isAdmin) {
+    throw new Error("Unauthorized - admin access required")
   }
 }
 
