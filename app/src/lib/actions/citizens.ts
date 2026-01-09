@@ -27,6 +27,7 @@ import {
   revokeCitizenAttestation,
 } from "@/lib/eas/serverOnly"
 import { getImpersonationContext, withImpersonation } from "@/lib/db/sessionContext"
+import { getActiveSeason } from "@/lib/seasons"
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
 interface S8QualifyingUser {
@@ -317,6 +318,14 @@ export const attestCitizen = async () =>
       if (!userId) {
         return {
           error: "Unauthorized",
+        }
+      }
+
+      // Block S8 registration when Season 9 is active
+      const activeSeason = await getActiveSeason()
+      if (activeSeason?.id === "9") {
+        return {
+          error: "Season 8 registration is closed. Please use the Season 9 registration flow.",
         }
       }
 

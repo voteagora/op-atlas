@@ -1,10 +1,14 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { CitizenRegistrationStatus } from "@prisma/client"
+import { citizenCategory, CitizenRegistrationStatus } from "@prisma/client"
 
 import { prisma } from "@/db/client"
-import { findBlockedCitizenSeasonEvaluation } from "@/db/citizenSeasons"
+import {
+  countCitizenSeasons,
+  findBlockedCitizenSeasonEvaluation,
+} from "@/db/citizenSeasons"
+import { getSeasonOrThrow } from "@/lib/seasons"
 import { getUserById } from "@/db/users"
 import { updateMailchimpTags } from "@/lib/api/mailchimp"
 import {
@@ -43,6 +47,21 @@ export async function createS9Citizen({
       }
     }
 
+    // Check citizen limit before creating attestation (attestation is on-chain and irreversible)
+    const season = await getSeasonOrThrow(seasonId)
+    if (season.userCitizenLimit) {
+      const currentCount = await countCitizenSeasons({
+        seasonId,
+        type: citizenCategory.USER,
+      })
+      if (currentCount >= season.userCitizenLimit) {
+        return {
+          success: false,
+          error: "Citizen registration limit has been reached for this season",
+        }
+      }
+    }
+
     // Create the attestation
     const attestationId = await createCitizenAttestation({
       to: governanceAddress,
@@ -60,16 +79,41 @@ export async function createS9Citizen({
       }
     }
 
-    // Create CitizenSeason record
-    await prisma.citizenSeason.create({
-      data: {
-        seasonId,
-        userId,
-        governanceAddress,
-        registrationStatus: CitizenRegistrationStatus.ATTESTED,
-        attestationId,
-        trustBreakdown: trustBreakdown || null,
-      },
+    // Use a transaction to ensure both tables are updated atomically
+    await prisma.$transaction(async (tx) => {
+      // Create CitizenSeason record
+      await tx.citizenSeason.create({
+        data: {
+          seasonId,
+          userId,
+          governanceAddress,
+          registrationStatus: CitizenRegistrationStatus.ATTESTED,
+          attestationId,
+          trustBreakdown: trustBreakdown || null,
+        },
+      })
+
+      // Upsert to legacy Citizen table for voting system compatibility
+      await tx.citizen.upsert({
+        where: {
+          userId,
+        },
+        update: {
+          address: governanceAddress,
+          attestationId,
+          type: CITIZEN_TYPES.user,
+          projectId: null,
+          organizationId: null,
+        },
+        create: {
+          userId,
+          address: governanceAddress,
+          attestationId,
+          type: CITIZEN_TYPES.user,
+          projectId: null,
+          organizationId: null,
+        },
+      })
     })
 
     // Update Mailchimp tags if user has an email
