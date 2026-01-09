@@ -413,6 +413,8 @@ export function useS9RegistrationFlow({
       if (attestationResult.success) {
         setStage(RegistrationStage.ResultFinalSuccess)
       } else {
+        // Update result with the actual attestation error so it's displayed
+        setResult((prev) => prev ? { ...prev, message: attestationResult.error } : prev)
         setStage(RegistrationStage.ResultError)
       }
     }, 5000)

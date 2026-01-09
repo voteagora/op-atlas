@@ -27,7 +27,7 @@ export function LinkWalletsStep({
           Link a wallet with Superchain activity
         </h3>
         <div className="text-center text-secondary-foreground underline">
-          <Link href="https://community.optimism.io/citizens-house/citizenship-eligibility-requirements" target="_blank">
+          <Link href="https://docs.optimism.io/governance/gov-faq#how-do-i-become-a-citizen" target="_blank">
             View requirements
           </Link>
         </div>
