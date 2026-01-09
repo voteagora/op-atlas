@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { fetchUser, fetchUserByAddress } from "@/lib/actions/hookFetchers"
@@ -29,10 +30,10 @@ export const useUser = ({
     staleTime: 1000 * 60 * 10, // 10 minutes
   })
 
-  const invalidate = () => {
+  const invalidate = useCallback(() => {
     if (!id) return Promise.resolve()
     return queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY, id] })
-  }
+  }, [id, queryClient])
 
   return { user: data, isLoading, isSuccess, isError, invalidate }
 }

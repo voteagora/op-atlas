@@ -1132,6 +1132,7 @@ export async function updateUser(
     privyDid?: string | null
     discord?: string | null
     github?: string | null
+    twitter?: string | null
     notDeveloper?: boolean
     govForumProfileUrl?: string | null
   },
@@ -1144,6 +1145,78 @@ export async function updateUser(
       emails: true,
     },
   })
+}
+
+export async function updateUserFarcasterId(
+  {
+    userId,
+    farcasterId,
+    name,
+    username,
+    imageUrl,
+    bio,
+  }: {
+    userId: string
+    farcasterId: string | null
+    name?: string | null
+    username?: string | null
+    imageUrl?: string | null
+    bio?: string | null
+  },
+  db: PrismaClient = prisma,
+) {
+  try {
+    // If trying to set a farcasterId (not clearing it)
+    if (farcasterId) {
+      // Check if this farcasterId is already in use by another user
+      const existingUserWithFid = await getUserByFarcasterId(farcasterId, db)
+
+      if (existingUserWithFid && existingUserWithFid.id !== userId) {
+        // Clear the farcasterId from the old user
+        try {
+          await db.user.update({
+            where: { id: existingUserWithFid.id },
+            data: {
+              farcasterId: null,
+              name: null,
+              username: generateTemporaryUsername(
+                existingUserWithFid.privyDid!,
+              ),
+              imageUrl: null,
+              bio: null,
+            },
+          })
+        } catch (clearError) {
+          console.error(
+            `[Auth] Failed to clear farcasterId from old user ${existingUserWithFid.id}:`,
+            clearError,
+          )
+        }
+      }
+    }
+
+    // Now update the target user with the farcasterId
+    return await db.user.update({
+      where: { id: userId },
+      data: {
+        farcasterId,
+        ...(name !== undefined && { name }),
+        ...(username !== undefined && { username }),
+        ...(imageUrl !== undefined && { imageUrl }),
+        ...(bio !== undefined && { bio }),
+      },
+      include: {
+        emails: true,
+        addresses: true,
+      },
+    })
+  } catch (error) {
+    console.error(
+      `[Auth] Failed to update farcasterId for user ${userId}:`,
+      error,
+    )
+    throw error
+  }
 }
 
 export async function createUser(

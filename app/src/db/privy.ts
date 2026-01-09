@@ -17,6 +17,7 @@ import {
   removeUserAddress,
   updateUser,
   updateUserEmail,
+  updateUserFarcasterId,
 } from "./users"
 
 import { linkOrphanedKYCUserToUser } from "./userKyc"
@@ -27,6 +28,9 @@ export const syncPrivyUser = async (
   const existingUser = await getUserByPrivyDid(privyUser.id)
 
   if (!existingUser) {
+    console.error(
+      `[Auth] No existing user found for Privy DID ${privyUser.id}`,
+    )
     return null
   }
 
@@ -54,31 +58,40 @@ export const syncPrivyUser = async (
     privyUser?.farcaster &&
     privyUser?.farcaster?.fid !== Number(existingUser.farcasterId)
   ) {
-    await updateUser({
-      id: existingUser.id,
-      farcasterId: String(privyUser.farcaster.fid),
-      privyDid: privyUser.id,
-      name: privyUser.farcaster.displayName || null,
-      username: privyUser.farcaster.username || null,
-      imageUrl: privyUser.farcaster.pfp || null,
-      bio: privyUser.farcaster.bio || null,
-    })
+    try {
+      await updateUserFarcasterId({
+        userId: existingUser.id,
+        farcasterId: String(privyUser.farcaster.fid),
+        name: privyUser.farcaster.displayName || null,
+        username: privyUser.farcaster.username || null,
+        imageUrl: privyUser.farcaster.pfp || null,
+        bio: privyUser.farcaster.bio || null,
+      })
+    } catch (error) {
+      console.error(
+        `[Auth] Failed to link Farcaster account (FID: ${privyUser.farcaster.fid}) to user ${existingUser.id}:`,
+        error,
+      )
+      // Don't throw - allow login to continue even if Farcaster link fails
+    }
   }
 
   // If farcaster was previously linked but now removed from privy, clear farcaster data
   if (!privyUser?.farcaster && existingUser.farcasterId) {
     try {
-      await updateUser({
-        id: existingUser.id,
+      await updateUserFarcasterId({
+        userId: existingUser.id,
         farcasterId: null,
         name: null,
-        // Reset username to a temporary one
         username: generateTemporaryUsername(existingUser.privyDid!),
         imageUrl: null,
         bio: null,
       })
     } catch (error) {
-      console.error("Failed to remove farcaster data:", error)
+      console.error(
+        `[Auth] Failed to clear farcasterId from user ${existingUser.id}:`,
+        error,
+      )
     }
   }
 
@@ -154,12 +167,20 @@ export const syncPrivyUser = async (
     }
   }
 
-  // Update Discord and Github
-  await updateUser({
-    id: existingUser.id,
-    discord: privyUser?.discord?.username || null,
-    github: privyUser?.github?.username || null,
-  })
+  // Update Discord, Github, and Twitter
+  try {
+    await updateUser({
+      id: existingUser.id,
+      discord: privyUser?.discord?.username || null,
+      github: privyUser?.github?.username || null,
+      twitter: privyUser?.twitter?.username || null,
+    })
+  } catch (error) {
+    console.error(
+      `[Auth] Failed to update social accounts for user ${existingUser.id}:`,
+      error,
+    )
+  }
 
   return await getUserById(existingUser.id)
 }

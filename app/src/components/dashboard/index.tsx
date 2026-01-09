@@ -8,6 +8,7 @@ import { ReactNode, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { Callout } from "@/components/common/Callout"
 import { unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
@@ -46,6 +47,8 @@ const Dashboard = ({
   adminProjects,
   kycTeams,
   userKYCStatus,
+  showCitizenReRegistrationCallout = false,
+  reRegistrationSeasonName,
 }: {
   className?: string
   user: UserWithAddresses
@@ -55,6 +58,8 @@ const Dashboard = ({
   adminProjects: ProjectWithDetails[]
   kycTeams?: UserKYCTeam[]
   userKYCStatus?: UserKYCStatus
+  showCitizenReRegistrationCallout?: boolean
+  reRegistrationSeasonName?: string
 }) => {
   const { data: session } = useSession()
   const isImpersonating = !!session?.impersonation?.isActive
@@ -101,6 +106,24 @@ const Dashboard = ({
       profileInitiallyComplete.current = false
     }
   }, [user])
+
+  if (showCitizenReRegistrationCallout) {
+    const seasonLabel = reRegistrationSeasonName ?? "Season 9"
+    cardComponents.push(
+      <Callout
+        key="citizen-re-registration"
+        type="info"
+        leftAlignedContent={
+          <p className="ml-2 text-sm font-normal text-blue-800">
+            To continue your citizenship, you must re-register for {seasonLabel}.{" "}
+            <Link href="/citizenship" className="underline">
+              See details
+            </Link>
+          </p>
+        }
+      />,
+    )
+  }
 
   const handleShowMore = () => {
     setVisibleCardsCount((prevCount) =>
