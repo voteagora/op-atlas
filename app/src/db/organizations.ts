@@ -739,6 +739,8 @@ export async function createOrganizationKycTeam(
   db: PrismaClient = prisma,
 ) {
   try {
+    const normalizedAddress = walletAddress.toLowerCase()
+
     const [orgProjects, orgProjectWithDeletedKycTeam] = await Promise.all([
       db.projectOrganization.findMany({
         where: {
@@ -796,21 +798,41 @@ export async function createOrganizationKycTeam(
       }),
     ])
 
-    // This means that user has recently stopped one of their streams
-    // and needs to create a new kyc team for the same stream
-    // and connect all projects to the same kyc team
     let createdKycTeam: { id: string; walletAddress: string }
 
     if (orgProjectWithDeletedKycTeam.length > 0) {
       createdKycTeam = await db.$transaction(async (tx) => {
+        // Check if there's a soft-deleted KYCTeam with the same wallet address.
+        // This handles the case where a user "starts over" but wants to reuse the same address
+        const existingSoftDeletedTeam = await tx.kYCTeam.findFirst({
+          where: {
+            walletAddress: normalizedAddress,
+            deletedAt: { not: null },
+          },
+          select: { id: true },
+        })
+
+        // If found, free up the wallet address by setting a placeholder.
+        if (existingSoftDeletedTeam) {
+          await tx.kYCTeam.update({
+            where: { id: existingSoftDeletedTeam.id },
+            data: {
+              walletAddress: `_deleted_${existingSoftDeletedTeam.id}`,
+            },
+          })
+        }
+
         const kycTeam = await tx.kYCTeam.create({
           data: {
-            walletAddress: walletAddress.toLowerCase(),
+            walletAddress: normalizedAddress,
           },
         })
 
+        // Note: SuperfluidStreams are linked to KYCTeam via receiver -> walletAddress,
+        // so they automatically follow when we assign the walletAddress to the new team.
+
         await Promise.all([
-          // Connect all streams to the new kyc team
+          // Connect all reward streams to the new kyc team
           tx.rewardStream.updateMany({
             where: {
               id: {
@@ -855,9 +877,29 @@ export async function createOrganizationKycTeam(
       })
     } else {
       createdKycTeam = await db.$transaction(async (tx) => {
+        // Check if there's a soft-deleted KYCTeam with the same wallet address.
+        // This handles the case where a user "starts over" but wants to reuse the same address
+        const existingSoftDeletedTeam = await tx.kYCTeam.findFirst({
+          where: {
+            walletAddress: normalizedAddress,
+            deletedAt: { not: null },
+          },
+          select: { id: true },
+        })
+
+        // If found, free up the wallet address by setting a placeholder.
+        if (existingSoftDeletedTeam) {
+          await tx.kYCTeam.update({
+            where: { id: existingSoftDeletedTeam.id },
+            data: {
+              walletAddress: `_deleted_${existingSoftDeletedTeam.id}`,
+            },
+          })
+        }
+
         const kycTeam = await tx.kYCTeam.create({
           data: {
-            walletAddress: walletAddress.toLowerCase(),
+            walletAddress: normalizedAddress,
           },
         })
 
