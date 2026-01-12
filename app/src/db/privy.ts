@@ -14,6 +14,7 @@ import {
   deleteUserEmails,
   getUserById,
   getUserByPrivyDid,
+  markUserEmailVerified,
   removeUserAddress,
   updateUser,
   updateUserEmail,
@@ -125,15 +126,22 @@ export const syncPrivyUser = async (
     }
   }
 
-  const privyEmail = privyUser?.email
-    ? privyUser?.email?.address?.toLowerCase()
-    : null
+  const privyEmail = privyUser?.email?.address?.toLowerCase() ?? null
+  // Check latestVerifiedAt from linkedAccounts to confirm email is verified in Privy
+  const privyEmailAccount = privyUser?.linkedAccounts?.find(
+    (account) => account.type === "email",
+  )
+  const privyEmailVerified =
+    privyEmailAccount && "latestVerifiedAt" in privyEmailAccount
+      ? Boolean(privyEmailAccount.latestVerifiedAt)
+      : false
   const dbEmail = existingUser?.emails[0]?.email
     ? existingUser.emails[0].email.toLowerCase()
     : null
+  const dbEmailVerified = existingUser?.emails[0]?.verified ?? false
 
   //  Add new or update existing email
-  if (privyEmail && privyEmail !== dbEmail) {
+  if (privyEmail && privyEmailVerified && privyEmail !== dbEmail) {
     try {
       await updateUserEmail({
         id: existingUser.id,
@@ -153,6 +161,15 @@ export const syncPrivyUser = async (
       }
     } catch (error) {
       console.error("Failed to update email:", error)
+    }
+  } else if (privyEmail && privyEmailVerified && privyEmail === dbEmail && !dbEmailVerified) {
+    // Email matches but is not verified in DB - mark it as verified
+    // This handles cases where the email was added through a different flow
+    // and never marked as verified, but Privy has it verified
+    try {
+      await markUserEmailVerified(privyEmail)
+    } catch (error) {
+      console.error("Failed to verify existing email:", error)
     }
   }
 

@@ -448,6 +448,16 @@ export async function updateUserEmail(
   }
 }
 
+export async function markUserEmailVerified(
+  email: string,
+  db: PrismaClient = prisma,
+) {
+  return db.userEmail.update({
+    where: { email: email.toLowerCase() },
+    data: { verified: true },
+  })
+}
+
 export async function addUserAddresses(
   {
     id,
