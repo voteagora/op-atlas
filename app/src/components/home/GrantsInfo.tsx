@@ -181,7 +181,11 @@ export const GrantsInfo = () => {
       >
         <Carousel setApi={setApi} className="w-full">
           <CarouselContent className="">
-            {MISSIONS.map((mission, index) => (
+            {MISSIONS.filter(
+              (mission) =>
+                !mission.name.includes("Dev Tooling") &&
+                !mission.name.includes("Onchain Builders"),
+            ).map((mission, index) => (
               <CarouselItem key={index} className="basis-full">
                 {renderMission(mission)}
               </CarouselItem>
@@ -200,7 +204,11 @@ export const GrantsInfo = () => {
 
       {/* Desktop Grid */}
       <div className="hidden md:grid grid-cols-3 gap-4 w-full">
-        {MISSIONS.map((mission) => renderMission(mission))}
+        {MISSIONS.filter(
+          (mission) =>
+            !mission.name.includes("Dev Tooling") &&
+            !mission.name.includes("Onchain Builders"),
+        ).map((mission) => renderMission(mission))}
       </div>
     </div>
   )
