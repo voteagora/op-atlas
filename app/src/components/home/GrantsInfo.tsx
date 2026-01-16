@@ -103,18 +103,32 @@ export const GrantsInfo = () => {
   }
 
   const renderMission = (mission: MissionData) => {
+    let missionOpen =
+      mission.startsAt < new Date() && mission.endsAt > new Date()
+    if (mission.pageName === "foundation-missions" && data) {
+      missionOpen = data?.AreMissionsOpen
+    }
+    const Element = missionOpen ? TrackedLink : "div"
+
     return (
-      <TrackedLink
-        className="h-[344px] px-7 py-8 bg-background rounded-xl border border-tertiary inline-flex flex-col justify-between items-start text-secondary-foreground hover:bg-[#F2F3F8] cursor-pointer group"
+      <Element
+        className={cn(
+          "h-[344px] px-7 py-8 bg-background rounded-xl border border-tertiary inline-flex flex-col justify-between items-start text-secondary-foreground group",
+          missionOpen ? "hover:bg-[#F2F3F8] cursor-pointer" : "opacity-80",
+        )}
         key={mission.name}
-        href={`/missions/${mission.pageName}`}
-        eventName="Link Click"
-        eventData={{
-          source: "home_page",
-          linkName: mission.name,
-          linkUrl: `/missions/${mission.pageName}`,
-          category: "Grants",
-        }}
+        {...(missionOpen
+          ? {
+              href: `/missions/${mission.pageName}`,
+              eventName: "Link Click",
+              eventData: {
+                source: "home_page",
+                linkName: mission.name,
+                linkUrl: `/missions/${mission.pageName}`,
+                category: "Grants",
+              },
+            }
+          : {})}
       >
         <div className="flex flex-col items-start gap-6">
           <div className="self-stretch h-7 inline-flex justify-between items-center">
@@ -122,7 +136,12 @@ export const GrantsInfo = () => {
             {renderStatusPill(mission)}
           </div>
           <div className="flex flex-col gap-2">
-            <div className="text-text-default text-xl font-normal leading-7 group-hover:underline">
+            <div
+              className={cn(
+                "text-text-default text-xl font-normal leading-7",
+                missionOpen ? "group-hover:underline" : "",
+              )}
+            >
               {mission.name === "Onchain Builders" ||
               mission.name === "Dev Tooling"
                 ? `Retro Funding: ${mission.name}`
@@ -132,45 +151,16 @@ export const GrantsInfo = () => {
               {mission.shortDescription}
             </div>
           </div>
-          {/* <div className="self-stretch h-px border border-tertiary" />
-          <div className="self-stretch flex flex-col justify-start items-start gap-3">
-            {missionsMap[mission.pageName].bestFor && (
-              <div className="inline-flex justify-start items-center gap-3">
-                <UserFill className="w-[18px] h-[18px]" />
-                <div className="text-center justify-start  text-sm font-normal leading-tight">
-                  Best for {missionsMap[mission.pageName].bestFor}
-                </div>
-              </div>
-            )}
-            {mission.applyBy && (
-              <div className="inline-flex justify-start items-center gap-3">
-                <CalendarEventFill className="w-[18px] h-[18px]" />
-                <div className="text-center justify-start  text-sm font-normal leading-tight">
-                  {`Apply by ${format(mission.applyBy, "MMM d")}`}
-                </div>
-              </div>
-            )}
-            <div className="inline-flex justify-start items-center gap-3">
-              <Image
-                className="w-[18px] h-[18px] rounded-xl"
-                src="/assets/icons/op-icon.svg"
-                alt="OP"
-                width={18}
-                height={18}
-              />
-              <div className="text-center justify-start  text-sm font-normal leading-tight">
-                Up to 55K each
-              </div>
+        </div>
+        {missionOpen && (
+          <div className="self-stretch inline-flex justify-end items-center gap-1.5">
+            <div className="justify-start  text-sm font-normal leading-tight">
+              Get started
             </div>
-          </div> */}
-        </div>
-        <div className="self-stretch inline-flex justify-end items-center gap-1.5">
-          <div className="justify-start  text-sm font-normal leading-tight">
-            Get started
+            <ArrowRightS className="w-4 h-4" />
           </div>
-          <ArrowRightS className="w-4 h-4" />
-        </div>
-      </TrackedLink>
+        )}
+      </Element>
     )
   }
 
