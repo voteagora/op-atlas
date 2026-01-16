@@ -86,59 +86,79 @@ export function HowItWorks() {
       >
         <Carousel setApi={setApi} opts={carouselOpts}>
           <CarouselContent className="-ml-3">
-            {steps.map((step, index) => (
-              <CarouselItem
-                key={index}
-                className={cn(
-                  "pl-3",
-                  shouldShowPartialNextCard
-                    ? "basis-1/2 md:basis-[32%]"
-                    : "basis-1/2 md:basis-1/3",
-                )}
-              >
-                <div className="h-[100%] md:h-[350px] p-6 bg-[#F2F3F8] rounded-xl flex flex-col justify-between">
-                  <div className="flex flex-col gap-2">
-                    <h1 className="text-callout-foreground text-4xl font-normal">
-                      {step.number}
-                    </h1>
-                    <p className="text-base font-normal">{step.title}</p>
-                    {step.description && (
-                      <p className="text-secondary-foreground text-base">
-                        {step.description}
-                      </p>
-                    )}
-                  </div>
-                  {step.subDetails && (
-                    <div className="mt-auto pt-4">
-                      {step.enforceSignIn ? (
-                        <button
-                          type="button"
-                          className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-none p-0 text-left"
-                          onClick={() => loginEnforced(step)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault()
-                              loginEnforced(step)
-                            }
-                          }}
-                        >
-                          {step.subDetails}
-                          <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
-                        </button>
-                      ) : (
-                        <ExternalLink
-                          href={step.subDetailsLink || "#"}
-                          className="text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline"
-                        >
-                          {step.subDetails}
-                          <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
-                        </ExternalLink>
+            {steps.map((step, index) => {
+              const missionIsOpen =
+                mission &&
+                mission?.startsAt &&
+                new Date() > mission?.startsAt &&
+                mission?.endsAt &&
+                new Date() < mission?.endsAt
+
+              const isDisabled = !missionIsOpen
+
+              return (
+                <CarouselItem
+                  key={index}
+                  className={cn(
+                    "pl-3",
+                    shouldShowPartialNextCard
+                      ? "basis-1/2 md:basis-[32%]"
+                      : "basis-1/2 md:basis-1/3",
+                  )}
+                >
+                  <div className="h-[100%] md:h-[350px] p-6 bg-[#F2F3F8] rounded-xl flex flex-col justify-between">
+                    <div className="flex flex-col gap-2">
+                      <h1 className="text-callout-foreground text-4xl font-normal">
+                        {step.number}
+                      </h1>
+                      <p className="text-base font-normal">{step.title}</p>
+                      {step.description && (
+                        <p className="text-secondary-foreground text-base">
+                          {step.description}
+                        </p>
                       )}
                     </div>
-                  )}
-                </div>
-              </CarouselItem>
-            ))}
+                    {step.subDetails && (
+                      <div className="mt-auto pt-4">
+                        {step.enforceSignIn ? (
+                          <button
+                            type="button"
+                            disabled={isDisabled}
+                            className={cn(
+                              "text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline cursor-pointer bg-transparent border-none p-0 text-left",
+                              isDisabled &&
+                                "opacity-50 cursor-not-allowed hover:no-underline pointer-events-none",
+                            )}
+                            onClick={() => loginEnforced(step)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault()
+                                loginEnforced(step)
+                              }
+                            }}
+                          >
+                            {step.subDetails}
+                            <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
+                          </button>
+                        ) : (
+                          <ExternalLink
+                            href={step.subDetailsLink || "#"}
+                            className={cn(
+                              "text-secondary-foreground text-sm inline-flex items-center gap-1 hover:underline",
+                              isDisabled &&
+                                "opacity-50 cursor-not-allowed hover:no-underline pointer-events-none",
+                            )}
+                          >
+                            {step.subDetails}
+                            <ArrowRightNew className="fill-secondary-foreground h-3 w-3 pl-1" />
+                          </ExternalLink>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </CarouselItem>
+              )
+            })}
           </CarouselContent>
         </Carousel>
 
