@@ -21,10 +21,6 @@ export default function Header() {
     missioName = `Retro Funding: ${mission.name}`
   }
 
-  if (mission?.pageName === "foundation-missions" && data) {
-    isOpenForEnrollment = data?.AreMissionsOpen
-  }
-
   return (
     <>
       <div>

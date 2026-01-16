@@ -77,9 +77,6 @@ export const GrantsInfo = () => {
   const renderStatusPill = (mission: MissionData) => {
     let missionOpen =
       mission.startsAt < new Date() && mission.endsAt > new Date()
-    if (mission.pageName === "foundation-missions" && data) {
-      missionOpen = data?.AreMissionsOpen
-    }
 
     let status = {
       text: missionOpen ? "Open" : "Closed",
@@ -105,9 +102,7 @@ export const GrantsInfo = () => {
   const renderMission = (mission: MissionData) => {
     let missionOpen =
       mission.startsAt < new Date() && mission.endsAt > new Date()
-    if (mission.pageName === "foundation-missions" && data) {
-      missionOpen = data?.AreMissionsOpen
-    }
+
     const content = (
       <>
         <div className="flex flex-col items-start gap-6">
