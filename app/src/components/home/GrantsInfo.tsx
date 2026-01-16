@@ -108,28 +108,8 @@ export const GrantsInfo = () => {
     if (mission.pageName === "foundation-missions" && data) {
       missionOpen = data?.AreMissionsOpen
     }
-    const Element = missionOpen ? TrackedLink : "div"
-
-    return (
-      <Element
-        className={cn(
-          "h-[344px] px-7 py-8 bg-background rounded-xl border border-tertiary inline-flex flex-col justify-between items-start text-secondary-foreground group",
-          missionOpen ? "hover:bg-[#F2F3F8] cursor-pointer" : "opacity-80",
-        )}
-        key={mission.name}
-        {...(missionOpen
-          ? {
-              href: `/missions/${mission.pageName}`,
-              eventName: "Link Click",
-              eventData: {
-                source: "home_page",
-                linkName: mission.name,
-                linkUrl: `/missions/${mission.pageName}`,
-                category: "Grants",
-              },
-            }
-          : {})}
-      >
+    const content = (
+      <>
         <div className="flex flex-col items-start gap-6">
           <div className="self-stretch h-7 inline-flex justify-between items-center">
             <div className="w-7 h-7">{missionsMap[mission.pageName].icon}</div>
@@ -160,7 +140,35 @@ export const GrantsInfo = () => {
             <ArrowRightS className="w-4 h-4" />
           </div>
         )}
-      </Element>
+      </>
+    )
+
+    if (missionOpen) {
+      return (
+        <TrackedLink
+          className="h-[344px] px-7 py-8 bg-background rounded-xl border border-tertiary inline-flex flex-col justify-between items-start text-secondary-foreground hover:bg-[#F2F3F8] cursor-pointer group"
+          key={mission.name}
+          href={`/missions/${mission.pageName}`}
+          eventName="Link Click"
+          eventData={{
+            source: "home_page",
+            linkName: mission.name,
+            linkUrl: `/missions/${mission.pageName}`,
+            category: "Grants",
+          }}
+        >
+          {content}
+        </TrackedLink>
+      )
+    }
+
+    return (
+      <div
+        className="h-[344px] px-7 py-8 bg-background rounded-xl border border-tertiary inline-flex flex-col justify-between items-start text-secondary-foreground group opacity-60"
+        key={mission.name}
+      >
+        {content}
+      </div>
     )
   }
 
