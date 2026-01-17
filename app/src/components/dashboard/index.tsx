@@ -199,92 +199,115 @@ const Dashboard = ({
         )}
         <ProfileDetailCard user={user} userKYCStatus={userKYCStatus} />
 
-        {(!projects.length ||
-          !!!organizations?.length ||
-          !profileInitiallyComplete.current) && (
-          <div className="flex flex-col gap-4">
-            {!isImpersonating &&
-              !isCompleteProfileAccordionDismissed &&
-              !profileInitiallyComplete.current && (
-                <CompleteProfileCallout
-                  user={user}
-                  setIsCompleteProfileAccordionDismissed={
-                    setIsCompleteProfileAccordionDismissed
-                  }
-                />
-              )}
-            {!organizations?.length && (
-              <MakeFirstOrganization
-                onClick={() => setShowCreateOrganizationDialog(true)}
+        {!isImpersonating &&
+          !isCompleteProfileAccordionDismissed &&
+          !profileInitiallyComplete.current && (
+            <CompleteProfileCallout
+              user={user}
+              setIsCompleteProfileAccordionDismissed={
+                setIsCompleteProfileAccordionDismissed
+              }
+            />
+          )}
+
+        <div id="your-projects" className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <h3>Your Projects</h3>
+
+            <Button
+              className="flex items-center gap-2"
+              variant="secondary"
+              onClick={() => (window.location.href = "/projects/new")}
+            >
+              <Image
+                src="/assets/icons/plus.svg"
+                width={9}
+                height={9}
+                alt="Plus"
               />
-            )}
-
-            {!projects.length && !organizations?.length && (
-              <Link href="/projects/new">
-                <AddFirstProject />
-              </Link>
-            )}
+              Create project
+            </Button>
           </div>
-        )}
 
-        {projects.length > 0 && (
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <h3>Your projects</h3>
-
-              <Button
-                className="flex items-center gap-2"
-                variant="secondary"
-                onClick={() => (window.location.href = "/projects/new")}
-              >
-                <Image
-                  src="/assets/icons/plus.svg"
-                  width={9}
-                  height={9}
-                  alt="Plus"
-                />
-                Add project
-              </Button>
-            </div>
-
-            {projects.map((project) => (
+          {projects.length > 0 ? (
+            projects.map((project) => (
               <UserProjectCard
                 key={project.id}
                 project={project}
                 applications={applications}
               />
-            ))}
-          </div>
-        )}
+            ))
+          ) : organizations?.some(
+              (organization) =>
+                (organization.organization.projects?.length ?? 0) > 0,
+            ) ? (
+            <p className="text-sm text-secondary-foreground">
+              Projects in your organizations appear below.
+            </p>
+          ) : (
+            <Link href="/projects/new">
+              <AddFirstProject />
+            </Link>
+          )}
+        </div>
 
-        {organizations?.map((organization) => {
-          return (
-            <div key={organization.id} className="flex flex-col gap-4">
-              <UserOrganizationInfoRow
-                user={user}
-                organization={organization}
+        <div id="your-organizations" className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <h3>Your Organizations</h3>
+
+            <Button
+              className="flex items-center gap-2"
+              variant="secondary"
+              onClick={() => setShowCreateOrganizationDialog(true)}
+            >
+              <Image
+                src="/assets/icons/plus.svg"
+                width={9}
+                height={9}
+                alt="Plus"
               />
+              Create organization
+            </Button>
+          </div>
 
-              {organization.organization.projects?.length > 0 ? (
-                <>
-                  {organization.organization.projects?.map((project) => (
-                    <UserProjectCard
-                      key={project.id}
-                      project={project.project as unknown as ProjectWithDetails}
-                      applications={applications}
-                    />
-                  ))}
-                </>
-              ) : (
-                <Link
-                  href={`/projects/new?orgId=${organization.organizationId}`}
-                >
-                  <AddFirstOrganizationProject />
-                </Link>
-              )}
-            </div>
-          )
-        })}
+          {organizations?.length ? (
+            organizations.map((organization) => {
+              return (
+                <div key={organization.id} className="flex flex-col gap-4">
+                  <UserOrganizationInfoRow
+                    user={user}
+                    organization={organization}
+                  />
+
+                  {organization.organization.projects?.length > 0 ? (
+                    <>
+                      {organization.organization.projects?.map((project) => (
+                        <UserProjectCard
+                          key={project.id}
+                          project={
+                            project.project as unknown as ProjectWithDetails
+                          }
+                          applications={applications}
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    <Link
+                      href={`/projects/new?orgId=${organization.organizationId}`}
+                    >
+                      <AddFirstOrganizationProject />
+                    </Link>
+                  )}
+                </div>
+              )
+            })
+          ) : (
+            <MakeFirstOrganization
+              onClick={() => setShowCreateOrganizationDialog(true)}
+            />
+          )}
+        </div>
+
         {SHOW_APPLICATIONS && (
           <div className="flex flex-col gap-y-6">
             <h3>Your Retro Funding applications</h3>

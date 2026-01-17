@@ -1,7 +1,7 @@
 "use client"
 
 import { Project } from "@prisma/client"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Plus } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -34,9 +34,7 @@ import { resolveProjectStatus } from "@/lib/utils/kyc"
 import { RecurringRewardsByRound } from "@/lib/utils/rewards"
 
 import ExternalLink from "../ExternalLink"
-import { Separator } from "../ui/separator"
 
-// Helper function to count unclaimed rewards
 const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
   if (!project) return 0
   return project.rewards.filter(
@@ -48,16 +46,26 @@ const getUnclaimedRewardsCount = (project: ProjectWithFullDetails | null) => {
   ).length
 }
 
+const getDisplayName = (option: string) => {
+  if (option === "Repos") return "Repos & Links"
+  if (option === "Grants") return "Pricing & Grants"
+  return option
+}
+
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
   team,
   contracts,
   recurringRewards,
+  switcherProjects = [],
+  switcherOrganizations = [],
 }: {
   project: ProjectWithFullDetails | null
   team: ProjectTeam
   contracts: ProjectContracts | null
   recurringRewards?: RecurringRewardsByRound[]
+  switcherProjects?: { id: string; name: string }[]
+  switcherOrganizations?: { id: string; name: string }[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -94,15 +102,23 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   const currentPage = pathname.split("/").slice(-1)[0]
   const hasNotBeenPublished = project ? project?.snapshots.length === 0 : true
 
+  const otherProjects = useMemo(() => {
+    if (!project?.id) return switcherProjects
+    return switcherProjects.filter((p) => p.id !== project.id)
+  }, [project?.id, switcherProjects])
+
+  const hasRewardsBadge =
+    unclaimedCount > 0 || (recurringRewards && recurringRewards.length > 0)
+
   return (
-    <div className="sm:flex flex-col gap-4 items-start hidden md:w-full md:max-w-[228px]">
+    <div className="sm:flex flex-col gap-y-6 items-start hidden w-full max-w-[228px]">
       <Button
         isLoading={dashboardLoading}
         onClick={handleGoBack}
         variant="ghost"
-        className="text-sm font-normal !p-0 ml-2"
+        className="text-sm font-normal text-secondary-foreground !p-0 justify-start"
       >
-        {project?.organization?.organization?.name ?? "Your projects"}
+        Dashboard
         <Image
           src="/assets/icons/arrow-left.svg"
           height={8}
@@ -112,136 +128,190 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
         />
       </Button>
 
-      <h2 className="max-w-48 line-clamp-2 text-2xl font-normal text-secondary-foreground pl-2">
-        {project?.name ?? "New project"}
-      </h2>
-
-      {hasNotBeenPublished && (
-        <div className="flex flex-col gap-2 pl-2">
-          <Progress value={progressPercent} className="w-[220px] h-2" />
-          <p className="text-sm font-normal">{progressPercent}% complete</p>
+      <div className="w-full">
+        <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground line-clamp-2">
+          {project?.name ?? "New Project"}
         </div>
-      )}
 
-      <div className="w-full gap-2">
-        {Object.values(ProjectSection).map((option, index) => (
-          <div
-            key={index}
-            className="text-sm text-secondary-foreground flex-row gap-2 px-2 py-1.5 rounded-md hover:bg-tertiary w-full"
-          >
-            {project ? (
+        {hasNotBeenPublished && (
+          <div className="flex flex-col gap-1.5 pt-3.5">
+            <Progress value={progressPercent} className="w-full h-2" />
+            <p className="text-sm font-normal text-secondary-foreground">
+              {progressPercent}% complete
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-col space-y-1.5 py-3.5 text-secondary-foreground text-sm">
+          {Object.values(ProjectSection).map((option) => {
+            const isActive = currentPage === option.toLowerCase()
+            const isCompleted = completedSections.includes(option)
+
+            return project ? (
               <Link
+                key={option}
                 href={`/projects/${project.id}/${option.toLowerCase()}`}
                 className={cn(
-                  "flex items-center justify-start gap-2",
-                  currentPage === option.toLowerCase()
-                    ? "font-normal text-foreground"
-                    : "",
+                  "flex gap-2 items-center",
+                  isActive && "text-foreground font-medium",
                 )}
               >
-                <div className="w-4 flex justify-center">
-                  {completedSections.includes(option) ? (
+                <div
+                  className={cn(
+                    "w-4 h-4 flex items-center justify-center shrink-0",
+                    !isActive && !isCompleted && "invisible",
+                  )}
+                >
+                  {isCompleted ? (
                     <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
                   ) : (
-                    <Image
-                      src="/assets/icons/circle-fill.svg"
-                      width={6.67}
-                      height={6.67}
-                      alt="Dot"
-                    />
+                    <span className="text-muted-foreground">•</span>
                   )}
                 </div>
-                {option === "Repos"
-                  ? "Repos & Links"
-                  : option === "Grants"
-                  ? "Pricing & Grants"
-                  : option}
+                {getDisplayName(option)}
               </Link>
             ) : (
-              <div className="flex justify-start items-center gap-2">
-                <div className="w-4 flex justify-center">
-                  <Image
-                    src="/assets/icons/circle-fill.svg"
-                    width={6.67}
-                    height={6.67}
-                    alt="Dot"
-                  />
+              <div key={option} className="flex gap-2 items-center">
+                <div className="w-4 h-4 flex items-center justify-center shrink-0 invisible">
+                  <span>•</span>
                 </div>
-
-                <p className="text-sm">{option}</p>
+                {getDisplayName(option)}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="w-full flex flex-col gap-2 px-2">
-        <Separator />
-        {project && (
-          <>
-            <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
+            )
+          })}
+
+          {project && (
+            <>
               <Link
-                className={cn([
-                  {
-                    "font-normal text-foreground": currentPage === "rewards",
-                  },
-                ])}
                 href={`/projects/${project.id}/rewards`}
+                className={cn(
+                  "flex gap-2 items-center",
+                  currentPage === "rewards" && "text-foreground font-medium",
+                )}
               >
-                Rewards
+                <span>Rewards</span>
+                {hasRewardsBadge && (
+                  <div className="text-xs font-normal text-red-600 bg-red-200 rounded-md px-2 py-0.5">
+                    {unclaimedCount + (recurringRewards?.length ?? 0)}
+                  </div>
+                )}
               </Link>
-              {(unclaimedCount > 0 ||
-                (recurringRewards && recurringRewards.length > 0)) && (
-                <div className="text-xs font-normal text-red-600 bg-red-200 rounded-md px-2 py-0.5">
-                  {unclaimedCount + (recurringRewards?.length ?? 0)}
-                </div>
-              )}
-            </div>
-            <div className="w-full px-2 py-1.5 text-sm text-secondary-foreground flex items-center gap-2 hover:bg-tertiary hover:rounded-md hover:text-muted-foreground">
+
               <Link
-                className={cn([
-                  {
-                    "font-normal text-foreground overflow-hidden text-ellipsis whitespace-nowrap":
-                      currentPage === "grant-address",
-                  },
-                ])}
                 href={`/projects/${project.id}/grant-address`}
+                className={cn(
+                  "flex gap-2 items-center",
+                  currentPage === "grant-address" &&
+                    "text-foreground font-medium",
+                )}
               >
-                Grant Delivery Address
+                <span className="truncate">Grant Address</span>
+                <IncompleteCard project={project} />
+                <ExpiredBadge project={project} />
               </Link>
-              {/* Only shows if Project status resolves to 'PENDING' */}
-              <IncompleteCard project={project} />
-              <ExpiredBadge project={project} />
-            </div>
-            <Separator />
-          </>
-        )}
-      </div>
-      <div className="flex flex-col w-full ml-2">
-        <ExternalLink
-          className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary flex space-x-1 items-center"
-          href={`/project/${project?.id}`}
-        >
-          <span>View project</span>
-          <ChevronRight size={16} />
-        </ExternalLink>
-        <ExternalLink
-          className="text-sm text-secondary-foreground font-normal px-2 py-1.5 w-full rounded-md hover:bg-tertiary flex space-x-1 items-center"
-          href="https://discord.gg/tGyeUqRqgE"
-        >
-          <span>Get help</span>
-          <ChevronRight size={16} />
-        </ExternalLink>
-        {project && isAdmin && (
-          <Button
-            type="button"
-            variant="ghost"
-            className=" justify-start px-2 py-1.5 font-normal text-sm text-secondary-foreground w-full rounded-md hover:opacity-100 hover:bg-tertiary"
-            style={{ height: "unset" }}
-            onClick={() => setDeletingProject(true)}
+            </>
+          )}
+        </div>
+
+        <div className="flex flex-col space-y-1.5 pt-3.5 text-secondary-foreground text-sm">
+          {project && (
+            <ExternalLink
+              className="flex gap-2 items-center"
+              href={`/project/${project.id}`}
+            >
+              <span>View project</span>
+              <ChevronRight size={16} />
+            </ExternalLink>
+          )}
+          <ExternalLink
+            className="flex gap-2 items-center"
+            href="https://discord.gg/tGyeUqRqgE"
           >
-            Delete project
-          </Button>
-        )}
+            <span>Get help</span>
+            <ChevronRight size={16} />
+          </ExternalLink>
+          {project && isAdmin && (
+            <button
+              type="button"
+              className="flex gap-2 items-center text-left"
+              onClick={() => setDeletingProject(true)}
+            >
+              Delete project
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="w-full">
+        <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
+          Your Other Projects
+        </div>
+        <ul className="flex flex-col space-y-1.5 py-3.5 text-secondary-foreground text-sm">
+          {otherProjects.map((p) => (
+            <li key={p.id}>
+              <Link
+                href={`/projects/${p.id}/details`}
+                className="flex gap-2 items-center font-medium text-foreground"
+              >
+                <div className="w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground">
+                  <span>•</span>
+                </div>
+                <span className="truncate">{p.name}</span>
+              </Link>
+              <Link
+                href={`/projects/${p.id}/grant-address`}
+                className="flex gap-2 items-center ml-6"
+              >
+                <span className="truncate">Grant Address</span>
+              </Link>
+            </li>
+          ))}
+          <li>
+            <Link
+              href="/projects/new"
+              className="flex gap-2 items-center"
+            >
+              <Plus size={16} />
+              Create project
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      <div className="w-full">
+        <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
+          Your Organizations
+        </div>
+        <ul className="flex flex-col space-y-1.5 py-3.5 text-secondary-foreground text-sm">
+          {switcherOrganizations.map((o) => (
+            <li key={o.id}>
+              <Link
+                href={`/profile/organizations/${o.id}`}
+                className="flex gap-2 items-center font-medium text-foreground"
+              >
+                <div className="w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground">
+                  <span>•</span>
+                </div>
+                <span className="truncate">{o.name}</span>
+              </Link>
+              <Link
+                href={`/profile/organizations/${o.id}/grant-address`}
+                className="flex gap-2 items-center ml-6"
+              >
+                <span className="truncate">Grant Addresses</span>
+              </Link>
+            </li>
+          ))}
+          <li>
+            <Link
+              href="/profile/organizations/new"
+              className="flex gap-2 items-center"
+            >
+              <Plus size={16} />
+              Create organization
+            </Link>
+          </li>
+        </ul>
       </div>
 
       {deletingProject && (
@@ -270,8 +340,8 @@ const IncompleteCard = ({ project }: { project: Project | null }) => {
 
   if (projectStatus == "APPROVED") return null
   return (
-    <div className="flex items-center justify-center bg-red-200 w-[80px] h-5 rotate-[0deg] opacity-100 rounded-full py-[2px] px-2">
-      <p className="text-red-600 font-riforma font-normal text-[12px] leading-[16px] tracking-[0%] text-center">
+    <div className="flex items-center justify-center bg-red-200 h-5 rounded-full py-[2px] px-2">
+      <p className="text-red-600 font-riforma font-normal text-[12px] leading-[16px] text-center">
         Incomplete
       </p>
     </div>
