@@ -180,12 +180,12 @@ const ProfileDetailCard = ({
           </Link>
           <Link href="/projects/new">
             <DropdownMenuItem className="cursor-pointer">
-              Add a project
+              Create a project
             </DropdownMenuItem>
           </Link>
-          <Link href="profile/organizations/new">
+          <Link href="/profile/organizations/new">
             <DropdownMenuItem className="cursor-pointer">
-              Make an organization
+              Create an organization
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSeparator className="mx-1 opacity-50" />
