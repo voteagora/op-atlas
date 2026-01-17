@@ -103,7 +103,7 @@
     "dotenv": "^16.4.7",
     "eas-indexer": "workspace:^",
     "embla-carousel-react": "^8.0.2",
-    "ethers": "^6.13.4",
+    "ethers": "^6.16.0",
     "graphql-request": "^7.1.0",
     "graphql-tag": "^2.12.6",
     "html2canvas": "^1.4.1",
