@@ -10,7 +10,8 @@ export default function Header() {
 
   const { data } = useGitHubMissions()
 
-  let isOpenForEnrollment = mission && mission?.startsAt < new Date()
+  let isOpenForEnrollment =
+    mission && mission?.startsAt < new Date() && mission?.endsAt > new Date()
   let missioName = mission?.name
 
   if (
@@ -18,10 +19,6 @@ export default function Header() {
     mission?.pageName === "retro-funding-dev-tooling"
   ) {
     missioName = `Retro Funding: ${mission.name}`
-  }
-
-  if (mission?.pageName === "foundation-missions" && data) {
-    isOpenForEnrollment = data?.AreMissionsOpen
   }
 
   return (

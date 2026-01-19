@@ -133,7 +133,8 @@ export default function Mission() {
     mission &&
     mission?.startsAt &&
     new Date() > mission?.startsAt &&
-    mission?.endsAt
+    mission?.endsAt &&
+    new Date() < mission?.endsAt
   const showSidePanel =
     missionIsOpen ||
     mission?.pageName === "audit-grants" ||
