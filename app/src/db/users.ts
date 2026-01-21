@@ -58,6 +58,7 @@ export async function getUserById(
       },
       emails: true,
       safeAddresses: true,
+      citizen: true,
     },
   })
 
@@ -1145,6 +1146,7 @@ export async function updateUser(
     twitter?: string | null
     notDeveloper?: boolean
     govForumProfileUrl?: string | null
+    emailNotifEnabled?: boolean
   },
   db: PrismaClient = prisma,
 ) {
