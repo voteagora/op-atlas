@@ -46,7 +46,7 @@ export const EmailNotificationCheckbox = ({ userId }: { userId: string }) => {
         disabled={isUpdating}
       />
       <span className="text-sm font-normal leading-none">
-        Get notified of citizens&apos; proposals
+        Get notified of Citizen House proposals
       </span>
     </div>
   )
