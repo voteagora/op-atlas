@@ -160,6 +160,36 @@ export async function s9Qualification({
     }
   }
 
+  const canContinueAfterClose = async (): Promise<boolean> => {
+    const existingEvaluation = await prisma.citizenSeasonEvaluation.findFirst({
+      where: {
+        seasonId: season.id,
+        userId,
+        outcome: CitizenRegistrationStatus.VERIFICATION_REQUIRED,
+      },
+    })
+    if (!existingEvaluation) return false
+
+    const existingCitizenRecord = await prisma.citizenSeason.findFirst({
+      where: {
+        seasonId: season.id,
+        userId,
+        registrationStatus: "ATTESTED",
+      },
+    })
+    if (existingCitizenRecord) return false
+
+    const registrationEndDate = season.registrationEndDate
+    if (!registrationEndDate) return false
+
+    const kycStartedBeforeClose =
+      kycRecord && kycRecord.createdAt < registrationEndDate
+    const worldIdStartedBeforeClose =
+      worldIdRecord && worldIdRecord.createdAt < registrationEndDate
+
+    return Boolean(kycStartedBeforeClose || worldIdStartedBeforeClose)
+  }
+
   if (!hasRegistrationStarted(season)) {
     return returnWithEvaluation({
       status: "REGISTRATION_CLOSED",
@@ -169,11 +199,14 @@ export async function s9Qualification({
   }
 
   if (hasRegistrationEnded(season)) {
-    return returnWithEvaluation({
-      status: "REGISTRATION_CLOSED",
-      outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-      message: "Season registration has ended.",
-    })
+    const canContinue = await canContinueAfterClose()
+    if (!canContinue) {
+      return returnWithEvaluation({
+        status: "REGISTRATION_CLOSED",
+        outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+        message: "Season registration has ended.",
+      })
+    }
   }
 
   if (existingCitizen) {
