@@ -81,7 +81,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
@@ -89,7 +89,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={riforma.variable}>
       <body className={riforma.className}>
-        <Providers>
+        <Providers defaultBanner={null}>
           <ErrorBoundary>
             <AppDialogs />
             {children}

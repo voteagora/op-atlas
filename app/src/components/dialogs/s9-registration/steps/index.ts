@@ -1,0 +1,6 @@
+export { ConnectSocialStep } from "./ConnectSocialStep"
+export { LinkWalletsStep } from "./LinkWalletsStep"
+export { SelectGovernanceStep } from "./SelectGovernanceStep"
+export { CheckingStep } from "./CheckingStep"
+export { ResultStep } from "./ResultStep"
+export { VerificationActions } from "./VerificationActions"

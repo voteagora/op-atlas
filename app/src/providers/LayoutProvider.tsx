@@ -1,13 +1,15 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { createContext, useContext, useRef } from "react"
 import ReactCanvasConfetti from "react-canvas-confetti"
 import { useWindowSize } from "usehooks-ts"
 
+import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner"
 import { MobileViewportWarning } from "@/components/common/MobileViewportWarning"
 import Navbar from "@/components/common/Navbar"
+import { SeasonNineBannerClient } from "@/app/citizenship/components/s9/SeasonNineBannerClient"
 
 const MOBILE_BREAKPOINT = 640 // Tailwind's `sm` breakpoint
 
@@ -41,6 +43,19 @@ export function useConfetti() {
   return ctx
 }
 
+type TopBannerContextValue = {
+  registerTopBanner: (id: string, banner: React.ReactNode | null) => void
+  unregisterTopBanner: (id: string) => void
+}
+
+const TopBannerContext = createContext<TopBannerContextValue | null>(null)
+
+export function useTopBanner() {
+  const ctx = useContext(TopBannerContext)
+  if (!ctx) throw new Error("useTopBanner must be used within LayoutProvider")
+  return ctx
+}
+
 const brightColors = [
   "#FF0000",
   "#FFD700",
@@ -51,13 +66,20 @@ const brightColors = [
   "#39FF14",
 ]
 
-export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
+export const LayoutWrapper = ({
+  children,
+  defaultBanner,
+}: {
+  children: React.ReactNode
+  defaultBanner?: { priorityWindow: boolean; registrationOpen: boolean; seasonName: string } | null
+}) => {
   const { width } = useWindowSize()
   const pathname = usePathname()
   const [isMounted, setIsMounted] = useState(false)
 
   // Confetti logic
   const [showConfetti, setShowConfetti] = useState(false)
+  const [banners, setBanners] = useState<Map<string, React.ReactNode>>(new Map())
   const confettiRef = useRef<any>(null)
 
   useEffect(() => {
@@ -92,6 +114,32 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     setIsMounted(true)
   }, [])
 
+  const registerTopBanner = useCallback((id: string, banner: React.ReactNode | null) => {
+    setBanners((prev) => {
+      const next = new Map(prev)
+      if (banner) {
+        next.set(id, banner)
+      } else {
+        next.delete(id)
+      }
+      return next
+    })
+  }, [])
+
+  const unregisterTopBanner = useCallback((id: string) => {
+    setBanners((prev) => {
+      const next = new Map(prev)
+      next.delete(id)
+      return next
+    })
+  }, [])
+
+  const topBanner = useMemo(() => {
+    if (banners.size === 0) return null
+    const values = Array.from(banners.values())
+    return values[values.length - 1] ?? null
+  }, [banners])
+
   if (!isMounted) {
     // Render nothing until the component is mounted on the client
     return null
@@ -101,30 +149,43 @@ export const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
   const hideNavbar = pathname.startsWith("/kyc")
 
   return (
-    <ConfettiContext.Provider value={setShowConfetti}>
-      <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
-        {!hideNavbar && <Navbar />}
-        <ReactCanvasConfetti
-          style={{
-            position: "fixed",
-            pointerEvents: "none",
-            width: "100vw",
-            height: "100vh",
-            top: 0,
-            left: 0,
-            zIndex: 10001,
-          }}
-          className="confetti-canvas"
-          onInit={(instance) => {
-            confettiRef.current = instance
-          }}
-        />
-        {width < MOBILE_BREAKPOINT && isRestrictedRoute(pathname) ? (
-          <MobileViewportWarning />
-        ) : (
-          children
-        )}
-      </div>
-    </ConfettiContext.Provider>
+    <TopBannerContext.Provider
+      value={{ registerTopBanner, unregisterTopBanner }}
+    >
+      <ConfettiContext.Provider value={setShowConfetti}>
+        <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
+          <ImpersonationBanner />
+          {!hideNavbar && topBanner}
+          {!hideNavbar && defaultBanner ? (
+            <SeasonNineBannerClient
+              priorityWindow={defaultBanner.priorityWindow}
+              registrationOpen={defaultBanner.registrationOpen}
+              seasonName={defaultBanner.seasonName}
+            />
+          ) : null}
+          {!hideNavbar && <Navbar />}
+          <ReactCanvasConfetti
+            style={{
+              position: "fixed",
+              pointerEvents: "none",
+              width: "100vw",
+              height: "100vh",
+              top: 0,
+              left: 0,
+              zIndex: 10001,
+            }}
+            className="confetti-canvas"
+            onInit={(instance) => {
+              confettiRef.current = instance
+            }}
+          />
+          {width < MOBILE_BREAKPOINT && isRestrictedRoute(pathname) ? (
+            <MobileViewportWarning />
+          ) : (
+            children
+          )}
+        </div>
+      </ConfettiContext.Provider>
+    </TopBannerContext.Provider>
   )
 }

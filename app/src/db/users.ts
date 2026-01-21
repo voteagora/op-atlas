@@ -9,6 +9,9 @@ import {
   UserPassport,
   UserSafeAddress,
 } from "@prisma/client"
+import type { PrismaClient } from "@prisma/client"
+import type { Session } from "next-auth"
+import { isSignedImpersonationSessionValid } from "@/lib/auth/impersonationSession"
 import { AggregatedType } from "eas-indexer/src/types"
 import { getAddress, isAddress } from "viem"
 
@@ -36,10 +39,14 @@ export type EntityRecords = Record<
   EntityObject[]
 >
 
-export async function getUserById(userId: string) {
-  const session = await auth()
+export async function getUserById(
+  userId: string,
+  db: PrismaClient = prisma,
+  sessionOverride?: Session | null,
+) {
+  const session = sessionOverride ?? (await auth())
 
-  const user = await prisma.user.findUnique({
+  const user = await db.user.findUnique({
     where: {
       id: userId,
     },
@@ -55,25 +62,36 @@ export async function getUserById(userId: string) {
     },
   })
 
-  // If user is not logged in or requesting different user's data, remove sensitive information
-  // but return the same object structure for consistency
-  if (!session?.user || (session.user.id !== userId && user)) {
-    if (user) {
-      user.emails = []
-      user.safeAddresses = []
-      user.privyDid = null
-      user.createdAt = new Date(0)
-      user.deletedAt = new Date(0)
-      user.updatedAt = new Date(0)
-      user.notDeveloper = false
-      return user
-    }
+  // If user is not logged in or requesting different user's data (and not an authorized admin impersonation),
+  // remove sensitive information but keep shape consistent.
+  const isAuthorizedImpersonationTarget = !!session?.impersonation &&
+    isSignedImpersonationSessionValid(session.impersonation as any, {
+      currentAdminUserId: session.user?.id,
+    }) &&
+    (session.impersonation as any).targetUserId === userId
+
+  const isSelfOrAuthorizedTarget = !!session?.user && (
+    session.user.id === userId || isAuthorizedImpersonationTarget
+  )
+
+  if (!isSelfOrAuthorizedTarget && user) {
+    user.emails = []
+    user.safeAddresses = []
+    user.privyDid = null
+    user.createdAt = new Date(0)
+    user.deletedAt = new Date(0)
+    user.updatedAt = new Date(0)
+    user.notDeveloper = false
+    return user
   }
 
   return user
 }
 
-export async function getUserByPrivyDid(privyDid: string): Promise<
+export async function getUserByPrivyDid(
+  privyDid: string,
+  db: PrismaClient = prisma,
+): Promise<
   | (User & {
       addresses: UserAddress[]
       interaction: UserInteraction | null
@@ -81,7 +99,7 @@ export async function getUserByPrivyDid(privyDid: string): Promise<
     })
   | null
 > {
-  return prisma.user.findFirst({
+  return db.user.findFirst({
     where: {
       privyDid: privyDid as string,
     },
@@ -100,8 +118,9 @@ export async function getUserByPrivyDid(privyDid: string): Promise<
 
 export async function getUserByAddress(
   address: string,
+  db: PrismaClient = prisma,
 ): Promise<UserWithAddresses | null> {
-  const user = await prisma.user.findFirst({
+  const user = await db.user.findFirst({
     where: {
       addresses: {
         some: {
@@ -124,8 +143,11 @@ export async function getUserByAddress(
   return user as UserWithAddresses | null
 }
 
-export async function getUserByEmail(email: string): Promise<User | null> {
-  const userEmail = await prisma.userEmail.findFirst({
+export async function getUserByEmail(
+  email: string,
+  db: PrismaClient = prisma,
+): Promise<User | null> {
+  const userEmail = await db.userEmail.findFirst({
     where: {
       email,
     },
@@ -148,8 +170,11 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   return userEmail?.user || null
 }
 
-export async function getUserByFarcasterId(farcasterId: string) {
-  return prisma.user.findUnique({
+export async function getUserByFarcasterId(
+  farcasterId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.user.findUnique({
     where: {
       farcasterId,
     },
@@ -161,7 +186,10 @@ export async function getUserByFarcasterId(farcasterId: string) {
   })
 }
 
-export async function getUserByUsername(username: string): Promise<
+export async function getUserByUsername(
+  username: string,
+  db: PrismaClient = prisma,
+): Promise<
   | (User & {
       addresses: UserAddress[]
       interaction: UserInteraction | null
@@ -170,7 +198,7 @@ export async function getUserByUsername(username: string): Promise<
     })
   | null
 > {
-  const result = await prisma.$queryRaw<
+  const result = await db.$queryRaw<
     (User & {
       addresses: UserAddress[]
       interaction: UserInteraction | null
@@ -219,12 +247,15 @@ export async function getUserByUsername(username: string): Promise<
   return result?.[0] || null
 }
 
-export async function searchUsersByUsername({
-  username,
-}: {
-  username: string
-}) {
-  return prisma.user.findMany({
+export async function searchUsersByUsername(
+  {
+    username,
+  }: {
+    username: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.user.findMany({
     where: {
       username: {
         contains: username,
@@ -233,8 +264,11 @@ export async function searchUsersByUsername({
   })
 }
 
-export async function searchByAddress({ address }: { address: string }) {
-  return prisma.user.findMany({
+export async function searchByAddress(
+  { address }: { address: string },
+  db: PrismaClient = prisma,
+) {
+  return db.user.findMany({
     where: {
       addresses: {
         some: {
@@ -249,14 +283,17 @@ export async function searchByAddress({ address }: { address: string }) {
   })
 }
 
-export async function searchByEmail({ email }: { email: string }) {
+export async function searchByEmail(
+  { email }: { email: string },
+  db: PrismaClient = prisma,
+) {
   // Only search if it's a valid email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) {
     return []
   }
 
-  return prisma.user.findMany({
+  return db.user.findMany({
     where: {
       emails: {
         some: {
@@ -269,20 +306,23 @@ export async function searchByEmail({ email }: { email: string }) {
   })
 }
 
-export async function upsertUser({
-  farcasterId,
-  ...user
-}: {
-  farcasterId?: string | null
-  name?: string | null
-  username?: string | null
-  imageUrl?: string | null
-  bio?: string | null
-  privyDid?: string | null
-}) {
+export async function upsertUser(
+  {
+    farcasterId,
+    ...user
+  }: {
+    farcasterId?: string | null
+    name?: string | null
+    username?: string | null
+    imageUrl?: string | null
+    bio?: string | null
+    privyDid?: string | null
+  },
+  db: PrismaClient = prisma,
+) {
   // If farcasterId is not provided, create a new user without it
   if (!farcasterId) {
-    return prisma.user.create({
+    return db.user.create({
       data: user as Prisma.UserCreateInput,
       include: {
         emails: true,
@@ -290,7 +330,7 @@ export async function upsertUser({
     })
   }
 
-  return prisma.user.upsert({
+  return db.user.upsert({
     where: {
       farcasterId,
     },
@@ -307,11 +347,14 @@ export async function upsertUser({
   })
 }
 
-export async function deleteUserEmails(uid: string) {
+export async function deleteUserEmails(
+  uid: string,
+  db: PrismaClient = prisma,
+) {
   try {
     // Only delete verified emails that don't have active verification processes
     // This preserves unverified emails with verification tokens (like KYC email verification)
-    await prisma.userEmail.deleteMany({
+    await db.userEmail.deleteMany({
       where: {
         userId: uid,
         verified: true,
@@ -327,81 +370,151 @@ export async function deleteUserEmails(uid: string) {
   }
 }
 
-export async function updateUserEmail({
-  id,
-  email,
-  verified,
-}: {
-  id: string
-  email?: string | null
-  verified?: boolean
-}) {
-  // Only delete verified emails that don't have pending verification tokens
-  // This preserves unverified emails with verification tokens (like KYC email verification)
-  const currentVerifiedEmail = await prisma.userEmail.findFirst({
-    where: {
-      userId: id,
-      verified: true,
-      verificationToken: null, // Only delete emails without pending verification
-      OR: [
-        { verificationTokenExpiresAt: null },
-        { verificationTokenExpiresAt: { lt: new Date() } }, // Expired tokens
-      ],
-    },
-  })
+export async function updateUserEmail(
+  {
+    id,
+    email,
+    verified,
+  }: {
+    id: string
+    email?: string | null
+    verified?: boolean
+  },
+  db: PrismaClient = prisma,
+) {
+  try {
+    // If setting a new email (not clearing it)
+    if (email) {
+      // Check if this email is already in use by another user
+      const existingEmailRecord = await db.userEmail.findUnique({
+        where: { email },
+        include: { user: true },
+      })
 
-  const deleteEmails = currentVerifiedEmail
-    ? [
-        prisma.userEmail.delete({
-          where: {
-            id: currentVerifiedEmail.id,
-          },
-        }),
-      ]
-    : []
+      if (existingEmailRecord && existingEmailRecord.userId !== id) {
+        // Delete the email from the old user
+        try {
+          await db.userEmail.delete({
+            where: { email },
+          })
+        } catch (deleteError) {
+          console.error(
+            `[Auth] Failed to delete email from old user ${existingEmailRecord.userId}:`,
+            deleteError,
+          )
+        }
+      }
+    }
 
-  const createEmail = email
-    ? [
-        prisma.userEmail.create({
-          data: {
-            email,
-            userId: id,
-            verified: verified ?? false,
-          },
-        }),
-      ]
-    : []
+    // Only delete verified emails that don't have pending verification tokens
+    // This preserves unverified emails with verification tokens (like KYC email verification)
+    const currentVerifiedEmail = await db.userEmail.findFirst({
+      where: {
+        userId: id,
+        verified: true,
+        verificationToken: null, // Only delete emails without pending verification
+        OR: [
+          { verificationTokenExpiresAt: null },
+          { verificationTokenExpiresAt: { lt: new Date() } }, // Expired tokens
+        ],
+      },
+    })
 
-  return prisma.$transaction([...deleteEmails, ...createEmail])
+    const deleteEmails = currentVerifiedEmail
+      ? [
+          db.userEmail.delete({
+            where: {
+              id: currentVerifiedEmail.id,
+            },
+          }),
+        ]
+      : []
+
+    const createEmail = email
+      ? [
+          db.userEmail.create({
+            data: {
+              email,
+              userId: id,
+              verified: verified ?? false,
+            },
+          }),
+        ]
+      : []
+
+    return db.$transaction([...deleteEmails, ...createEmail])
+  } catch (error) {
+    console.error(`[Auth] Failed to update email for user ${id}:`, error)
+    throw error
+  }
 }
 
-export async function addUserAddresses({
-  id,
-  addresses,
-  source,
-}: {
-  id: string
-  addresses: string[]
-  source: UserAddressSource
-}) {
-  return prisma.userAddress.createMany({
-    data: addresses.map((address) => ({
-      userId: id,
-      address,
-      source,
-    })),
-    skipDuplicates: true,
+export async function markUserEmailVerified(
+  email: string,
+  db: PrismaClient = prisma,
+) {
+  return db.userEmail.update({
+    where: { email: email.toLowerCase() },
+    data: { verified: true },
   })
 }
 
-export async function removeUserAddress({
-  id,
-  address,
-}: {
-  id: string
-  address: string
-}) {
-  return prisma.userAddress.delete({
+export async function addUserAddresses(
+  {
+    id,
+    addresses,
+    source,
+  }: {
+    id: string
+    addresses: string[]
+    source: UserAddressSource
+  },
+  db: PrismaClient = prisma,
+) {
+  try {
+    // Find all addresses that already exist and belong to other users
+    const existingAddresses = await db.userAddress.findMany({
+      where: {
+        address: { in: addresses },
+        userId: { not: id },
+      },
+    })
+
+    // Delete them all in one query
+    if (existingAddresses.length > 0) {
+      await db.userAddress.deleteMany({
+        where: {
+          address: { in: existingAddresses.map((a) => a.address) },
+        },
+      })
+    }
+
+    // Now add all addresses to the current user
+    return db.userAddress.createMany({
+      data: addresses.map((address) => ({
+        userId: id,
+        address,
+        source,
+      })),
+      skipDuplicates: true,
+    })
+  } catch (error) {
+    console.error(`[Auth] Failed to add addresses for user ${id}:`, error)
+    throw error
+  }
+}
+
+export async function removeUserAddress(
+  {
+    id,
+    address,
+  }: {
+    id: string
+    address: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.userAddress.delete({
     where: {
       address_userId: {
         address,
@@ -411,16 +524,19 @@ export async function removeUserAddress({
   })
 }
 
-export async function addUserSafeAddress({
-  userId,
-  safeAddress,
-}: {
-  userId: string
-  safeAddress: string
-}) {
+export async function addUserSafeAddress(
+  {
+    userId,
+    safeAddress,
+  }: {
+    userId: string
+    safeAddress: string
+  },
+  db: PrismaClient = prisma,
+) {
   const formatted = getAddress(safeAddress)
 
-  return prisma.userSafeAddress.upsert({
+  return db.userSafeAddress.upsert({
     where: {
       userId_safeAddress: {
         userId,
@@ -435,14 +551,17 @@ export async function addUserSafeAddress({
   })
 }
 
-export async function removeUserSafeAddress({
-  userId,
-  safeAddress,
-}: {
-  userId: string
-  safeAddress: string
-}) {
-  return prisma.userSafeAddress.delete({
+export async function removeUserSafeAddress(
+  {
+    userId,
+    safeAddress,
+  }: {
+    userId: string
+    safeAddress: string
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.userSafeAddress.delete({
     where: {
       userId_safeAddress: {
         userId,
@@ -455,8 +574,9 @@ export async function removeUserSafeAddress({
 export async function updateUserInteraction(
   userId: string,
   data: Prisma.UserInteractionUncheckedCreateInput,
+  db: PrismaClient = prisma,
 ) {
-  return await prisma.userInteraction.upsert({
+  return await db.userInteraction.upsert({
     where: { userId },
     update: {
       ...data,
@@ -469,8 +589,9 @@ export async function updateUserInteraction(
 
 export async function getAllCitizens(
   records: ExtendedAggregatedType["citizen"],
+  db: PrismaClient = prisma,
 ) {
-  return prisma.userAddress.findMany({
+  return db.userAddress.findMany({
     where: {
       AND: [
         {
@@ -501,12 +622,13 @@ export async function getAllBadgeholders() {
 
 export async function getAllS7GovContributors(
   records: AggregatedType["gov_contribution"],
+  db: PrismaClient = prisma,
 ) {
   const round7Addresses = records.filter(
     (record) => record.metadata.round === 7,
   )
 
-  return prisma.userAddress.findMany({
+  return db.userAddress.findMany({
     where: {
       AND: [
         {
@@ -533,12 +655,13 @@ export async function getAllS7GovContributors(
 
 export async function getAllRFVoters(
   records: ExtendedAggregatedType["rf_voter"],
+  db: PrismaClient = prisma,
 ) {
   const guestVoters = records.filter(
     (record) => record.metadata.voter_type === "Guest",
   )
 
-  return prisma.userAddress.findMany({
+  return db.userAddress.findMany({
     where: {
       address: {
         in: guestVoters.map((record) => record.address),
@@ -559,9 +682,9 @@ export async function getAllRFVoters(
   })
 }
 
-export async function getAllContributors() {
+export async function getAllContributors(db: PrismaClient = prisma) {
   const [projectContributors, orgContributors] = await Promise.all([
-    prisma.userProjects.findMany({
+    db.userProjects.findMany({
       where: {
         projectId: {
           in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
@@ -597,7 +720,7 @@ export async function getAllContributors() {
       },
     }),
 
-    prisma.projectOrganization.findMany({
+    db.projectOrganization.findMany({
       where: {
         projectId: {
           in: CONTRIBUTOR_ELIGIBLE_PROJECTS,
@@ -672,8 +795,8 @@ export async function getAllContributors() {
   return uniqueContributors
 }
 
-export async function getAllOnchainBuilders() {
-  return prisma.user.findMany({
+export async function getAllOnchainBuilders(db: PrismaClient = prisma) {
+  return db.user.findMany({
     where: {
       OR: [
         {
@@ -726,8 +849,10 @@ export async function getAllOnchainBuilders() {
     },
   })
 }
-export async function getAllGithubRepoBuiulders() {
-  return prisma.user.findMany({
+export async function getAllGithubRepoBuiulders(
+  db: PrismaClient = prisma,
+) {
+  return db.user.findMany({
     where: {
       OR: [
         {
@@ -785,7 +910,10 @@ export async function getAllGithubRepoBuiulders() {
   })
 }
 
-export async function addTags(records: EntityRecords) {
+export async function addTags(
+  records: EntityRecords,
+  db: PrismaClient = prisma,
+) {
   const entityKeys = Object.keys(records) as (keyof typeof records)[]
   const userTagsMap = new Map<string, Set<string>>()
 
@@ -803,7 +931,7 @@ export async function addTags(records: EntityRecords) {
 
   // Enrich with reward/org/project admin metadata
   const [allProjects, latestTranche] = await Promise.all([
-    prisma.project.findMany({
+    db.project.findMany({
       where: { deletedAt: null },
       include: {
         applications: { include: { round: true } },
@@ -820,7 +948,7 @@ export async function addTags(records: EntityRecords) {
         },
       },
     }),
-    prisma.recurringReward.findFirst({
+    db.recurringReward.findFirst({
       orderBy: {
         tranche: "desc",
       },
@@ -873,7 +1001,7 @@ export async function addTags(records: EntityRecords) {
   })
 
   // Add KYC tags
-  const kycUsers = await prisma.kYCUser.findMany({
+  const kycUsers = await db.kYCUser.findMany({
     where: {
       status: { in: ["PENDING", "APPROVED"] },
     },
@@ -899,7 +1027,7 @@ export async function addTags(records: EntityRecords) {
   // Determine changes
   const newEmails = Array.from(userTagsMap.keys())
 
-  const existingRecords = await prisma.contactEmailTags.findMany({
+  const existingRecords = await db.contactEmailTags.findMany({
     where: {
       email: { in: newEmails },
     },
@@ -937,19 +1065,19 @@ export async function addTags(records: EntityRecords) {
     const batch = emailsToUpsert.slice(i, i + BATCH_SIZE)
 
     const tx = batch.map(({ email, tags }) =>
-      prisma.contactEmailTags.upsert({
+      db.contactEmailTags.upsert({
         where: { email },
         create: { email, tags },
         update: { tags },
       }),
     )
 
-    await prisma.$transaction(tx)
+    await db.$transaction(tx)
     console.log(`Processed batch ${i / BATCH_SIZE + 1}`)
   }
 
   if (emailsToRemove.length > 0) {
-    await prisma.contactEmailTags.deleteMany({
+    await db.contactEmailTags.deleteMany({
       where: {
         email: { in: emailsToRemove },
       },
@@ -960,8 +1088,13 @@ export async function addTags(records: EntityRecords) {
   return emailsToUpsert.map(({ email, tags }) => ({ email, tags }))
 }
 
-export async function makeUserAddressPrimary(address: string, userId: string) {
-  const user = await getUserById(userId)
+export async function makeUserAddressPrimary(
+  address: string,
+  userId: string,
+  db: PrismaClient = prisma,
+  sessionOverride?: Session | null,
+) {
+  const user = await getUserById(userId, db, sessionOverride)
 
   if (!user) {
     throw new Error("User not found")
@@ -970,7 +1103,7 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
   const existingPrimary = user.addresses.find((addr) => addr.primary)?.address
 
   if (existingPrimary) {
-    await prisma.userAddress.update({
+    await db.userAddress.update({
       where: {
         address_userId: {
           address: existingPrimary,
@@ -983,7 +1116,7 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
     })
   }
 
-  await prisma.userAddress.update({
+  await db.userAddress.update({
     where: {
       address_userId: {
         address,
@@ -996,24 +1129,28 @@ export async function makeUserAddressPrimary(address: string, userId: string) {
   })
 }
 
-export async function updateUser({
-  id,
-  ...user
-}: {
-  id: string
-  farcasterId?: string | null
-  name?: string | null
-  username?: string | null
-  imageUrl?: string | null
-  bio?: string | null
-  privyDid?: string | null
-  discord?: string | null
-  github?: string | null
-  notDeveloper?: boolean
-  govForumProfileUrl?: string | null
-  emailNotifEnabled?: boolean
-}) {
-  return prisma.user.update({
+export async function updateUser(
+  {
+    id,
+    ...user
+  }: {
+    id: string
+    farcasterId?: string | null
+    name?: string | null
+    username?: string | null
+    imageUrl?: string | null
+    bio?: string | null
+    privyDid?: string | null
+    discord?: string | null
+    github?: string | null
+    twitter?: string | null
+    notDeveloper?: boolean
+    govForumProfileUrl?: string | null
+    emailNotifEnabled?: boolean
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.user.update({
     where: { id },
     data: user,
     include: {
@@ -1022,8 +1159,83 @@ export async function updateUser({
   })
 }
 
-export async function createUser(privyDid: string) {
-  return prisma.user.create({
+export async function updateUserFarcasterId(
+  {
+    userId,
+    farcasterId,
+    name,
+    username,
+    imageUrl,
+    bio,
+  }: {
+    userId: string
+    farcasterId: string | null
+    name?: string | null
+    username?: string | null
+    imageUrl?: string | null
+    bio?: string | null
+  },
+  db: PrismaClient = prisma,
+) {
+  try {
+    // If trying to set a farcasterId (not clearing it)
+    if (farcasterId) {
+      // Check if this farcasterId is already in use by another user
+      const existingUserWithFid = await getUserByFarcasterId(farcasterId, db)
+
+      if (existingUserWithFid && existingUserWithFid.id !== userId) {
+        // Clear the farcasterId from the old user
+        try {
+          await db.user.update({
+            where: { id: existingUserWithFid.id },
+            data: {
+              farcasterId: null,
+              name: null,
+              username: generateTemporaryUsername(
+                existingUserWithFid.privyDid!,
+              ),
+              imageUrl: null,
+              bio: null,
+            },
+          })
+        } catch (clearError) {
+          console.error(
+            `[Auth] Failed to clear farcasterId from old user ${existingUserWithFid.id}:`,
+            clearError,
+          )
+        }
+      }
+    }
+
+    // Now update the target user with the farcasterId
+    return await db.user.update({
+      where: { id: userId },
+      data: {
+        farcasterId,
+        ...(name !== undefined && { name }),
+        ...(username !== undefined && { username }),
+        ...(imageUrl !== undefined && { imageUrl }),
+        ...(bio !== undefined && { bio }),
+      },
+      include: {
+        emails: true,
+        addresses: true,
+      },
+    })
+  } catch (error) {
+    console.error(
+      `[Auth] Failed to update farcasterId for user ${userId}:`,
+      error,
+    )
+    throw error
+  }
+}
+
+export async function createUser(
+  privyDid: string,
+  db: PrismaClient = prisma,
+) {
+  return db.user.create({
     data: {
       privyDid,
       username: generateTemporaryUsername(privyDid),
@@ -1031,19 +1243,22 @@ export async function createUser(privyDid: string) {
   })
 }
 
-export async function upsertUserPassport({
-  userId,
-  passport,
-}: {
-  userId: string
-  passport: {
-    score: number
-    expiresAt: Date
-    address: string
-  }
-}) {
+export async function upsertUserPassport(
+  {
+    userId,
+    passport,
+  }: {
+    userId: string
+    passport: {
+      score: number
+      expiresAt: Date
+      address: string
+    }
+  },
+  db: PrismaClient = prisma,
+) {
   // Check if a passport for that address already exists
-  const existingPassport = await prisma.userPassport.findFirst({
+  const existingPassport = await db.userPassport.findFirst({
     where: {
       userId,
       address: passport.address,
@@ -1052,7 +1267,7 @@ export async function upsertUserPassport({
 
   // Delete existing record if it exists
   if (existingPassport) {
-    await prisma.userPassport.delete({
+    await db.userPassport.delete({
       where: {
         id: existingPassport.id,
       },
@@ -1060,7 +1275,7 @@ export async function upsertUserPassport({
   }
 
   // Create new record
-  return prisma.userPassport.create({
+  return db.userPassport.create({
     data: {
       userId,
       score: passport.score,
@@ -1072,38 +1287,45 @@ export async function upsertUserPassport({
 
 export async function getUserPassports(
   userId: string,
+  db: PrismaClient = prisma,
 ): Promise<UserPassport[]> {
-  return prisma.userPassport.findMany({
+  return db.userPassport.findMany({
     where: {
       userId,
     },
   })
 }
 
-export async function deleteUserPassport(id: number) {
-  return prisma.userPassport.delete({
+export async function deleteUserPassport(id: number, db: PrismaClient = prisma) {
+  return db.userPassport.delete({
     where: { id },
   })
 }
 
-export async function getUserWorldId(userId: string) {
-  return prisma.userWorldId.findFirst({
+export async function getUserWorldId(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
+  return db.userWorldId.findFirst({
     where: {
       userId,
     },
   })
 }
 
-export async function upsertUserWorldId({
-  userId,
-  nullifierHash,
-  verified = false,
-}: {
-  userId: string
-  nullifierHash: string
-  verified?: boolean
-}) {
-  return prisma.userWorldId.upsert({
+export async function upsertUserWorldId(
+  {
+    userId,
+    nullifierHash,
+    verified = false,
+  }: {
+    userId: string
+    nullifierHash: string
+    verified?: boolean
+  },
+  db: PrismaClient = prisma,
+) {
+  return db.userWorldId.upsert({
     where: {
       userId,
     },

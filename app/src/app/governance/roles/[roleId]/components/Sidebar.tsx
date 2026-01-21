@@ -15,6 +15,8 @@ import { useAnalytics } from "@/providers/AnalyticsProvider"
 export const Sidebar = ({ role }: { role: Role }) => {
   const { track } = useAnalytics()
   const { status: authStatus, data: session } = useSession()
+  const viewerId =
+    session?.impersonation?.targetUserId ?? session?.user?.id
   const isAuthenticated = authStatus === "authenticated"
 
   const { login } = usePrivy()
@@ -25,8 +27,8 @@ export const Sidebar = ({ role }: { role: Role }) => {
 
   const { data: activeApplications, isLoading: isLoadingActiveApplications } =
     useActiveUserApplications({
-      userId: session?.user?.id || "",
-      enabled: isAuthenticated,
+      userId: viewerId || "",
+      enabled: isAuthenticated && !!viewerId,
     })
 
   const hasAppliedForThisRole =
@@ -69,7 +71,7 @@ export const Sidebar = ({ role }: { role: Role }) => {
         button_type: "Nominate Yourself",
         role_name: role.title,
         role_id: role.id,
-        candidate_user_id: session?.user?.id || null,
+        candidate_user_id: viewerId || null,
         elementType: "Button",
         elementName: btext,
       })

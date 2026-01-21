@@ -32,13 +32,15 @@ describe("processStream", () => {
         createdAt: Date
         updatedAt: Date
         email: string
-        firstName: string
-        lastName: string
+        firstName: string | null
+        lastName: string | null
         businessName: string | null
         status: "PENDING" | "APPROVED" | "REJECTED"
         expiry: Date
         personaStatus: null
         personaReferenceId: string | null
+        personaInquiryId: string | null
+        inquiryCreatedAt: Date | null
       }
     }> = [],
   ): KYCStreamTeam => ({
@@ -50,6 +52,7 @@ describe("processStream", () => {
     projects,
     team: teamMembers,
     rewardStreams: [],
+    KYCLegalEntityTeams: [],
   })
 
   const createMockStream = (
@@ -110,6 +113,8 @@ describe("processStream", () => {
       expiry: new Date(),
       personaStatus: null,
       personaReferenceId: null,
+      personaInquiryId: null,
+      inquiryCreatedAt: null,
     },
   })
 

@@ -77,7 +77,7 @@ export default function PersonalKYCStatus({ kycUser }: PersonalKYCStatusProps) {
 
   if (kycUser.status === "PENDING") {
     return (
-      <div className="flex flex-col border p-6 gap-4 border-[#E0E2EB] rounded-[12px]">
+      <div className="flex flex-col border p-6 gap-4 border-tertiary rounded-[12px]">
         <Loader2 className="h-6 w-6 animate-spin" />
 
         <span className="text-sm text-secondary-foreground">
@@ -121,7 +121,7 @@ export default function PersonalKYCStatus({ kycUser }: PersonalKYCStatusProps) {
 
   if (kycUser.status === "REJECTED") {
     return (
-      <div className="flex flex-col border p-6 gap-3 border-[#E0E2EB] rounded-[12px]">
+      <div className="flex flex-col border p-6 gap-3 border-tertiary rounded-[12px]">
         <TriangleAlert className="h-6 w-6 text-brand-primary" />
 
         <div className="text-sm">

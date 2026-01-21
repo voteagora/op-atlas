@@ -5,11 +5,18 @@
 "use server"
 
 import { uploadToBucket } from "../google"
+import { withImpersonationProtection } from "@/lib/impersonationContext"
 
 export const uploadImage = async (image: Blob): Promise<string> => {
-  const arrayBuffer = await image.arrayBuffer()
   const filename = `${crypto.randomUUID()}.png`
-  const url = await uploadToBucket(Buffer.from(arrayBuffer), filename)
-
-  return url
+  return withImpersonationProtection(
+    "Storage",
+    `Upload image ${filename}`,
+    async () => {
+      const arrayBuffer = await image.arrayBuffer()
+      const url = await uploadToBucket(Buffer.from(arrayBuffer), filename)
+      return url
+    },
+    `https://storage.mock.optimism.io/impersonation/${filename}`,
+  )
 }

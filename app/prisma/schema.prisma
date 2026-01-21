@@ -8,6 +8,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CitizenRegistrationStatus {
+  PENDING
+  ELIGIBILITY_FAILED
+  VERIFICATION_REQUIRED
+  BLOCKED
+  READY
+  ATTESTED
+  REVOKED
+}
+
+enum SocialTrustPlatform {
+  FARCASTER
+  GITHUB
+  X
+}
+
 model User {
   id                 String             @id @default(uuid())
   name               String?
@@ -22,9 +38,12 @@ model User {
   notDeveloper       Boolean            @default(false)
   govForumProfileUrl String?
   discord            String?
+  twitter            String?
   privyDid           String?
   emailNotifEnabled  Boolean            @default(false)
   citizen            Citizen?
+  citizenSeasons     CitizenSeason[]
+  citizenEvaluations CitizenSeasonEvaluation[]
   RewardClaim        RewardClaim[]
   roleApplications   RoleApplication[]
   addresses          UserAddress[]
@@ -167,6 +186,7 @@ model Organization {
   projects             ProjectOrganization[]
   roleApplications     RoleApplication[]
   team                 UserOrganization[]
+  citizenSeasons       CitizenSeason[]
 
   @@index([deletedAt])
 }
@@ -261,6 +281,7 @@ model Project {
   recurringRewards          RecurringReward[]
   team                      UserProjects[]
   projectOSOData            projectOSOData[]
+  citizenSeasons            CitizenSeason[]
 
   @@index([deletedAt, createdAt])
   @@index([deletedAt])
@@ -735,6 +756,121 @@ model ProjectOSOAtlasRelatedProjects {
   @@unique([projectId, tranche, relatedProjectId])
   @@index([projectId])
   @@index([relatedProjectId])
+}
+
+model Season {
+  id                    String                     @id
+  name                  String
+  active                Boolean                    @default(false)
+  startDate             DateTime
+  endDate               DateTime
+  registrationStartDate DateTime
+  registrationEndDate   DateTime
+  priorityEndDate       DateTime?
+  userCitizenLimit      Int?
+  config                Json?
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  citizenSeasons        CitizenSeason[]
+  evaluations           CitizenSeasonEvaluation[]
+  openRankSnapshots     OpenRankSnapshot[]
+  priorityAttestations  PriorityAttestationSnapshot[]
+  citizenUserQualifications    CitizenQualifyingUser[]
+  citizenChainQualifications   CitizenQualifyingChain[]
+  citizenProjectQualifications CitizenQualifyingProject[]
+}
+
+model CitizenSeason {
+  id                      String                 @id @default(uuid())
+  seasonId                String
+  season                  Season                 @relation(fields: [seasonId], references: [id])
+  userId                  String?
+  user                    User?                  @relation(fields: [userId], references: [id])
+  organizationId          String?
+  organization            Organization?          @relation(fields: [organizationId], references: [id])
+  projectId               String?
+  project                 Project?               @relation(fields: [projectId], references: [id])
+  governanceAddress       String?
+  registrationStatus      CitizenRegistrationStatus @default(PENDING)
+  attestationId           String?
+  trustBreakdown          Json?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+
+  @@index([seasonId, userId])
+}
+
+model CitizenSeasonEvaluation {
+  id             String                    @id @default(uuid())
+  seasonId       String
+  season         Season                    @relation(fields: [seasonId], references: [id])
+  userId         String
+  user           User                      @relation(fields: [userId], references: [id])
+  wallets        String[]
+  socialProfiles Json
+  openRankRaw    Json?
+  passportRaw    Json?
+  outcome        CitizenRegistrationStatus
+  createdAt      DateTime                  @default(now())
+
+  @@index([seasonId, userId])
+  @@index([outcome])
+}
+
+model OpenRankSnapshot {
+  id         String               @id @default(uuid())
+  seasonId   String
+  season     Season               @relation(fields: [seasonId], references: [id])
+  platform   SocialTrustPlatform
+  identifier String
+  score      Float?
+  raw        Json?
+  loadedAt   DateTime             @default(now())
+
+  @@unique([seasonId, platform, identifier])
+  @@index([seasonId, platform])
+}
+
+model PriorityAttestationSnapshot {
+  id           String   @id @default(uuid())
+  seasonId     String
+  season       Season   @relation(fields: [seasonId], references: [id])
+  attestationId String?
+  address      String
+  loadedAt     DateTime @default(now())
+
+  @@unique([seasonId, address])
+  @@index([seasonId, attestationId])
+}
+
+model CitizenQualifyingUser {
+  seasonId String
+  address  String
+  season   Season @relation(fields: [seasonId], references: [id])
+
+  @@id([seasonId, address])
+  @@index([seasonId])
+  @@index([address])
+}
+
+model CitizenQualifyingChain {
+  seasonId       String
+  organizationId String
+  season         Season @relation(fields: [seasonId], references: [id])
+
+  @@id([seasonId, organizationId])
+  @@index([seasonId])
+  @@index([organizationId])
+}
+
+model CitizenQualifyingProject {
+  seasonId  String
+  projectId String
+  season    Season @relation(fields: [seasonId], references: [id])
+
+  @@id([seasonId, projectId])
+  @@index([seasonId])
+  @@index([projectId])
 }
 
 model Citizen {

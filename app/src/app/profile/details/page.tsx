@@ -1,13 +1,14 @@
 import { Metadata } from "next"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import { Badge } from "@/components/common/Badge"
 import { EmailConnection } from "@/components/profile/EmailConnection"
 import { EmailNotificationCheckbox } from "@/components/profile/EmailNotificationCheckbox"
 import { IdentityVerification } from "@/components/profile/IdentityVerification"
 import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { updateInteractions } from "@/lib/actions/users"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import { ProfileDetailsContent } from "./content"
 
@@ -17,16 +18,17 @@ export const metadata: Metadata = {
 }
 
 export default async function Page() {
-  const session = await auth()
-
-  if (!session?.user?.id) {
+  const { session, userId } = await getImpersonationContext()
+  if (!userId) {
     redirect("/")
   }
 
-  updateInteractions({ userId: session.user.id, profileVisitCount: 1 })
+  if (!session?.impersonation?.isActive) {
+    updateInteractions({ userId, profileVisitCount: 1 })
+  }
 
   // Fetch KYC status
-  const kycStatus = await getUserKYCStatus(session.user.id)
+  const kycStatus = await getUserKYCStatus(userId)
 
   return (
     <div className="flex flex-col gap-12 text-secondary-foreground">
@@ -42,9 +44,9 @@ export default async function Page() {
           Email is required for grants, citizenship, and identity verification.
           It should be a personal email where we can reliably reach you.
         </div>
-        <EmailConnection userId={session.user.id} />
+        <EmailConnection userId={userId} />
         <div className="mt-4">
-          <EmailNotificationCheckbox userId={session.user.id} />
+          <EmailNotificationCheckbox userId={userId} />
         </div>
       </div>
       <div className="flex flex-col">
@@ -55,15 +57,19 @@ export default async function Page() {
           <Badge text="Private" size="md" />
         </div>
         <div className="mb-4 text-base text-secondary-foreground">
-          Complete KYC to add proof of personhood to your Atlas account.
+          This is your personal identity verification for Optimism governance
+          participation (citizens, delegates). <strong>This is not part of any grant application process.</strong>
+          If you need to verify your identity for a grant,
+          go to your project&apos;s or organization&apos;s Grant Address page instead.
         </div>
-        <IdentityVerification
-          userId={session.user.id}
-          kycUser={kycStatus.kycUser}
-        />
+        <IdentityVerification userId={userId} kycUser={kycStatus.kycUser} />
       </div>
       <div className="flex flex-col gap-6">
-        <ProfileDetailsContent session={session} />
+        <ProfileDetailsContent
+          session={session}
+          userId={userId}
+          isImpersonating={!!session?.impersonation?.isActive}
+        />
       </div>
     </div>
   )

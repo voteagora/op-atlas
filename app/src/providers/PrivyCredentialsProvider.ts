@@ -73,14 +73,31 @@ export const PrivyCredentialsProvider = CredentialsProvider({
     }
 
     // Check if a user with this privyDid already exists
-    const existingUser = await getUserByPrivyDid(privyUser.id)
+    try {
+      const existingUser = await getUserByPrivyDid(privyUser.id)
 
-    if (!existingUser) {
-      await createUser(privyUser.id)
+      if (!existingUser) {
+        await createUser(privyUser.id)
+      }
+
+      const refreshedUser = await syncPrivyUser(privyUser)
+
+      if (!refreshedUser) {
+        console.error(
+          `[Auth] syncPrivyUser returned null for user ${privyUser.id}`,
+        )
+        return null
+      }
+
+      return userResponse(refreshedUser)
+    } catch (error) {
+      console.error(
+        `[Auth] Authentication failed for Privy DID ${privyUser.id}:`,
+        error,
+      )
+      // Return null to clear loading state and allow retry
+      return null
     }
-
-    const refreshedUser = await syncPrivyUser(privyUser)
-    return userResponse(refreshedUser)
   },
 })
 

@@ -395,7 +395,7 @@ const KYCStatusPresenter = ({
   }, [legalEntities, legalSendingState, projectId, organizationId, kycTeamId])
   return (
     <>
-      <div className="group flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
+      <div className="group flex flex-col max-w border p-6 gap-6 border-tertiary rounded-[12px]">
         {isLoading ? (
           <KYCSkeleton />
         ) : (
@@ -425,23 +425,14 @@ const KYCStatusPresenter = ({
                 <p className="font-riforma text-[14px] font-[400] leading-[20px] text-center">
                   Is something missing or incorrect?
                 </p>
-                <span
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault()
-                      openDeleteKYCTeamDialog()
-                    }
-                  }}
+                <button
+                  type="button"
                   onClick={openDeleteKYCTeamDialog}
                   aria-label="Start KYC process over"
-                  className="cursor-pointer"
+                  className="underline font-riforma text-[14px] font-[400] leading-[20px] text-center cursor-pointer"
                 >
-                  <p className="underline font-riforma text-[14px] font-[400] leading-[20px] text-center">
-                    Start over
-                  </p>
-                </span>
+                  Start over
+                </button>
               </div>
             )}
           </>

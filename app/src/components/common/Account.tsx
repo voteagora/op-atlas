@@ -20,6 +20,7 @@ import { UserAvatar } from "@/components/common/UserAvatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -54,19 +55,24 @@ type ProfileMenuItemProps = {
   href: string
   label: string
   currentContext: string
+  inset?: boolean
 }
 
 const ProfileMenuItem = ({
   href,
   label,
   currentContext,
+  inset,
 }: ProfileMenuItemProps) => {
   return currentContext === "EOA" ? (
     <Link href={href}>
-      <DropdownMenuItem className="cursor-pointer">{label}</DropdownMenuItem>
+      <DropdownMenuItem inset={inset} className="cursor-pointer">
+        {label}
+      </DropdownMenuItem>
     </Link>
   ) : (
     <DropdownMenuItem
+      inset={inset}
       className="cursor-pointer text-muted-foreground opacity-50"
       disabled
     >
@@ -192,30 +198,6 @@ const SafeWalletsMenuItems = ({
 
 // Wrapper component that handles conditional hook usage
 const AccountContent = () => {
-  // Always call hooks - they will be mocked by the TestModeProvider when in test mode
-  const isLinking = useRef(false)
-  const isLoggingIn = useRef(false)
-
-  const { data: session, status: authStatus } = useSession()
-  const { user, invalidate: invalidateUser } = useUser({
-    id: session?.user?.id || "",
-    enabled: !!session?.user,
-  })
-
-  const username = useUsername(user)
-
-  // Safe wallet integration
-  const {
-    currentAddress,
-    currentContext,
-    signerWallet,
-    selectedSafeWallet,
-    availableSafeWallets,
-    switchToSafe,
-    switchToEOA,
-    isLoadingSafeWallets,
-  } = useWallet()
-
   // Privy hooks (kept after refs/session/wallet for clarity; production path only)
   const { user: privyUser, getAccessToken } = usePrivy()
   const { login: privyLogin } = useLogin({
@@ -246,6 +228,34 @@ const AccountContent = () => {
     },
   })
 
+  const isLinking = useRef(false)
+  const isLoggingIn = useRef(false)
+
+  const { data: session, status: authStatus } = useSession()
+  const viewerId =
+    session?.impersonation?.isActive && session?.impersonation?.targetUserId
+      ? session.impersonation.targetUserId
+      : session?.user?.id
+  const adminUserId = session?.user?.id ?? null
+  const { user, invalidate: invalidateUser } = useUser({
+    id: viewerId || "",
+    enabled: !!viewerId,
+  })
+
+  const username = useUsername(user)
+
+  // Safe wallet integration
+  const {
+    currentAddress,
+    currentContext,
+    signerWallet,
+    selectedSafeWallet,
+    availableSafeWallets,
+    switchToSafe,
+    switchToEOA,
+    isLoadingSafeWallets,
+  } = useWallet()
+
   const prevAuthStatus = usePrevious(authStatus)
 
   const { isBadgeholder } = useIsBadgeholder()
@@ -271,6 +281,9 @@ const AccountContent = () => {
   }
 
   const onPrivyLogin = (user: PrivyUser) => {
+    if (session?.impersonation?.isActive) {
+      return
+    }
     isLoggingIn.current = true
     getAccessToken()
       .then((token) => {
@@ -292,7 +305,8 @@ const AccountContent = () => {
       isLoggingIn.current = false
       saveLogInDate()
       track("Successful Sign In", {
-        userId: session.user.id,
+        userId: viewerId ?? undefined,
+        actingAdminId: adminUserId ?? undefined,
         elementType: "auth",
         elementName: "Sign In",
       })
@@ -320,7 +334,8 @@ const AccountContent = () => {
         }
       } else {
         track("Profile created", {
-          userId: session.user.id,
+          userId: viewerId ?? undefined,
+          actingAdminId: adminUserId ?? undefined,
           elementType: "auth",
           elementName: "Profile Creation",
         })
@@ -387,10 +402,7 @@ const AccountContent = () => {
             </>
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 flex flex-col gap-1 z-[9999]"
-        >
+        <DropdownMenuContent align="end" className="w-56 z-[9999]">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               Dashboard
@@ -417,33 +429,52 @@ const AccountContent = () => {
               switchToSafe={switchToSafe}
             />
           )}
-          <hr className="w-full border-[0.5px] border-border" />
-          <ProfileMenuItem
-            href="/profile/details"
-            label="Account Details"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/connected-apps"
-            label="Connected Apps"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/verified-addresses"
-            label="Linked Wallets"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/organizations/new"
-            label="Organizations"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/citizenship"
-            label="Citizen Registration"
-            currentContext={currentContext}
-          />
-          <hr className="w-full border-[0.5px] border-border" />
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Account
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/profile/details"
+              label="Account Details"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/connected-apps"
+              label="Connected Apps"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/verified-addresses"
+              label="Linked Wallets"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Participation
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/dashboard#your-projects"
+              label="Your Projects"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/dashboard#your-organizations"
+              label="Your Organizations"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/citizenship"
+              label="Citizen Registration"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => {
@@ -488,11 +519,17 @@ export const Account = () => {
 const TestModeAccount = () => {
   const isLinking = useRef(false)
   const isLoggingIn = useRef(false)
+  const [holdLoginUI, setHoldLoginUI] = useState(false)
 
   const { data: session, status: authStatus } = useSession()
+  const viewerId =
+    session?.impersonation?.isActive && session?.impersonation?.targetUserId
+      ? session.impersonation.targetUserId
+      : session?.user?.id
+  const adminUserId = session?.user?.id ?? null
   const { user, invalidate: invalidateUser } = useUser({
-    id: session?.user?.id || "",
-    enabled: !!session?.user,
+    id: viewerId || "",
+    enabled: !!viewerId,
   })
 
   const username = useUsername(user)
@@ -534,13 +571,21 @@ const TestModeAccount = () => {
   }
 
   const onPrivyLogin = (user: PrivyUser) => {
+    if (session?.impersonation?.isActive) {
+      return
+    }
     isLoggingIn.current = true
+    // In test mode, keep the button with spinner visible briefly to stabilize UI under test
+    setHoldLoginUI(true)
+    setTimeout(() => setHoldLoginUI(false), 1500)
     // Mock implementation for test mode
     Promise.resolve("mock-token")
       .then((token) => {
         signIn("credentials", {
           privy: JSON.stringify(user),
           privyAccessToken: token,
+          testMode: "true",
+          testUserId: user.id,
           redirect: false,
         }).catch(() => {
           toast.error("Unable to login at this time. Try again later.")
@@ -556,7 +601,8 @@ const TestModeAccount = () => {
       isLoggingIn.current = false
       saveLogInDate()
       track("Successful Sign In", {
-        userId: session.user.id,
+        userId: viewerId ?? undefined,
+        actingAdminId: adminUserId ?? undefined,
         elementType: "auth",
         elementName: "Sign In",
       })
@@ -573,7 +619,8 @@ const TestModeAccount = () => {
         checkBadgeholderStatus()
       } else {
         track("Profile created", {
-          userId: session.user.id,
+          userId: viewerId ?? undefined,
+          actingAdminId: adminUserId ?? undefined,
           elementType: "auth",
           elementName: "Profile Creation",
         })
@@ -600,6 +647,19 @@ const TestModeAccount = () => {
     didLogIn,
     user?.emails,
   ])
+
+  // During the brief post-click window, keep rendering the Sign in button with spinner
+  if (holdLoginUI) {
+    return (
+      <button
+        type="button"
+        className={`cursor-pointer text-sm text-primary-foreground leading-5 rounded-md px-2 sm:px-4 py-2.5 flex items-center justify-center h-10 w-max ${"bg-gray-300"}`}
+        onClick={() => {}}
+      >
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </button>
+    )
+  }
 
   if (session) {
     return (
@@ -644,10 +704,7 @@ const TestModeAccount = () => {
             </>
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 flex flex-col gap-1 z-[9999]"
-        >
+        <DropdownMenuContent align="end" className="w-56 z-[9999]">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               Dashboard
@@ -674,33 +731,52 @@ const TestModeAccount = () => {
               switchToSafe={switchToSafe}
             />
           )}
-          <hr className="w-full border-[0.5px] border-border" />
-          <ProfileMenuItem
-            href="/profile/details"
-            label="Account Details"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/connected-apps"
-            label="Connected Apps"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/verified-addresses"
-            label="Linked Wallets"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/organizations/new"
-            label="Organizations"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/citizenship"
-            label="Citizen Registration"
-            currentContext={currentContext}
-          />
-          <hr className="w-full border-[0.5px] border-border" />
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Account
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/profile/details"
+              label="Account Details"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/connected-apps"
+              label="Connected Apps"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/verified-addresses"
+              label="Linked Wallets"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Participation
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/dashboard#your-projects"
+              label="Your Projects"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/dashboard#your-organizations"
+              label="Your Organizations"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/citizenship"
+              label="Citizen Registration"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => {

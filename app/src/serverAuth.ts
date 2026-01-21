@@ -28,6 +28,7 @@ export async function authenticateApiUser(
     }
   }
 
+  // Query the authoritative production database directly
   const apiUser = await getApiUser({ apiKey: hashApiKey(key) })
 
   if (!apiUser) {

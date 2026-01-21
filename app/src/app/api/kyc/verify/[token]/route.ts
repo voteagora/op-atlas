@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/db/client"
-import { verifyKYCToken, isKYCLinkExpired } from "@/lib/utils/kycToken"
+
+import { verifyKYCToken } from "@/lib/utils/kycToken"
 import { personaClient } from "@/lib/persona"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { token: string } },
 ) {
   try {
+    const { db } = await getImpersonationContext({ forceProd: true, session: null })
     const { token } = params
 
     // Verify and decode the token
@@ -27,12 +29,12 @@ export async function POST(
     let personaTemplateId: string | undefined
 
     if (entityType === "kycUser") {
-      entity = await prisma.kYCUser.findUnique({
+      entity = await db.kYCUser.findUnique({
         where: { id: entityId },
       })
       personaTemplateId = process.env.PERSONA_INQUIRY_KYC_TEMPLATE
     } else {
-      entity = await prisma.kYCLegalEntity.findUnique({
+      entity = await db.kYCLegalEntity.findUnique({
         where: { id: entityId },
       })
       personaTemplateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
@@ -53,16 +55,10 @@ export async function POST(
       )
     }
 
-    // Check if inquiry creation date is expired (> 7 days)
-    if (entity.inquiryCreatedAt && isKYCLinkExpired(entity.inquiryCreatedAt)) {
-      return NextResponse.json(
-        {
-          error:
-            "This verification link has expired. Please restart the KYC process from your profile.",
-        },
-        { status: 410 }, // 410 Gone
-      )
-    }
+    // Note: We no longer check inquiryCreatedAt here because:
+    // 1. The JWT token already has its own 7-day expiration
+    // 2. If the Persona inquiry is expired, generateOneTimeLink() will fail with an appropriate error
+    // This allows users to resume verification via resent emails even for older inquiries
 
     let inquiryId = entity.personaInquiryId
 
@@ -81,12 +77,12 @@ export async function POST(
 
         // Update the entity with the new reference ID
         if (entityType === "kycUser") {
-          await prisma.kYCUser.update({
+          await db.kYCUser.update({
             where: { id: entityId },
             data: { personaReferenceId: referenceId },
           })
         } else {
-          await prisma.kYCLegalEntity.update({
+          await db.kYCLegalEntity.update({
             where: { id: entityId },
             data: { personaReferenceId: referenceId },
           })
@@ -103,7 +99,7 @@ export async function POST(
 
       // Store the inquiry ID and creation timestamp in database atomically
       if (entityType === "kycUser") {
-        await prisma.kYCUser.update({
+        await db.kYCUser.update({
           where: { id: entityId },
           data: {
             personaInquiryId: inquiryId,
@@ -111,7 +107,7 @@ export async function POST(
           },
         })
       } else {
-        await prisma.kYCLegalEntity.update({
+        await db.kYCLegalEntity.update({
           where: { id: entityId },
           data: {
             personaInquiryId: inquiryId,

@@ -8,6 +8,8 @@ import { useEffect, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
+import { AdminBlacklistButton } from "../admin/AdminBlacklistButton"
+import { AdminImpersonationButton } from "../admin/AdminImpersonationButton"
 import ExternalLink from "../ExternalLink"
 import {
   DropdownMenu,
@@ -42,14 +44,7 @@ export const grantLinks = [
     title: "Growth Grants",
     href: "/missions/growth-grants",
   },
-  {
-    title: "Retro Funding: Dev Tooling",
-    href: "/missions/retro-funding-dev-tooling",
-  },
-  {
-    title: "Retro Funding: Onchain Builders",
-    href: "/missions/retro-funding-onchain-builders",
-  },
+
   {
     title: "Foundation Missions",
     href: "/missions/foundation-missions",
@@ -84,7 +79,10 @@ export const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky inset-x-0 top-0 h-18 flex px-6 z-[200] bg-background">
+      <nav
+        className="sticky inset-x-0 h-18 flex px-6 z-[200] bg-background transition-[top] duration-150"
+        style={{ top: "var(--impersonation-banner-height, 0px)" }}
+      >
         <div className="flex items-center justify-between h-full w-full mx-auto">
           <div className="flex sm:hidden items-center h-full w-full gap-4">
             <button
@@ -219,7 +217,9 @@ export const Navbar = () => {
             )}
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
+            <AdminBlacklistButton />
+            <AdminImpersonationButton />
             <Account />
           </div>
         </div>
