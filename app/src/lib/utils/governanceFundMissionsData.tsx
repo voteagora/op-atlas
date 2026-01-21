@@ -33,7 +33,7 @@ export const governanceFundMissionsData: MissionData = {
   status: "ongoing",
   iconUrl: "/assets/images/onchain-builders.png",
   startsAt: new Date("2025-08-15T00:00:00.000Z"),
-  endsAt: new Date("2025-12-31T00:00:00.000Z"),
+  endsAt: new Date("2026-12-31T00:00:00.000Z"),
   applyBy: new Date("2025-12-31T00:00:00.000Z"),
   evaluationMonth: 9,
   callout: [
