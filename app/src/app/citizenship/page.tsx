@@ -30,7 +30,8 @@ import { RegisteredCard } from "@/app/citizenship/components/s9/RegisteredCard"
 import type { RegisteredCardContext } from "@/app/citizenship/components/s9/RegisteredCard"
 import { LinkBox } from "@/components/common/LinkBox"
 import { Badge } from "@/components/ui/badge"
-import { getUserByAddress, getUserById } from "@/db/users"
+import { getUserByAddress, getUserById, getUserWorldId } from "@/db/users"
+import { getUserKYCUser } from "@/db/userKyc"
 import {
   checkCitizenshipLimit,
   getCitizen,
@@ -347,6 +348,29 @@ async function renderSeasonNinePage({
     }) : Promise.resolve(null),
   ])
 
+  let canContinueAfterClose = false
+  if (userId && registrationEnded) {
+    const [kycRecord, worldIdRecord, verificationRequiredEval] = await Promise.all([
+      getUserKYCUser(userId),
+      getUserWorldId(userId),
+      prisma.citizenSeasonEvaluation.findFirst({
+        where: {
+          seasonId: season.id,
+          userId,
+          outcome: CitizenRegistrationStatus.VERIFICATION_REQUIRED,
+        },
+      }),
+    ])
+
+    if (verificationRequiredEval && !citizenSeason && season.registrationEndDate) {
+      const kycStartedBeforeClose =
+        kycRecord && kycRecord.createdAt < season.registrationEndDate
+      const worldIdStartedBeforeClose =
+        worldIdRecord && worldIdRecord.createdAt < season.registrationEndDate
+      canContinueAfterClose = Boolean(kycStartedBeforeClose || worldIdStartedBeforeClose)
+    }
+  }
+
   const limitReached = season.userCitizenLimit
     ? registeredCitizensCount >= season.userCitizenLimit
     : false
@@ -421,6 +445,7 @@ async function renderSeasonNinePage({
       limitReached,
       isBlocked,
       isLoggedIn: Boolean(user),
+      canContinueAfterClose,
     })
 
   const statusLabel = registrationOpen ? "Open" : "Closed"
@@ -1802,6 +1827,7 @@ function determineRegistrationCardState({
   limitReached,
   isBlocked,
   isLoggedIn,
+  canContinueAfterClose,
 }: {
   season: SeasonWithConfig
   citizenSeason: S9CitizenSeason | null
@@ -1814,6 +1840,7 @@ function determineRegistrationCardState({
   limitReached: boolean
   isBlocked: boolean
   isLoggedIn: boolean
+  canContinueAfterClose: boolean
 }): RegistrationCardState | null {
   if (citizenSeason) {
     return null
@@ -1834,11 +1861,11 @@ function determineRegistrationCardState({
     }
   }
 
-  if (registrationEnded || limitReached) {
+  if ((registrationEnded || limitReached) && !canContinueAfterClose) {
     return {
       type: "registration-closed",
       message:
-        `Thanks for your interest, but the Citizens&apos; House has reached capacity for ${season.name}.`,
+        `Thanks for your interest, but the Citizens' House has reached capacity for ${season.name}.`,
     }
   }
 
@@ -1863,7 +1890,7 @@ function determineRegistrationCardState({
     }
   }
 
-  if (registrationOpen) {
+  if (registrationOpen || canContinueAfterClose) {
     return {
       type: "register",
       ctaId: "s9-registration-button",

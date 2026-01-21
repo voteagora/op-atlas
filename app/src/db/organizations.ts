@@ -813,11 +813,17 @@ export async function createOrganizationKycTeam(
         })
 
         // If found, free up the wallet address by setting a placeholder.
+        // Note: Due to ON UPDATE CASCADE on SuperfluidStream.receiver FK,
+        // changing walletAddress will cascade to SuperfluidStream - we fix this below.
+        const placeholderAddress = existingSoftDeletedTeam
+          ? `_deleted_${existingSoftDeletedTeam.id}`
+          : null
+
         if (existingSoftDeletedTeam) {
           await tx.kYCTeam.update({
             where: { id: existingSoftDeletedTeam.id },
             data: {
-              walletAddress: `_deleted_${existingSoftDeletedTeam.id}`,
+              walletAddress: placeholderAddress!,
             },
           })
         }
@@ -828,8 +834,17 @@ export async function createOrganizationKycTeam(
           },
         })
 
-        // Note: SuperfluidStreams are linked to KYCTeam via receiver -> walletAddress,
-        // so they automatically follow when we assign the walletAddress to the new team.
+        // Fix SuperfluidStream.receiver values that were cascaded to the placeholder.
+        if (placeholderAddress) {
+          await tx.superfluidStream.updateMany({
+            where: {
+              receiver: placeholderAddress,
+            },
+            data: {
+              receiver: normalizedAddress,
+            },
+          })
+        }
 
         await Promise.all([
           // Connect all reward streams to the new kyc team
@@ -879,6 +894,7 @@ export async function createOrganizationKycTeam(
       createdKycTeam = await db.$transaction(async (tx) => {
         // Check if there's a soft-deleted KYCTeam with the same wallet address.
         // This handles the case where a user "starts over" but wants to reuse the same address
+        // (e.g., updating signers on a multisig without changing the address).
         const existingSoftDeletedTeam = await tx.kYCTeam.findFirst({
           where: {
             walletAddress: normalizedAddress,
@@ -888,11 +904,17 @@ export async function createOrganizationKycTeam(
         })
 
         // If found, free up the wallet address by setting a placeholder.
+        // Note: Due to ON UPDATE CASCADE on SuperfluidStream.receiver FK,
+        // changing walletAddress will cascade to SuperfluidStream - we fix this below.
+        const placeholderAddress = existingSoftDeletedTeam
+          ? `_deleted_${existingSoftDeletedTeam.id}`
+          : null
+
         if (existingSoftDeletedTeam) {
           await tx.kYCTeam.update({
             where: { id: existingSoftDeletedTeam.id },
             data: {
-              walletAddress: `_deleted_${existingSoftDeletedTeam.id}`,
+              walletAddress: placeholderAddress!,
             },
           })
         }
@@ -902,6 +924,18 @@ export async function createOrganizationKycTeam(
             walletAddress: normalizedAddress,
           },
         })
+
+        // Fix SuperfluidStream.receiver values that were cascaded to the placeholder.
+        if (placeholderAddress) {
+          await tx.superfluidStream.updateMany({
+            where: {
+              receiver: placeholderAddress,
+            },
+            data: {
+              receiver: normalizedAddress,
+            },
+          })
+        }
 
         await Promise.all([
           // Connect all projects to the new kyc team

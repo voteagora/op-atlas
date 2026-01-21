@@ -135,7 +135,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
           <DialogHeader className="flex flex-col items-center gap-4">
             <div className="flex flex-col gap-2">
               <DialogTitle className="text-center text-lg font-normal text-text-default">
-                Make an organization
+                Create an organization
               </DialogTitle>
               <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">
                 An organization is a group of people aligned around a shared

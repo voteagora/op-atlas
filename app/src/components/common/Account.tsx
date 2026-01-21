@@ -20,6 +20,7 @@ import { UserAvatar } from "@/components/common/UserAvatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -54,19 +55,24 @@ type ProfileMenuItemProps = {
   href: string
   label: string
   currentContext: string
+  inset?: boolean
 }
 
 const ProfileMenuItem = ({
   href,
   label,
   currentContext,
+  inset,
 }: ProfileMenuItemProps) => {
   return currentContext === "EOA" ? (
     <Link href={href}>
-      <DropdownMenuItem className="cursor-pointer">{label}</DropdownMenuItem>
+      <DropdownMenuItem inset={inset} className="cursor-pointer">
+        {label}
+      </DropdownMenuItem>
     </Link>
   ) : (
     <DropdownMenuItem
+      inset={inset}
       className="cursor-pointer text-muted-foreground opacity-50"
       disabled
     >
@@ -396,10 +402,7 @@ const AccountContent = () => {
             </>
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 flex flex-col gap-1 z-[9999]"
-        >
+        <DropdownMenuContent align="end" className="w-56 z-[9999]">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               Dashboard
@@ -426,33 +429,52 @@ const AccountContent = () => {
               switchToSafe={switchToSafe}
             />
           )}
-          <hr className="w-full border-[0.5px] border-border" />
-          <ProfileMenuItem
-            href="/profile/details"
-            label="Account Details"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/connected-apps"
-            label="Connected Apps"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/verified-addresses"
-            label="Linked Wallets"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/organizations/new"
-            label="Organizations"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/citizenship"
-            label="Citizen Registration"
-            currentContext={currentContext}
-          />
-          <hr className="w-full border-[0.5px] border-border" />
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Account
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/profile/details"
+              label="Account Details"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/connected-apps"
+              label="Connected Apps"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/verified-addresses"
+              label="Linked Wallets"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Participation
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/dashboard#your-projects"
+              label="Your Projects"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/dashboard#your-organizations"
+              label="Your Organizations"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/citizenship"
+              label="Citizen Registration"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => {
@@ -631,9 +653,7 @@ const TestModeAccount = () => {
     return (
       <button
         type="button"
-        className={`cursor-pointer text-sm text-primary-foreground leading-5 rounded-md px-2 sm:px-4 py-2.5 flex items-center justify-center h-10 w-max ${
-          "bg-gray-300"
-        }`}
+        className={`cursor-pointer text-sm text-primary-foreground leading-5 rounded-md px-2 sm:px-4 py-2.5 flex items-center justify-center h-10 w-max ${"bg-gray-300"}`}
         onClick={() => {}}
       >
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -684,10 +704,7 @@ const TestModeAccount = () => {
             </>
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-56 flex flex-col gap-1 z-[9999]"
-        >
+        <DropdownMenuContent align="end" className="w-56 z-[9999]">
           <Link href="/dashboard">
             <DropdownMenuItem className="cursor-pointer">
               Dashboard
@@ -714,33 +731,52 @@ const TestModeAccount = () => {
               switchToSafe={switchToSafe}
             />
           )}
-          <hr className="w-full border-[0.5px] border-border" />
-          <ProfileMenuItem
-            href="/profile/details"
-            label="Account Details"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/connected-apps"
-            label="Connected Apps"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/verified-addresses"
-            label="Linked Wallets"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/profile/organizations/new"
-            label="Organizations"
-            currentContext={currentContext}
-          />
-          <ProfileMenuItem
-            href="/citizenship"
-            label="Citizen Registration"
-            currentContext={currentContext}
-          />
-          <hr className="w-full border-[0.5px] border-border" />
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Account
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/profile/details"
+              label="Account Details"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/connected-apps"
+              label="Connected Apps"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/profile/verified-addresses"
+              label="Linked Wallets"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
+          <DropdownMenuLabel className="px-2 py-1.5 text-xs font-medium text-muted-foreground select-none">
+            Your Participation
+          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <ProfileMenuItem
+              href="/dashboard#your-projects"
+              label="Your Projects"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/dashboard#your-organizations"
+              label="Your Organizations"
+              currentContext={currentContext}
+              inset
+            />
+            <ProfileMenuItem
+              href="/citizenship"
+              label="Citizen Registration"
+              currentContext={currentContext}
+              inset
+            />
+          </DropdownMenuGroup>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => {

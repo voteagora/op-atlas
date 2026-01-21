@@ -2138,11 +2138,17 @@ export async function createProjectKycTeam(
       // If found, free up the wallet address by setting a placeholder.
       // This allows the new KYCTeam to use the address while preserving
       // the soft-deleted record for referential integrity.
+      // Note: Due to ON UPDATE CASCADE on SuperfluidStream.receiver FK,
+      // changing walletAddress will cascade to SuperfluidStream - we fix this below.
+      const placeholderAddress = existingSoftDeletedTeam
+        ? `_deleted_${existingSoftDeletedTeam.id}`
+        : null
+
       if (existingSoftDeletedTeam) {
         await tx.kYCTeam.update({
           where: { id: existingSoftDeletedTeam.id },
           data: {
-            walletAddress: `_deleted_${existingSoftDeletedTeam.id}`,
+            walletAddress: placeholderAddress!,
           },
         })
       }
@@ -2153,6 +2159,21 @@ export async function createProjectKycTeam(
           walletAddress: normalizedAddress,
         },
       })
+
+      // Fix SuperfluidStream.receiver values that were cascaded to the placeholder.
+      // The FK has ON UPDATE CASCADE, so when we changed the old team's address,
+      // SuperfluidStream.receiver was also updated. We need to restore it to the
+      // correct address so it points to the new team.
+      if (placeholderAddress) {
+        await tx.superfluidStream.updateMany({
+          where: {
+            receiver: placeholderAddress,
+          },
+          data: {
+            receiver: normalizedAddress,
+          },
+        })
+      }
 
       // Transfer reward streams from the project's existing team (if any)
       if (project?.kycTeam?.rewardStreams.length) {
@@ -2167,9 +2188,6 @@ export async function createProjectKycTeam(
           },
         })
       }
-
-      // Note: SuperfluidStreams are linked to KYCTeam via receiver -> walletAddress,
-      // so they automatically follow when we assign the walletAddress to the new team.
 
       // Link the current project to the new KYCTeam
       await tx.project.update({
