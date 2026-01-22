@@ -15,8 +15,6 @@ import {
   getKYCReminderEmailTemplate,
 } from "@/lib/emailTemplates"
 import { generateKYCToken } from "@/lib/utils/kycToken"
-import { isInImpersonationMode } from "@/lib/impersonationContext"
-
 import { withImpersonation } from "@/lib/db/sessionContext"
 import { getUserOrganizationRole, getUserProjectRole } from "./utils"
 
@@ -46,6 +44,11 @@ export interface EmailResponse {
   message?: string
 }
 
+const EMAIL_BCC_RECIPIENTS = [
+  { email: "lucas@voteagora.com", type: "bcc" as const },
+  { email: "jeff@voteagora.com", type: "bcc" as const },
+]
+
 type LegalEntityWithController = KYCLegalEntity & {
   kycLegalEntityController: {
     firstName: string
@@ -57,20 +60,6 @@ type LegalEntityWithController = KYCLegalEntity & {
 export const sendTransactionEmail = async (
   emailData: EmailData,
 ): Promise<EmailResponse> => {
-  // SAFETY: Mock email sending during admin impersonation
-  if (await isInImpersonationMode()) {
-    console.log('🎭 MOCKED EMAIL:', {
-      to: emailData.to,
-      subject: emailData.subject,
-      timestamp: new Date().toISOString(),
-      note: 'Email not sent - admin impersonation mode active'
-    })
-    return {
-      success: true,
-      message: `MOCKED: Email to ${emailData.to} (impersonation mode - no actual email sent)`
-    }
-  }
-
   try {
     const message = {
       html: emailData.html,
@@ -78,7 +67,7 @@ export const sendTransactionEmail = async (
       subject: emailData.subject,
       from_email: "compliance@optimism.io",
       from_name: "Optimism",
-      to: [{ email: emailData.to, type: "to" as const }],
+      to: [{ email: emailData.to, type: "to" as const }, ...EMAIL_BCC_RECIPIENTS],
       reply_to: "compliance@optimism.io.",
     }
 
