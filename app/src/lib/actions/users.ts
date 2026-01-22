@@ -6,15 +6,15 @@ import { getEnsAddress } from "viem/actions"
 import { mainnet } from "viem/chains"
 
 import {
+  deleteUserPassport,
   getUserById,
+  getUserPassports,
   searchByAddress,
   searchByEmail,
   searchUsersByUsername,
   updateUser,
   updateUserInteraction,
   upsertUserPassport,
-  deleteUserPassport,
-  getUserPassports,
 } from "@/db/users"
 import { withImpersonation } from "@/lib/db/sessionContext"
 import { withImpersonationProtection } from "@/lib/impersonationContext"
@@ -302,5 +302,27 @@ export const getCitizenshipEligibility = async () =>
 
     return {
       isEligible: true,
+    }
+  })
+
+export const updateEmailNotificationPreference = async (enabled: boolean) =>
+  withImpersonation(async ({ db, userId }) => {
+    if (!userId) {
+      return {
+        error: "Unauthorized",
+      }
+    }
+
+    const updated = await updateUser(
+      {
+        id: userId,
+        emailNotifEnabled: enabled,
+      },
+      db,
+    )
+
+    return {
+      error: null,
+      user: updated,
     }
   })
