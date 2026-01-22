@@ -44,11 +44,6 @@ export interface EmailResponse {
   message?: string
 }
 
-const EMAIL_BCC_RECIPIENTS = [
-  { email: "lucas@voteagora.com", type: "bcc" as const },
-  { email: "jeff@voteagora.com", type: "bcc" as const },
-]
-
 type LegalEntityWithController = KYCLegalEntity & {
   kycLegalEntityController: {
     firstName: string
@@ -67,7 +62,7 @@ export const sendTransactionEmail = async (
       subject: emailData.subject,
       from_email: "compliance@optimism.io",
       from_name: "Optimism",
-      to: [{ email: emailData.to, type: "to" as const }, ...EMAIL_BCC_RECIPIENTS],
+      to: [{ email: emailData.to, type: "to" as const }],
       reply_to: "compliance@optimism.io.",
     }
 
