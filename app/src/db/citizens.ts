@@ -134,7 +134,12 @@ export async function getCitizenByAddress(
   address: string,
   db: PrismaClient = prisma,
 ): Promise<Citizen | null> {
-  return db.citizen.findUnique({
-    where: { address },
+  return db.citizen.findFirst({
+    where: {
+      address: {
+        equals: address,
+        mode: "insensitive",
+      },
+    },
   })
 }
