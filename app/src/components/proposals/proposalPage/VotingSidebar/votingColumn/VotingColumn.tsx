@@ -606,7 +606,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const validateAddress = () => {
     const newActiveWallet = wallets.find(
-      (wallet) => wallet.address === citizen?.address,
+      (wallet) =>
+        wallet.address.toLowerCase() === citizen?.address?.toLowerCase(),
     )
     console.log("newActiveWallet", wallets, citizen?.address)
     if (!newActiveWallet) {
