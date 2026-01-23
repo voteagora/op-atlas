@@ -62,6 +62,20 @@ export async function createS9Citizen({
       }
     }
 
+    // Check if user already has an attestation for this season (idempotency check)
+    const existingCitizenSeason = await prisma.citizenSeason.findFirst({
+      where: {
+        seasonId,
+        userId,
+        attestationId: { not: null },
+        registrationStatus: CitizenRegistrationStatus.ATTESTED,
+      },
+    })
+
+    if (existingCitizenSeason?.attestationId) {
+      return { success: true, attestationId: existingCitizenSeason.attestationId }
+    }
+
     // Create the attestation
     const attestationId = await createCitizenAttestation({
       to: governanceAddress,
