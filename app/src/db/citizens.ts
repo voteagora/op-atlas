@@ -109,14 +109,18 @@ export async function getCitizenById(
 }
 
 export async function getCitizenProposalVote(
-  citizenId: number,
+  citizenIdOrAddress: number | string,
   proposalId: string,
   db: PrismaClient = prisma,
 ): Promise<any> {
+  const isAddress = typeof citizenIdOrAddress === "string"
+  
   return db.offChainVote.findFirst({
     where: {
-      citizenId: citizenId,
       proposalId: proposalId,
+      ...(isAddress
+        ? { voterAddress: { equals: citizenIdOrAddress, mode: "insensitive" } }
+        : { citizenId: citizenIdOrAddress }),
     },
   })
 }
