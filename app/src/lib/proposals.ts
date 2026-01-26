@@ -200,7 +200,7 @@ export const enrichProposalData = async (
         }
     selfNominations: UIProposal[]
   },
-  citizenId: number,
+  citizenIdOrAddress: number | string,
   options: { db?: PrismaClient } = {},
 ) => {
   const { db } = options
@@ -209,7 +209,7 @@ export const enrichProposalData = async (
     proposal: UIProposal,
   ): Promise<UIProposal> => {
     const offchainVote = await getCitizenProposalVote(
-      citizenId,
+      citizenIdOrAddress,
       proposal.id,
       db,
     )
@@ -311,7 +311,9 @@ export const getEnrichedProposalData = async (
       }
 
       // Enrich the proposal data with citizen data for conditional vote status rendering
-      return enrichProposalData(proposalData, citizen.id, { db })
+      // Use address for vote lookup to ensure compatibility with SeasonCitizenS8S9 view
+      const citizenIdentifier = citizen.address || citizen.id
+      return enrichProposalData(proposalData, citizenIdentifier, { db })
     } catch (error) {
       console.error(`Failed to fetch Citizen Data: ${error}`)
       // If we can't get citizen data, just return the proposal data as is
