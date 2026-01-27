@@ -27,9 +27,10 @@ import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import {
-  useUserByAddress,
+  useUserByContext,
   useUserCitizen,
 } from "@/hooks/citizen/useUserCitizen"
+import { useUserByAddress } from "@/hooks/citizen/useUserCitizen"
 import { useWallet } from "@/hooks/useWallet"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
@@ -277,7 +278,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     session?.impersonation?.targetUserId ?? session?.user?.id
   const { user } = useWallet()
 
-  const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
+  const { citizen, isLoading: isCitizenLoading } = useUserByContext()
 
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
     useCitizenQualification(user?.id)
@@ -680,10 +681,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             await setActiveWallet(newActiveWallet)
           }
 
-          if (
-            !citizen?.address ||
-            signer!.address.toLowerCase() !== citizen.address.toLowerCase()
-          ) {
+          if (signer!.address !== citizen!.address) {
             throw new Error("Signer address does not match citizen address")
           }
           if (isSmartContract) {
