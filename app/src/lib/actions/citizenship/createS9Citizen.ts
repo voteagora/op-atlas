@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { citizenCategory, CitizenRegistrationStatus } from "@prisma/client"
+import { getAddress } from "viem"
 
 import { prisma } from "@/db/client"
 import {
@@ -30,6 +31,7 @@ export async function createS9Citizen({
   trustBreakdown?: any
 }): Promise<{ success: boolean; attestationId?: string; error?: string }> {
   try {
+    const checksummedAddress = getAddress(governanceAddress)
     const user = await getUserById(userId)
     if (!user) {
       return { success: false, error: "User not found" }
@@ -78,7 +80,7 @@ export async function createS9Citizen({
 
     // Create the attestation
     const attestationId = await createCitizenAttestation({
-      to: governanceAddress,
+      to: checksummedAddress,
       farcasterId: parseInt(user.farcasterId || "0"),
       selectionMethod: CITIZEN_ATTESTATION_CODE[CITIZEN_TYPES.user],
       refUID: undefined, // Users don't need refUID
@@ -100,7 +102,7 @@ export async function createS9Citizen({
         data: {
           seasonId,
           userId,
-          governanceAddress,
+          governanceAddress: checksummedAddress,
           registrationStatus: CitizenRegistrationStatus.ATTESTED,
           attestationId,
           trustBreakdown: trustBreakdown || null,
@@ -113,7 +115,7 @@ export async function createS9Citizen({
           userId,
         },
         update: {
-          address: governanceAddress,
+          address: checksummedAddress,
           attestationId,
           type: CITIZEN_TYPES.user,
           projectId: null,
@@ -121,7 +123,7 @@ export async function createS9Citizen({
         },
         create: {
           userId,
-          address: governanceAddress,
+          address: checksummedAddress,
           attestationId,
           type: CITIZEN_TYPES.user,
           projectId: null,

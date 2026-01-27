@@ -5,6 +5,7 @@ import {
   citizenCategory,
   Prisma,
 } from "@prisma/client"
+import { getAddress, isAddress } from "viem"
 
 import { prisma } from "@/db/client"
 
@@ -59,11 +60,14 @@ export async function getCitizenSeasonsByGovernanceAddresses({
     return []
   }
 
+  const lowercasedAddresses = addresses.map((addr) => addr.toLowerCase())
+
   return prisma.citizenSeason.findMany({
     where: {
       seasonId,
       governanceAddress: {
-        in: addresses,
+        in: lowercasedAddresses,
+        mode: "insensitive",
       },
       registrationStatus: includeRevoked
         ? undefined
@@ -139,6 +143,11 @@ export async function upsertCitizenSeason({
   userId: string
   data: CitizenSeasonUpsertData
 }) {
+  const checksummedData =
+    data.governanceAddress && isAddress(data.governanceAddress)
+      ? { ...data, governanceAddress: getAddress(data.governanceAddress) }
+      : data
+
   const existing = await prisma.citizenSeason.findFirst({
     where: {
       seasonId,
@@ -152,7 +161,7 @@ export async function upsertCitizenSeason({
   if (existing) {
     return prisma.citizenSeason.update({
       where: { id: existing.id },
-      data,
+      data: checksummedData,
     })
   }
 
@@ -160,7 +169,7 @@ export async function upsertCitizenSeason({
     data: {
       seasonId,
       userId,
-      ...data,
+      ...checksummedData,
     },
   })
 }
