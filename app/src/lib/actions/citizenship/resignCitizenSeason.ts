@@ -7,6 +7,8 @@ import { auth } from "@/auth"
 import { prisma } from "@/db/client"
 import { isUserAdminOfOrganization } from "@/db/organizations"
 import { getUserById } from "@/db/users"
+import { removeMailchimpTags } from "@/lib/api/mailchimp"
+import { CITIZEN_TYPES, S9_CITIZEN_TAGS } from "@/lib/constants"
 import { revokeCitizenAttestation } from "@/lib/eas/serverOnly"
 import { getUserProjectRole } from "@/lib/actions/utils"
 
@@ -100,15 +102,53 @@ export async function resignCitizenSeason(citizenSeasonId: string) {
   }
 
   try {
-    await prisma.citizenSeason.update({
-      where: { id: citizenSeasonId },
-      data: {
-        registrationStatus: CitizenRegistrationStatus.REVOKED,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.citizenSeason.update({
+        where: { id: citizenSeasonId },
+        data: {
+          registrationStatus: CitizenRegistrationStatus.REVOKED,
+        },
+      })
+
+      if (citizenSeason.userId) {
+        await tx.citizen.delete({
+          where: { userId: citizenSeason.userId },
+        })
+      } else if (citizenSeason.organizationId) {
+        await tx.citizen.deleteMany({
+          where: { organizationId: citizenSeason.organizationId },
+        })
+      } else if (citizenSeason.projectId) {
+        await tx.citizen.deleteMany({
+          where: { projectId: citizenSeason.projectId },
+        })
+      }
     })
   } catch (error) {
     console.error("Failed to update citizen season:", error)
     return { error: "Failed to update citizen record" }
+  }
+
+  const targetUserId = citizenSeason.userId
+  if (targetUserId) {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      include: { emails: true },
+    })
+    const userEmail = targetUser?.emails?.[0]?.email
+    if (userEmail) {
+      const citizenType = citizenSeason.organizationId
+        ? CITIZEN_TYPES.chain
+        : citizenSeason.projectId
+          ? CITIZEN_TYPES.app
+          : CITIZEN_TYPES.user
+      const tagToRemove = S9_CITIZEN_TAGS[citizenType]
+      try {
+        await removeMailchimpTags([{ email: userEmail, tagsToRemove: [tagToRemove] }])
+      } catch (error) {
+        console.error("Failed to remove Mailchimp tags:", error)
+      }
+    }
   }
 
   await Promise.all([
