@@ -275,21 +275,33 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const { data: session } = useSession()
   const viewerId =
     session?.impersonation?.targetUserId ?? session?.user?.id
-  const { user } = useWallet()
+  const { user, currentContext, selectedSafeWallet } = useWallet()
 
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
+
+  const { citizen: safeCitizenByAddress, isLoading: isSafeCitizenLoading } =
+    useUserByAddress(selectedSafeWallet?.address || null)
+
+  const effectiveCitizen =
+    currentContext === "SAFE" && selectedSafeWallet?.address
+      ? safeCitizenByAddress || citizen
+      : citizen
+  const isEffectiveCitizenLoading =
+    currentContext === "SAFE" && selectedSafeWallet?.address
+      ? isSafeCitizenLoading || (!safeCitizenByAddress && isCitizenLoading)
+      : isCitizenLoading
 
   const { data: citizenEligibility, isLoading: isEligibilityLoading } =
     useCitizenQualification(user?.id)
 
   useEffect(() => {
-    if (!isVoteLoading && !isCitizenLoading && !isEligibilityLoading) {
+    if (!isVoteLoading && !isEffectiveCitizenLoading && !isEligibilityLoading) {
       const timer = setTimeout(() => {
         setIsInitialLoad(false)
       }, 150)
       return () => clearTimeout(timer)
     }
-  }, [isVoteLoading, isCitizenLoading, isEligibilityLoading])
+  }, [isVoteLoading, isEffectiveCitizenLoading, isEligibilityLoading])
 
   const { voteType: myVoteType, selections: myVoteSelections } = myVote?.vote
     ? mapValueToVoteType(proposalData.proposalType, myVote.vote) || {}
@@ -307,7 +319,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const votingActions = getVotingActions(
     !!viewerId,
-    !!citizen,
+    !!effectiveCitizen,
     !!citizenEligibility?.eligible,
   )
 
@@ -321,7 +333,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const canVote =
     !!viewerId &&
-    !!citizen &&
+    !!effectiveCitizen &&
     proposalData.status === ProposalStatus.ACTIVE &&
     !myVote
 
@@ -329,11 +341,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const signer = useEthersSigner({ chainId: CHAIN_ID })
   const { setActiveWallet } = useSetActiveWallet()
   const { track } = useAnalytics()
-  const { currentContext, selectedSafeWallet } = useWallet()
-  // When a Safe is selected (EOA + Safe), fetch its citizen to use the correct refUID
-  const { citizen: safeCitizenByAddress } = useUserByAddress(
-    selectedSafeWallet?.address || null,
-  )
 
   const { connector } = useAccount()
 
@@ -371,7 +378,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   if (
     isInitialLoad ||
     isVoteLoading ||
-    isCitizenLoading ||
+    isEffectiveCitizenLoading ||
     isEligibilityLoading
   ) {
     return <VotingColumnSkeleton />
@@ -526,6 +533,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     ])
 
     const refUID =
+      (safeCitizenByAddress?.attestationId as `0x${string}`) ??
       (citizen?.attestationId as `0x${string}`) ??
       "0x0000000000000000000000000000000000000000000000000000000000000000"
 
@@ -823,7 +831,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       <div className="w-full transition-opacity duration-300 border rounded-t-lg ease-in-out">
         <CardText
           proposalData={proposalData}
-          isCitizen={!!citizen}
+          isCitizen={!!effectiveCitizen}
           vote={displayVoteType}
           eligibility={citizenEligibility}
         />
