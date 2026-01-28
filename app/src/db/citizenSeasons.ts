@@ -238,3 +238,24 @@ export async function findBlockedCitizenSeasonEvaluation({
     },
   })
 }
+
+export async function getCitizenSeasonByGovernanceAddress(address: string) {
+  return prisma.citizenSeason.findFirst({
+    where: {
+      governanceAddress: {
+        equals: address,
+        mode: "insensitive",
+      },
+      registrationStatus: {
+        not: CitizenRegistrationStatus.REVOKED,
+      },
+    },
+    include: {
+      user: true,
+      organization: true,
+      project: true,
+      season: true,
+    },
+    orderBy: [{ season: { startDate: "desc" } }, { createdAt: "desc" }],
+  })
+}
