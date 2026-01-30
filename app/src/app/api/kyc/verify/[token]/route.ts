@@ -55,41 +55,32 @@ export async function POST(
       )
     }
 
-    // Note: We no longer check inquiryCreatedAt here because:
-    // 1. The JWT token already has its own 7-day expiration
-    // 2. If the Persona inquiry is expired, generateOneTimeLink() will fail with an appropriate error
-    // This allows users to resume verification via resent emails even for older inquiries
-
     let inquiryId = entity.personaInquiryId
+    let needsNewInquiry = !inquiryId
 
-    // Case 1: No inquiry exists yet - create a new one
-    // Use transaction to prevent race conditions from duplicate requests
-    if (!inquiryId) {
+    if (inquiryId) {
+      const existingInquiry = await personaClient.getInquiryById(inquiryId)
+      if (!existingInquiry) {
+        console.log(
+          `Persona inquiry ${inquiryId} not found, will create a new one`,
+        )
+        needsNewInquiry = true
+      } else if (existingInquiry.attributes.status === "expired") {
+        console.log(
+          `Persona inquiry ${inquiryId} is expired, will create a new one`,
+        )
+        needsNewInquiry = true
+      }
+    }
+
+    if (needsNewInquiry) {
       console.log(
         `Creating new Persona inquiry for ${entityType} ${entityId}`,
       )
 
-      // Ensure we have a reference ID
-      let referenceId = entity.personaReferenceId
-      if (!referenceId) {
-        const { randomBytes } = await import("crypto")
-        referenceId = randomBytes(16).toString("hex")
+      const { randomBytes } = await import("crypto")
+      const referenceId = randomBytes(16).toString("hex")
 
-        // Update the entity with the new reference ID
-        if (entityType === "kycUser") {
-          await db.kYCUser.update({
-            where: { id: entityId },
-            data: { personaReferenceId: referenceId },
-          })
-        } else {
-          await db.kYCLegalEntity.update({
-            where: { id: entityId },
-            data: { personaReferenceId: referenceId },
-          })
-        }
-      }
-
-      // Create new inquiry via Persona API
       const inquiry = await personaClient.createInquiry(
         referenceId,
         personaTemplateId,
@@ -97,11 +88,11 @@ export async function POST(
 
       inquiryId = inquiry.id
 
-      // Store the inquiry ID and creation timestamp in database atomically
       if (entityType === "kycUser") {
         await db.kYCUser.update({
           where: { id: entityId },
           data: {
+            personaReferenceId: referenceId,
             personaInquiryId: inquiryId,
             inquiryCreatedAt: new Date(),
           },
@@ -110,6 +101,7 @@ export async function POST(
         await db.kYCLegalEntity.update({
           where: { id: entityId },
           data: {
+            personaReferenceId: referenceId,
             personaInquiryId: inquiryId,
             inquiryCreatedAt: new Date(),
           },
@@ -117,7 +109,6 @@ export async function POST(
       }
     }
 
-    // Case 2: Inquiry exists - generate a new OTL to resume
     console.log(`Generating OTL for inquiry ${inquiryId}`)
     const { redirectUrl } = await personaClient.generateOneTimeLink(inquiryId)
 
