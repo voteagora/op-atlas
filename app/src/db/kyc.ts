@@ -204,8 +204,13 @@ export async function deleteKycTeam({
     const kycUsersToDelete = await tx.kYCUser.findMany({
       where: {
         KYCUserTeams: {
+          // Require at least one team link (avoid deleting orphaned personal KYC users)
+          some: {
+            kycTeamId,
+          },
+          // Ensure the user is only associated with this single team
           every: {
-            kycTeamId: kycTeamId,
+            kycTeamId,
           },
         },
         status: {
