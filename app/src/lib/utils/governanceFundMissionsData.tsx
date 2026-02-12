@@ -50,7 +50,7 @@ export const governanceFundMissionsData: MissionData = {
       icon="/assets/icons/op-icon.svg"
     />,
   ],
-  showSupportedNetworks: false,
+  showSupportedNetworks: true,
   applicationPageEligibility: [],
   missionPageEligibility: [],
   howItWorks: [
