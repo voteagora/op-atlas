@@ -10,74 +10,54 @@ export const growthGrantsData: MissionData = {
   pageName: "growth-grants",
   name: "Growth Grants",
   number: 10,
-  roundName: "Season 8 Growth Grants",
+  roundName: "Season 9 Growth Grants",
   funding: {
-    op: "6.33M",
+    op: "3.89M",
   },
   ogDescription:
-    "Growth Grants are distributing up to 6.33M OP in Season 8. If you've built a Superchain app, sign up to check if you qualify for growth funding.",
+    "Growth Grants are distributing up to 3.89M OP in Season 9. If you've built a Superchain app, sign up to check if you qualify for growth funding.",
   shortDescription:
     "For apps that have already deployed, looking to boost their TVL.",
   details: [
     <p key="details-1">
       Growth Grants support Superchain apps that have already launched and are
-      ready to scale their impact in alignment with the{" "}
-      <ExternalLink
-        href="https://gov.optimism.io/t/season-8-intent/10009"
-        className="underline"
-      >
-        Collective Intent
-      </ExternalLink>
-      . Applicants submit a plan for growth, methods for measuring success, and
+      ready to scale their impact. Applicants submit a plan for growth, methods for measuring success, and
       their desired capital allocation to execute their plan.
     </p>,
     <p key="details-2">
-      For Season 8, plans should target at least one of the following success
+      For Season 9, plans should target at least one of the following success
       metrics:
       <ul className="list-disc pl-4 space-y-2 text-base text-secondary-foreground">
         <li className="mt-4">
-          <span>Superchain TVL</span>
+          <span>DEX TVL in Priority Pairs (Liquidity)</span>
         </li>
         <li>
-          <span>Superchain Transaction Fees</span>
+          <span>DEX Fees in Priority Pairs</span>
         </li>
       </ul>
     </p>,
-    <p key="details-3">
-      Projects that are a good fit might focus on making Superchain assets{" "}
-      <ExternalLink
-        href="https://specs.optimism.io/interop/overview.html"
-        className="underline"
-      >
-        interop-ready
-      </ExternalLink>
-      , building upgrades that increase TVL, or shipping features that drive
-      cross-chain transactions. Other eligible projects may include tools that
-      help track adoption, support conversions to interop formats, or create
-      stronger incentives for ecosystem usage.
-    </p>,
   ],
-  season: "8",
+  season: "9",
   callout: [
     <GrantInfoCallout
       key="season-budget"
       title="Season Budget"
-      description="6.33M OP"
+      description="3.89M OP"
       icon="/assets/icons/op-icon.svg"
     />,
     <GrantInfoCallout
       key="apply-by"
       title="Apply by"
-      description="Dec 4, 2025"
+      description="May 20, 2026"
       icon={<CalendarEventFill fill="#3374DB" />}
     />,
   ],
   showSupportedNetworks: true,
   status: "ongoing",
   iconUrl: "/assets/images/onchain-builders.png",
-  startsAt: new Date("2025-08-15T00:00:00.000Z"),
-  endsAt: new Date("2026-12-31T00:00:00.000Z"),
-  applyBy: new Date("2025-12-04T00:00:00.000Z"),
+  startsAt: new Date("2026-02-11T00:00:00.000Z"),
+  endsAt: new Date("2026-07-20T00:00:00.000Z"),
+  applyBy: new Date("2025-05-20T00:00:00.000Z"),
   evaluationMonth: 9,
   missionPageEligibility: [
     {
@@ -178,8 +158,8 @@ export const growthGrantsData: MissionData = {
   ],
   learnMoreLinks: [
     {
-      title: "S8 Governance Fund Missions",
-      href: "https://gov.optimism.io/t/s8-governance-fund-missions/10004?u=gonna.eth",
+      title: "S9 Governance Fund Missions",
+      href: "https://gov.optimism.io/t/season-9-governance-fund-missions/10526",
     },
     {
       title: "Collective Grant Policies",

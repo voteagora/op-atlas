@@ -63,12 +63,12 @@ export const ApplicationStatusCard = ({
           variant={"outline"}
           onClick={() => {
             buttonClickHandler({
-              href: "https://app.opgrants.io/programs/959/apply",
+              href: "https://app.opgrants.io/programs/1045",
               text: "Apply",
               type: "application",
             })
             window.open(
-              "https://app.opgrants.io/programs/959/apply",
+              "https://app.opgrants.io/programs/1045",
               "_blank",
               "noopener,noreferrer",
             )
