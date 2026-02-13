@@ -78,6 +78,10 @@ export const GrantsInfo = () => {
     let missionOpen =
       mission.startsAt < new Date() && mission.endsAt > new Date()
 
+    if (mission.pageName === "foundation-missions" && data) {
+      missionOpen = data.AreMissionsOpen
+    }
+
     let status = {
       text: missionOpen ? "Open" : "Closed",
       color: missionOpen ? "bg-callout" : "bg-secondary",
@@ -102,6 +106,10 @@ export const GrantsInfo = () => {
   const renderMission = (mission: MissionData) => {
     let missionOpen =
       mission.startsAt < new Date() && mission.endsAt > new Date()
+
+    if (mission.pageName === "foundation-missions" && data) {
+      missionOpen = data.AreMissionsOpen
+    }
 
     const content = (
       <>
