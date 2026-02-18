@@ -348,7 +348,7 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           )
         }
 
-        let effectiveCaseStatus = parsedStatus
+        let effectiveCaseStatus: string = parsedStatus
 
         if (parsedStatus === "APPROVED") {
           try {
