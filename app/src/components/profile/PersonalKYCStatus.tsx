@@ -75,7 +75,7 @@ export default function PersonalKYCStatus({ kycUser }: PersonalKYCStatusProps) {
     }
   }, [kycUser.id])
 
-  if (kycUser.status === "PENDING") {
+  if (kycUser.status === "PENDING" || kycUser.status === "PENDING_REVIEW") {
     return (
       <div className="flex flex-col border p-6 gap-4 border-tertiary rounded-[12px]">
         <Loader2 className="h-6 w-6 animate-spin" />

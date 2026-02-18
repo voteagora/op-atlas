@@ -1165,6 +1165,7 @@ enum KYCStatus {
   PENDING
   APPROVED
   REJECTED
+  PENDING_REVIEW
 }
 
 enum ProjectOSOMetric {

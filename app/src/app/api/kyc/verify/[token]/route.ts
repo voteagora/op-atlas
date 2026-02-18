@@ -36,6 +36,7 @@ export async function POST(
     } else {
       entity = await db.kYCLegalEntity.findUnique({
         where: { id: entityId },
+        include: { kycLegalEntityController: true },
       })
       personaTemplateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
     }
@@ -56,6 +57,7 @@ export async function POST(
     }
 
     let inquiryId = entity.personaInquiryId
+    let referenceId = entity.personaReferenceId
     let needsNewInquiry = !inquiryId
 
     if (inquiryId) {
@@ -78,12 +80,33 @@ export async function POST(
         `Creating new Persona inquiry for ${entityType} ${entityId}`,
       )
 
-      const { randomBytes } = await import("crypto")
-      const referenceId = randomBytes(16).toString("hex")
+      if (!referenceId) {
+        const { randomBytes } = await import("crypto")
+        referenceId = randomBytes(16).toString("hex")
+        console.log(
+          `Generated new Persona reference ID for ${entityType} ${entityId}`,
+        )
+      } else {
+        console.log(
+          `Reusing existing Persona reference ID for ${entityType} ${entityId}`,
+        )
+      }
+
+      const fields: Record<string, string> = {}
+      if (entityType === "legalEntity") {
+        if (entity.name) fields["business-name"] = entity.name
+        const controller = entity.kycLegalEntityController
+        if (controller) {
+          if (controller.firstName) fields["control-person-name-first"] = controller.firstName
+          if (controller.lastName) fields["control-person-name-last"] = controller.lastName
+          if (controller.email) fields["control-person-email-address"] = controller.email
+        }
+      }
 
       const inquiry = await personaClient.createInquiry(
         referenceId,
         personaTemplateId,
+        Object.keys(fields).length > 0 ? fields : undefined,
       )
 
       inquiryId = inquiry.id
