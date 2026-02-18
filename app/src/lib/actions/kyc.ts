@@ -9,6 +9,7 @@ import {
   updateKYCUserStatus,
   getUserKycTeamSources,
   updateLegalEntityStatus,
+  findLegalEntityByPersonaIds,
 } from "@/db/kyc"
 import { ensureClaim, getReward, updateClaim } from "@/db/rewards"
 import { getKYCUsersByProjectId as getKYCUsersByProjId } from "@/db/kyc"
@@ -26,6 +27,19 @@ import { UserKYCTeam } from "@/lib/types"
 import { KYCStatus } from "@prisma/client"
 
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
+
+const NAME_VALIDATION_CUTOFF = new Date("2026-02-18")
+
+function normalizeForComparison(value: string | null | undefined): string {
+  return (value ?? "").trim().toLowerCase()
+}
+
+function namesMatch(
+  personaValue: string | null | undefined,
+  atlasValue: string | null | undefined,
+): boolean {
+  return normalizeForComparison(personaValue) === normalizeForComparison(atlasValue)
+}
 
 /**
  * Calculate KYC/KYB expiry date based on Persona inquiry attributes
@@ -334,8 +348,33 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           )
         }
 
+        let effectiveCaseStatus: string = parsedStatus
+
+        if (parsedStatus === "APPROVED") {
+          try {
+            const legalEntity = await findLegalEntityByPersonaIds(inquiryId, inquiryReferenceId)
+            if (legalEntity && legalEntity.createdAt >= NAME_VALIDATION_CUTOFF) {
+              const personaBusinessName = personaCase.attributes.fields["business-name"]?.value
+              const businessNameMatch = namesMatch(personaBusinessName, legalEntity.name)
+
+              if (!businessNameMatch) {
+                console.warn(
+                  `Business name mismatch for case ${personaCase.id} inquiry ${inquiryId}: ` +
+                  `Persona="${personaBusinessName}" Atlas="${legalEntity.name}". Setting PENDING_REVIEW.`,
+                )
+                effectiveCaseStatus = "PENDING_REVIEW"
+              }
+            }
+          } catch (error) {
+            console.error(
+              `Failed to validate business name for case ${personaCase.id}, proceeding with APPROVED`,
+              error,
+            )
+          }
+        }
+
         const updatedEntities = await updateLegalEntityStatus({
-          parsedStatus,
+          parsedStatus: effectiveCaseStatus,
           updatedAt: updatedAtDate,
           inquiryId,
           referenceId: inquiryReferenceId,
@@ -629,7 +668,7 @@ async function fetchAvailableLegalEntitiesForOrganization(
       .map((l) => l.legalEntity)
       .filter((e): e is NonNullable<typeof e> => Boolean(e))
       .filter(
-        (e) => e.status !== KYCStatus.REJECTED && (!e.expiry || e.expiry > now),
+        (e) => e.status !== KYCStatus.REJECTED && e.status !== KYCStatus.PENDING_REVIEW && (!e.expiry || e.expiry > now),
       )
 
     // Dedupe by id

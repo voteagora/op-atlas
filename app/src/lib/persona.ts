@@ -200,6 +200,7 @@ class PersonaClient {
   async createInquiry(
     referenceId: string,
     templateId: string,
+    fields?: Record<string, string>,
   ): Promise<PersonaInquiry> {
     if (!this.apiKey) {
       throw new Error("Persona API key not set")
@@ -207,6 +208,15 @@ class PersonaClient {
 
     try {
       const url = `${PERSONA_API_URL}/api/v1/inquiries`
+      const attributes: Record<string, unknown> = {
+        "inquiry-template-id": templateId,
+        "reference-id": referenceId,
+      }
+
+      if (fields && Object.keys(fields).length > 0) {
+        attributes.fields = fields
+      }
+
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -215,12 +225,7 @@ class PersonaClient {
           "Persona-Version": "2023-01-05",
         },
         body: JSON.stringify({
-          data: {
-            attributes: {
-              "inquiry-template-id": templateId,
-              "reference-id": referenceId,
-            },
-          },
+          data: { attributes },
         }),
       })
 

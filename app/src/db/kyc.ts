@@ -136,6 +136,44 @@ export async function updateLegalEntityStatus({
   return updatedByReference
 }
 
+export async function findKYCUserByPersonaIds(
+  inquiryId: string,
+  referenceId?: string,
+  db: PrismaClient = prisma,
+): Promise<KYCUser | null> {
+  const byInquiry = await db.kYCUser.findFirst({
+    where: { personaInquiryId: inquiryId },
+  })
+  if (byInquiry) return byInquiry
+
+  if (referenceId) {
+    return db.kYCUser.findFirst({
+      where: { personaReferenceId: referenceId },
+    })
+  }
+
+  return null
+}
+
+export async function findLegalEntityByPersonaIds(
+  inquiryId: string,
+  referenceId?: string,
+  db: PrismaClient = prisma,
+): Promise<KYCLegalEntity | null> {
+  const byInquiry = await db.kYCLegalEntity.findFirst({
+    where: { personaInquiryId: inquiryId },
+  })
+  if (byInquiry) return byInquiry
+
+  if (referenceId) {
+    return db.kYCLegalEntity.findFirst({
+      where: { personaReferenceId: referenceId },
+    })
+  }
+
+  return null
+}
+
 export async function checkWalletAddressExists(
   walletAddress: string,
   db: PrismaClient = prisma,

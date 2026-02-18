@@ -454,7 +454,7 @@ export interface UserKYCTeam {
   organizationName?: string
   users: Array<{
     id: string
-    status: "PENDING" | "APPROVED" | "REJECTED"
+    status: "PENDING" | "APPROVED" | "REJECTED" | "PENDING_REVIEW"
     updatedAt: Date
     expiry: Date | null
   }>
