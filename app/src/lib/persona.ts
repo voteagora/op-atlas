@@ -92,7 +92,7 @@ export type PersonaCase = {
 type PersonaResponse<T> = {
   data: T[]
   links: {
-    next: string
+    next: string | null
   }
 }
 
@@ -128,6 +128,80 @@ export type GeneratedPersonaOneTimeLink = {
   expiresAt?: string
 }
 
+const inquiryByIdCache = new Map<string, PersonaInquiry>()
+const INQUIRY_CACHE_MAX_ITEMS = 20_000
+const PERSONA_RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504])
+const MAX_PERSONA_RETRIES = 3
+
+function clearInquiryCache() {
+  inquiryByIdCache.clear()
+}
+
+function cacheInquiries(inquiries: PersonaInquiry[]) {
+  for (const inquiry of inquiries) {
+    if (!inquiry?.id) continue
+    inquiryByIdCache.set(inquiry.id, inquiry)
+  }
+
+  if (inquiryByIdCache.size > INQUIRY_CACHE_MAX_ITEMS) {
+    clearInquiryCache()
+  }
+}
+
+function truncateForLogs(value: string, maxLength = 400): string {
+  const normalized = value.replace(/\s+/g, " ").trim()
+  if (normalized.length <= maxLength) {
+    return normalized
+  }
+
+  return `${normalized.slice(0, maxLength)}...`
+}
+
+function safeParseJson(value: string): unknown {
+  try {
+    return JSON.parse(value)
+  } catch {
+    return null
+  }
+}
+
+function parseRetryAfterSeconds(value: string | null): number | null {
+  if (!value) return null
+
+  const seconds = Number(value)
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return seconds
+  }
+
+  const asDateMs = Date.parse(value)
+  if (Number.isNaN(asDateMs)) {
+    return null
+  }
+
+  const deltaSeconds = Math.ceil((asDateMs - Date.now()) / 1000)
+  return deltaSeconds > 0 ? deltaSeconds : 0
+}
+
+function getRetryDelayMs(response: Response, attempt: number): number {
+  const retryAfterSeconds = parseRetryAfterSeconds(
+    response.headers.get("retry-after"),
+  )
+  if (retryAfterSeconds !== null) {
+    return retryAfterSeconds * 1000
+  }
+
+  // Exponential backoff with a small cap to keep cron bounded.
+  return Math.min(500 * 2 ** attempt, 4000)
+}
+
+function shouldRetryStatus(status: number): boolean {
+  return PERSONA_RETRYABLE_STATUS_CODES.has(status)
+}
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 class PersonaClient {
   constructor(private readonly apiKey?: string) {
     if (!apiKey) {
@@ -135,31 +209,92 @@ class PersonaClient {
     }
   }
 
-  async getCases(nextUrl?: string): Promise<PersonaResponse<PersonaCase>> {
-    const url = `${PERSONA_API_URL}${nextUrl || "/api/v1/cases"}`
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-    })
+  private async getPaginated<T>(path: string): Promise<PersonaResponse<T>> {
+    const apiKey = this.apiKey
+    if (!apiKey) {
+      throw new Error("Persona API key not set")
+    }
 
-    return response.json()
+    const url = `${PERSONA_API_URL}${path}`
+    for (let attempt = 0; attempt <= MAX_PERSONA_RETRIES; attempt++) {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      })
+
+      const rawBody = await response.text()
+      const parsed = safeParseJson(rawBody) as Record<string, unknown> | null
+
+      if (!response.ok) {
+        if (
+          shouldRetryStatus(response.status) &&
+          attempt < MAX_PERSONA_RETRIES
+        ) {
+          const delayMs = getRetryDelayMs(response, attempt)
+          console.warn(
+            `Persona request ${path} returned ${response.status}; retrying in ${delayMs}ms (attempt ${attempt + 1}/${MAX_PERSONA_RETRIES})`,
+          )
+          await sleep(delayMs)
+          continue
+        }
+
+        const errorDetails =
+          parsed && Array.isArray(parsed.errors)
+            ? truncateForLogs(JSON.stringify(parsed.errors))
+            : truncateForLogs(rawBody || "<empty>")
+
+        throw new Error(
+          `Persona request failed for ${path}: ${response.status} ${response.statusText} - ${errorDetails}`,
+        )
+      }
+
+      const data = parsed?.data
+      const next = parsed?.links
+        ? (parsed.links as { next?: unknown }).next
+        : undefined
+
+      if (!Array.isArray(data)) {
+        throw new Error(
+          `Persona response missing data array for ${path}: ${truncateForLogs(rawBody || "<empty>")}`,
+        )
+      }
+
+      if (next !== undefined && next !== null && typeof next !== "string") {
+        throw new Error(
+          `Persona response has invalid links.next for ${path}: ${truncateForLogs(rawBody || "<empty>")}`,
+        )
+      }
+
+      return {
+        data: data as T[],
+        links: {
+          next: typeof next === "string" ? next : null,
+        },
+      }
+    }
+
+    throw new Error(
+      `Persona request failed for ${path}: exhausted retry attempts`,
+    )
+  }
+
+  async getCases(nextUrl?: string): Promise<PersonaResponse<PersonaCase>> {
+    return this.getPaginated<PersonaCase>(nextUrl || "/api/v1/cases")
   }
 
   async getInquiries(
     nextUrl?: string,
   ): Promise<PersonaResponse<PersonaInquiry>> {
-    const url = `${PERSONA_API_URL}${nextUrl || "/api/v1/inquiries"}`
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-    })
-
-    return response.json()
+    return this.getPaginated<PersonaInquiry>(nextUrl || "/api/v1/inquiries")
   }
 
   async getInquiryById(inquiryId: string): Promise<PersonaInquiry | null> {
+    const cachedInquiry = inquiryByIdCache.get(inquiryId)
+    if (cachedInquiry) {
+      return cachedInquiry
+    }
+
     const apiKey = this.apiKey
     if (!apiKey) {
       console.warn("Persona API key not set")
@@ -168,27 +303,45 @@ class PersonaClient {
 
     try {
       const url = `${PERSONA_API_URL}/api/v1/inquiries/${inquiryId}`
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      })
+      for (let attempt = 0; attempt <= MAX_PERSONA_RETRIES; attempt++) {
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+          },
+        })
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          return null
+        if (!response.ok) {
+          if (response.status === 404) {
+            return null
+          }
+          if (
+            shouldRetryStatus(response.status) &&
+            attempt < MAX_PERSONA_RETRIES
+          ) {
+            const delayMs = getRetryDelayMs(response, attempt)
+            console.warn(
+              `Persona inquiry ${inquiryId} returned ${response.status}; retrying in ${delayMs}ms (attempt ${attempt + 1}/${MAX_PERSONA_RETRIES})`,
+            )
+            await sleep(delayMs)
+            continue
+          }
+          throw new Error(
+            `Failed to fetch inquiry: ${response.status} ${response.statusText}`,
+          )
         }
-        throw new Error(
-          `Failed to fetch inquiry: ${response.status} ${response.statusText}`,
-        )
-      }
 
-      const data: PersonaSingleResponse<PersonaInquiry> = await response.json()
-      return data.data
+        const data: PersonaSingleResponse<PersonaInquiry> = await response.json()
+        if (data?.data?.id) {
+          inquiryByIdCache.set(data.data.id, data.data)
+        }
+        return data.data
+      }
     } catch (error) {
       console.error(`Error fetching inquiry ${inquiryId}:`, error)
       return null
     }
+
+    return null
   }
 
   /**
@@ -346,12 +499,12 @@ async function* fetchGenerator<T>(
     )) as PersonaResponse<T>
 
     const batch = response.data
+    if (path === "getInquiries") {
+      cacheInquiries(batch as unknown as PersonaInquiry[])
+    }
     yield batch
-    // Clear references to help garbage collection
-    response.data = []
-    batch.length = 0
 
-    currentUrl = response.links.next
+    currentUrl = response.links.next || undefined
   } while (currentUrl)
 }
 
@@ -363,6 +516,7 @@ export const getAndProcessPersonaCases = () => {
 }
 
 export const getAndProcessPersonaInquiries = () => {
+  clearInquiryCache()
   return processPaginatedData(
     () => fetchGenerator<PersonaInquiry>(personaClient, "getInquiries"),
     processPersonaInquiries,
@@ -378,6 +532,10 @@ async function processPaginatedData<T>(
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 2)
 
   for await (const batch of fetchPage()) {
+    if (batch.length === 0) {
+      continue
+    }
+
     // Since data is sorted by created-at desc, we need to check the last item
     const lastItem = batch[batch.length - 1]
     const timestamp = (lastItem as any).attributes?.["created-at"]

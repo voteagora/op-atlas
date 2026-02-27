@@ -277,7 +277,8 @@ export const processPersonaInquiries = async (inquiries: PersonaInquiry[]) => {
 
 export const processPersonaCases = async (cases: PersonaCase[]) => {
   for (const personaCase of cases) {
-    if (Object.keys(personaCase.attributes.fields).length === 0) {
+    const caseFields = personaCase.attributes?.fields ?? {}
+    if (Object.keys(caseFields).length === 0) {
       console.warn(`No fields found for case ${personaCase.id}`)
       continue
     }
@@ -354,7 +355,7 @@ export const processPersonaCases = async (cases: PersonaCase[]) => {
           try {
             const legalEntity = await findLegalEntityByPersonaIds(inquiryId, inquiryReferenceId)
             if (legalEntity && legalEntity.createdAt >= NAME_VALIDATION_CUTOFF) {
-              const personaBusinessName = personaCase.attributes.fields["business-name"]?.value
+              const personaBusinessName = caseFields["business-name"]?.value
               const businessNameMatch = namesMatch(personaBusinessName, legalEntity.name)
 
               if (!businessNameMatch) {
