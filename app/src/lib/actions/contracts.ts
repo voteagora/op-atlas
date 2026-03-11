@@ -5,15 +5,11 @@ import { Address, getAddress, isAddressEqual, verifyMessage } from "viem"
 
 import {
   addProjectContract,
-  addProjectContracts,
   getProjectContractsByDeployerWithClient,
-  getProjectContractsWithClient,
   removeProjectContract,
   removeProjectContractsByDeployer,
   updateProjectContract,
-  upsertProjectContracts,
 } from "@/db/projects"
-import { getDeployedContractsServerParsed } from "@/lib/oso"
 import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
 
 import { UNIVERSAL_CREATE2_FACTORY } from "../constants"
@@ -43,52 +39,6 @@ async function withProjectMember<T>(
     return handler({ ...ctx, userId: ctx.userId })
   }, { requireUser: true })
 }
-
-export const verifyDeployer = async (
-  projectId: string,
-  deployerAddress: Address,
-  chainId: number,
-  signature: `0x${string}`,
-) =>
-  withProjectMember(projectId, async ({ db }) => {
-    const contracts = await getDeployedContractsServerParsed(deployerAddress)
-
-    const client = clients[chainId]
-
-    const isValidSignature = await client.verifyMessage({
-      address: getAddress(deployerAddress),
-      message: getMessage(projectId),
-      signature: signature as `0x${string}`,
-    })
-
-    if (!isValidSignature) {
-      return {
-        error: "Invalid signature",
-      }
-    }
-
-    const addedContracts = await addProjectContracts(
-      projectId,
-      contracts?.map((contract) => ({
-        chainId: contract.chainId,
-        contractAddress: getAddress(contract.contractAddress),
-        deployerAddress: getAddress(deployerAddress),
-        projectId,
-        deploymentHash: "",
-        verificationProof: signature,
-        verificationChainId: chainId,
-      })) ?? [],
-      db,
-    )
-
-    return {
-      error: null,
-      contracts: {
-        included: addedContracts.createdContracts,
-        excluded: addedContracts.failedContracts,
-      },
-    }
-  })
 
 export const verifyContract = async ({
   projectId,
@@ -318,55 +268,6 @@ export const removeContractsByDeployer = async (
 
     revalidatePath("/dashboard")
     revalidatePath("/projects", "layout")
-
-    return {
-      error: null,
-    }
-  })
-
-export const addAllExcludedProjectContractsAction = async (
-  deployer: string,
-  projectId: string,
-  signature: string,
-  verificationChainId: number,
-) =>
-  withProjectMember(projectId, async ({ db }) => {
-    const osoContracts = await getDeployedContractsServerParsed(deployer)
-    const projectContracts = await getProjectContractsWithClient(
-      { projectId },
-      db,
-    )
-
-    const excludedContracts =
-      osoContracts.filter(
-        (c) =>
-          !projectContracts?.contracts.some(
-            (pc) =>
-              pc.contractAddress === c.contractAddress &&
-              pc.chainId === c.chainId,
-          ),
-      ) ?? []
-
-    try {
-      await upsertProjectContracts(
-        projectId,
-        excludedContracts.map((c) => ({
-          contractAddress: c.contractAddress,
-          chainId: c.chainId,
-          verificationProof: signature,
-          verificationChainId,
-          deployerAddress: deployer,
-          deploymentHash: "",
-          projectId,
-        })),
-        db,
-      )
-    } catch (error: unknown) {
-      console.error("Error adding all contracts", error)
-      return {
-        error: "Error adding all contracts",
-      }
-    }
 
     return {
       error: null,
