@@ -1,10 +1,8 @@
 "server-only"
 
-import { gql, GraphQLClient } from "graphql-request"
 import { cache } from "react"
 
 import {
-  createOSOProjects,
   getDevToolingRecurringReward,
   getOnchainBuilderRecurringReward,
   getProjectActiveAddressesCount,
@@ -19,20 +17,8 @@ import {
   getTopProjectsFromOSO,
   getTrustedDevelopersCountFromOSO,
 } from "@/db/projects"
-import {
-  Oso_ProjectsByCollectionV1,
-  Oso_ProjectsV1,
-  QueryOso_ProjectsByCollectionV1Args,
-  QueryOso_ProjectsV1Args,
-} from "@/graphql/__generated__/types"
-import { recordExternalApiCall } from "@/lib/metrics"
-import client from "@/lib/oso-client"
-import {
-  OsoDeployerContractsReturnType,
-  ParsedOsoDeployerContract,
-} from "@/lib/types"
 
-import { BATCH_SIZE, supportedMappings, TRANCHE_MONTHS_MAP } from "./constants"
+import { TRANCHE_MONTHS_MAP } from "./constants"
 import { Trend } from "./types"
 import {
   formatActiveAddresses,
@@ -52,142 +38,6 @@ import {
   parseRewardsResults,
   convertMonthMetricsToDateMetrics,
 } from "./utils"
-
-// Create instrumented GraphQL client
-class InstrumentedGraphQLClient extends GraphQLClient {
-  async request<T = any>(document: any, variables?: any): Promise<T> {
-    const startTime = Date.now()
-
-    try {
-      const result = await super.request<T>(document, variables)
-      const duration = (Date.now() - startTime) / 1000
-      recordExternalApiCall("oso", "graphql", "POST", 200, duration)
-      return result
-    } catch (error) {
-      const duration = (Date.now() - startTime) / 1000
-      const status =
-        error instanceof Error && error.message.includes("400") ? 400 : 500
-      recordExternalApiCall("oso", "graphql", "POST", status, duration)
-      throw error
-    }
-  }
-}
-
-export const osoClient = new InstrumentedGraphQLClient(
-  "https://www.oso.xyz/api/v1/graphql",
-  {
-    headers: {
-      Authorization: `Bearer ${process.env.OSO_AUTH_TOKEN}`,
-    },
-  },
-)
-
-export const getDeployedContractsServer = cache(
-  async function getDeployedContractsServer(
-    deployer: string,
-  ): Promise<OsoDeployerContractsReturnType> {
-    const variables = {
-      where: {
-        _and: [
-          {
-            _or: [
-              { rootDeployerAddress: { _eq: deployer.toLowerCase() } },
-              { originatingAddress: { _eq: deployer.toLowerCase() } },
-            ],
-          },
-          // Only get contracts where factoryAddress is empty (direct deployments)
-          { factoryAddress: { _eq: "" } },
-        ],
-      },
-    }
-
-    const query = gql`
-      query ContractQuery($where: Oso_ContractsV0BoolExp) {
-        oso_contractsV0(where: $where) {
-          contractAddress
-          contractNamespace
-          rootDeployerAddress
-          factoryAddress
-        }
-      }
-    `
-    const req: OsoDeployerContractsReturnType = await osoClient.request(
-      query,
-      variables,
-    )
-
-    return req
-  },
-)
-
-export const getDeployedContractsServerParsed = cache(
-  async function getDeployedContractsServerParsed(
-    deployer: string,
-  ): Promise<ParsedOsoDeployerContract[]> {
-    const contracts = await getDeployedContractsServer(deployer)
-    return parseOsoDeployerContract(contracts)
-  },
-)
-
-export const mapOSOProjects = cache(async function mapOSOProjects(
-  projectAtlasIds: string[],
-) {
-  let mapped = 0
-  let totalCreated = 0
-
-  for (let i = 0; i < projectAtlasIds.length; i += BATCH_SIZE) {
-    const batchIds = projectAtlasIds.slice(i, i + BATCH_SIZE)
-
-    const projectsQuery: QueryOso_ProjectsV1Args = {
-      where: {
-        projectName: { _in: batchIds },
-        projectSource: { _eq: "OP_ATLAS" },
-      },
-    }
-
-    const projectsSelect: (keyof Oso_ProjectsV1)[] = [
-      "projectId",
-      "projectName",
-    ]
-
-    const osoProjects = await client.executeQuery(
-      "oso_projectsV1",
-      projectsQuery,
-      projectsSelect,
-    )
-
-    const collectionQuery: QueryOso_ProjectsByCollectionV1Args = {
-      where: { projectName: { _in: batchIds } },
-    }
-
-    const collectionSelect: (keyof Oso_ProjectsByCollectionV1)[] = [
-      "collectionName",
-      "projectId",
-      "projectName",
-    ]
-
-    const collections = await client.executeQuery(
-      "oso_projectsByCollectionV1",
-      collectionQuery,
-      collectionSelect,
-    )
-
-    mapped += osoProjects.oso_projectsV1.length
-
-    const created = await createOSOProjects(
-      osoProjects.oso_projectsV1,
-      collections.oso_projectsByCollectionV1,
-    )
-
-    totalCreated += created.length
-
-    console.log(
-      `Mapped ${Math.min(i + BATCH_SIZE, projectAtlasIds.length)} projects`,
-    )
-  }
-
-  return { mapped, totalCreated }
-})
 
 export const getProjectMetrics = cache(async function getProjectMetrics(
   projectId: string,
@@ -503,52 +353,3 @@ const getTopProjects = cache(async (osoId: string) => {
   return trancheData
 })
 
-export async function getDeployedContracts(
-  deployer: string,
-): Promise<OsoDeployerContractsReturnType> {
-  const contracts = await fetch(`/api/oso/contracts/${deployer}`, {
-    cache: "no-store",
-  })
-
-  return contracts.json()
-}
-
-export async function getParsedDeployedContracts(
-  deployer: string,
-): Promise<ParsedOsoDeployerContract[]> {
-  const contracts = await getDeployedContracts(deployer)
-  return parseOsoDeployerContract(contracts)
-}
-
-function osoNamespaceToChainId(namespace: string) {
-  const normalized = namespace.toUpperCase().replace(/[-_\s]/g, "")
-  const synonyms: Record<string, string> = {
-    OP: "OPTIMISM",
-    OPMAINNET: "OPTIMISM",
-    WORLD: "WORLDCHAIN",
-    WORLDCHAINMAINNET: "WORLDCHAIN",
-    ZORAMAINNET: "ZORA",
-    ARENAZMAINNET: "ARENAZ",
-    POLYNOMIALMAINNET: "POLYNOMIAL",
-    UNICHAINMAINNET: "UNICHAIN",
-  }
-  const key = synonyms[normalized] ?? normalized
-  return supportedMappings[key as keyof typeof supportedMappings]
-}
-
-export function parseOsoDeployerContract(
-  contract: OsoDeployerContractsReturnType | null,
-): ParsedOsoDeployerContract[] {
-  if (!contract) {
-    return []
-  }
-
-  // Filter out contracts that are not supported
-  return contract.oso_contractsV0
-    .filter((c) => osoNamespaceToChainId(c.contractNamespace))
-    .map((c) => ({
-      contractAddress: c.contractAddress,
-      chainId: osoNamespaceToChainId(c.contractNamespace),
-      rootDeployerAddress: c.rootDeployerAddress,
-    }))
-}
