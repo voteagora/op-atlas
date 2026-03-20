@@ -11,13 +11,11 @@ type MiradorProviderProps = PropsWithChildren<{
 
 export function MiradorProvider({
   apiKey,
-  enabled = true,
+  enabled = false,
   children,
 }: MiradorProviderProps) {
   useEffect(() => {
-    if (enabled) {
-      configureMiradorWebClient(apiKey)
-    }
+    configureMiradorWebClient({ apiKey, enabled })
   }, [apiKey, enabled])
 
   return <>{children}</>

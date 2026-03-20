@@ -2,11 +2,23 @@
 
 import { Client as MiradorWebClient } from "@miradorlabs/web-sdk/dist/index.esm.js"
 
+import { isMiradorEnabled } from "./enabled"
+
 let miradorClient: MiradorWebClient | null = null
 let configuredApiKey: string | null = null
 
-export function configureMiradorWebClient(apiKey?: string | null) {
-  if (!apiKey) {
+type ConfigureMiradorWebClientOptions = {
+  apiKey?: string | null
+  enabled?: boolean
+}
+
+export function configureMiradorWebClient({
+  apiKey,
+  enabled = isMiradorEnabled(),
+}: ConfigureMiradorWebClientOptions = {}) {
+  if (!enabled || !apiKey) {
+    miradorClient = null
+    configuredApiKey = null
     return
   }
 
@@ -25,6 +37,10 @@ export function configureMiradorWebClient(apiKey?: string | null) {
 }
 
 export function getMiradorWebClient(): MiradorWebClient | null {
+  if (!isMiradorEnabled()) {
+    return null
+  }
+
   return miradorClient
 }
 

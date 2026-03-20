@@ -2,11 +2,13 @@ import "server-only"
 
 import { Client as MiradorServerClient } from "@miradorlabs/nodejs-sdk"
 
+import { isMiradorEnabled } from "./enabled"
+
 let miradorServerClient: MiradorServerClient | null = null
 let hasWarnedMissingServerApiKey = false
 
 export function getMiradorServerClient(): MiradorServerClient | null {
-  if (process.env.NEXT_PUBLIC_MIRADOR_ENABLED === "false") {
+  if (!isMiradorEnabled()) {
     return null
   }
 

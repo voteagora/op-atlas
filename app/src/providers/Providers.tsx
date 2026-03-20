@@ -45,15 +45,17 @@ type SeasonBannerConfig = {
 export default function Providers({
   children,
   defaultBanner,
+  miradorEnabled,
   miradorWebApiKey,
 }: {
   children: React.ReactNode
   defaultBanner?: SeasonBannerConfig | null
+  miradorEnabled?: boolean
   miradorWebApiKey?: string
 }) {
   return (
     <SessionProvider>
-      <MiradorProvider apiKey={miradorWebApiKey}>
+      <MiradorProvider apiKey={miradorWebApiKey} enabled={miradorEnabled}>
         <AuthKitProvider config={farcasterConfig}>
           <PrivyAuthProvider>
             <QueryClientProvider client={queryClient}>
