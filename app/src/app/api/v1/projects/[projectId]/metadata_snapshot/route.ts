@@ -7,6 +7,9 @@ import {
   getProjectContracts,
 } from "@/db/projects"
 import { createProjectSnapshotOnBehalf } from "@/lib/actions/snapshots"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { appendServerTraceEvent } from "@/lib/mirador/serverTrace"
+import { getMiradorTraceContextFromHeaders } from "@/lib/mirador/requestContext"
 import {
   buildFullProjectMetadata,
   FullProjectMetadataValidator,
@@ -18,6 +21,13 @@ export const POST = async (
   route: { params: { projectId: string } },
 ) => {
   const authResponse = await authenticateApiUser(req)
+  const traceContext = getMiradorTraceContextFromHeaders(req)
+  const resolvedTraceContext = traceContext
+    ? {
+        ...traceContext,
+        flow: traceContext.flow ?? MIRADOR_FLOW.projectPublish,
+      }
+    : undefined
 
   if (!authResponse.authenticated) {
     return new Response(authResponse.failReason, { status: 401 })
@@ -26,6 +36,21 @@ export const POST = async (
   try {
     const { projectId } = route.params
     const { farcasterId, metadata } = await req.json()
+
+    await appendServerTraceEvent({
+      traceContext: {
+        ...resolvedTraceContext,
+        source: "api",
+        step: "metadata_snapshot_post_start",
+        projectId,
+      },
+      eventName: "project_metadata_snapshot_started",
+      details: {
+        projectId,
+        apiUserId: authResponse.userId,
+      },
+      tags: ["project_publish", "metadata", "api"],
+    })
 
     const parsedMetadata = FullProjectMetadataValidator.parse(metadata)
 
@@ -46,11 +71,42 @@ export const POST = async (
       },
       projectId,
       z.string().parse(farcasterId),
+      resolvedTraceContext,
     )
+
+    await appendServerTraceEvent({
+      traceContext: {
+        ...resolvedTraceContext,
+        source: "api",
+        step: "metadata_snapshot_post_success",
+        projectId,
+      },
+      eventName: "project_metadata_snapshot_succeeded",
+      details: {
+        projectId,
+        ipfsHash,
+        attestationId,
+      },
+      tags: ["project_publish", "metadata", "api"],
+    })
 
     return NextResponse.json({ ipfsHash, attestationId, projectId })
   } catch (e) {
     console.error(e)
+
+    await appendServerTraceEvent({
+      traceContext: {
+        ...resolvedTraceContext,
+        source: "api",
+        step: "metadata_snapshot_post_failed",
+      },
+      eventName: "project_metadata_snapshot_failed",
+      details: {
+        error: e instanceof Error ? e.message : String(e),
+      },
+      tags: ["project_publish", "metadata", "api", "error"],
+    })
+
     return new Response(JSON.stringify(e), { status: 500 })
   }
 }

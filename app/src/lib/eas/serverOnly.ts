@@ -6,60 +6,90 @@ import {
   SchemaEncoder,
   Signature,
 } from "@ethereum-attestation-service/eas-sdk"
-
-import { ethers, Wallet } from "ethers"
 import { randomBytes } from "crypto"
+import { ethers, Wallet } from "ethers"
 
-import { OFFCHAIN_VOTE_SCHEMA_ID } from "@/lib/eas/clientSafe"
+import {
+  EAS_DEFAULT_CHAIN_IDS,
+  EAS_DEFAULT_CONTRACT_ADDRESSES,
+  EAS_DEFAULT_NETWORKS,
+  EAS_DEFAULT_SCHEMA_IDS,
+  EAS_SCHEMA_STRINGS,
+  getEasEnvironmentProfile,
+  readOptionalEnv,
+} from "@/lib/eas/schemaDefinitions"
+import {
+  extractEasTxInputData,
+  extractFailedEasTxContext,
+} from "@/lib/eas/txContext"
 import { withImpersonationProtection } from "@/lib/impersonationContext"
 
-const ENTITY_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x5eefb359bc596699202474fd99e92172d1b788aa34280f385c498875d1bfb424"
-    : "0xff0b916851c1c5507406cfcaa60e5d549c91b7f642eb74e33b88143cae4b47d0"
-const PROJECT_METADATA_SCHEMA_ID =
-  "0xe035e3fe27a64c8d7291ae54c6e85676addcbc2d179224fe7fc1f7f05a8c6eac"
-const ORGANIZATION_METADATA_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x9c181f1e683fd2d79287d0b4fe1832f571fb4f5815ff9c1d0ed5b7a9bd067a03"
-    : "0xc2b376d1a140287b1fa1519747baae1317cf37e0d27289b86f85aa7cebfd649f"
-const APPLICATION_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xb50a1973d1aab9206545cd1da93e0dc1b5314989928bb35f58762020e2027154"
-    : "0x2169b74bfcb5d10a6616bbc8931dc1c56f8d1c305319a9eeca77623a991d4b80"
-const CONTRACT_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xb4c6ea838744caa6f0bfce726c0223cffefb94d98e5690f818cf0e2800e7a8f2"
-    : "0x5560b68760b2ec5a727e6a66e1f9754c307384fe7624ae4e0138c530db14a70b"
+const easEnvironment = getEasEnvironmentProfile()
+const defaultSchemaIds = EAS_DEFAULT_SCHEMA_IDS[easEnvironment]
 
-const CITIZEN_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x754160df7a4bd6ecf7e8801d54831a5d33403b4d52400e87d7611ee0eee6de23"
-    : "0xc35634c4ca8a54dce0a2af61a9a9a5a3067398cb3916b133238c4f6ba721bc8a"
-const CITIZEN_WALLET_CHANGE_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0x3acfc8404d72c7112ef6f957f0fcf0a5c3e026b586c101ea25355d4666a00362"
-    : "0xa55599e411f0eb310d47357e7d6064b09023e1d6f8bcb5504c051572a37db5f7"
+const readSchemaIdOverride = (
+  serverEnvName: string,
+  publicEnvName: string,
+  fallback: string,
+) =>
+  readOptionalEnv(serverEnvName) ?? readOptionalEnv(publicEnvName) ?? fallback
 
-const citizenWalletChangeSchema = new SchemaEncoder("bytes32 oldCitizenUID")
-
-const citizenSchema = new SchemaEncoder(
-  "uint256 farcasterId,string selectionMethod",
+const ENTITY_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_ENTITY_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_ENTITY_ID",
+  defaultSchemaIds.entity,
+)
+const PROJECT_METADATA_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_PROJECT_METADATA_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_PROJECT_METADATA_ID",
+  defaultSchemaIds.projectMetadata,
+)
+const ORGANIZATION_METADATA_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_ORGANIZATION_METADATA_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_ORGANIZATION_METADATA_ID",
+  defaultSchemaIds.organizationMetadata,
+)
+const APPLICATION_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_APPLICATION_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_APPLICATION_ID",
+  defaultSchemaIds.application,
+)
+const CONTRACT_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_CONTRACT_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_CONTRACT_ID",
+  defaultSchemaIds.contract,
+)
+const CITIZEN_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_CITIZEN_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_CITIZEN_ID",
+  defaultSchemaIds.citizen,
+)
+const CITIZEN_WALLET_CHANGE_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_CITIZEN_WALLET_CHANGE_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_CITIZEN_WALLET_CHANGE_ID",
+  defaultSchemaIds.citizenWalletChange,
+)
+const OFFCHAIN_VOTE_SCHEMA_ID = readSchemaIdOverride(
+  "EAS_SCHEMA_VOTES_ID",
+  "NEXT_PUBLIC_EAS_SCHEMA_VOTES_ID",
+  defaultSchemaIds.votes,
 )
 
-const entitySchema = new SchemaEncoder("uint256 farcasterID,string type")
+const citizenWalletChangeSchema = new SchemaEncoder(
+  EAS_SCHEMA_STRINGS.citizenWalletChange,
+)
+
+const citizenSchema = new SchemaEncoder(EAS_SCHEMA_STRINGS.citizen)
+
+const entitySchema = new SchemaEncoder(EAS_SCHEMA_STRINGS.entity)
 const projectMetadataSchema = new SchemaEncoder(
-  "bytes32 projectRefUID,uint256 farcasterID,string name,string category,bytes32 parentProjectRefUID,uint8 metadataType,string metadataUrl",
+  EAS_SCHEMA_STRINGS.projectMetadata,
 )
 const organizationMetadataSchema = new SchemaEncoder(
-  "bytes32 refUID, uint256 farcasterID, string name, bytes32 parentOrgUID, bytes32[] projects, uint8 metadataType, string metadataUrl",
+  EAS_SCHEMA_STRINGS.organizationMetadata,
 )
-const applicationSchema = new SchemaEncoder(
-  "string round, uint256 farcasterID, bytes32 metadataSnapshotRefUID, uint8 metadataType, string metadataUrl",
-)
-const contractSchema = new SchemaEncoder(
-  "address contract, uint32 chainId, address deployer, bytes32 deploymentTx, bytes signature, uint32 verificationChainId, uint256 farcasterID",
-)
+const applicationSchema = new SchemaEncoder(EAS_SCHEMA_STRINGS.application)
+const contractSchema = new SchemaEncoder(EAS_SCHEMA_STRINGS.contract)
 
 const EAS_SIGNER_PRIVATE_KEY = process.env.EAS_SIGNER_PRIVATE_KEY
 if (!EAS_SIGNER_PRIVATE_KEY) {
@@ -67,15 +97,20 @@ if (!EAS_SIGNER_PRIVATE_KEY) {
 }
 
 const EAS_ADDRESS =
-  process.env.EAS_CONTRACT_ADDRESS ||
-  (process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e" // Sepolia L1 (fallback in dev)
-    : "0x4200000000000000000000000000000000000021") // Optimism Mainnet (fallback)
+  readOptionalEnv("EAS_CONTRACT_ADDRESS") ??
+  readOptionalEnv("NEXT_PUBLIC_EAS_CONTRACT_ADDRESS") ??
+  EAS_DEFAULT_CONTRACT_ADDRESSES[easEnvironment]
+const EAS_FORCE_CITIZEN_TX_FAILURE =
+  process.env.EAS_FORCE_CITIZEN_TX_FAILURE === "true"
+const EAS_FORCE_CITIZEN_TX_FAILURE_MODE =
+  process.env.EAS_FORCE_CITIZEN_TX_FAILURE_MODE ?? "deadbeef"
+const ZERO_SCHEMA_UID =
+  "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 const eas = new EAS(EAS_ADDRESS)
 
 const provider = new ethers.AlchemyProvider(
-  process.env.NEXT_PUBLIC_ENV === "dev" ? "sepolia" : "optimism",
+  EAS_DEFAULT_NETWORKS[easEnvironment],
   process.env.ALCHEMY_API_KEY,
 )
 
@@ -92,6 +127,22 @@ async function createAttestation(
   data: string,
   refUID?: string,
 ) {
+  const result = await createAttestationWithTx(schemaId, data, refUID)
+  return result.attestationId
+}
+
+export type EasAttestationWithTxResult = {
+  attestationId: string
+  txHash?: string
+  chainId: number
+  txInputData?: string
+}
+
+async function createAttestationWithTx(
+  schemaId: string,
+  data: string,
+  refUID?: string,
+): Promise<EasAttestationWithTxResult> {
   const tx = await eas.attest({
     schema: schemaId,
     data: {
@@ -102,8 +153,23 @@ async function createAttestation(
       refUID,
     },
   })
+  const txInputData = extractEasTxInputData(tx)
 
-  return await tx.wait()
+  const attestationId = await tx.wait()
+
+  return {
+    attestationId,
+    txHash: tx.receipt?.hash,
+    chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+    txInputData,
+  }
+}
+
+type EasMultiAttestationWithTxResult = {
+  attestationIds: string[]
+  txHashes: string[]
+  txInputData: string[]
+  chainId: number
 }
 
 async function createMultiAttestations(
@@ -113,12 +179,30 @@ async function createMultiAttestations(
     refUID?: string
   }[],
 ): Promise<string[]> {
+  const result = await createMultiAttestationsWithTx(attestations)
+  return result.attestationIds
+}
+
+async function createMultiAttestationsWithTx(
+  attestations: {
+    schema: string
+    data: string
+    refUID?: string
+  }[],
+): Promise<EasMultiAttestationWithTxResult> {
+  const chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
+
   if (attestations.length === 0) {
     console.warn("No attestations to create")
-    return []
+    return {
+      attestationIds: [],
+      txHashes: [],
+      txInputData: [],
+      chainId,
+    }
   }
+
   if (attestations.length === 1) {
-    // Single-attest fallback
     const [a] = attestations
     try {
       const tx = await eas.attest({
@@ -131,18 +215,29 @@ async function createMultiAttestations(
           refUID: a.refUID,
         },
       })
+      const txInputData = extractEasTxInputData(tx)
       const uid = await tx.wait()
-      return [uid]
+
+      return {
+        attestationIds: [uid],
+        txHashes: tx.receipt?.hash ? [tx.receipt.hash] : [],
+        txInputData: txInputData ? [txInputData] : [],
+        chainId,
+      }
     } catch (error) {
       console.error("Attestation failed", {
         attestation: a,
-        error: error,
+        error,
       })
-      return []
+      return {
+        attestationIds: [],
+        txHashes: [],
+        txInputData: [],
+        chainId,
+      }
     }
   }
 
-  // Group by schema to reduce calldata and improve gas efficiency
   const grouped = new Map<
     string,
     {
@@ -157,16 +252,14 @@ async function createMultiAttestations(
     }
   >()
 
-  // For each unique schema value, it checks if grouped already has a bucket.
   for (const a of attestations) {
-    // if not, create a new bucket
     if (!grouped.has(a.schema)) {
       grouped.set(a.schema, {
         schema: a.schema,
         data: [],
       })
     }
-    // Add the attestation to the bucket
+
     grouped.get(a.schema)!.data.push({
       recipient: "0x0000000000000000000000000000000000000000",
       expirationTime: BigInt(0),
@@ -179,11 +272,17 @@ async function createMultiAttestations(
   const attestationRequests = Array.from(grouped.values())
 
   try {
-    // Try to submit as one batched multiAttest call
     const tx = await eas.multiAttest(attestationRequests)
-    return await tx.wait()
+    const txInputData = extractEasTxInputData(tx)
+    const attestationIds = await tx.wait()
+
+    return {
+      attestationIds,
+      txHashes: tx.receipt?.hash ? [tx.receipt.hash] : [],
+      txInputData: txInputData ? [txInputData] : [],
+      chainId,
+    }
   } catch (error) {
-    // If it fails (gas/size/other constraint), split the input in half and recurse.
     console.warn("multiAttest failed, splitting batch:", {
       size: attestations.length,
     })
@@ -192,11 +291,17 @@ async function createMultiAttestations(
     const left = attestations.slice(0, mid)
     const right = attestations.slice(mid)
 
-    // Recurse sequentially to avoid nonce/race issues
-    const leftUids = await createMultiAttestations(left)
-    const rightUids = await createMultiAttestations(right)
+    const leftResult = await createMultiAttestationsWithTx(left)
+    const rightResult = await createMultiAttestationsWithTx(right)
 
-    return leftUids.concat(rightUids)
+    return {
+      attestationIds: leftResult.attestationIds.concat(
+        rightResult.attestationIds,
+      ),
+      txHashes: leftResult.txHashes.concat(rightResult.txHashes),
+      txInputData: leftResult.txInputData.concat(rightResult.txInputData),
+      chainId,
+    }
   }
 }
 
@@ -204,16 +309,37 @@ async function revokeMultiAttestations(
   schemaId: string,
   attestationIds: string[],
 ) {
+  const result = await revokeMultiAttestationsWithTx(schemaId, attestationIds)
+  return result.revokedAttestationIds
+}
+
+type EasRevocationWithTxResult = {
+  revokedAttestationIds: string[]
+  txHash?: string
+  chainId: number
+  txInputData?: string
+}
+
+async function revokeMultiAttestationsWithTx(
+  schemaId: string,
+  attestationIds: string[],
+): Promise<EasRevocationWithTxResult> {
   const tx = await eas.multiRevoke([
     {
       schema: schemaId,
       data: attestationIds.map((id) => ({ uid: id })),
     },
   ])
+  const txInputData = extractEasTxInputData(tx)
 
   await tx.wait()
 
-  return attestationIds
+  return {
+    revokedAttestationIds: attestationIds,
+    txHash: tx.receipt?.hash,
+    chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+    txInputData,
+  }
 }
 
 export async function createEntityAttestation({
@@ -238,6 +364,36 @@ export async function createEntityAttestation({
       return attestationId
     },
     mockUID(),
+  )
+}
+
+export async function createEntityAttestationWithTx({
+  farcasterId,
+  type,
+}: {
+  farcasterId: number
+  type: "project" | "organization"
+}): Promise<EasAttestationWithTxResult> {
+  return withImpersonationProtection(
+    "EAS",
+    `Create entity attestation (${type})`,
+    async () => {
+      const data = entitySchema.encodeData([
+        { name: "farcasterID", value: farcasterId, type: "uint256" },
+        { name: "type", value: type, type: "string" },
+      ])
+
+      const result = await createAttestationWithTx(ENTITY_SCHEMA_ID, data)
+      console.info("Created entity attestation:", result.attestationId)
+
+      return result
+    },
+    {
+      attestationId: mockUID(),
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
   )
 }
 
@@ -283,6 +439,56 @@ export async function createProjectMetadataAttestation({
   )
 }
 
+export async function createProjectMetadataAttestationWithTx({
+  farcasterId,
+  projectId,
+  name,
+  category,
+  ipfsUrl,
+  refUID,
+}: {
+  farcasterId: number
+  projectId: string
+  name: string
+  category: string
+  ipfsUrl: string
+  refUID?: string
+}): Promise<EasAttestationWithTxResult> {
+  return withImpersonationProtection(
+    "EAS",
+    `Create project metadata attestation (${projectId})`,
+    async () => {
+      const attestation = buildProjectMetadataAttestation({
+        farcasterId,
+        projectId,
+        name,
+        category,
+        ipfsUrl,
+        refUID,
+      })
+
+      const result = await createAttestationWithTx(
+        attestation.schema,
+        attestation.data,
+        attestation.refUID,
+      )
+
+      console.info(
+        "Created project metadata attestation:",
+        result.attestationId,
+      )
+
+      return result
+    },
+    {
+      attestationId: mockUID(),
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
+  )
+}
+
 export async function createOrganizationMetadataAttestation({
   farcasterId,
   organizationId,
@@ -323,6 +529,55 @@ export async function createOrganizationMetadataAttestation({
   )
 }
 
+export async function createOrganizationMetadataAttestationWithTx({
+  farcasterId,
+  organizationId,
+  name,
+  projectIds,
+  ipfsUrl,
+}: {
+  farcasterId: number
+  organizationId: string
+  name: string
+  projectIds: string[]
+  ipfsUrl: string
+}): Promise<EasAttestationWithTxResult> {
+  return withImpersonationProtection(
+    "EAS",
+    `Create organization metadata attestation (${organizationId})`,
+    async () => {
+      const data = organizationMetadataSchema.encodeData([
+        { name: "refUID", value: organizationId, type: "bytes32" },
+        { name: "farcasterID", value: farcasterId, type: "uint256" },
+        { name: "name", value: name, type: "string" },
+        { name: "parentOrgUID", value: "", type: "bytes32" },
+        { name: "projects", value: projectIds, type: "bytes32[]" },
+        { name: "metadataType", value: "0", type: "uint8" },
+        { name: "metadataUrl", value: ipfsUrl, type: "string" },
+      ])
+
+      const result = await createAttestationWithTx(
+        ORGANIZATION_METADATA_SCHEMA_ID,
+        data,
+        organizationId,
+      )
+
+      console.info(
+        "Created organization metadata attestation:",
+        result.attestationId,
+      )
+
+      return result
+    },
+    {
+      attestationId: mockUID(),
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
+  )
+}
+
 export async function createApplicationAttestation({
   farcasterId,
   projectId,
@@ -351,6 +606,46 @@ export async function createApplicationAttestation({
       return await createAttestation(APPLICATION_SCHEMA_ID, data, projectId)
     },
     mockUID(),
+  )
+}
+
+export async function createApplicationAttestationWithTx({
+  farcasterId,
+  projectId,
+  round,
+  snapshotRef,
+  ipfsUrl,
+}: {
+  farcasterId: number
+  projectId: string
+  round: string
+  snapshotRef: string
+  ipfsUrl: string
+}): Promise<EasAttestationWithTxResult> {
+  return withImpersonationProtection(
+    "EAS",
+    `Create application attestation (${projectId})`,
+    async () => {
+      const data = applicationSchema.encodeData([
+        { name: "round", value: round, type: "string" },
+        { name: "farcasterID", value: farcasterId, type: "uint256" },
+        { name: "metadataSnapshotRefUID", value: snapshotRef, type: "bytes32" },
+        { name: "metadataType", value: "0", type: "uint8" },
+        { name: "metadataUrl", value: ipfsUrl, type: "string" },
+      ])
+
+      return await createAttestationWithTx(
+        APPLICATION_SCHEMA_ID,
+        data,
+        projectId,
+      )
+    },
+    {
+      attestationId: mockUID(),
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
   )
 }
 
@@ -393,6 +688,95 @@ export async function createContractAttestations({
   )
 }
 
+export async function createContractAttestationsWithTx({
+  contracts,
+  projectId,
+  farcasterId,
+  refUID,
+}: {
+  contracts: {
+    contractAddress: string
+    chainId: number
+    deployer: string
+    deploymentTx: string
+    signature: string
+    verificationChainId: number
+  }[]
+  projectId: string
+  farcasterId: number
+  refUID?: string
+}): Promise<{
+  attestationIds: string[]
+  txHashes: string[]
+  txInputData: string[]
+  chainId: number
+}> {
+  return withImpersonationProtection(
+    "EAS",
+    `Create ${contracts.length} contract attestations for ${projectId}`,
+    async () => {
+      const attestations = buildContractAttestations({
+        contracts,
+        projectId,
+        farcasterId,
+        refUID,
+      })
+
+      const batchSize = 60
+      const maxRetries = 5
+      const combined = {
+        attestationIds: [] as string[],
+        txHashes: [] as string[],
+        txInputData: [] as string[],
+        chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      }
+
+      function* batchGenerator<T>(items: T[], size: number) {
+        for (let i = 0; i < items.length; i += size) {
+          yield items.slice(i, i + size)
+        }
+      }
+
+      async function processBatchWithRetry(
+        batch: typeof attestations,
+        retryCount = 0,
+      ): Promise<EasMultiAttestationWithTxResult> {
+        try {
+          return await createMultiAttestationsWithTx(batch)
+        } catch (error) {
+          if (retryCount >= maxRetries) {
+            throw new Error(`Failed after ${maxRetries} retries: ${error}`)
+          }
+          console.warn(
+            `Retry ${retryCount + 1}/${maxRetries} for batch of ${
+              batch.length
+            } items`,
+          )
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.pow(2, retryCount) * 1000),
+          )
+          return processBatchWithRetry(batch, retryCount + 1)
+        }
+      }
+
+      for await (const batch of batchGenerator(attestations, batchSize)) {
+        const result = await processBatchWithRetry(batch)
+        combined.attestationIds.push(...result.attestationIds)
+        combined.txHashes.push(...result.txHashes)
+        combined.txInputData.push(...result.txInputData)
+      }
+
+      return combined
+    },
+    {
+      attestationIds: contracts.map(() => mockUID()),
+      txHashes: [],
+      txInputData: [],
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+    },
+  )
+}
+
 export async function createCitizenWalletChangeAttestation({
   oldCitizenUID,
   newCitizenUID,
@@ -400,6 +784,20 @@ export async function createCitizenWalletChangeAttestation({
   oldCitizenUID: string
   newCitizenUID: string
 }) {
+  const result = await createCitizenWalletChangeAttestationWithTx({
+    oldCitizenUID,
+    newCitizenUID,
+  })
+  return result.attestationId
+}
+
+export async function createCitizenWalletChangeAttestationWithTx({
+  oldCitizenUID,
+  newCitizenUID,
+}: {
+  oldCitizenUID: string
+  newCitizenUID: string
+}): Promise<EasAttestationWithTxResult> {
   return withImpersonationProtection(
     "EAS",
     `Create citizen wallet change attestation`,
@@ -408,13 +806,18 @@ export async function createCitizenWalletChangeAttestation({
         { name: "oldCitizenUID", value: oldCitizenUID, type: "bytes32" },
       ])
 
-      return await createAttestation(
+      return await createAttestationWithTx(
         CITIZEN_WALLET_CHANGE_SCHEMA_ID,
         data,
         newCitizenUID,
       )
     },
-    mockUID(),
+    {
+      attestationId: mockUID(),
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
   )
 }
 
@@ -436,22 +839,35 @@ export async function revokeContractAttestations(attestationIds: string[]) {
 }
 
 export async function revokeCitizenAttestation(attestationId: string) {
+  const result = await revokeCitizenAttestationWithTx(attestationId)
+  return result.revokedAttestationIds
+}
+
+export async function revokeCitizenAttestationWithTx(
+  attestationId: string,
+): Promise<EasRevocationWithTxResult> {
   return withImpersonationProtection(
     "EAS",
     `Revoke citizen attestation`,
     async () => {
       const isActive = await isAttestationActive(attestationId)
       if (!isActive) {
-        return
+        return {
+          revokedAttestationIds: [],
+          txHash: undefined,
+          chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+          txInputData: undefined,
+        }
       }
 
-      return processAttestationsInBatches(
-        [attestationId],
-        async (batch) => revokeMultiAttestations(CITIZEN_SCHEMA_ID, batch),
-        20,
-      )
+      return revokeMultiAttestationsWithTx(CITIZEN_SCHEMA_ID, [attestationId])
     },
-    [],
+    {
+      revokedAttestationIds: [],
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
   )
 }
 
@@ -604,10 +1020,134 @@ export async function createCitizenAttestation({
   selectionMethod: string
   refUID?: string
 }) {
+  const result = await createCitizenAttestationWithTx({
+    to,
+    farcasterId,
+    selectionMethod,
+    refUID,
+  })
+
+  return result.attestationId
+}
+
+export async function createCitizenAttestationWithTx({
+  to,
+  farcasterId,
+  selectionMethod,
+  refUID,
+}: {
+  to: string
+  farcasterId: number
+  selectionMethod: string
+  refUID?: string
+}): Promise<{
+  attestationId: string
+  txHash?: string
+  chainId: number
+  txInputData?: string
+}> {
   return withImpersonationProtection(
     "EAS",
     `Create citizen attestation`,
     async () => {
+      if (EAS_FORCE_CITIZEN_TX_FAILURE) {
+        if (EAS_FORCE_CITIZEN_TX_FAILURE_MODE === "invalid_schema") {
+          const forcedData = citizenSchema.encodeData([
+            { name: "farcasterId", value: farcasterId, type: "uint256" },
+            { name: "selectionMethod", value: selectionMethod, type: "string" },
+          ])
+          const forcedTx = await eas.attest(
+            {
+              schema: ZERO_SCHEMA_UID,
+              data: {
+                recipient: to,
+                expirationTime: BigInt(0),
+                revocable: true,
+                data: forcedData,
+                refUID,
+              },
+            },
+            {
+              gasLimit: BigInt(300_000),
+            },
+          )
+          const forcedTxInputData = extractEasTxInputData(forcedTx)
+
+          try {
+            await forcedTx.wait()
+          } catch (error) {
+            const errorRecord = error as {
+              receipt?: { hash?: string }
+              transactionHash?: string
+            }
+            const forcedError = new Error(
+              "Forced test failure (invalid_schema): citizen attestation transaction reverted.",
+            ) as Error & {
+              txHash?: string
+              chainId?: number
+              txInputData?: string
+              cause?: unknown
+            }
+            forcedError.txHash =
+              errorRecord.receipt?.hash ?? errorRecord.transactionHash
+            forcedError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
+            forcedError.txInputData = forcedTxInputData
+            forcedError.cause = error
+            throw forcedError
+          }
+
+          const unexpectedSuccessError = new Error(
+            "Forced invalid_schema mode enabled, but transaction unexpectedly succeeded.",
+          ) as Error & {
+            txHash?: string
+            chainId?: number
+            txInputData?: string
+          }
+          unexpectedSuccessError.txHash = forcedTx.receipt?.hash
+          unexpectedSuccessError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
+          unexpectedSuccessError.txInputData = forcedTxInputData
+          throw unexpectedSuccessError
+        }
+
+        const forcedTxInputData = "0xdeadbeef"
+        const forcedTx = await signer.sendTransaction({
+          to: EAS_ADDRESS,
+          data: forcedTxInputData,
+          gasLimit: BigInt(150_000),
+          value: BigInt(0),
+        })
+
+        try {
+          await forcedTx.wait()
+        } catch (error) {
+          const forcedError = new Error(
+            "Forced test failure (deadbeef): citizen attestation transaction reverted.",
+          ) as Error & {
+            txHash?: string
+            chainId?: number
+            txInputData?: string
+            cause?: unknown
+          }
+          forcedError.txHash = forcedTx.hash
+          forcedError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
+          forcedError.txInputData = forcedTxInputData
+          forcedError.cause = error
+          throw forcedError
+        }
+
+        const unexpectedSuccessError = new Error(
+          "Forced deadbeef mode enabled, but transaction unexpectedly succeeded.",
+        ) as Error & {
+          txHash?: string
+          chainId?: number
+          txInputData?: string
+        }
+        unexpectedSuccessError.txHash = forcedTx.hash
+        unexpectedSuccessError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
+        unexpectedSuccessError.txInputData = forcedTxInputData
+        throw unexpectedSuccessError
+      }
+
       const data = citizenSchema.encodeData([
         { name: "farcasterId", value: farcasterId, type: "uint256" },
         { name: "selectionMethod", value: selectionMethod, type: "string" },
@@ -623,10 +1163,23 @@ export async function createCitizenAttestation({
           refUID,
         },
       })
+      const txInputData = extractEasTxInputData(tx)
 
-      return await tx.wait()
+      const attestationId = await tx.wait()
+
+      return {
+        attestationId,
+        txHash: tx.receipt?.hash,
+        chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+        txInputData,
+      }
     },
-    mockUID(),
+    {
+      attestationId: mockUID(),
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
   )
 }
 
@@ -648,6 +1201,27 @@ export async function createDelegatedVoteAttestation(
   signerAddress: string,
   citizenRefUID: string,
 ): Promise<string> {
+  const result = await createDelegatedVoteAttestationWithTx(
+    data,
+    delegateAttestationSignature,
+    signerAddress,
+    citizenRefUID,
+  )
+
+  return result.attestationId
+}
+
+export async function createDelegatedVoteAttestationWithTx(
+  data: string,
+  delegateAttestationSignature: Signature,
+  signerAddress: string,
+  citizenRefUID: string,
+): Promise<{
+  attestationId: string
+  txHash?: string
+  chainId: number
+  txInputData?: string
+}> {
   return withImpersonationProtection(
     "EAS",
     `Create delegated vote attestation`,
@@ -659,32 +1233,57 @@ export async function createDelegatedVoteAttestation(
         citizenRefUID,
       })
 
-      try {
-        // Use attestByDelegation to create the attestation
-        const tx = await eas.attestByDelegation({
-          schema: OFFCHAIN_VOTE_SCHEMA_ID,
-          data: {
-            recipient: signerAddress,
-            expirationTime: BigInt(0), // NO_EXPIRATION
-            revocable: false,
-            refUID: citizenRefUID as `0x${string}`,
-            data: data,
-          },
-          signature: delegateAttestationSignature,
-          attester: signerAddress,
-          deadline: BigInt(0), // NO_EXPIRATION
-        })
+      // Use attestByDelegation to create the attestation
+      const tx = await eas.attestByDelegation({
+        schema: OFFCHAIN_VOTE_SCHEMA_ID,
+        data: {
+          recipient: signerAddress,
+          expirationTime: BigInt(0), // NO_EXPIRATION
+          revocable: false,
+          refUID: citizenRefUID as `0x${string}`,
+          data: data,
+        },
+        signature: delegateAttestationSignature,
+        attester: signerAddress,
+        deadline: BigInt(0), // NO_EXPIRATION
+      })
+      const txInputData = extractEasTxInputData(tx)
 
+      try {
         // Wait for the transaction to be mined
-        const receipt = await tx.wait()
-        console.log("Vote attestation created with ID:", receipt)
-        return receipt
+        const attestationId = await tx.wait()
+        console.log("Vote attestation created with ID:", attestationId)
+        return {
+          attestationId,
+          txHash: tx.receipt?.hash,
+          chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+          txInputData,
+        }
       } catch (error) {
-        console.error("Error creating vote attestation:", error)
-        throw error
+        const failedContext = extractFailedEasTxContext(error)
+        const wrappedError = new Error(
+          "Delegated vote attestation transaction reverted.",
+        ) as Error & {
+          txHash?: string
+          chainId?: number
+          txInputData?: string
+          cause?: unknown
+        }
+        wrappedError.txHash = failedContext.txHash ?? tx.receipt?.hash
+        wrappedError.chainId =
+          failedContext.chainId ?? EAS_DEFAULT_CHAIN_IDS[easEnvironment]
+        wrappedError.txInputData = failedContext.txInputData ?? txInputData
+        wrappedError.cause = error
+        console.error("Error creating vote attestation:", wrappedError)
+        throw wrappedError
       }
     },
-    mockUID(),
+    {
+      attestationId: mockUID(),
+      txHash: undefined,
+      chainId: EAS_DEFAULT_CHAIN_IDS[easEnvironment],
+      txInputData: undefined,
+    },
   )
 }
 

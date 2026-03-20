@@ -8,11 +8,21 @@ import { prisma } from "@/db/client"
 import { isUserAdminOfOrganization } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 import { removeMailchimpTags } from "@/lib/api/mailchimp"
+import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
 import { CITIZEN_TYPES, S9_CITIZEN_TAGS } from "@/lib/constants"
-import { revokeCitizenAttestation } from "@/lib/eas/serverOnly"
+import { revokeCitizenAttestationWithTx } from "@/lib/eas/serverOnly"
+import { extractFailedEasTxContext } from "@/lib/eas/txContext"
+import {
+  appendServerTraceEvent,
+  withMiradorTraceStep,
+} from "@/lib/mirador/serverTrace"
+import { MiradorTraceContext } from "@/lib/mirador/types"
 import { getUserProjectRole } from "@/lib/actions/utils"
 
-export async function resignCitizenSeason(citizenSeasonId: string) {
+export async function resignCitizenSeason(
+  citizenSeasonId: string,
+  traceContext?: MiradorTraceContext,
+) {
   const session = await auth()
   const userId = session?.user?.id
 
@@ -92,11 +102,69 @@ export async function resignCitizenSeason(citizenSeasonId: string) {
     ? "project"
     : "user"
 
+  await appendServerTraceEvent({
+    traceContext: withMiradorTraceStep(
+      traceContext,
+      "citizen_resign_start",
+      "backend",
+    ),
+    eventName: "citizen_resign_started",
+    details: {
+      citizenSeasonId,
+      userId,
+      targetType,
+      attestationId: citizenSeason.attestationId,
+    },
+    tags: ["citizen", "resignation"],
+  })
+
+  let revocationTxHash: string | undefined
+  let revocationTxInputData: string | undefined
+  let revocationMiradorChain: ReturnType<typeof getMiradorChainNameFromChainId>
+
   if (citizenSeason.attestationId) {
     try {
-      await revokeCitizenAttestation(citizenSeason.attestationId)
+      const revocationResult = await revokeCitizenAttestationWithTx(
+        citizenSeason.attestationId,
+      )
+      revocationTxHash = revocationResult.txHash
+      revocationTxInputData = revocationResult.txInputData
+      revocationMiradorChain = getMiradorChainNameFromChainId(
+        revocationResult.chainId,
+      )
     } catch (error) {
       console.error("Failed to revoke attestation:", error)
+      const failedTxContext = extractFailedEasTxContext(error)
+      const failedMiradorChain = getMiradorChainNameFromChainId(
+        failedTxContext.chainId,
+      )
+
+      await appendServerTraceEvent({
+        traceContext: withMiradorTraceStep(
+          traceContext,
+          "citizen_resign_revocation_failed",
+          "backend",
+        ),
+        eventName: "citizen_resign_failed",
+        details: {
+          citizenSeasonId,
+          attestationId: citizenSeason.attestationId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        tags: ["citizen", "resignation", "error"],
+        txHashHints:
+          failedTxContext.txHash && failedMiradorChain
+            ? [
+                {
+                  txHash: failedTxContext.txHash,
+                  chain: failedMiradorChain,
+                  details: "Failed citizen resignation revocation transaction",
+                },
+              ]
+            : undefined,
+        txInputData: failedTxContext.txInputData,
+      })
+
       return { error: "Failed to revoke attestation" }
     }
   }
@@ -126,6 +194,21 @@ export async function resignCitizenSeason(citizenSeasonId: string) {
     })
   } catch (error) {
     console.error("Failed to update citizen season:", error)
+
+    await appendServerTraceEvent({
+      traceContext: withMiradorTraceStep(
+        traceContext,
+        "citizen_resign_db_failed",
+        "backend",
+      ),
+      eventName: "citizen_resign_failed",
+      details: {
+        citizenSeasonId,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      tags: ["citizen", "resignation", "error"],
+    })
+
     return { error: "Failed to update citizen record" }
   }
 
@@ -140,11 +223,13 @@ export async function resignCitizenSeason(citizenSeasonId: string) {
       const citizenType = citizenSeason.organizationId
         ? CITIZEN_TYPES.chain
         : citizenSeason.projectId
-          ? CITIZEN_TYPES.app
-          : CITIZEN_TYPES.user
+        ? CITIZEN_TYPES.app
+        : CITIZEN_TYPES.user
       const tagToRemove = S9_CITIZEN_TAGS[citizenType]
       try {
-        await removeMailchimpTags([{ email: userEmail, tagsToRemove: [tagToRemove] }])
+        await removeMailchimpTags([
+          { email: userEmail, tagsToRemove: [tagToRemove] },
+        ])
       } catch (error) {
         console.error("Failed to remove Mailchimp tags:", error)
       }
@@ -155,6 +240,33 @@ export async function resignCitizenSeason(citizenSeasonId: string) {
     revalidatePath("/citizenship"),
     revalidatePath("/dashboard"),
   ])
+
+  await appendServerTraceEvent({
+    traceContext: withMiradorTraceStep(
+      traceContext,
+      "citizen_resign_success",
+      "backend",
+    ),
+    eventName: "citizen_resign_succeeded",
+    details: {
+      citizenSeasonId,
+      actorUserId: userId,
+      targetUserId: citizenSeason.userId,
+      type: targetType,
+    },
+    tags: ["citizen", "resignation"],
+    txHashHints:
+      revocationTxHash && revocationMiradorChain
+        ? [
+            {
+              txHash: revocationTxHash,
+              chain: revocationMiradorChain,
+              details: "Citizen resignation revocation transaction",
+            },
+          ]
+        : undefined,
+    txInputData: revocationTxInputData,
+  })
 
   console.info("[citizenship] resign success", {
     citizenSeasonId,

@@ -3,6 +3,8 @@ import { z } from "zod"
 
 import { upsertUser } from "@/db/users"
 import { createNewProjectOnBehalf } from "@/lib/actions/projects"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { getMiradorTraceContextFromHeaders } from "@/lib/mirador/requestContext"
 import { traceApiOperation } from "@/lib/tracing"
 import { authenticateApiUser } from "@/serverAuth"
 
@@ -21,9 +23,19 @@ export const POST = async (req: NextRequest) => {
 
     try {
       const { name, farcasterId } = payloadValidator.parse(await req.json())
+      const traceContext = getMiradorTraceContextFromHeaders(req)
 
       const { id: userId } = await upsertUser({ farcasterId })
-      const project = await createNewProjectOnBehalf({ name }, userId)
+      const project = await createNewProjectOnBehalf(
+        { name },
+        userId,
+        traceContext
+          ? {
+              ...traceContext,
+              flow: traceContext.flow ?? MIRADOR_FLOW.projectCreation,
+            }
+          : undefined,
+      )
 
       if (!project || "error" in project) {
         return new Response("Failed to create project", { status: 500 })
