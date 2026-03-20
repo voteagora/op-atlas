@@ -42,10 +42,7 @@ export function VerifiedAddressesContent({
   userId,
   impersonationMode = false,
 }: VerifiedAddressesContentProps) {
-  const {
-    user,
-    invalidate: invalidateUser,
-  } = useUser({
+  const { user, invalidate: invalidateUser } = useUser({
     id: userId,
     enabled: !!userId,
   })

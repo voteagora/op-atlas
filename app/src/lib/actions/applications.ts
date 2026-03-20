@@ -71,18 +71,14 @@ export const publishAndSaveApplication = async (
 
   try {
     // Publish attestation (must reference an existing metadata snapshot)
-    const {
-      attestationId,
-      txHash,
-      chainId,
-      txInputData,
-    } = await createApplicationAttestationWithTx({
-      farcasterId: parseInt(farcasterId),
-      projectId: project.projectId,
-      round: `${roundName ?? round}`,
-      snapshotRef: metadataSnapshotId,
-      ipfsUrl: "", // Skipping IPFS for S7
-    })
+    const { attestationId, txHash, chainId, txInputData } =
+      await createApplicationAttestationWithTx({
+        farcasterId: parseInt(farcasterId),
+        projectId: project.projectId,
+        round: `${roundName ?? round}`,
+        snapshotRef: metadataSnapshotId,
+        ipfsUrl: "", // Skipping IPFS for S7
+      })
 
     // Create application in database
     const application = await createApplication(

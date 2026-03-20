@@ -78,7 +78,6 @@ import { makeUserAddressPrimaryAction } from "../actions"
 describe("makeUserAddressPrimaryAction", () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
     ;(
       getImpersonationContext as jest.MockedFunction<
         typeof getImpersonationContext
@@ -91,9 +90,7 @@ describe("makeUserAddressPrimaryAction", () => {
   })
 
   it("does not create a Mirador trace for offchain-only primary address changes", async () => {
-    ;(
-      getCitizen as jest.MockedFunction<typeof getCitizen>
-    ).mockResolvedValue({
+    ;(getCitizen as jest.MockedFunction<typeof getCitizen>).mockResolvedValue({
       attestationId: "att-1",
       address: "0xabc",
     } as any)
@@ -114,20 +111,18 @@ describe("makeUserAddressPrimaryAction", () => {
   it("starts and closes a server-owned Mirador trace when re-attestation is required", async () => {
     const standaloneTrace = { trace: "primary-address-trace" }
 
-    ;(
-      getCitizen as jest.MockedFunction<typeof getCitizen>
-    ).mockResolvedValue({
+    ;(getCitizen as jest.MockedFunction<typeof getCitizen>).mockResolvedValue({
       attestationId: "att-1",
       address: "0xold",
       type: "user",
       organizationId: null,
       projectId: null,
     } as any)
-    ;(
-      getUserById as jest.MockedFunction<typeof getUserById>
-    ).mockResolvedValue({
-      farcasterId: "123",
-    } as any)
+    ;(getUserById as jest.MockedFunction<typeof getUserById>).mockResolvedValue(
+      {
+        farcasterId: "123",
+      } as any,
+    )
     ;(
       revokeCitizenAttestationWithTx as jest.MockedFunction<
         typeof revokeCitizenAttestationWithTx

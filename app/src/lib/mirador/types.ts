@@ -8,7 +8,7 @@ export type MiradorChainName =
 
 export type MiradorTraceSource = "frontend" | "backend" | "api"
 export type MiradorFlow =
-  (typeof import("./constants").MIRADOR_FLOW)[keyof typeof import("./constants").MIRADOR_FLOW]
+  typeof import("./constants").MIRADOR_FLOW[keyof typeof import("./constants").MIRADOR_FLOW]
 
 export type MiradorTraceContext = {
   traceId?: string | null

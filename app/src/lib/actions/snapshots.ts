@@ -135,25 +135,21 @@ async function publishContractsWithoutBatching(
   let publishChainId: number | undefined
 
   if (toPublish.length > 0) {
-    const {
-      attestationIds,
-      txHashes,
-      txInputData,
-      chainId,
-    } = await createContractAttestationsWithTx({
-      contracts: toPublish.map((contract) => ({
-        contractAddress: contract.contractAddress,
-        chainId: contract.chainId,
-        deployer: contract.deployerAddress,
-        deploymentTx: contract.deploymentHash,
-        signature: contract.verificationProof,
-        verificationChainId: contract.verificationChainId || contract.chainId,
-      })),
-      projectId,
-      farcasterId:
-        farcasterId !== null ? Number.parseInt(farcasterId, 10) || 0 : 0,
-      refUID: projectId,
-    })
+    const { attestationIds, txHashes, txInputData, chainId } =
+      await createContractAttestationsWithTx({
+        contracts: toPublish.map((contract) => ({
+          contractAddress: contract.contractAddress,
+          chainId: contract.chainId,
+          deployer: contract.deployerAddress,
+          deploymentTx: contract.deploymentHash,
+          signature: contract.verificationProof,
+          verificationChainId: contract.verificationChainId || contract.chainId,
+        })),
+        projectId,
+        farcasterId:
+          farcasterId !== null ? Number.parseInt(farcasterId, 10) || 0 : 0,
+        refUID: projectId,
+      })
     publishTxHashes = txHashes
     publishTxInputData = txInputData
     publishChainId = chainId
@@ -257,19 +253,15 @@ async function createMetadataSnapshotRecord(
 
   const metadata = formatProjectMetadata(project, team)
   const ipfsHash = await uploadToPinata(project.id, metadata)
-  const {
-    attestationId,
-    txHash,
-    chainId,
-    txInputData,
-  } = await createProjectMetadataAttestationWithTx({
-    farcasterId: farcasterId ? parseInt(farcasterId, 10) : 0,
-    projectId: project.id,
-    name: project.name,
-    category: project.category ?? "",
-    ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
-    refUID: project.id,
-  })
+  const { attestationId, txHash, chainId, txInputData } =
+    await createProjectMetadataAttestationWithTx({
+      farcasterId: farcasterId ? parseInt(farcasterId, 10) : 0,
+      projectId: project.id,
+      name: project.name,
+      category: project.category ?? "",
+      ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+      refUID: project.id,
+    })
 
   const snapshot = await addProjectSnapshot(
     {
@@ -611,24 +603,21 @@ export const publishProjectContractsBatch = async ({
       const farcasterNumeric = actingUser?.farcasterId
         ? parseInt(actingUser.farcasterId, 10) || 0
         : 0
-      const {
-        attestationIds,
-        txHashes,
-        txInputData,
-        chainId,
-      } = await createContractAttestationsWithTx({
-        contracts: publishBatch.map((contract) => ({
-          contractAddress: contract.contractAddress,
-          chainId: contract.chainId,
-          deployer: contract.deployerAddress,
-          deploymentTx: contract.deploymentHash,
-          signature: contract.verificationProof,
-          verificationChainId: contract.verificationChainId || contract.chainId,
-        })),
-        projectId: projectContracts.id,
-        farcasterId: farcasterNumeric,
-        refUID: contractRefUID,
-      })
+      const { attestationIds, txHashes, txInputData, chainId } =
+        await createContractAttestationsWithTx({
+          contracts: publishBatch.map((contract) => ({
+            contractAddress: contract.contractAddress,
+            chainId: contract.chainId,
+            deployer: contract.deployerAddress,
+            deploymentTx: contract.deploymentHash,
+            signature: contract.verificationProof,
+            verificationChainId:
+              contract.verificationChainId || contract.chainId,
+          })),
+          projectId: projectContracts.id,
+          farcasterId: farcasterNumeric,
+          refUID: contractRefUID,
+        })
       publishTxHashes = txHashes
       publishTxInputData = txInputData
       publishChainId = chainId
@@ -900,27 +889,20 @@ export const createProjectSnapshotOnBehalf = async (
       const ipfsHash = await uploadToPinata(projectId, project)
 
       // Create attestation
-      const {
-        attestationId,
-        txHash,
-        chainId,
-        txInputData,
-      } = await createProjectMetadataAttestationWithTx({
-        farcasterId: parseInt(farcasterId),
-        projectId: projectId,
-        name: project.name,
-        category: project.category ?? "",
-        ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
-      })
+      const { attestationId, txHash, chainId, txInputData } =
+        await createProjectMetadataAttestationWithTx({
+          farcasterId: parseInt(farcasterId),
+          projectId: projectId,
+          name: project.name,
+          category: project.category ?? "",
+          ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+        })
 
       return { ipfsHash, attestationId, txHash, chainId, txInputData }
     })()
 
     const [{ ipfsHash, attestationId, txHash, chainId, txInputData }, _] =
-      await Promise.all([
-        attestationPromise,
-        updateProjectPromise,
-      ])
+      await Promise.all([attestationPromise, updateProjectPromise])
 
     const snapshot = await addProjectSnapshot({
       projectId,
@@ -1009,18 +991,14 @@ export const createOrganizationSnapshot = async (
         const metadata = formatOrganizationMetadata(organization)
         const ipfsHash = await uploadToPinata(organizationId, metadata)
 
-        const {
-          attestationId,
-          txHash,
-          chainId,
-          txInputData,
-        } = await createOrganizationMetadataAttestationWithTx({
-          farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
-          organizationId: organization.id,
-          name: organization.name,
-          projectIds: organization.projects.map((p) => p.projectId),
-          ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
-        })
+        const { attestationId, txHash, chainId, txInputData } =
+          await createOrganizationMetadataAttestationWithTx({
+            farcasterId: user.farcasterId ? parseInt(user.farcasterId) : 0,
+            organizationId: organization.id,
+            name: organization.name,
+            projectIds: organization.projects.map((p) => p.projectId),
+            ipfsUrl: `https://storage.retrofunding.optimism.io/ipfs/${ipfsHash}`,
+          })
 
         const snapshot = await addOrganizationSnapshot(
           {
