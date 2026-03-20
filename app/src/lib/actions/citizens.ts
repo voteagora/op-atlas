@@ -23,10 +23,20 @@ import {
   CITIZEN_TYPES,
 } from "@/lib/constants"
 import {
-  createCitizenAttestation,
-  revokeCitizenAttestation,
+  createCitizenAttestationWithTx,
+  revokeCitizenAttestationWithTx,
 } from "@/lib/eas/serverOnly"
-import { getImpersonationContext, withImpersonation } from "@/lib/db/sessionContext"
+import { extractFailedEasTxContext } from "@/lib/eas/txContext"
+import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
+import {
+  getImpersonationContext,
+  withImpersonation,
+} from "@/lib/db/sessionContext"
+import {
+  appendServerTraceEvent,
+  withMiradorTraceStep,
+} from "@/lib/mirador/serverTrace"
+import { MiradorTraceContext } from "@/lib/mirador/types"
 import { getActiveSeason } from "@/lib/seasons"
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
 
@@ -213,13 +223,15 @@ export const s8CitizenshipQualification = async (
     return null
   }
 
-  return withImpersonation(({ db }) => computeS8CitizenshipQualification(userId, db))
+  return withImpersonation(({ db }) =>
+    computeS8CitizenshipQualification(userId, db),
+  )
 }
 
 // S8 Citizenship Limit Check
 export const checkCitizenshipLimit = async (): Promise<boolean> => {
-  const citizenCount = await withImpersonation(({ db }) =>
-    getCitizenCountByType(CITIZEN_TYPES.user, db),
+  const citizenCount = await withImpersonation(
+    ({ db }) => getCitizenCountByType(CITIZEN_TYPES.user, db),
     { forceProd: true },
   )
   return citizenCount >= 1000
@@ -259,7 +271,10 @@ export const updateCitizen = async (citizen: {
     { requireUser: true },
   )
 
-export const deleteCitizen = async (citizenId: number) =>
+export const deleteCitizen = async (
+  citizenId: number,
+  traceContext?: MiradorTraceContext,
+) =>
   withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
@@ -276,9 +291,33 @@ export const deleteCitizen = async (citizenId: number) =>
         return { error: "Unauthorized" }
       }
 
+      await appendServerTraceEvent({
+        traceContext: withMiradorTraceStep(
+          traceContext,
+          "citizen_revocation_start",
+          "backend",
+        ),
+        eventName: "citizen_revocation_started",
+        details: { citizenId, userId, attestationId: citizen.attestationId },
+        tags: ["citizen", "revocation"],
+      })
+
+      let revocationTxHash: string | undefined
+      let revocationTxInputData: string | undefined
+      let revocationMiradorChain: ReturnType<
+        typeof getMiradorChainNameFromChainId
+      >
+
       if (citizen.attestationId) {
         try {
-          await revokeCitizenAttestation(citizen.attestationId)
+          const revocationResult = await revokeCitizenAttestationWithTx(
+            citizen.attestationId,
+          )
+          revocationTxHash = revocationResult.txHash
+          revocationTxInputData = revocationResult.txInputData
+          revocationMiradorChain = getMiradorChainNameFromChainId(
+            revocationResult.chainId,
+          )
 
           const user = await db.user.findUnique({
             where: { id: userId },
@@ -291,15 +330,84 @@ export const deleteCitizen = async (citizenId: number) =>
           }
         } catch (err) {
           console.error("Failed to revoke attestation:", err)
+          const failedTxContext = extractFailedEasTxContext(err)
+          const failedMiradorChain = getMiradorChainNameFromChainId(
+            failedTxContext.chainId,
+          )
+
+          await appendServerTraceEvent({
+            traceContext: withMiradorTraceStep(
+              traceContext,
+              "citizen_revocation_failed",
+              "backend",
+            ),
+            eventName: "citizen_revocation_failed",
+            details: {
+              citizenId,
+              attestationId: citizen.attestationId,
+              error: err instanceof Error ? err.message : String(err),
+            },
+            tags: ["citizen", "revocation", "error"],
+            txHashHints:
+              failedTxContext.txHash && failedMiradorChain
+                ? [
+                    {
+                      txHash: failedTxContext.txHash,
+                      chain: failedMiradorChain,
+                      details: "Failed citizen revocation transaction",
+                    },
+                  ]
+                : undefined,
+            txInputData: failedTxContext.txInputData,
+          })
+
           return { error: "Failed to revoke attestation" }
         }
       }
 
       try {
         await deleteCitizenRecord(citizenId, db)
+
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "citizen_revocation_success",
+            "backend",
+          ),
+          eventName: "citizen_revocation_succeeded",
+          details: { citizenId, userId },
+          tags: ["citizen", "revocation"],
+          txHashHints:
+            revocationTxHash && revocationMiradorChain
+              ? [
+                  {
+                    txHash: revocationTxHash,
+                    chain: revocationMiradorChain,
+                    details: "Citizen revocation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData: revocationTxInputData,
+        })
+
         return { success: true }
       } catch (err) {
         console.error("Failed to delete citizen record:", err)
+
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "citizen_delete_record_failed",
+            "backend",
+          ),
+          eventName: "citizen_delete_record_failed",
+          details: {
+            citizenId,
+            error: err instanceof Error ? err.message : String(err),
+          },
+          tags: ["citizen", "revocation", "error"],
+        })
+
         return { error: "Failed to delete citizen record" }
       }
     },
@@ -312,7 +420,7 @@ export const getCitizen = async (
   return withImpersonation(({ db }) => getCitizenByType(lookup, db))
 }
 
-export const attestCitizen = async () =>
+export const attestCitizen = async (traceContext?: MiradorTraceContext) =>
   withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {
@@ -325,14 +433,12 @@ export const attestCitizen = async () =>
       const activeSeason = await getActiveSeason()
       if (activeSeason?.id === "9") {
         return {
-          error: "Season 8 registration is closed. Please use the Season 9 registration flow.",
+          error:
+            "Season 8 registration is closed. Please use the Season 9 registration flow.",
         }
       }
 
-      const qualification = await computeS8CitizenshipQualification(
-        userId,
-        db,
-      )
+      const qualification = await computeS8CitizenshipQualification(userId, db)
 
       if (!qualification?.eligible) {
         return {
@@ -373,23 +479,58 @@ export const attestCitizen = async () =>
         }
       }
 
+      await appendServerTraceEvent({
+        traceContext: withMiradorTraceStep(
+          traceContext,
+          "s8_citizen_attestation_start",
+          "backend",
+        ),
+        eventName: "s8_citizen_attestation_started",
+        details: { userId, citizenType, primaryAddress },
+        tags: ["citizen", "attestation", "s8"],
+      })
+
       try {
-        const attestationId = await createCitizenAttestation({
-          to: primaryAddress,
-          farcasterId: parseInt(user?.farcasterId || "0"),
-          selectionMethod:
-            CITIZEN_ATTESTATION_CODE[
-              citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
-            ],
-          refUID:
-            qualification.type === CITIZEN_TYPES.chain ||
-            qualification.type === CITIZEN_TYPES.app
-              ? qualification.identifier
-              : undefined,
-        })
+        const { attestationId, txHash, txInputData, chainId } =
+          await createCitizenAttestationWithTx({
+            to: primaryAddress,
+            farcasterId: parseInt(user?.farcasterId || "0"),
+            selectionMethod:
+              CITIZEN_ATTESTATION_CODE[
+                citizenType as keyof typeof CITIZEN_ATTESTATION_CODE
+              ],
+            refUID:
+              qualification.type === CITIZEN_TYPES.chain ||
+              qualification.type === CITIZEN_TYPES.app
+                ? qualification.identifier
+                : undefined,
+          })
+        const miradorChain = getMiradorChainNameFromChainId(chainId)
 
         const isValidAttestationId = /^0x[a-fA-F0-9]{64}$/.test(attestationId)
         if (!isValidAttestationId) {
+          await appendServerTraceEvent({
+            traceContext: withMiradorTraceStep(
+              traceContext,
+              "s8_citizen_attestation_invalid_uid",
+              "backend",
+            ),
+            eventName: "s8_citizen_attestation_failed",
+            details: { userId, attestationId },
+            tags: ["citizen", "attestation", "s8", "error"],
+            txHashHints:
+              txHash && miradorChain
+                ? [
+                    {
+                      txHash,
+                      chain: miradorChain,
+                      details: "S8 citizen attestation transaction",
+                    },
+                  ]
+                : undefined,
+            txInputData,
+          })
+
           return {
             error: "Invalid attestation ID format",
           }
@@ -424,8 +565,60 @@ export const attestCitizen = async () =>
             },
           ])
         }
+
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "s8_citizen_attestation_success",
+            "backend",
+          ),
+          eventName: "s8_citizen_attestation_succeeded",
+          details: { userId, attestationId, citizenType, primaryAddress },
+          tags: ["citizen", "attestation", "s8"],
+          txHashHints:
+            txHash && miradorChain
+              ? [
+                  {
+                    txHash,
+                    chain: miradorChain,
+                    details: "S8 citizen attestation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData,
+        })
       } catch (error) {
         console.error("Error attesting citizen:", error)
+        const failedTxContext = extractFailedEasTxContext(error)
+        const failedMiradorChain = getMiradorChainNameFromChainId(
+          failedTxContext.chainId,
+        )
+
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "s8_citizen_attestation_exception",
+            "backend",
+          ),
+          eventName: "s8_citizen_attestation_failed",
+          details: {
+            userId,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          tags: ["citizen", "attestation", "s8", "error"],
+          txHashHints:
+            failedTxContext.txHash && failedMiradorChain
+              ? [
+                  {
+                    txHash: failedTxContext.txHash,
+                    chain: failedMiradorChain,
+                    details: "Failed S8 citizen attestation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData: failedTxContext.txInputData,
+        })
+
         return {
           error: "Failed to attest citizen",
         }

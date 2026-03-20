@@ -22,8 +22,15 @@ import {
 } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 import { withImpersonation } from "@/lib/db/sessionContext"
+import { extractFailedEasTxContext } from "@/lib/eas/txContext"
+import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
 
-import { createEntityAttestation } from "../eas/serverOnly"
+import { createEntityAttestationWithTx } from "../eas/serverOnly"
+import {
+  appendServerTraceEvent,
+  withMiradorTraceStep,
+} from "../mirador/serverTrace"
+import { MiradorTraceContext } from "../mirador/types"
 import { TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin, verifyOrganizationMembership } from "./utils"
@@ -37,9 +44,11 @@ export const getUserOrganizations = async (userId: string) =>
 export const createNewOrganization = async ({
   organization,
   teamMembers,
+  traceContext,
 }: {
   organization: CreateOrganizationParams
   teamMembers: CreateTeamMemberParams[]
+  traceContext?: MiradorTraceContext
 }) =>
   withImpersonation(
     async ({ db, userId, session }) => {
@@ -56,24 +65,98 @@ export const createNewOrganization = async ({
         }
       }
 
-      const organizationId = await createEntityAttestation({
-        farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
-        type: "organization",
+      await appendServerTraceEvent({
+        traceContext: withMiradorTraceStep(
+          traceContext,
+          "organization_creation_start",
+          "backend",
+        ),
+        eventName: "organization_creation_started",
+        details: { userId, organizationName: organization.name },
+        tags: ["organization", "creation"],
       })
 
-      const organizationData = await createOrganization(
-        {
-          organizationId,
-          organization,
-          teamMembers,
-        },
-        db,
-      )
+      try {
+        const {
+          attestationId: organizationId,
+          txHash,
+          chainId,
+          txInputData,
+        } = await createEntityAttestationWithTx({
+          farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
+          type: "organization",
+        })
+        const miradorChain = getMiradorChainNameFromChainId(chainId)
 
-      revalidatePath("/dashboard")
-      return {
-        error: null,
-        organizationData,
+        const organizationData = await createOrganization(
+          {
+            organizationId,
+            organization,
+            teamMembers,
+          },
+          db,
+        )
+
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "organization_creation_success",
+            "backend",
+          ),
+          eventName: "organization_creation_succeeded",
+          details: { userId, organizationId },
+          tags: ["organization", "creation"],
+          txHashHints:
+            txHash && miradorChain
+              ? [
+                  {
+                    txHash,
+                    chain: miradorChain,
+                    details: "Organization entity attestation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData,
+        })
+
+        revalidatePath("/dashboard")
+        return {
+          error: null,
+          organizationData,
+        }
+      } catch (error) {
+        const failedTxContext = extractFailedEasTxContext(error)
+        const failedMiradorChain = getMiradorChainNameFromChainId(
+          failedTxContext.chainId,
+        )
+
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "organization_creation_exception",
+            "backend",
+          ),
+          eventName: "organization_creation_failed",
+          details: {
+            userId,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          tags: ["organization", "creation", "error"],
+          txHashHints:
+            failedTxContext.txHash && failedMiradorChain
+              ? [
+                  {
+                    txHash: failedTxContext.txHash,
+                    chain: failedMiradorChain,
+                    details:
+                      "Failed organization entity attestation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData: failedTxContext.txInputData,
+        })
+
+        throw error
       }
     },
     { requireUser: true },
@@ -266,7 +349,10 @@ export const removeMemberFromOrganization = async (
         return isInvalid
       }
 
-      const team = await getOrganizationTeamWithClient({ id: organizationId }, db)
+      const team = await getOrganizationTeamWithClient(
+        { id: organizationId },
+        db,
+      )
       if (team?.team.length === 1) {
         return {
           error: "Cannot remove the final team member",

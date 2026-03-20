@@ -7,7 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -28,8 +28,15 @@ import {
   setProjectOrganization,
   updateProjectDetails,
 } from "@/lib/actions/projects"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
 import { ProjectWithFullDetails } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import FileUploadInput from "../../common/FileUploadInput"
@@ -102,6 +109,8 @@ export default function ProjectDetailsForm({
   const { track } = useAnalytics()
 
   const { data: currentUser } = useSession()
+  const projectCreationTraceRef =
+    useRef<ReturnType<typeof startMiradorTrace>>(null)
 
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -239,7 +248,63 @@ export default function ProjectDetailsForm({
       const isCreating = !project
 
       const createOrUpdateProject = async (): Promise<Project> => {
+        let projectCreationTrace: ReturnType<typeof startMiradorTrace> = null
+
         try {
+          let createTraceContext: Awaited<
+            ReturnType<typeof buildFrontendTraceContext>
+          >
+          if (!project) {
+            if (projectCreationTraceRef.current) {
+              addMiradorEvent(
+                projectCreationTraceRef.current,
+                "trace_replaced",
+                {
+                  reason: "new_project_creation_attempt",
+                },
+              )
+              await closeMiradorTrace(
+                projectCreationTraceRef.current,
+                "Superseded by new project creation attempt",
+              )
+            }
+
+            projectCreationTrace = startMiradorTrace({
+              name: "ProjectCreation",
+              flow: MIRADOR_FLOW.projectCreation,
+              context: {
+                source: "frontend",
+                userId: currentUser?.user?.id,
+                sessionId: currentUser?.user?.id,
+              },
+              attributes: {
+                projectName: newValues.name,
+                organizationId: values.organization?.id,
+              },
+              tags: ["project", "creation", "frontend"],
+            })
+            projectCreationTraceRef.current = projectCreationTrace
+
+            addMiradorEvent(
+              projectCreationTrace,
+              "project_creation_submit_started",
+              {
+                projectName: newValues.name,
+                organizationId: values.organization?.id,
+              },
+            )
+
+            createTraceContext = await buildFrontendTraceContext(
+              projectCreationTrace,
+              {
+                flow: MIRADOR_FLOW.projectCreation,
+                step: "project_creation_submit",
+                userId: currentUser?.user?.id,
+                sessionId: currentUser?.user?.id,
+              },
+            )
+          }
+
           const [response, res] = project
             ? await Promise.all([
                 updateProjectDetails(project.id, newValues),
@@ -250,7 +315,11 @@ export default function ProjectDetailsForm({
                 ),
               ])
             : await Promise.all([
-                createNewProject(newValues, values.organization?.id),
+                createNewProject(
+                  newValues,
+                  values.organization?.id,
+                  createTraceContext,
+                ),
               ])
 
           if (response.error !== null || !response.project) {
@@ -267,10 +336,38 @@ export default function ProjectDetailsForm({
               elementType: "Form",
               elementName: "Save",
             })
+
+            addMiradorEvent(
+              projectCreationTrace,
+              "project_creation_submit_succeeded",
+              {
+                projectId: response.project.id,
+              },
+            )
+            await closeMiradorTrace(
+              projectCreationTrace,
+              "Project creation succeeded",
+            )
+            projectCreationTraceRef.current = null
           }
 
           return response.project
         } catch (error) {
+          if (isCreating) {
+            addMiradorEvent(
+              projectCreationTrace,
+              "project_creation_submit_failed",
+              {
+                error: error instanceof Error ? error.message : String(error),
+              },
+            )
+            await closeMiradorTrace(
+              projectCreationTrace,
+              "Project creation failed",
+            )
+            projectCreationTraceRef.current = null
+          }
+
           const errorType = error instanceof Error ? error.name : "UnknownError"
           const errorMessage =
             error instanceof Error ? error.message : String(error)

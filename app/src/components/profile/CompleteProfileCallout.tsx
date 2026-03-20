@@ -7,7 +7,7 @@ import Link from "next/link"
 import { PrimaryAddress } from "@/app/profile/verified-addresses/primary-address"
 import { VerifiedAddress } from "@/app/profile/verified-addresses/verified-address"
 import { useUser } from "@/hooks/db/useUser"
-import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
+import { usePrivyUnlinkWallet } from "@/hooks/privy/usePrivyUnlinkWallet"
 import {
   UserAddressSource,
   UserWithAddresses,
@@ -188,7 +188,7 @@ function ConnectYourGithubStep({ user }: { user: User }) {
 }
 
 function AddVerifiedAddressesStep({ user }: { user: UserWithAddresses }) {
-  const { unlinkWallet } = usePrivyLinkWallet(user.id)
+  const { unlinkWallet } = usePrivyUnlinkWallet(user.id)
   return (
     <div className="flex justify-between py-4 gap-6">
       <div className="flex gap-4">

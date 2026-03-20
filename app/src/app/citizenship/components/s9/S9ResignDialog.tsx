@@ -2,12 +2,20 @@
 
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { resignCitizenSeason } from "@/lib/actions/citizenship/resignCitizenSeason"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 
 type ResignContext = {
   kind: "user" | "organization" | "project"
@@ -28,6 +36,7 @@ export function S9ResignDialog({
   context,
 }: S9ResignDialogProps) {
   const router = useRouter()
+  const { data: session } = useSession()
   const [isPending, startTransition] = useTransition()
 
   const isUserContext = context.kind === "user"
@@ -41,16 +50,62 @@ export function S9ResignDialog({
 
   const handleResign = () => {
     startTransition(async () => {
-      const result = await resignCitizenSeason(citizenSeasonId)
+      const userId =
+        session?.impersonation?.targetUserId ?? session?.user?.id ?? undefined
+      const trace = startMiradorTrace({
+        name: "CitizenResign",
+        flow: MIRADOR_FLOW.citizenResign,
+        context: {
+          source: "frontend",
+          userId,
+          sessionId: userId,
+        },
+        attributes: {
+          citizenSeasonId,
+          contextKind: context.kind,
+        },
+        tags: ["citizen", "resign", "s9", "frontend"],
+      })
 
-      if (result?.error) {
-        toast.error(result.error)
-        return
+      addMiradorEvent(trace, "citizen_resign_submit_started", {
+        citizenSeasonId,
+        contextKind: context.kind,
+      })
+
+      try {
+        const traceContext = await buildFrontendTraceContext(trace, {
+          flow: MIRADOR_FLOW.citizenResign,
+          step: "citizen_resign_submit",
+          userId,
+          sessionId: userId,
+        })
+        const result = await resignCitizenSeason(citizenSeasonId, traceContext)
+
+        if (result?.error) {
+          addMiradorEvent(trace, "citizen_resign_submit_failed", {
+            citizenSeasonId,
+            error: result.error,
+          })
+          await closeMiradorTrace(trace, "Citizen resign failed")
+          toast.error(result.error)
+          return
+        }
+
+        addMiradorEvent(trace, "citizen_resign_submit_succeeded", {
+          citizenSeasonId,
+        })
+        await closeMiradorTrace(trace, "Citizen resign succeeded")
+        toast.success("Citizenship resigned")
+        onOpenChange(false)
+        router.refresh()
+      } catch (error) {
+        addMiradorEvent(trace, "citizen_resign_submit_failed", {
+          citizenSeasonId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        await closeMiradorTrace(trace, "Citizen resign failed")
+        toast.error("Failed to resign citizenship")
       }
-
-      toast.success("Citizenship resigned")
-      onOpenChange(false)
-      router.refresh()
     })
   }
 

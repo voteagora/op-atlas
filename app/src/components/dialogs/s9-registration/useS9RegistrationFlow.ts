@@ -4,9 +4,14 @@ import { useModalStatus } from "@privy-io/react-auth"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { getAddress } from "viem"
 
 import { makeUserAddressPrimaryAction } from "@/app/profile/verified-addresses/actions"
-import { useUser, USER_ADDRESSES_QUERY_KEY, USER_QUERY_KEY } from "@/hooks/db/useUser"
+import {
+  USER_ADDRESSES_QUERY_KEY,
+  USER_QUERY_KEY,
+  useUser,
+} from "@/hooks/db/useUser"
 import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 import { usePrivyLinkGithub } from "@/hooks/privy/usePrivyLinkGithub"
 import { usePrivyLinkTwitter } from "@/hooks/privy/usePrivyLinkTwitter"
@@ -16,9 +21,16 @@ import {
   s9Qualification,
   S9QualificationResult,
 } from "@/lib/actions/citizenship/s9Qualification"
-import { createS9Citizen } from "@/lib/actions/citizenship/createS9Citizen"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { withMiradorTraceHeaders } from "@/lib/mirador/headers"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  flushAndWaitForMiradorTraceId,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
+import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { getAddress } from "viem"
 
 import { S9_REGISTRATION_DIALOG_STORAGE_KEY } from "../constants"
 
@@ -45,6 +57,12 @@ export const STEP_ORDER: RegistrationStage[] = [
 ]
 
 type WalletEligibilityState = Record<string, "checking" | "pass" | "fail">
+type MiradorTraceInstance = NonNullable<ReturnType<typeof startMiradorTrace>>
+type CreateS9CitizenResponse = {
+  success: boolean
+  attestationId?: string
+  error?: string
+}
 
 export type UseS9RegistrationFlowArgs = {
   open: boolean
@@ -62,7 +80,11 @@ export type UseS9RegistrationFlowResult = {
   farcasterConnected: boolean
   githubConnected: boolean
   xConnected: boolean
-  sortedWallets: Array<{ address: string; primary: boolean; source?: string | null }>
+  sortedWallets: Array<{
+    address: string
+    primary: boolean
+    source?: string | null
+  }>
   selectedWallets: string[]
   selectedGovernance: string | null
   walletEligibility: WalletEligibilityState
@@ -111,28 +133,235 @@ export function useS9RegistrationFlow({
   const { isOpen: isPrivyModalOpen } = useModalStatus()
 
   const [seasonLabel, setSeasonLabel] = useState(`Season ${seasonId}`)
-  const [stage, setStage] = useState<RegistrationStage>(RegistrationStage.ConnectSocial)
+  const [stage, setStage] = useState<RegistrationStage>(
+    RegistrationStage.ConnectSocial,
+  )
   const [selectedWallets, setSelectedWallets] = useState<string[]>([])
-  const [selectedGovernance, setSelectedGovernance] = useState<string | null>(null)
-  const [walletEligibility, setWalletEligibility] = useState<WalletEligibilityState>({})
+  const [selectedGovernance, setSelectedGovernance] = useState<string | null>(
+    null,
+  )
+  const [walletEligibility, setWalletEligibility] =
+    useState<WalletEligibilityState>({})
   const [result, setResult] = useState<S9QualificationResult | null>(null)
   const [isRegistering, setIsRegistering] = useState(false)
-  const [verificationStatus, setVerificationStatus] = useState({ kyc: false, world: false })
+  const [verificationStatus, setVerificationStatus] = useState({
+    kyc: false,
+    world: false,
+  })
 
   const walletEligibilityRef = useRef<WalletEligibilityState>({})
+  const stageRef = useRef<RegistrationStage>(RegistrationStage.ConnectSocial)
+  const registrationTraceRef =
+    useRef<ReturnType<typeof startMiradorTrace>>(null)
+  const registrationTraceIdRef = useRef<string | null>(null)
+  const pendingUnmountCloseTimeoutRef = useRef<number | null>(null)
+  const walletEligibilityRunKeyRef = useRef<string | null>(null)
+  const walletEligibilityPromiseRef =
+    useRef<Promise<WalletEligibilityState> | null>(null)
 
   useEffect(() => {
     walletEligibilityRef.current = walletEligibility
   }, [walletEligibility])
+  useEffect(() => {
+    stageRef.current = stage
+  }, [stage])
 
   const attestationTimeoutRef = useRef<number | null>(null)
+
+  const cancelPendingUnmountClose = useCallback(() => {
+    if (pendingUnmountCloseTimeoutRef.current !== null) {
+      window.clearTimeout(pendingUnmountCloseTimeoutRef.current)
+      pendingUnmountCloseTimeoutRef.current = null
+    }
+  }, [])
+
+  const syncTraceIdForActiveTrace = useCallback(
+    (trace: MiradorTraceInstance) => {
+      void flushAndWaitForMiradorTraceId(trace).then((traceId) => {
+        if (traceId && registrationTraceRef.current === trace) {
+          registrationTraceIdRef.current = traceId
+        }
+      })
+    },
+    [],
+  )
+
+  const ensureRegistrationTraceId = useCallback(async () => {
+    const activeTrace = registrationTraceRef.current
+    if (!activeTrace) {
+      return null
+    }
+
+    const currentTraceId = activeTrace.getTraceId()
+    if (currentTraceId) {
+      registrationTraceIdRef.current = currentTraceId
+      return currentTraceId
+    }
+
+    const traceId = await flushAndWaitForMiradorTraceId(activeTrace)
+    if (traceId && registrationTraceRef.current === activeTrace) {
+      registrationTraceIdRef.current = traceId
+      return traceId
+    }
+
+    return registrationTraceRef.current?.getTraceId() ?? null
+  }, [])
+
+  const createS9CitizenWithTrace = useCallback(
+    async ({
+      traceId,
+      userId,
+      governanceAddress,
+      seasonId,
+      trustBreakdown,
+    }: {
+      traceId: string | null
+      userId: string
+      governanceAddress: string
+      seasonId: string
+      trustBreakdown?: unknown
+    }): Promise<CreateS9CitizenResponse> => {
+      const response = await fetch("/api/v1/citizenship/s9/register", {
+        method: "POST",
+        headers: withMiradorTraceHeaders(
+          {
+            "Content-Type": "application/json",
+          },
+          traceId,
+          MIRADOR_FLOW.citizenS9Registration,
+        ),
+        body: JSON.stringify({
+          userId,
+          governanceAddress,
+          seasonId,
+          trustBreakdown,
+        }),
+      })
+
+      const payload = (await response.json()) as CreateS9CitizenResponse & {
+        error?: string
+      }
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: payload.error ?? "Failed to register S9 citizenship",
+        }
+      }
+
+      return payload
+    },
+    [],
+  )
+
+  const closeRegistrationTrace = useCallback(
+    async (
+      reason: string,
+      eventName?: string,
+      details?: Record<string, unknown>,
+    ) => {
+      const trace = registrationTraceRef.current
+      if (!trace) {
+        return
+      }
+      cancelPendingUnmountClose()
+
+      if (eventName) {
+        addMiradorEvent(trace, eventName, details)
+      }
+
+      await closeMiradorTrace(trace, reason)
+      registrationTraceRef.current = null
+      registrationTraceIdRef.current = null
+    },
+    [cancelPendingUnmountClose],
+  )
 
   const invalidateUserQueries = useCallback(() => {
     return Promise.all([
       queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY, userId] }),
-      queryClient.invalidateQueries({ queryKey: [USER_ADDRESSES_QUERY_KEY, userId] }),
+      queryClient.invalidateQueries({
+        queryKey: [USER_ADDRESSES_QUERY_KEY, userId],
+      }),
     ]).then(() => undefined)
   }, [queryClient, userId])
+
+  useEffect(() => {
+    cancelPendingUnmountClose()
+
+    if (!open) {
+      const trace = registrationTraceRef.current
+      if (trace) {
+        addMiradorEvent(trace, "s9_registration_dialog_closed", {
+          stage: stageRef.current,
+          seasonId,
+        })
+        void closeMiradorTrace(trace, "S9 registration dialog closed")
+        registrationTraceRef.current = null
+        registrationTraceIdRef.current = null
+      }
+      return
+    }
+
+    if (registrationTraceRef.current) {
+      return
+    }
+
+    const trace = startMiradorTrace({
+      name: "S9CitizenRegistration",
+      flow: MIRADOR_FLOW.citizenS9Registration,
+      context: {
+        source: "frontend",
+        userId,
+        farcasterId: user?.farcasterId ?? undefined,
+        sessionId: userId,
+      },
+      attributes: {
+        seasonId,
+        stage: RegistrationStage.ConnectSocial,
+      },
+      tags: ["citizen", "registration", "s9", "frontend"],
+    })
+
+    registrationTraceRef.current = trace
+    registrationTraceIdRef.current = null
+    addMiradorEvent(trace, "s9_registration_dialog_opened", {
+      seasonId,
+      stage: RegistrationStage.ConnectSocial,
+    })
+    if (trace) {
+      syncTraceIdForActiveTrace(trace)
+    }
+  }, [
+    cancelPendingUnmountClose,
+    open,
+    seasonId,
+    syncTraceIdForActiveTrace,
+    user?.farcasterId,
+    userId,
+  ])
+
+  useEffect(() => {
+    return () => {
+      const trace = registrationTraceRef.current
+      if (trace) {
+        cancelPendingUnmountClose()
+        pendingUnmountCloseTimeoutRef.current = window.setTimeout(() => {
+          if (registrationTraceRef.current !== trace) {
+            return
+          }
+
+          addMiradorEvent(trace, "s9_registration_trace_closed_on_unmount", {
+            seasonId,
+          })
+          void closeMiradorTrace(trace, "S9 registration hook unmounted")
+          registrationTraceRef.current = null
+          registrationTraceIdRef.current = null
+          pendingUnmountCloseTimeoutRef.current = null
+        }, 0)
+      }
+    }
+  }, [cancelPendingUnmountClose, seasonId])
 
   // Reset dialog state when newly opened
   useEffect(() => {
@@ -161,10 +390,14 @@ export function useS9RegistrationFlow({
   useEffect(() => {
     if (!user) return
 
-    const wallets = (user.addresses ?? []).map((addr) => addr.address.toLowerCase())
+    const wallets = (user.addresses ?? []).map((addr) =>
+      addr.address.toLowerCase(),
+    )
     setSelectedWallets(wallets)
 
-    const primary = user.addresses?.find((addr) => addr.primary)?.address?.toLowerCase()
+    const primary = user.addresses
+      ?.find((addr) => addr.primary)
+      ?.address?.toLowerCase()
     setSelectedGovernance(primary ?? wallets[0] ?? null)
   }, [user])
 
@@ -185,47 +418,99 @@ export function useS9RegistrationFlow({
       return
     }
 
-    const checkingState = pendingWallets.reduce<WalletEligibilityState>((acc, wallet) => {
-      acc[wallet.address.toLowerCase()] = "checking"
-      return acc
-    }, {})
-
-    setWalletEligibility((prev) => ({ ...prev, ...checkingState }))
+    const pendingAddresses = pendingWallets
+      .map((wallet) => wallet.address.toLowerCase())
+      .sort()
+    const runKey = pendingAddresses.join(",")
 
     let isActive = true
 
-    const runEligibility = async () => {
-      const results = await Promise.allSettled(
+    let runPromise = walletEligibilityPromiseRef.current
+    if (walletEligibilityRunKeyRef.current !== runKey || !runPromise) {
+      addMiradorEvent(
+        registrationTraceRef.current,
+        "s9_registration_wallet_eligibility_started",
+        {
+          walletCount: pendingWallets.length,
+          addresses: pendingAddresses,
+        },
+      )
+
+      const checkingState = pendingWallets.reduce<WalletEligibilityState>(
+        (acc, wallet) => {
+          acc[wallet.address.toLowerCase()] = "checking"
+          return acc
+        },
+        {},
+      )
+
+      setWalletEligibility((prev) => ({ ...prev, ...checkingState }))
+
+      runPromise = Promise.allSettled(
         pendingWallets.map(async (wallet) => {
           const address = wallet.address.toLowerCase()
           try {
             const response = await checkWalletEligibility(address)
-            return { address, status: response.eligible ? "pass" : "fail" } as const
+            return {
+              address,
+              status: response.eligible ? "pass" : "fail",
+            } as const
           } catch (error) {
             console.error(`Error checking wallet ${address}:`, error)
             return { address, status: "fail" as const }
           }
         }),
-      )
-
-      if (!isActive) return
-
-      const finalState = results.reduce<WalletEligibilityState>((acc, outcome, index) => {
-        if (outcome.status === "fulfilled") {
-          acc[outcome.value.address] = outcome.value.status
-        } else {
-          const address = pendingWallets[index]?.address.toLowerCase()
-          if (address) {
-            acc[address] = "fail"
+      ).then((results) => {
+        return results.reduce<WalletEligibilityState>((acc, outcome, index) => {
+          if (outcome.status === "fulfilled") {
+            acc[outcome.value.address] = outcome.value.status
+          } else {
+            const address = pendingWallets[index]?.address.toLowerCase()
+            if (address) {
+              acc[address] = "fail"
+            }
           }
-        }
-        return acc
-      }, {})
+          return acc
+        }, {})
+      })
 
-      setWalletEligibility((prev) => ({ ...prev, ...finalState }))
+      walletEligibilityRunKeyRef.current = runKey
+      walletEligibilityPromiseRef.current = runPromise
     }
 
-    runEligibility()
+    runPromise
+      .then((finalState) => {
+        if (!isActive) return
+
+        setWalletEligibility((prev) => ({ ...prev, ...finalState }))
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_wallet_eligibility_completed",
+          {
+            outcomes: finalState,
+          },
+        )
+      })
+      .catch((error) => {
+        if (!isActive) return
+        console.error("Wallet eligibility check failed", error)
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_wallet_eligibility_failed",
+          {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        )
+      })
+      .finally(() => {
+        if (
+          walletEligibilityRunKeyRef.current === runKey &&
+          walletEligibilityPromiseRef.current === runPromise
+        ) {
+          walletEligibilityRunKeyRef.current = null
+          walletEligibilityPromiseRef.current = null
+        }
+      })
 
     return () => {
       isActive = false
@@ -262,28 +547,113 @@ export function useS9RegistrationFlow({
       }
 
       if (!nextOpen) {
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_close_requested",
+          {
+            stage,
+            seasonId,
+            refresh: Boolean(options?.refresh),
+          },
+        )
         if (typeof window !== "undefined") {
           window.sessionStorage.removeItem(S9_REGISTRATION_DIALOG_STORAGE_KEY)
         }
         setOpenDialog(undefined)
         onOpenChange(false)
+        void closeRegistrationTrace(
+          "S9 registration dialog closed by user",
+          "s9_registration_trace_closed",
+          { stage, seasonId },
+        )
         if (options?.refresh) {
           router.refresh()
         }
       } else {
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_open_requested",
+          {
+            stage,
+            seasonId,
+          },
+        )
         if (typeof window !== "undefined") {
-          window.sessionStorage.setItem(S9_REGISTRATION_DIALOG_STORAGE_KEY, "true")
+          window.sessionStorage.setItem(
+            S9_REGISTRATION_DIALOG_STORAGE_KEY,
+            "true",
+          )
         }
         onOpenChange(nextOpen)
       }
     },
-    [isPrivyModalOpen, onOpenChange, setOpenDialog, router],
+    [
+      closeRegistrationTrace,
+      isPrivyModalOpen,
+      onOpenChange,
+      router,
+      seasonId,
+      setOpenDialog,
+      stage,
+    ],
   )
 
   const handleRegister = useCallback(async (): Promise<boolean> => {
     if (!userId || !selectedGovernance) {
+      addMiradorEvent(
+        registrationTraceRef.current,
+        "s9_registration_check_skipped",
+        {
+          reason: "missing_user_or_governance",
+          hasUserId: Boolean(userId),
+          hasSelectedGovernance: Boolean(selectedGovernance),
+        },
+      )
       return false
     }
+
+    if (!registrationTraceRef.current) {
+      const trace = startMiradorTrace({
+        name: "S9CitizenRegistration",
+        flow: MIRADOR_FLOW.citizenS9Registration,
+        context: {
+          source: "frontend",
+          userId,
+          farcasterId: user?.farcasterId ?? undefined,
+          walletAddress: selectedGovernance,
+          sessionId: userId,
+        },
+        attributes: {
+          seasonId,
+          stage: RegistrationStage.Checking,
+        },
+        tags: ["citizen", "registration", "s9", "frontend"],
+      })
+      registrationTraceRef.current = trace
+      registrationTraceIdRef.current = null
+      addMiradorEvent(trace, "s9_registration_trace_restarted", {
+        seasonId,
+      })
+      if (trace) {
+        syncTraceIdForActiveTrace(trace)
+      }
+    }
+
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_check_started",
+      {
+        seasonId,
+        governanceAddress: selectedGovernance,
+        socialConnected: {
+          farcasterConnected,
+          githubConnected,
+          xConnected,
+        },
+        walletCount: sortedWallets.length,
+      },
+    )
+    void ensureRegistrationTraceId()
 
     setIsRegistering(true)
     setStage(RegistrationStage.Checking)
@@ -296,11 +666,48 @@ export function useS9RegistrationFlow({
           (wallet) => wallet.address.toLowerCase() === normalizedGovernance,
         )?.address ?? selectedGovernance
 
+      addMiradorEvent(
+        registrationTraceRef.current,
+        "s9_registration_governance_selected",
+        {
+          governanceAddress: canonicalAddress,
+        },
+      )
+
       try {
-        await makeUserAddressPrimaryAction(getAddress(canonicalAddress))
+        const traceContext = await buildFrontendTraceContext(
+          registrationTraceRef.current,
+          {
+            flow: MIRADOR_FLOW.citizenS9Registration,
+            step: "s9_registration_governance_set_primary",
+            userId,
+            farcasterId: user?.farcasterId ?? undefined,
+            walletAddress: canonicalAddress,
+            sessionId: userId,
+          },
+        )
+        await makeUserAddressPrimaryAction(
+          getAddress(canonicalAddress),
+          traceContext,
+        )
         await invalidateUserQueries()
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_governance_saved",
+          {
+            governanceAddress: canonicalAddress,
+          },
+        )
       } catch (error) {
         console.error("Failed to set governance wallet as primary", error)
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_governance_save_failed",
+          {
+            governanceAddress: canonicalAddress,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        )
         setStage(RegistrationStage.ResultError)
         return false
       }
@@ -310,6 +717,17 @@ export function useS9RegistrationFlow({
         governanceAddress: selectedGovernance,
         seasonId,
       })
+
+      addMiradorEvent(
+        registrationTraceRef.current,
+        "s9_registration_qualification_received",
+        {
+          seasonId,
+          status: response.status,
+          kycApproved: response.kycApproved,
+          worldIdVerified: response.worldIdVerified,
+        },
+      )
 
       setResult(response)
       setVerificationStatus({
@@ -346,6 +764,14 @@ export function useS9RegistrationFlow({
       return true
     } catch (error) {
       console.error("Error checking S9 eligibility", error)
+      addMiradorEvent(
+        registrationTraceRef.current,
+        "s9_registration_qualification_failed",
+        {
+          seasonId,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      )
       setStage(RegistrationStage.ResultError)
       return false
     } finally {
@@ -354,23 +780,63 @@ export function useS9RegistrationFlow({
 
     // Fallback return
     return false
-  }, [invalidateUserQueries, selectedGovernance, seasonId, sortedWallets, userId])
+  }, [
+    ensureRegistrationTraceId,
+    farcasterConnected,
+    githubConnected,
+    invalidateUserQueries,
+    seasonId,
+    selectedGovernance,
+    sortedWallets,
+    syncTraceIdForActiveTrace,
+    user?.farcasterId,
+    userId,
+    xConnected,
+  ])
 
   const handleVerifyIdentity = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_verify_identity_selected",
+      {
+        stage,
+      },
+    )
     handleClose(false)
     router.push("/profile/details")
-  }, [handleClose, router])
+  }, [handleClose, router, stage])
 
   const handleWorldIdConnected = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_world_id_connected",
+      {
+        stage,
+      },
+    )
     setVerificationStatus((prev) => ({ ...prev, world: true }))
-  }, [])
+  }, [stage])
 
   const handleStartParticipating = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_start_participating",
+      {
+        stage,
+      },
+    )
     handleClose(false)
     router.push("/governance")
-  }, [handleClose, router])
+  }, [handleClose, router, stage])
 
   const goToNext = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_step_continue",
+      {
+        currentStage: stage,
+      },
+    )
     setStage((current) => {
       if (current === RegistrationStage.ConnectSocial) {
         return RegistrationStage.LinkWallets
@@ -380,7 +846,29 @@ export function useS9RegistrationFlow({
       }
       return current
     })
-  }, [])
+  }, [stage])
+
+  useEffect(() => {
+    if (!registrationTraceRef.current) {
+      return
+    }
+
+    if (
+      stage !== RegistrationStage.ResultNotEligible &&
+      stage !== RegistrationStage.ResultPriority &&
+      stage !== RegistrationStage.ResultClosed &&
+      stage !== RegistrationStage.ResultAlreadyRegistered &&
+      stage !== RegistrationStage.ResultError
+    ) {
+      return
+    }
+
+    void closeRegistrationTrace(
+      `S9 registration finished with status: ${stage}`,
+      "s9_registration_trace_closed_terminal_status",
+      { stage, seasonId },
+    )
+  }, [closeRegistrationTrace, seasonId, stage])
 
   // Automatically transition from READY to issuing attestation
   useEffect(() => {
@@ -388,15 +876,43 @@ export function useS9RegistrationFlow({
       return
     }
 
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_ready_for_attestation",
+      {
+        seasonId,
+        selectedGovernance,
+      },
+    )
+
     attestationTimeoutRef.current = window.setTimeout(async () => {
       setStage(RegistrationStage.ResultIssuingAttestation)
+      addMiradorEvent(
+        registrationTraceRef.current,
+        "s9_registration_attestation_started",
+        {
+          seasonId,
+          governanceAddress: selectedGovernance,
+        },
+      )
 
       if (!userId || !selectedGovernance) {
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_attestation_failed",
+          {
+            reason: "missing_user_or_governance",
+            hasUserId: Boolean(userId),
+            hasSelectedGovernance: Boolean(selectedGovernance),
+          },
+        )
         setStage(RegistrationStage.ResultError)
         return
       }
 
-      const attestationResult = await createS9Citizen({
+      const traceId = await ensureRegistrationTraceId()
+      const attestationResult = await createS9CitizenWithTrace({
+        traceId,
         userId,
         governanceAddress: selectedGovernance,
         seasonId,
@@ -411,11 +927,49 @@ export function useS9RegistrationFlow({
       })
 
       if (attestationResult.success) {
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_attestation_succeeded",
+          {
+            seasonId,
+            governanceAddress: selectedGovernance,
+            attestationId: attestationResult.attestationId,
+          },
+        )
         setStage(RegistrationStage.ResultFinalSuccess)
+        await closeRegistrationTrace(
+          "S9 registration completed",
+          "s9_registration_trace_closed_success",
+          {
+            seasonId,
+            governanceAddress: selectedGovernance,
+            attestationId: attestationResult.attestationId,
+          },
+        )
       } else {
+        addMiradorEvent(
+          registrationTraceRef.current,
+          "s9_registration_attestation_failed",
+          {
+            seasonId,
+            governanceAddress: selectedGovernance,
+            error: attestationResult.error,
+          },
+        )
         // Update result with the actual attestation error so it's displayed
-        setResult((prev) => prev ? { ...prev, message: attestationResult.error } : prev)
+        setResult((prev) =>
+          prev ? { ...prev, message: attestationResult.error } : prev,
+        )
         setStage(RegistrationStage.ResultError)
+        await closeRegistrationTrace(
+          "S9 registration attestation failed",
+          "s9_registration_trace_closed_failure",
+          {
+            seasonId,
+            governanceAddress: selectedGovernance,
+            error: attestationResult.error,
+          },
+        )
       }
     }, 5000)
 
@@ -425,7 +979,76 @@ export function useS9RegistrationFlow({
         attestationTimeoutRef.current = null
       }
     }
-  }, [stage, userId, selectedGovernance, seasonId, result])
+  }, [
+    closeRegistrationTrace,
+    createS9CitizenWithTrace,
+    ensureRegistrationTraceId,
+    result,
+    seasonId,
+    selectedGovernance,
+    stage,
+    userId,
+  ])
+
+  const handleSetSelectedGovernance = useCallback(
+    (address: string | null) => {
+      addMiradorEvent(
+        registrationTraceRef.current,
+        "s9_registration_governance_changed",
+        {
+          previousGovernance: selectedGovernance,
+          nextGovernance: address,
+        },
+      )
+      setSelectedGovernance(address)
+    },
+    [selectedGovernance],
+  )
+
+  const handleLinkWallet = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_wallet_link_requested",
+      {
+        stage,
+        selectedWalletCount: selectedWallets.length,
+      },
+    )
+    linkWallet()
+  }, [linkWallet, selectedWallets.length, stage])
+
+  const handleLinkFarcaster = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_farcaster_link_requested",
+      {
+        stage,
+      },
+    )
+    linkFarcaster()
+  }, [linkFarcaster, stage])
+
+  const handleLinkGithub = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_github_link_requested",
+      {
+        stage,
+      },
+    )
+    linkGithub()
+  }, [linkGithub, stage])
+
+  const handleLinkTwitter = useCallback(() => {
+    addMiradorEvent(
+      registrationTraceRef.current,
+      "s9_registration_twitter_link_requested",
+      {
+        stage,
+      },
+    )
+    linkTwitter()
+  }, [linkTwitter, stage])
 
   return {
     userId,
@@ -452,15 +1075,15 @@ export function useS9RegistrationFlow({
     actions: {
       handleClose,
       goToNext,
-      setSelectedGovernance,
+      setSelectedGovernance: handleSetSelectedGovernance,
       handleRegister,
       handleVerifyIdentity,
       handleWorldIdConnected,
       handleStartParticipating,
-      linkWallet,
-      linkFarcaster,
-      linkGithub,
-      linkTwitter,
+      linkWallet: handleLinkWallet,
+      linkFarcaster: handleLinkFarcaster,
+      linkGithub: handleLinkGithub,
+      linkTwitter: handleLinkTwitter,
     },
   }
 }

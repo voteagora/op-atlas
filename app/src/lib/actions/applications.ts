@@ -12,8 +12,15 @@ import {
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
 import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
+import { extractFailedEasTxContext } from "@/lib/eas/txContext"
+import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
 
-import { createApplicationAttestation } from "../eas/serverOnly"
+import { createApplicationAttestationWithTx } from "../eas/serverOnly"
+import {
+  appendServerTraceEvent,
+  withMiradorTraceStep,
+} from "../mirador/serverTrace"
+import { MiradorTraceContext } from "../mirador/types"
 import { CategoryWithImpact } from "../types"
 import { getProjectStatus } from "../utils"
 import { verifyAdminStatus } from "./utils"
@@ -35,6 +42,7 @@ export const publishAndSaveApplication = async (
     metadataSnapshotId,
     round,
     roundName,
+    traceContext,
   }: {
     project: SubmitApplicationRequest
     category: CategoryWithImpact
@@ -42,27 +50,107 @@ export const publishAndSaveApplication = async (
     metadataSnapshotId: string
     round: number
     roundName?: string
+    traceContext?: MiradorTraceContext
   },
   ctx: SessionContext,
 ): Promise<Application> => {
-  // Publish attestation (must reference an existing metadata snapshot)
-  const attestationId = await createApplicationAttestation({
-    farcasterId: parseInt(farcasterId),
-    projectId: project.projectId,
-    round: `${roundName ?? round}`,
-    snapshotRef: metadataSnapshotId,
-    ipfsUrl: "", // Skipping IPFS for S7
+  await appendServerTraceEvent({
+    traceContext: withMiradorTraceStep(
+      traceContext,
+      "application_attestation_start",
+      "backend",
+    ),
+    eventName: "application_attestation_started",
+    details: {
+      projectId: project.projectId,
+      round: roundName ?? round,
+      metadataSnapshotId,
+    },
+    tags: ["application", "attestation"],
   })
 
-  // Create application in database
-  return createApplication(
-    {
-      round: round,
-      ...project,
-      attestationId,
-    },
-    { db: ctx.db, session: ctx.session },
-  )
+  try {
+    // Publish attestation (must reference an existing metadata snapshot)
+    const { attestationId, txHash, chainId, txInputData } =
+      await createApplicationAttestationWithTx({
+        farcasterId: parseInt(farcasterId),
+        projectId: project.projectId,
+        round: `${roundName ?? round}`,
+        snapshotRef: metadataSnapshotId,
+        ipfsUrl: "", // Skipping IPFS for S7
+      })
+
+    // Create application in database
+    const application = await createApplication(
+      {
+        round: round,
+        ...project,
+        attestationId,
+      },
+      { db: ctx.db, session: ctx.session },
+    )
+    const miradorChain = getMiradorChainNameFromChainId(chainId)
+
+    await appendServerTraceEvent({
+      traceContext: withMiradorTraceStep(
+        traceContext,
+        "application_attestation_success",
+        "backend",
+      ),
+      eventName: "application_attestation_succeeded",
+      details: {
+        projectId: project.projectId,
+        attestationId,
+        round: roundName ?? round,
+      },
+      tags: ["application", "attestation"],
+      txHashHints:
+        txHash && miradorChain
+          ? [
+              {
+                txHash,
+                chain: miradorChain,
+                details: "Application attestation transaction",
+              },
+            ]
+          : undefined,
+      txInputData,
+    })
+
+    return application
+  } catch (error) {
+    const failedTxContext = extractFailedEasTxContext(error)
+    const failedMiradorChain = getMiradorChainNameFromChainId(
+      failedTxContext.chainId,
+    )
+
+    await appendServerTraceEvent({
+      traceContext: withMiradorTraceStep(
+        traceContext,
+        "application_attestation_exception",
+        "backend",
+      ),
+      eventName: "application_attestation_failed",
+      details: {
+        projectId: project.projectId,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      tags: ["application", "attestation", "error"],
+      txHashHints:
+        failedTxContext.txHash && failedMiradorChain
+          ? [
+              {
+                txHash: failedTxContext.txHash,
+                chain: failedMiradorChain,
+                details: "Failed application attestation transaction",
+              },
+            ]
+          : undefined,
+      txInputData: failedTxContext.txInputData,
+    })
+
+    throw error
+  }
 }
 
 const createProjectApplication = async (
@@ -72,6 +160,7 @@ const createProjectApplication = async (
   round: number,
   category: CategoryWithImpact,
   roundName?: string,
+  traceContext?: MiradorTraceContext,
 ) => {
   const { db, userId } = ctx
 
@@ -154,6 +243,7 @@ const createProjectApplication = async (
       metadataSnapshotId: latestSnapshot.attestationId,
       round,
       roundName,
+      traceContext,
     },
     ctx,
   )
@@ -176,6 +266,7 @@ export const submitApplications = async (
   roundName: string,
   roundNumber: number,
   categories?: CategoryWithImpact[],
+  traceContext?: MiradorTraceContext,
 ) => {
   return withImpersonation(
     async (ctx) => {
@@ -214,6 +305,7 @@ export const submitApplications = async (
           roundNumber,
           categories?.find((category) => category.id === project.categoryId)!,
           roundName,
+          traceContext,
         )
         if (result.error === null && result.application) {
           applications.push(result.application)

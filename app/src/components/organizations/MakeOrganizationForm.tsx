@@ -22,8 +22,15 @@ import {
   updateOrganizationDetails,
 } from "@/lib/actions/organizations"
 import { useIsOrganizationAdmin } from "@/lib/hooks"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
 import { OrganizationWithDetails, TeamRole } from "@/lib/types"
 import { uploadImage } from "@/lib/utils/images"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 
 import FileUploadInput from "../common/FileUploadInput"
 import { PhotoCropModal } from "../projects/details/PhotoCropModal"
@@ -266,7 +273,40 @@ export default function MakeOrganizationForm({
 
     const promise: Promise<Organization> = new Promise(
       async (resolve, reject) => {
+        let trace: ReturnType<typeof startMiradorTrace> = null
+
         try {
+          let traceContext: Awaited<
+            ReturnType<typeof buildFrontendTraceContext>
+          >
+          if (!organization) {
+            trace = startMiradorTrace({
+              name: "OrganizationCreation",
+              flow: MIRADOR_FLOW.organizationCreation,
+              context: {
+                source: "frontend",
+                userId: user.id,
+                sessionId: user.id,
+              },
+              attributes: {
+                organizationName: newValues.name,
+                teamMembers: team.length,
+              },
+              tags: ["organization", "creation", "frontend"],
+            })
+
+            addMiradorEvent(trace, "organization_creation_submit_started", {
+              organizationName: newValues.name,
+              teamMembers: team.length,
+            })
+            traceContext = await buildFrontendTraceContext(trace, {
+              flow: MIRADOR_FLOW.organizationCreation,
+              step: "organization_creation_submit",
+              userId: user.id,
+              sessionId: user.id,
+            })
+          }
+
           const response = organization
             ? await updateOrganizationDetails({
                 id: organization.id,
@@ -278,15 +318,29 @@ export default function MakeOrganizationForm({
                   userId: user.id,
                   role,
                 })),
+                traceContext,
               })
 
           if (response?.error !== null || !response) {
             throw new Error(response?.error ?? "Failed to save project")
           }
 
+          if (!organization) {
+            addMiradorEvent(trace, "organization_creation_submit_succeeded", {
+              organizationId: response.organizationData.id,
+            })
+            await closeMiradorTrace(trace, "Organization creation succeeded")
+          }
+
           resolve(response.organizationData)
         } catch (error) {
           console.error("Error creating project", error)
+          if (!organization) {
+            addMiradorEvent(trace, "organization_creation_submit_failed", {
+              error: error instanceof Error ? error.message : String(error),
+            })
+            await closeMiradorTrace(trace, "Organization creation failed")
+          }
           reject(error)
         }
       },

@@ -11,8 +11,8 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { AnalyticsProvider } from "./AnalyticsProvider"
 import { DialogProvider } from "./DialogProvider"
 import { LayoutWrapper } from "./LayoutProvider"
+import { MiradorProvider } from "./MiradorProvider"
 import { PostHogProvider } from "./PosthogProvider"
-import PrivyProvider from "./PrivyAuthProvider"
 import PrivyAuthProvider from "./PrivyAuthProvider"
 
 if (
@@ -45,27 +45,33 @@ type SeasonBannerConfig = {
 export default function Providers({
   children,
   defaultBanner,
+  miradorEnabled,
+  miradorWebApiKey,
 }: {
   children: React.ReactNode
   defaultBanner?: SeasonBannerConfig | null
+  miradorEnabled?: boolean
+  miradorWebApiKey?: string
 }) {
   return (
     <SessionProvider>
-      <AuthKitProvider config={farcasterConfig}>
-        <PrivyAuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <AnalyticsProvider>
-              <DialogProvider>
-                <TooltipProvider>
-                  <LayoutWrapper defaultBanner={defaultBanner}>
-                    <PostHogProvider>{children}</PostHogProvider>
-                  </LayoutWrapper>
-                </TooltipProvider>
-              </DialogProvider>
-            </AnalyticsProvider>
-          </QueryClientProvider>
-        </PrivyAuthProvider>
-      </AuthKitProvider>
+      <MiradorProvider apiKey={miradorWebApiKey} enabled={miradorEnabled}>
+        <AuthKitProvider config={farcasterConfig}>
+          <PrivyAuthProvider>
+            <QueryClientProvider client={queryClient}>
+              <AnalyticsProvider>
+                <DialogProvider>
+                  <TooltipProvider>
+                    <LayoutWrapper defaultBanner={defaultBanner}>
+                      <PostHogProvider>{children}</PostHogProvider>
+                    </LayoutWrapper>
+                  </TooltipProvider>
+                </DialogProvider>
+              </AnalyticsProvider>
+            </QueryClientProvider>
+          </PrivyAuthProvider>
+        </AuthKitProvider>
+      </MiradorProvider>
     </SessionProvider>
   )
 }

@@ -17,7 +17,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { useUser } from "@/hooks/db/useUser"
 import { createNewOrganization } from "@/lib/actions/organizations"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
 import { uploadImage } from "@/lib/utils/images"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 
 import FileUploadInput from "../common/FileUploadInput"
 import { DialogProps } from "../dialogs/types"
@@ -87,7 +94,33 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
 
     const promise: Promise<Organization> = new Promise(
       async (resolve, reject) => {
+        const trace = startMiradorTrace({
+          name: "OrganizationCreation",
+          flow: MIRADOR_FLOW.organizationCreation,
+          context: {
+            source: "frontend",
+            userId: user?.id,
+            sessionId: user?.id,
+          },
+          attributes: {
+            organizationName: newValues.name,
+            teamMembers: (selectedUserIds?.length ?? 0) + (user?.id ? 1 : 0),
+          },
+          tags: ["organization", "creation", "frontend"],
+        })
+
+        addMiradorEvent(trace, "organization_creation_submit_started", {
+          organizationName: newValues.name,
+        })
+
         try {
+          const traceContext = await buildFrontendTraceContext(trace, {
+            flow: MIRADOR_FLOW.organizationCreation,
+            step: "organization_creation_submit",
+            userId: user?.id,
+            sessionId: user?.id,
+          })
+
           const response = await createNewOrganization({
             organization: newValues,
             teamMembers: [
@@ -97,6 +130,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
               })) ?? []),
               { userId: user?.id!, role: "admin" },
             ],
+            traceContext,
           })
 
           if (response?.error !== null || !response) {
@@ -105,9 +139,17 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
           // if (isCreating) {
           //   track("Add Project", { projectId: response.id })
           // }
+          addMiradorEvent(trace, "organization_creation_submit_succeeded", {
+            organizationId: response.organizationData.id,
+          })
+          await closeMiradorTrace(trace, "Organization creation succeeded")
           resolve(response.organizationData)
         } catch (error) {
           console.error("Error creating project", error)
+          addMiradorEvent(trace, "organization_creation_submit_failed", {
+            error: error instanceof Error ? error.message : String(error),
+          })
+          await closeMiradorTrace(trace, "Organization creation failed")
           reject(error)
         }
       },
