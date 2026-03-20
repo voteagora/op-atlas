@@ -86,10 +86,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const miradorWebApiKey = process.env.MIRADOR_WEB_API_KEY
+
   return (
     <html lang="en" className={riforma.variable}>
       <body className={riforma.className}>
-        <Providers defaultBanner={null}>
+        <Providers defaultBanner={null} miradorWebApiKey={miradorWebApiKey}>
           <ErrorBoundary>
             <AppDialogs />
             {children}
