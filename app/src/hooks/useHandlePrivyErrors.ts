@@ -1,32 +1,21 @@
 import { signOut } from "next-auth/react"
 import { toast } from "sonner"
 
+import { getPrivyErrorMessage } from "@/hooks/privy/privyErrorMessages"
+
 export const useHandlePrivyErrors = () => {
-  return (error: string) => {
-    switch (error) {
-      case "must_be_authenticated":
-        toast.error("Session expired. Please sign in again.")
+  return (errorCode: string) => {
+    const message = getPrivyErrorMessage(errorCode)
+
+    if (errorCode === "must_be_authenticated") {
+      if (message) {
+        toast.error(message, { id: `privy-error-${errorCode}` })
+      }
       return signOut()
+    }
 
-      case "failed_to_update_account":
-        return toast.error(
-          "Failed to update account. Please refresh the page and try again.",
-        )
-
-      case "failed_to_link_account":
-        return toast.error(
-          "Failed to link account. Please refresh the page and try again.",
-        )
-
-      case "linked_to_another_user":
-        return toast.error("Account already linked to another user.")
-
-      case "exited_update_flow":
-      case "exited_link_flow":
-        return
-
-      default:
-        toast.error(`Privy Error: ${error}`)
+    if (message) {
+      return toast.error(message, { id: `privy-error-${errorCode}` })
     }
   }
 }

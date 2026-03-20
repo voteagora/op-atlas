@@ -10,7 +10,7 @@ import { getChainId, switchChain } from "@wagmi/core"
 import { ethers } from "ethers"
 import { Lock } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { useAccount } from "wagmi"
 
@@ -19,11 +19,11 @@ import {
   ProposalType,
   VoteType,
 } from "@/components/proposals/proposal.types"
-import { ProposalStatusBadge } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import VoterActions from "@/components/proposals/proposalPage/VotingSidebar/votingCard/VoterActions"
 import CandidateCards from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/CanidateCards"
 import OverrideVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/OverrideVoteCard"
 import StandardVoteCard from "@/components/proposals/proposalPage/VotingSidebar/votingColumn/StandardVoteCard"
+import { ProposalStatusBadge } from "@/components/proposals/proposalsPage/components/ProposalCard"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import {
@@ -33,13 +33,26 @@ import {
 import { useWallet } from "@/hooks/useWallet"
 import useMyVote from "@/hooks/voting/useMyVote"
 import { useEthersSigner } from "@/hooks/wagmi/useEthersSigner"
-import { vote } from "@/lib/actions/votes"
 import {
   CHAIN_ID,
   EAS_CONTRACT_ADDRESS,
   EAS_VOTE_SCHEMA,
   OFFCHAIN_VOTE_SCHEMA_ID,
 } from "@/lib/eas/clientSafe"
+import { extractEasTxInputData } from "@/lib/eas/txContext"
+import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { withMiradorTraceHeaders } from "@/lib/mirador/headers"
+import {
+  addMiradorAttributes,
+  addMiradorEvent,
+  addMiradorSafeTxHint,
+  addMiradorTxHint,
+  addMiradorTxInputData,
+  closeMiradorTrace,
+  flushAndWaitForMiradorTraceId,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 import { ProposalData } from "@/lib/proposals"
 import { truncateAddress } from "@/lib/utils/string"
 import {
@@ -58,6 +71,10 @@ import { MyVote } from "../votingCard/MyVote"
 import { CardText } from "../votingCard/VotingCard"
 import { CandidateResults } from "./CandidateResults"
 import VotingQuestionnaire from "./VotingQuestionnaire"
+
+type MiradorTraceInstance = NonNullable<ReturnType<typeof startMiradorTrace>>
+type VoteApiResponse = { attestationId?: string; error?: string }
+const SAFE_CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
 
 const VotingColumnSkeleton = () => (
   <div className="flex flex-col p-6 gap-y-4 border rounded-lg">
@@ -238,6 +255,27 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isSmartContract, setIsSmartContract] = useState<boolean>(false)
   const [isCheckingWallet, setIsCheckingWallet] = useState<boolean>(false)
   const [hasCheckedWallet, setHasCheckedWallet] = useState<boolean>(false)
+  const voteTraceRef = useRef<ReturnType<typeof startMiradorTrace>>(null)
+  const voteTraceIdRef = useRef<string | null>(null)
+  const pendingUnmountCloseTimeoutRef = useRef<number | null>(null)
+
+  const cancelPendingUnmountClose = useCallback(() => {
+    if (pendingUnmountCloseTimeoutRef.current !== null) {
+      window.clearTimeout(pendingUnmountCloseTimeoutRef.current)
+      pendingUnmountCloseTimeoutRef.current = null
+    }
+  }, [])
+
+  const syncVoteTraceIdForActiveTrace = useCallback(
+    (trace: MiradorTraceInstance) => {
+      void flushAndWaitForMiradorTraceId(trace).then((traceId) => {
+        if (traceId && voteTraceRef.current === trace) {
+          voteTraceIdRef.current = traceId
+        }
+      })
+    },
+    [],
+  )
 
   const setShowConfetti = useConfetti()
   const brightColors = useMemo(
@@ -273,8 +311,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   >(undefined)
 
   const { data: session } = useSession()
-  const viewerId =
-    session?.impersonation?.targetUserId ?? session?.user?.id
+  const viewerId = session?.impersonation?.targetUserId ?? session?.user?.id
   const { user, currentContext, selectedSafeWallet } = useWallet()
 
   const { citizen, isLoading: isCitizenLoading } = useUserCitizen()
@@ -344,11 +381,150 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const { connector } = useAccount()
 
+  const startVoteTrace = (vote: {
+    voteType: VoteType
+    selections?: number[]
+  }) => {
+    if (voteTraceRef.current) {
+      addMiradorEvent(voteTraceRef.current, "vote_trace_replaced", {
+        proposalId: proposalData.offchainProposalId,
+      })
+      void closeMiradorTrace(
+        voteTraceRef.current,
+        "Superseded by new vote attempt",
+      )
+    }
+
+    const trace = startMiradorTrace({
+      name: "GovernanceVote",
+      flow: MIRADOR_FLOW.governanceVote,
+      context: {
+        source: "frontend",
+        userId: viewerId ? String(viewerId) : undefined,
+        farcasterId: user?.farcasterId ?? undefined,
+        walletAddress:
+          selectedSafeWallet?.address ?? citizen?.address ?? undefined,
+        chainId: CHAIN_ID,
+        proposalId: proposalData.offchainProposalId,
+        sessionId: session?.user?.id ?? undefined,
+      },
+      attributes: {
+        proposalType: proposalData.proposalType,
+        proposalStatus: proposalData.status,
+        votingContext: currentContext,
+        selectedVoteType: vote.voteType,
+      },
+      tags: ["governance", "vote", "frontend"],
+    })
+
+    voteTraceRef.current = trace
+    voteTraceIdRef.current = null
+
+    addMiradorEvent(trace, "vote_flow_started", {
+      proposalId: proposalData.offchainProposalId,
+      selectedVoteType: vote.voteType,
+      selectedVoteCount: vote.selections?.length ?? 0,
+    })
+    if (trace) {
+      syncVoteTraceIdForActiveTrace(trace)
+    }
+
+    return trace
+  }
+
+  const ensureVoteTraceId = async () => {
+    const activeTrace = voteTraceRef.current
+    if (!activeTrace) {
+      return null
+    }
+
+    const currentTraceId = activeTrace.getTraceId()
+    if (currentTraceId) {
+      voteTraceIdRef.current = currentTraceId
+      return currentTraceId
+    }
+
+    const traceId = await flushAndWaitForMiradorTraceId(activeTrace)
+    if (traceId && voteTraceRef.current === activeTrace) {
+      voteTraceIdRef.current = traceId
+      return traceId
+    }
+
+    return voteTraceRef.current?.getTraceId() ?? null
+  }
+
+  const submitVoteWithTrace = async (
+    traceId: string | null,
+    payload: {
+      data: string
+      delegateAttestationSignature: { r: string; s: string; v: number }
+      signerAddress: string
+      citizenRefUID: string
+    },
+  ): Promise<string> => {
+    const response = await fetch("/api/v1/votes", {
+      method: "POST",
+      headers: withMiradorTraceHeaders(
+        {
+          "Content-Type": "application/json",
+        },
+        traceId,
+        MIRADOR_FLOW.governanceVote,
+      ),
+      body: JSON.stringify(payload),
+    })
+
+    const result = (await response.json()) as VoteApiResponse
+    if (!response.ok || !result.attestationId) {
+      throw new Error(result.error ?? "Failed to submit vote attestation")
+    }
+
+    return result.attestationId
+  }
+
+  const closeVoteTrace = async (
+    reason: string,
+    eventName?: string,
+    details?: Record<string, unknown>,
+  ) => {
+    const trace = voteTraceRef.current
+    if (!trace) {
+      return
+    }
+
+    if (eventName) {
+      addMiradorEvent(trace, eventName, details)
+    }
+
+    await closeMiradorTrace(trace, reason)
+    voteTraceRef.current = null
+    voteTraceIdRef.current = null
+  }
+
   useEffect(() => {
     setHasCheckedWallet(false)
     setIsSmartContract(false)
     setIsCheckingWallet(false)
   }, [citizen?.address])
+
+  useEffect(() => {
+    return () => {
+      const trace = voteTraceRef.current
+      if (trace) {
+        cancelPendingUnmountClose()
+        pendingUnmountCloseTimeoutRef.current = window.setTimeout(() => {
+          if (voteTraceRef.current !== trace) return
+          addMiradorEvent(trace, "vote_trace_closed_on_unmount", {
+            proposalId: proposalData.offchainProposalId,
+          })
+          void closeMiradorTrace(trace, "Voting component unmounted")
+          voteTraceRef.current = null
+          voteTraceIdRef.current = null
+          pendingUnmountCloseTimeoutRef.current = null
+        }, 0)
+      }
+    }
+  }, [cancelPendingUnmountClose, proposalData.offchainProposalId])
 
   useEffect(() => {
     const checkWalletType = async () => {
@@ -479,11 +655,10 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         data: encodedData,
       },
     })
-
-    const receiptOrTx: any =
-      typeof (tx as any)?.wait === "function" ? await (tx as any).wait() : tx
+    const txInputData = extractEasTxInputData(tx)
     const attestationId =
-      receiptOrTx?.transactionHash || receiptOrTx?.hash || receiptOrTx
+      typeof (tx as any)?.wait === "function" ? await (tx as any).wait() : null
+    const txHash = (tx as any)?.receipt?.hash as string | undefined
 
     if (!attestationId) {
       throw new Error(
@@ -492,7 +667,9 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
     return {
       attestationId,
+      txHash,
       signerAddress: signer.address as `0x${string}`,
+      txInputData,
     }
   }
 
@@ -500,7 +677,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     choices: string,
     safeAddress: string,
   ) => {
-    const SAFE_CHAIN_ID = process.env.NEXT_PUBLIC_ENV === "dev" ? 11155111 : 10
     const currentChainId = getChainId(privyWagmiConfig)
     if (currentChainId !== SAFE_CHAIN_ID) {
       await switchChain(privyWagmiConfig, { chainId: SAFE_CHAIN_ID })
@@ -608,6 +784,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     return {
       attestationId: txHash,
       signerAddress: safeAddress,
+      txInputData: txData.data,
     }
   }
 
@@ -651,14 +828,39 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   const handleCastVote = async () => {
     if (!selectedVotes) return
+    const trace = startVoteTrace(selectedVotes)
+    addMiradorEvent(trace, "vote_questionnaire_requested", {
+      proposalType: proposalData.proposalType,
+    })
 
     const questionnaireComplete = await handleQuestionnaire()
-    if (!questionnaireComplete) return
+    if (!questionnaireComplete) {
+      await closeVoteTrace(
+        "Vote cancelled during questionnaire",
+        "vote_questionnaire_cancelled",
+        {
+          proposalId: proposalData.offchainProposalId,
+          selectedVoteType: selectedVotes.voteType,
+        },
+      )
+      return
+    }
 
     const choices = mapVoteTypeToValue(
       proposalData.proposalType as ProposalType,
       selectedVotes,
     )
+
+    addMiradorAttributes(trace, {
+      selectedVoteValue: choices,
+      selectedVoteCount: selectedVotes.selections?.length ?? 0,
+    })
+    addMiradorEvent(trace, "vote_submission_started", {
+      proposalId: proposalData.offchainProposalId,
+      selectedVoteType: selectedVotes.voteType,
+      selectedVoteCount: selectedVotes.selections?.length ?? 0,
+      context: currentContext,
+    })
 
     setIsVoting(true)
 
@@ -674,12 +876,39 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             "[Voting] SAFE context with EOA+Safe → propose via Safe Tx Service",
             selectedSafeWallet.address,
           )
+          addMiradorEvent(trace, "vote_safe_proposal_started", {
+            safeAddress: selectedSafeWallet.address,
+            proposalId: proposalData.offchainProposalId,
+          })
           const attestationData = await createSafeVoteTransactionForAddress(
             choices,
             selectedSafeWallet.address,
           )
           signerAddress = attestationData.signerAddress
           attestationId = attestationData.attestationId
+          const miradorChain = getMiradorChainNameFromChainId(SAFE_CHAIN_ID)
+          if (miradorChain) {
+            addMiradorSafeTxHint(
+              trace,
+              attestationId,
+              miradorChain,
+              "Governance vote safe transaction proposal",
+            )
+          } else {
+            addMiradorEvent(
+              trace,
+              "vote_safe_tx_hint_skipped_unsupported_chain",
+              {
+                safeTxHash: attestationId,
+                chainId: SAFE_CHAIN_ID,
+              },
+            )
+          }
+          addMiradorTxInputData(trace, attestationData.txInputData)
+          addMiradorEvent(trace, "vote_safe_proposal_created", {
+            safeAddress: selectedSafeWallet.address,
+            safeTxHash: attestationId,
+          })
           skipInvalidate = true
           usedContext = "SAFE"
         } else {
@@ -692,30 +921,79 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             !citizen?.address ||
             signer!.address.toLowerCase() !== citizen.address.toLowerCase()
           ) {
+            addMiradorEvent(trace, "vote_wallet_mismatch_detected", {
+              signerAddress: signer?.address,
+              citizenAddress: citizen?.address,
+            })
             throw new Error("Signer address does not match citizen address")
           }
           if (isSmartContract) {
             // Smart contract wallet (non-Safe) voting
+            addMiradorEvent(trace, "vote_smart_contract_wallet_started", {
+              walletAddress: signer?.address,
+            })
             const attestationData = await createMultisigWalletAttestation(
               choices,
             )
             signerAddress = attestationData.signerAddress
             attestationId = attestationData.attestationId
+            const miradorChain = getMiradorChainNameFromChainId(CHAIN_ID)
+            if (miradorChain && attestationData.txHash) {
+              addMiradorTxHint(
+                trace,
+                attestationData.txHash,
+                miradorChain,
+                "Governance vote tx (smart contract wallet)",
+              )
+              addMiradorTxInputData(trace, attestationData.txInputData)
+            } else {
+              addMiradorEvent(trace, "vote_tx_hint_skipped_unsupported_chain", {
+                txHash: attestationData.txHash,
+                attestationId,
+                chainId: CHAIN_ID,
+                hasSupportedChain: Boolean(miradorChain),
+              })
+            }
+            addMiradorEvent(trace, "vote_smart_contract_wallet_submitted", {
+              txHash: attestationData.txHash,
+              attestationId,
+              walletAddress: signerAddress,
+            })
             usedContext = "SC"
           } else {
             // EOA wallet voting
+            addMiradorEvent(trace, "vote_delegated_signature_started", {
+              walletAddress: signer?.address,
+            })
             const attestationData = await createDelegatedAttestation(choices)
             signerAddress = attestationData.signerAddress
 
-            attestationId = await vote(
-              attestationData.data,
-              attestationData.rawSignature.signature,
+            addMiradorEvent(trace, "vote_delegated_signature_collected", {
+              walletAddress: signerAddress,
+            })
+
+            const traceId = await ensureVoteTraceId()
+
+            attestationId = await submitVoteWithTrace(traceId, {
+              data: attestationData.data,
+              delegateAttestationSignature: attestationData.rawSignature
+                .signature as { r: string; s: string; v: number },
               signerAddress,
-              (citizen?.attestationId as `0x${string}`) ??
+              citizenRefUID:
+                (citizen?.attestationId as `0x${string}`) ??
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
-            )
+            })
           }
         }
+
+        addMiradorEvent(trace, "vote_submission_succeeded", {
+          proposalId: proposalData.offchainProposalId,
+          attestationId,
+          signerAddress,
+          context: usedContext,
+          selectedVoteType: selectedVotes.voteType,
+          selectedVoteCount: selectedVotes.selections?.length ?? 0,
+        })
 
         // Track successful vote submission
         track("Citizen Voting Vote Submitted", {
@@ -726,6 +1004,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           elementName: "Vote Submission",
           url: window.location.pathname,
         })
+
+        await closeVoteTrace(
+          usedContext === "SAFE"
+            ? "Safe vote transaction proposed"
+            : "Vote submitted successfully",
+          "vote_trace_closed_success",
+          {
+            proposalId: proposalData.offchainProposalId,
+            context: usedContext,
+          },
+        )
         return usedContext
       } catch (error) {
         console.error("Failed to cast vote:", error)
@@ -756,6 +1045,14 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         }
 
         console.error("Failed to cast vote:", errorContext)
+
+        addMiradorEvent(trace, "vote_submission_failed", {
+          proposalId: proposalData.offchainProposalId,
+          selectedVoteType: selectedVotes.voteType,
+          selectedVoteCount: selectedVotes.selections?.length ?? 0,
+          context: usedContext,
+          error: errorMessage,
+        })
 
         // Track vote error
         track("Citizen Voting Vote Error", {
@@ -792,8 +1089,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
             .toLowerCase()
             .includes("User rejected the request.".toLowerCase())
         ) {
+          await closeVoteTrace("Vote rejected by user", "vote_user_rejected", {
+            proposalId: proposalData.offchainProposalId,
+            context: usedContext,
+          })
           throw new Error("User rejected signature")
         }
+        await closeVoteTrace("Vote failed", "vote_trace_closed_failure", {
+          proposalId: proposalData.offchainProposalId,
+          context: usedContext,
+          error: errorMessage,
+        })
         throw new Error(`Failed to cast vote: ${error}`)
       } finally {
         setIsVoting(false)

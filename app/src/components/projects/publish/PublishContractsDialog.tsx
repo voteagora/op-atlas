@@ -1,17 +1,26 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Badge } from "@/components/common/Badge"
 import { LinearProgress } from "@/components/common/LinearProgress"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
-  createProjectSnapshot,
-  finalizeProjectSnapshot,
-  publishProjectContractsBatch,
-} from "@/lib/actions/snapshots"
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { withMiradorTraceHeaders } from "@/lib/mirador/headers"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  flushAndWaitForMiradorTraceId,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 
 export type PublishProgress = {
   verifiedTotal: number
@@ -27,6 +36,34 @@ type PublishContractsDialogProps = {
   onProgressUpdate?: (progress: PublishProgress) => void
   onComplete?: () => void
   onMetadataPublished?: (attestationId?: string) => void
+}
+
+type MiradorTraceInstance = NonNullable<ReturnType<typeof startMiradorTrace>>
+type SnapshotResult = {
+  error?: string | null
+  metadataPending?: boolean
+  pendingContracts?: {
+    toPublish: number
+    toRevoke: number
+  }
+  snapshot?: {
+    attestationId?: string
+  } | null
+}
+type ContractsBatchResult = {
+  error?: string | null
+  publishedThisBatch?: number
+  revokedThisBatch?: number
+  remainingPublish?: number
+  remainingRevoke?: number
+  totalVerified?: number
+  totalPublished?: number
+}
+type FinalizeResult = {
+  error?: string | null
+  snapshot?: {
+    attestationId?: string
+  } | null
 }
 
 const DEFAULT_PROGRESS: PublishProgress = {
@@ -48,6 +85,81 @@ async function fetchProgress(projectId: string): Promise<PublishProgress> {
   return data
 }
 
+async function createProjectSnapshotWithTrace(
+  projectId: string,
+  traceId: string | null,
+): Promise<SnapshotResult> {
+  const response = await fetch(
+    `/api/v1/projects/${projectId}/publish/snapshot`,
+    {
+      method: "POST",
+      headers: withMiradorTraceHeaders(
+        undefined,
+        traceId,
+        MIRADOR_FLOW.projectPublish,
+      ),
+    },
+  )
+  const payload = (await response.json()) as SnapshotResult
+  if (!response.ok) {
+    return {
+      error: payload.error ?? "Failed to create project snapshot",
+    }
+  }
+  return payload
+}
+
+async function publishContractsBatchWithTrace(
+  projectId: string,
+  traceId: string | null,
+): Promise<ContractsBatchResult> {
+  const response = await fetch(
+    `/api/v1/projects/${projectId}/publish/contracts-batch`,
+    {
+      method: "POST",
+      headers: withMiradorTraceHeaders(
+        {
+          "Content-Type": "application/json",
+        },
+        traceId,
+        MIRADOR_FLOW.projectPublish,
+      ),
+      body: JSON.stringify({}),
+    },
+  )
+  const payload = (await response.json()) as ContractsBatchResult
+  if (!response.ok) {
+    return {
+      error: payload.error ?? "Failed to publish project contracts",
+    }
+  }
+  return payload
+}
+
+async function finalizeProjectSnapshotWithTrace(
+  projectId: string,
+  traceId: string | null,
+): Promise<FinalizeResult> {
+  const response = await fetch(
+    `/api/v1/projects/${projectId}/publish/finalize`,
+    {
+      method: "POST",
+      headers: withMiradorTraceHeaders(
+        undefined,
+        traceId,
+        MIRADOR_FLOW.projectPublish,
+      ),
+    },
+  )
+  const payload = (await response.json()) as FinalizeResult
+  if (!response.ok) {
+    return {
+      error: payload.error ?? "Failed to finalize project snapshot",
+    }
+  }
+  return payload
+}
+
 export function PublishContractsDialog({
   projectId,
   open,
@@ -56,8 +168,10 @@ export function PublishContractsDialog({
   onComplete,
   onMetadataPublished,
 }: PublishContractsDialogProps) {
-  const [progress, setProgress] =
-    useState<PublishProgress>(DEFAULT_PROGRESS)
+  const { data: session } = useSession()
+  const viewerId = session?.impersonation?.targetUserId ?? session?.user?.id
+
+  const [progress, setProgress] = useState<PublishProgress>(DEFAULT_PROGRESS)
   const [error, setError] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [metadataStatus, setMetadataStatus] = useState<
@@ -66,31 +180,132 @@ export function PublishContractsDialog({
   const [metadataError, setMetadataError] = useState<string | null>(null)
   const [needsMetadataFinalization, setNeedsMetadataFinalization] =
     useState(false)
-  const [phase, setPhase] =
-    useState<"contracts" | "metadata" | "success">("contracts")
+  const [phase, setPhase] = useState<"contracts" | "metadata" | "success">(
+    "contracts",
+  )
   const [retryKey, setRetryKey] = useState(0)
 
   const abortRef = useRef(false)
   const processingRef = useRef(false)
+  const publishTraceRef = useRef<ReturnType<typeof startMiradorTrace>>(null)
+  const publishTraceIdRef = useRef<string | null>(null)
+  const pendingUnmountCloseTimeoutRef = useRef<number | null>(null)
+
+  const cancelPendingUnmountClose = useCallback(() => {
+    if (pendingUnmountCloseTimeoutRef.current !== null) {
+      window.clearTimeout(pendingUnmountCloseTimeoutRef.current)
+      pendingUnmountCloseTimeoutRef.current = null
+    }
+  }, [])
+
+  const syncTraceIdForActiveTrace = useCallback(
+    (trace: MiradorTraceInstance) => {
+      void flushAndWaitForMiradorTraceId(trace).then((traceId) => {
+        if (traceId && publishTraceRef.current === trace) {
+          publishTraceIdRef.current = traceId
+        }
+      })
+    },
+    [],
+  )
+
+  const ensurePublishTraceId = async () => {
+    const activeTrace = publishTraceRef.current
+    if (!activeTrace) {
+      return null
+    }
+
+    const currentTraceId = activeTrace.getTraceId()
+    if (currentTraceId) {
+      publishTraceIdRef.current = currentTraceId
+      return currentTraceId
+    }
+
+    const traceId = await flushAndWaitForMiradorTraceId(activeTrace)
+    if (traceId && publishTraceRef.current === activeTrace) {
+      publishTraceIdRef.current = traceId
+      return traceId
+    }
+
+    return publishTraceRef.current?.getTraceId() ?? null
+  }
+
+  const closePublishTrace = async (
+    reason: string,
+    eventName?: string,
+    details?: Record<string, unknown>,
+  ) => {
+    const trace = publishTraceRef.current
+    if (!trace) {
+      return
+    }
+    cancelPendingUnmountClose()
+
+    if (eventName) {
+      addMiradorEvent(trace, eventName, details)
+    }
+
+    await closeMiradorTrace(trace, reason)
+    publishTraceRef.current = null
+    publishTraceIdRef.current = null
+  }
 
   const loadProgress = async () => {
+    addMiradorEvent(
+      publishTraceRef.current,
+      "project_publish_progress_requested",
+      {
+        projectId,
+      },
+    )
     try {
       const snapshot = await fetchProgress(projectId)
       setProgress(snapshot)
       onProgressUpdate?.(snapshot)
+      addMiradorEvent(
+        publishTraceRef.current,
+        "project_publish_progress_loaded",
+        {
+          projectId,
+          verifiedTotal: snapshot.verifiedTotal,
+          publishedTotal: snapshot.publishedTotal,
+          pendingPublish: snapshot.pendingPublish,
+          pendingRevoke: snapshot.pendingRevoke,
+        },
+      )
       return snapshot
     } catch (err) {
       console.error(err)
       setError("Failed to load contract publishing progress.")
+      addMiradorEvent(
+        publishTraceRef.current,
+        "project_publish_progress_failed",
+        {
+          projectId,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      )
       return DEFAULT_PROGRESS
     }
   }
 
   const finalizeMetadata = async () => {
     if (!needsMetadataFinalization || abortRef.current) {
+      addMiradorEvent(
+        publishTraceRef.current,
+        "project_publish_metadata_not_required",
+        {
+          projectId,
+        },
+      )
       setMetadataStatus("success")
       setPhase("success")
       onComplete?.()
+      await closePublishTrace(
+        "Project publish completed",
+        "project_publish_trace_closed_success",
+        { projectId, reason: "metadata_not_required" },
+      )
       return
     }
 
@@ -98,14 +313,36 @@ export function PublishContractsDialog({
       setPhase("metadata")
       setMetadataStatus("running")
       setMetadataError(null)
+      addMiradorEvent(
+        publishTraceRef.current,
+        "project_publish_metadata_started",
+        {
+          projectId,
+        },
+      )
 
-      const finalizeResult = await finalizeProjectSnapshot(projectId)
+      const traceId = await ensurePublishTraceId()
+      const finalizeResult = await finalizeProjectSnapshotWithTrace(
+        projectId,
+        traceId,
+      )
       if (abortRef.current) return
 
       if (
         !finalizeResult ||
         ("error" in finalizeResult && finalizeResult.error)
       ) {
+        addMiradorEvent(
+          publishTraceRef.current,
+          "project_publish_metadata_failed",
+          {
+            projectId,
+            error:
+              typeof finalizeResult?.error === "string"
+                ? finalizeResult.error
+                : "Unknown metadata publish error",
+          },
+        )
         setMetadataStatus("error")
         setMetadataError(
           typeof finalizeResult?.error === "string"
@@ -120,6 +357,19 @@ export function PublishContractsDialog({
       await loadProgress()
       if (abortRef.current) return
 
+      addMiradorEvent(
+        publishTraceRef.current,
+        "project_publish_metadata_succeeded",
+        {
+          projectId,
+          hasSnapshot:
+            "snapshot" in finalizeResult && Boolean(finalizeResult.snapshot),
+          attestationId:
+            "snapshot" in finalizeResult && finalizeResult.snapshot
+              ? finalizeResult.snapshot.attestationId
+              : undefined,
+        },
+      )
       setMetadataStatus("success")
       setPhase("success")
       if ("snapshot" in finalizeResult && finalizeResult.snapshot) {
@@ -128,8 +378,21 @@ export function PublishContractsDialog({
         onMetadataPublished?.()
       }
       onComplete?.()
+      await closePublishTrace(
+        "Project publish completed",
+        "project_publish_trace_closed_success",
+        { projectId, reason: "metadata_success" },
+      )
     } catch (err) {
       console.error(err)
+      addMiradorEvent(
+        publishTraceRef.current,
+        "project_publish_metadata_exception",
+        {
+          projectId,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      )
       setMetadataStatus("error")
       setMetadataError("Failed to publish metadata. Please try again.")
     }
@@ -139,6 +402,14 @@ export function PublishContractsDialog({
     if (processingRef.current || abortRef.current) return
     processingRef.current = true
     setIsProcessing(true)
+    addMiradorEvent(
+      publishTraceRef.current,
+      "project_publish_batches_started",
+      {
+        projectId,
+        initialState,
+      },
+    )
 
     let current = initialState ?? progress
     if (initialState) {
@@ -151,13 +422,35 @@ export function PublishContractsDialog({
         const hasPending =
           current.pendingPublish > 0 || current.pendingRevoke > 0
         if (!hasPending) {
+          addMiradorEvent(
+            publishTraceRef.current,
+            "project_publish_batches_no_pending",
+            {
+              projectId,
+            },
+          )
           break
         }
 
         const previous = current
-        const batchResult = await publishProjectContractsBatch({ projectId })
+        const traceId = await ensurePublishTraceId()
+        const batchResult = await publishContractsBatchWithTrace(
+          projectId,
+          traceId,
+        )
 
         if (!batchResult || batchResult.error) {
+          addMiradorEvent(
+            publishTraceRef.current,
+            "project_publish_batch_failed",
+            {
+              projectId,
+              error:
+                typeof batchResult?.error === "string"
+                  ? batchResult.error
+                  : "Unknown batch publish error",
+            },
+          )
           setError(
             typeof batchResult?.error === "string"
               ? batchResult.error
@@ -170,6 +463,13 @@ export function PublishContractsDialog({
           !("totalVerified" in batchResult) ||
           !("totalPublished" in batchResult)
         ) {
+          addMiradorEvent(
+            publishTraceRef.current,
+            "project_publish_batch_invalid_response",
+            {
+              projectId,
+            },
+          )
           setError("Failed to publish contracts. Please try again.")
           return
         }
@@ -177,7 +477,8 @@ export function PublishContractsDialog({
         current = {
           verifiedTotal: batchResult.totalVerified ?? previous.verifiedTotal,
           publishedTotal: batchResult.totalPublished ?? previous.publishedTotal,
-          pendingPublish: batchResult.remainingPublish ?? previous.pendingPublish,
+          pendingPublish:
+            batchResult.remainingPublish ?? previous.pendingPublish,
           pendingRevoke: batchResult.remainingRevoke ?? previous.pendingRevoke,
         }
 
@@ -186,7 +487,31 @@ export function PublishContractsDialog({
           current.pendingRevoke < previous.pendingRevoke ||
           current.publishedTotal > previous.publishedTotal
 
+        addMiradorEvent(
+          publishTraceRef.current,
+          "project_publish_batch_succeeded",
+          {
+            projectId,
+            previousPendingPublish: previous.pendingPublish,
+            previousPendingRevoke: previous.pendingRevoke,
+            pendingPublish: current.pendingPublish,
+            pendingRevoke: current.pendingRevoke,
+            publishedTotal: current.publishedTotal,
+            madeProgress,
+          },
+        )
+
         if (!madeProgress) {
+          addMiradorEvent(
+            publishTraceRef.current,
+            "project_publish_batch_stalled",
+            {
+              projectId,
+              pendingPublish: current.pendingPublish,
+              pendingRevoke: current.pendingRevoke,
+              publishedTotal: current.publishedTotal,
+            },
+          )
           setError(
             "Publishing stalled because no progress could be made. Please try again shortly.",
           )
@@ -202,12 +527,91 @@ export function PublishContractsDialog({
       }
     } catch (err) {
       console.error(err)
+      addMiradorEvent(
+        publishTraceRef.current,
+        "project_publish_batches_exception",
+        {
+          projectId,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      )
       setError("Failed to publish contracts. Please try again.")
     } finally {
       processingRef.current = false
       setIsProcessing(false)
     }
   }
+
+  useEffect(() => {
+    cancelPendingUnmountClose()
+
+    if (!open) {
+      const trace = publishTraceRef.current
+      if (trace) {
+        addMiradorEvent(trace, "project_publish_dialog_closed", { projectId })
+        void closeMiradorTrace(trace, "Project publish dialog closed")
+        publishTraceRef.current = null
+        publishTraceIdRef.current = null
+      }
+      return
+    }
+
+    if (publishTraceRef.current) {
+      return
+    }
+
+    const trace = startMiradorTrace({
+      name: "ProjectPublish",
+      flow: MIRADOR_FLOW.projectPublish,
+      context: {
+        source: "frontend",
+        userId: viewerId ? String(viewerId) : undefined,
+        projectId,
+        sessionId: session?.user?.id,
+      },
+      attributes: {
+        projectId,
+        phase: "contracts",
+      },
+      tags: ["project_publish", "frontend"],
+    })
+
+    publishTraceRef.current = trace
+    publishTraceIdRef.current = null
+    addMiradorEvent(trace, "project_publish_dialog_opened", { projectId })
+    if (trace) {
+      syncTraceIdForActiveTrace(trace)
+    }
+  }, [
+    cancelPendingUnmountClose,
+    open,
+    projectId,
+    session?.user?.id,
+    syncTraceIdForActiveTrace,
+    viewerId,
+  ])
+
+  useEffect(() => {
+    return () => {
+      const trace = publishTraceRef.current
+      if (trace) {
+        cancelPendingUnmountClose()
+        pendingUnmountCloseTimeoutRef.current = window.setTimeout(() => {
+          if (publishTraceRef.current !== trace) {
+            return
+          }
+
+          addMiradorEvent(trace, "project_publish_trace_closed_on_unmount", {
+            projectId,
+          })
+          void closeMiradorTrace(trace, "Project publish dialog unmounted")
+          publishTraceRef.current = null
+          publishTraceIdRef.current = null
+          pendingUnmountCloseTimeoutRef.current = null
+        }, 0)
+      }
+    }
+  }, [cancelPendingUnmountClose, projectId])
 
   useEffect(() => {
     abortRef.current = !open
@@ -223,6 +627,9 @@ export function PublishContractsDialog({
       return
     }
 
+    addMiradorEvent(publishTraceRef.current, "project_publish_flow_started", {
+      projectId,
+    })
     setPhase("contracts")
     setMetadataStatus("running")
     setMetadataError(null)
@@ -234,10 +641,32 @@ export function PublishContractsDialog({
 
     const run = async () => {
       try {
-        const snapshotResult = await createProjectSnapshot(projectId)
+        addMiradorEvent(
+          publishTraceRef.current,
+          "project_publish_snapshot_requested",
+          {
+            projectId,
+          },
+        )
+        const traceId = await ensurePublishTraceId()
+        const snapshotResult = await createProjectSnapshotWithTrace(
+          projectId,
+          traceId,
+        )
         if (abortRef.current) return
 
         if (!snapshotResult || snapshotResult.error) {
+          addMiradorEvent(
+            publishTraceRef.current,
+            "project_publish_snapshot_failed",
+            {
+              projectId,
+              error:
+                typeof snapshotResult?.error === "string"
+                  ? snapshotResult.error
+                  : "Unknown snapshot error",
+            },
+          )
           setMetadataStatus("error")
           setMetadataError(
             typeof snapshotResult?.error === "string"
@@ -251,6 +680,18 @@ export function PublishContractsDialog({
           "metadataPending" in snapshotResult &&
           !snapshotResult.metadataPending
         ) {
+          addMiradorEvent(
+            publishTraceRef.current,
+            "project_publish_snapshot_succeeded",
+            {
+              projectId,
+              metadataPending: false,
+              attestationId:
+                "snapshot" in snapshotResult && snapshotResult.snapshot
+                  ? snapshotResult.snapshot.attestationId
+                  : undefined,
+            },
+          )
           setPhase("metadata")
           setError(null)
           await loadProgress()
@@ -258,18 +699,32 @@ export function PublishContractsDialog({
 
           setMetadataStatus("success")
           setPhase("success")
-          if (
-            "snapshot" in snapshotResult &&
-            snapshotResult.snapshot
-          ) {
+          if ("snapshot" in snapshotResult && snapshotResult.snapshot) {
             onMetadataPublished?.(snapshotResult.snapshot.attestationId)
           } else {
             onMetadataPublished?.()
           }
           onComplete?.()
+          await closePublishTrace(
+            "Project publish completed",
+            "project_publish_trace_closed_success",
+            { projectId, reason: "snapshot_without_batching" },
+          )
           return
         }
 
+        addMiradorEvent(
+          publishTraceRef.current,
+          "project_publish_snapshot_succeeded",
+          {
+            projectId,
+            metadataPending: true,
+            pendingContracts:
+              "pendingContracts" in snapshotResult
+                ? snapshotResult.pendingContracts
+                : undefined,
+          },
+        )
         setNeedsMetadataFinalization(true)
         setMetadataStatus("pending")
 
@@ -287,6 +742,14 @@ export function PublishContractsDialog({
         }
       } catch (err) {
         console.error(err)
+        addMiradorEvent(
+          publishTraceRef.current,
+          "project_publish_flow_exception",
+          {
+            projectId,
+            error: err instanceof Error ? err.message : String(err),
+          },
+        )
         setMetadataStatus("error")
         setMetadataError("Failed to start publishing. Please try again.")
       }
@@ -298,15 +761,17 @@ export function PublishContractsDialog({
       abortRef.current = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    open,
-    projectId,
-    retryKey,
-    onMetadataPublished,
-    onComplete,
-  ])
+  }, [open, projectId, retryKey, onMetadataPublished, onComplete])
 
   const handleRetryMetadata = () => {
+    addMiradorEvent(
+      publishTraceRef.current,
+      "project_publish_retry_metadata_requested",
+      {
+        projectId,
+        needsMetadataFinalization,
+      },
+    )
     setMetadataError(null)
     if (needsMetadataFinalization) {
       finalizeMetadata()
@@ -319,6 +784,15 @@ export function PublishContractsDialog({
     if (isProcessing || abortRef.current) {
       return
     }
+    addMiradorEvent(
+      publishTraceRef.current,
+      "project_publish_retry_contracts_requested",
+      {
+        projectId,
+        pendingPublish: progress.pendingPublish,
+        pendingRevoke: progress.pendingRevoke,
+      },
+    )
     setError(null)
     processBatches(progress)
   }
@@ -330,20 +804,22 @@ export function PublishContractsDialog({
   const totalRemaining = remainingContracts + remainingRevocations
   const progressHelperText =
     remainingRevocations > 0
-      ? `${remainingRevocations} outdated attestation${remainingRevocations === 1 ? "" : "s"} awaiting revocation`
+      ? `${remainingRevocations} outdated attestation${
+          remainingRevocations === 1 ? "" : "s"
+        } awaiting revocation`
       : totalRemaining > 0
-        ? `${totalRemaining} contract${totalRemaining === 1 ? "" : "s"} remaining`
-        : "All contracts are published onchain"
+      ? `${totalRemaining} contract${totalRemaining === 1 ? "" : "s"} remaining`
+      : "All contracts are published onchain"
 
   const showProgress = totalContracts > 0
   const showContractSpinner =
     phase === "contracts" &&
     !error &&
-    (isProcessing || metadataStatus === "pending" || metadataStatus === "running")
+    (isProcessing ||
+      metadataStatus === "pending" ||
+      metadataStatus === "running")
 
-  const completed =
-    metadataStatus === "success" &&
-    totalRemaining === 0
+  const completed = metadataStatus === "success" && totalRemaining === 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -422,7 +898,6 @@ export function PublishContractsDialog({
               </p>
             </div>
           )}
-
         </div>
       </DialogContent>
     </Dialog>

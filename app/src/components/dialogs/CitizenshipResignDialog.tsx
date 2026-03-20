@@ -11,6 +11,13 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { deleteCitizen } from "@/lib/actions/citizens"
 import { CITIZEN_TYPES } from "@/lib/constants"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 
 import { DialogProps } from "./types"
 
@@ -34,19 +41,55 @@ export default function CitizenshipResignDialog({
 
   const handleResign = async () => {
     startTransition(async () => {
+      const trace = startMiradorTrace({
+        name: "CitizenResign",
+        flow: MIRADOR_FLOW.citizenResign,
+        context: {
+          source: "frontend",
+          userId: citizen.userId,
+          sessionId: citizen.userId,
+        },
+        tags: ["citizen", "resign", "frontend"],
+      })
+
+      addMiradorEvent(trace, "citizen_resign_submit_started", {
+        citizenId: citizen.id,
+      })
+
       try {
-        const result = await deleteCitizen(citizen.id)
+        const traceContext = await buildFrontendTraceContext(trace, {
+          flow: MIRADOR_FLOW.citizenResign,
+          step: "citizen_resign_submit",
+          userId: citizen.userId,
+          sessionId: citizen.userId,
+        })
+
+        const result = await deleteCitizen(citizen.id, traceContext)
 
         if (result.error) {
+          addMiradorEvent(trace, "citizen_resign_submit_failed", {
+            citizenId: citizen.id,
+            error: result.error,
+          })
+          await closeMiradorTrace(trace, "Citizen resign failed")
           toast.error(result.error)
           return
         }
 
         await invalidate()
+        addMiradorEvent(trace, "citizen_resign_submit_succeeded", {
+          citizenId: citizen.id,
+        })
+        await closeMiradorTrace(trace, "Citizen resign succeeded")
         toast.success("Citizenship resigned")
         router.refresh()
         onOpenChange(false)
       } catch (error) {
+        addMiradorEvent(trace, "citizen_resign_submit_failed", {
+          citizenId: citizen.id,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        await closeMiradorTrace(trace, "Citizen resign failed")
         toast.error("Failed to resign citizenship")
       }
     })
