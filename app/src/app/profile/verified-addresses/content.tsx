@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import { AddressConnection } from "@/components/profile/AddressConnection"
 import { Button } from "@/components/ui/button"
 import { useUser } from "@/hooks/db/useUser"
-import { usePrivyLinkWallet } from "@/hooks/privy/usePrivyLinkWallet"
+import { usePrivyUnlinkWallet } from "@/hooks/privy/usePrivyUnlinkWallet"
 import { UserAddressSource } from "@/lib/types"
 
 import { removeSafeAddressAction } from "./actions"
@@ -127,7 +127,7 @@ const VerifiedAddressesInteractive = ({
   invalidateUser: InvalidateUser
 }) => {
   const { user: privyUser } = usePrivy()
-  const { unlinkWallet } = usePrivyLinkWallet(userId)
+  const { unlinkWallet } = usePrivyUnlinkWallet(userId)
   const [isSafeDialogOpen, setIsSafeDialogOpen] = useState(false)
 
   const privyWallets = (privyUser?.linkedAccounts?.filter(
