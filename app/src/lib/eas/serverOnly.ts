@@ -100,12 +100,6 @@ const EAS_ADDRESS =
   readOptionalEnv("EAS_CONTRACT_ADDRESS") ??
   readOptionalEnv("NEXT_PUBLIC_EAS_CONTRACT_ADDRESS") ??
   EAS_DEFAULT_CONTRACT_ADDRESSES[easEnvironment]
-const EAS_FORCE_CITIZEN_TX_FAILURE =
-  process.env.EAS_FORCE_CITIZEN_TX_FAILURE === "true"
-const EAS_FORCE_CITIZEN_TX_FAILURE_MODE =
-  process.env.EAS_FORCE_CITIZEN_TX_FAILURE_MODE ?? "deadbeef"
-const ZERO_SCHEMA_UID =
-  "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 const eas = new EAS(EAS_ADDRESS)
 
@@ -1050,104 +1044,6 @@ export async function createCitizenAttestationWithTx({
     "EAS",
     `Create citizen attestation`,
     async () => {
-      if (EAS_FORCE_CITIZEN_TX_FAILURE) {
-        if (EAS_FORCE_CITIZEN_TX_FAILURE_MODE === "invalid_schema") {
-          const forcedData = citizenSchema.encodeData([
-            { name: "farcasterId", value: farcasterId, type: "uint256" },
-            { name: "selectionMethod", value: selectionMethod, type: "string" },
-          ])
-          const forcedTx = await eas.attest(
-            {
-              schema: ZERO_SCHEMA_UID,
-              data: {
-                recipient: to,
-                expirationTime: BigInt(0),
-                revocable: true,
-                data: forcedData,
-                refUID,
-              },
-            },
-            {
-              gasLimit: BigInt(300_000),
-            },
-          )
-          const forcedTxInputData = extractEasTxInputData(forcedTx)
-
-          try {
-            await forcedTx.wait()
-          } catch (error) {
-            const errorRecord = error as {
-              receipt?: { hash?: string }
-              transactionHash?: string
-            }
-            const forcedError = new Error(
-              "Forced test failure (invalid_schema): citizen attestation transaction reverted.",
-            ) as Error & {
-              txHash?: string
-              chainId?: number
-              txInputData?: string
-              cause?: unknown
-            }
-            forcedError.txHash =
-              errorRecord.receipt?.hash ?? errorRecord.transactionHash
-            forcedError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
-            forcedError.txInputData = forcedTxInputData
-            forcedError.cause = error
-            throw forcedError
-          }
-
-          const unexpectedSuccessError = new Error(
-            "Forced invalid_schema mode enabled, but transaction unexpectedly succeeded.",
-          ) as Error & {
-            txHash?: string
-            chainId?: number
-            txInputData?: string
-          }
-          unexpectedSuccessError.txHash = forcedTx.receipt?.hash
-          unexpectedSuccessError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
-          unexpectedSuccessError.txInputData = forcedTxInputData
-          throw unexpectedSuccessError
-        }
-
-        const forcedTxInputData = "0xdeadbeef"
-        const forcedTx = await signer.sendTransaction({
-          to: EAS_ADDRESS,
-          data: forcedTxInputData,
-          gasLimit: BigInt(150_000),
-          value: BigInt(0),
-        })
-
-        try {
-          await forcedTx.wait()
-        } catch (error) {
-          const forcedError = new Error(
-            "Forced test failure (deadbeef): citizen attestation transaction reverted.",
-          ) as Error & {
-            txHash?: string
-            chainId?: number
-            txInputData?: string
-            cause?: unknown
-          }
-          forcedError.txHash = forcedTx.hash
-          forcedError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
-          forcedError.txInputData = forcedTxInputData
-          forcedError.cause = error
-          throw forcedError
-        }
-
-        const unexpectedSuccessError = new Error(
-          "Forced deadbeef mode enabled, but transaction unexpectedly succeeded.",
-        ) as Error & {
-          txHash?: string
-          chainId?: number
-          txInputData?: string
-        }
-        unexpectedSuccessError.txHash = forcedTx.hash
-        unexpectedSuccessError.chainId = EAS_DEFAULT_CHAIN_IDS[easEnvironment]
-        unexpectedSuccessError.txInputData = forcedTxInputData
-        throw unexpectedSuccessError
-      }
-
       const data = citizenSchema.encodeData([
         { name: "farcasterId", value: farcasterId, type: "uint256" },
         { name: "selectionMethod", value: selectionMethod, type: "string" },
