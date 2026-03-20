@@ -32,17 +32,18 @@ export const PrimaryAddress = ({
 
   const displayAddress = shouldTruncate ? truncateAddress(address) : address
 
+  const setPrimaryAddress = async (candidateAddress: string) => {
+    const normalizedAddress = getAddress(candidateAddress)
+    await makeUserAddressPrimaryAction(normalizedAddress)
+    await invalidateUser()
+  }
+
   const onSetPrimary = (address: string) => {
-    toast.promise(
-      makeUserAddressPrimaryAction(getAddress(address)).then(() => {
-        invalidateUser()
-      }),
-      {
-        loading: "Setting governance address...",
-        success: "Governance address set",
-        error: "Failed to set governance address",
-      },
-    )
+    toast.promise(setPrimaryAddress(address), {
+      loading: "Setting governance address...",
+      success: "Governance address set",
+      error: "Failed to set governance address",
+    })
   }
 
   return (
