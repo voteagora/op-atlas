@@ -53,8 +53,10 @@ const OrganizationExpiredBadge = ({
 
 export function UserProfileSidebar({
   organizations,
+  projects = [],
 }: {
   organizations?: Organization[]
+  projects?: { id: string; name: string }[]
 }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -92,10 +94,10 @@ export function UserProfileSidebar({
         />
       </Button>
       <div>
-        <div className="py-1.5 border-b border-border text-sm font-semibold text-foreground">
-          Settings
+        <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
+          Your Account
         </div>
-        <div className="flex flex-col gap-2 mt-2 text-secondary-foreground text-sm">
+        <div className="flex flex-col space-y-1.5 py-3.5 text-secondary-foreground text-sm">
           <Link
             href="/profile/details"
             className={cn(
@@ -106,10 +108,10 @@ export function UserProfileSidebar({
             <div
               className={cn(
                 currentPage !== "details" && "invisible",
-                "text-xl pb-0.5 w-3 text-muted-foreground",
+                "w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground",
               )}
             >
-              •
+              <span>•</span>
             </div>
             Account Details
           </Link>
@@ -123,10 +125,10 @@ export function UserProfileSidebar({
             <div
               className={cn(
                 currentPage !== "connected-apps" && "invisible",
-                "text-xl pb-0.5 w-3 text-muted-foreground",
+                "w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground",
               )}
             >
-              •
+              <span>•</span>
             </div>
             Connected Apps
           </Link>
@@ -141,10 +143,10 @@ export function UserProfileSidebar({
             <div
               className={cn(
                 currentPage !== "verified-addresses" && "invisible",
-                "text-xl pb-0.5 w-3 text-muted-foreground",
+                "w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground",
               )}
             >
-              •
+              <span>•</span>
             </div>
             Linked Wallets
           </Link>
@@ -152,9 +154,44 @@ export function UserProfileSidebar({
       </div>
       <div>
         <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
-          Organizations
+          Your Projects
         </div>
-        <ul className="text-sm space-y-1.5 py-3.5">
+        <ul className="flex flex-col space-y-1.5 py-3.5 text-secondary-foreground text-sm">
+          {projects.map((project) => (
+            <li key={project.id}>
+              <Link
+                href={`/projects/${project.id}/details`}
+                className="flex gap-2 items-center font-medium text-foreground"
+              >
+                <div className="w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground">
+                  <span>•</span>
+                </div>
+                <span className="truncate">{project.name}</span>
+              </Link>
+              <Link
+                href={`/projects/${project.id}/grant-address`}
+                className="flex gap-2 items-center ml-6"
+              >
+                <span className="truncate">Grant Address</span>
+              </Link>
+            </li>
+          ))}
+          <li>
+            <Link
+              href="/projects/new"
+              className="flex gap-2 items-center"
+            >
+              <Plus size={16} />
+              Create project
+            </Link>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div className="py-2.5 border-b border-border text-sm font-semibold text-foreground">
+          Your Organizations
+        </div>
+        <ul className="flex flex-col space-y-1.5 py-3.5 text-secondary-foreground text-sm">
           {organizationsData.map((orgData, index) => {
             const {
               organization,
@@ -164,76 +201,57 @@ export function UserProfileSidebar({
             } = orgData
 
             return (
-              <li key={index} className={"flex flex-col"}>
+              <li key={index}>
                 <Link
                   href={`/profile/organizations/${organization.id}`}
-                  className={cn([
-                    "text-secondary-foreground font-normal space-x-2",
-                    { "text-foreground font-medium": isLinkActive },
-                  ])}
+                  className={cn(
+                    "flex gap-2 items-center font-medium text-foreground",
+                    isLinkActive && !isGrantAddressActive && "text-foreground",
+                  )}
                 >
-                  <span
-                    className={cn([
-                      "opacity-0 text-xl",
-                      { "opacity-100": isLinkActive && !isGrantAddressActive },
-                    ])}
-                  >
-                    •
-                  </span>
-                  <span>{organization.name}</span>
+                  <div className="w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground">
+                    <span>•</span>
+                  </div>
+                  <span className="truncate">{organization.name}</span>
                 </Link>
                 <Link
                   href={`/profile/organizations/${organization.id}/grant-address`}
-                  className={cn([
-                    "text-secondary-foreground space-x-2 pl-4 flex flex-row ",
-                    {
-                      "text-foreground font-medium": isGrantAddressActive,
-                    },
-                  ])}
+                  className={cn(
+                    "flex gap-2 items-center ml-6",
+                    isGrantAddressActive && "text-foreground font-medium",
+                  )}
                 >
-                  <span
-                    className={cn([
-                      "font-normal text-foreground",
-                      { "opacity-100": isGrantAddressActive },
-                    ])}
-                  >
-                    •
-                  </span>
-                  <div className="flex flex-row gap-2">
-                    <span className="overflow-hidden text-ellipsis whitespace-nowrap font-normal text-foreground text-[14px]">
-                      Grant Addresses
-                    </span>
-                    {/* Only shows if Project status resolves to 'PENDING' */}
-                    <IncompleteCard project={incompleteProject} />
-                    <OrganizationExpiredBadge
-                      organizationId={organization.id}
-                    />
-                  </div>
+                  <span className="truncate">Grant Addresses</span>
+                  <IncompleteCard project={incompleteProject} />
+                  <OrganizationExpiredBadge organizationId={organization.id} />
                 </Link>
               </li>
             )
           })}
 
           {currentPage === "new" && (
-            <Link
-              href="/profile/organizations/new"
-              className={cn(
-                currentPage === "new" && "text-foreground font-medium",
-                "flex gap-2 items-center",
-              )}
-            >
-              <div className="text-xl pb-0.5 w-3">•</div>
-              New organization
-            </Link>
+            <li>
+              <Link
+                href="/profile/organizations/new"
+                className="flex gap-2 items-center text-foreground font-medium"
+              >
+                <div className="w-4 h-4 flex items-center justify-center shrink-0 text-muted-foreground">
+                  <span>•</span>
+                </div>
+                New organization
+              </Link>
+            </li>
           )}
 
-          <Link
-            href="/profile/organizations/new"
-            className="flex gap-2 items-center py-1"
-          >
-            <Plus size={16} />
-            Make an organization
-          </Link>
+          <li>
+            <Link
+              href="/profile/organizations/new"
+              className="flex gap-2 items-center"
+            >
+              <Plus size={16} />
+              Create organization
+            </Link>
+          </li>
         </ul>
       </div>
     </div>

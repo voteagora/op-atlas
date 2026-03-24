@@ -1,0 +1,69 @@
+"use client"
+
+import { usePrivy } from "@privy-io/react-auth"
+import Image from "next/image"
+
+import { Button } from "@/components/common/Button"
+import { useUser } from "@/hooks/db/useUser"
+import { usePrivyLinkTwitter } from "@/hooks/privy/usePrivyLinkTwitter"
+import { cn } from "@/lib/utils"
+
+export const XConnection = ({
+  userId,
+  readOnly = false,
+}: {
+  userId: string
+  readOnly?: boolean
+}) => {
+  const { user: privyUser } = usePrivy()
+  const { user, invalidate: invalidateUser } = useUser({
+    id: userId,
+    enabled: true,
+  })
+
+  const username = user?.twitter || privyUser?.twitter?.username
+  const isSyncing =
+    user?.twitter?.toLowerCase() !== privyUser?.twitter?.username?.toLowerCase()
+
+  const { linkTwitter, unlinkTwitter } = usePrivyLinkTwitter(userId)
+
+  return (
+    <div className="flex flex-row gap-2">
+      {username && (
+        <div className="flex flex-col gap-2">
+          <div>
+            <div
+              className={cn(
+                "flex flex-1 p-3 border items-center gap-1.5 rounded-lg h-10",
+                isSyncing && "opacity-50",
+              )}
+            >
+              <Image
+                src="/assets/icons/circle-check-green.svg"
+                height={16.67}
+                width={16.67}
+                alt="Verified"
+              />
+              <p className="text-sm">@{username}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {username ? (
+        <Button
+          variant="secondary"
+          onClick={unlinkTwitter}
+          disabled={readOnly}
+          className={cn(isSyncing && "opacity-50")}
+        >
+          Disconnect
+        </Button>
+      ) : (
+        <Button variant="secondary" onClick={linkTwitter} disabled={readOnly}>
+          Connect
+        </Button>
+      )}
+    </div>
+  )
+}

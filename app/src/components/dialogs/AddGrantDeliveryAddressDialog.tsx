@@ -194,12 +194,19 @@ export function AddGrantDeliveryAddressDialog({
           <div className="flex flex-col items-center text-center gap-4">
             <h3>Copy and sign the message below</h3>
             <p className="text-secondary-foreground">
-              You can{" "}
+              You can use{" "}
               <ExternalLink
                 href="https://optimistic.etherscan.io/verifiedSignatures"
                 className="underline"
               >
-                use Etherscan
+                Etherscan
+              </ExternalLink>{" "}
+              or{" "}
+              <ExternalLink
+                href="https://signator.io/"
+                className="underline"
+              >
+                Signator
               </ExternalLink>{" "}
               to generate a signature. Then return here with your signature hash
               and continue to the next step.

@@ -1,6 +1,7 @@
 "use server"
 
 import type { Citizen, PrismaClient } from "@prisma/client"
+import { getAddress } from "viem"
 
 import { prisma } from "./client"
 import { CITIZEN_TYPES } from "@/lib/constants"
@@ -20,16 +21,19 @@ export async function upsertCitizen({
     organizationId?: string | null
   }
 }, db: PrismaClient = prisma) {
+  const checksummedAddress = getAddress(citizen.address)
   return db.citizen.upsert({
     where: {
       userId: id,
     },
     update: {
       ...citizen,
+      address: checksummedAddress,
     },
     create: {
       userId: id,
       ...citizen,
+      address: checksummedAddress,
     },
   })
 }
@@ -48,11 +52,14 @@ export async function updateCitizen({
     organizationId?: string | null
   }
 }, db: PrismaClient = prisma) {
+  const data = citizen.address
+    ? { ...citizen, address: getAddress(citizen.address) }
+    : citizen
   return db.citizen.update({
     where: {
       userId: id,
     },
-    data: citizen,
+    data,
   })
 }
 
@@ -109,14 +116,18 @@ export async function getCitizenById(
 }
 
 export async function getCitizenProposalVote(
-  citizenId: number,
+  citizenIdOrAddress: number | string,
   proposalId: string,
   db: PrismaClient = prisma,
 ): Promise<any> {
+  const isAddress = typeof citizenIdOrAddress === "string"
+  
   return db.offChainVote.findFirst({
     where: {
-      citizenId: citizenId,
       proposalId: proposalId,
+      ...(isAddress
+        ? { voterAddress: { equals: citizenIdOrAddress, mode: "insensitive" } }
+        : { citizenId: citizenIdOrAddress }),
     },
   })
 }
@@ -134,7 +145,12 @@ export async function getCitizenByAddress(
   address: string,
   db: PrismaClient = prisma,
 ): Promise<Citizen | null> {
-  return db.citizen.findUnique({
-    where: { address },
+  return db.citizen.findFirst({
+    where: {
+      address: {
+        equals: address,
+        mode: "insensitive",
+      },
+    },
   })
 }

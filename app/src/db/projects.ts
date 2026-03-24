@@ -2097,8 +2097,10 @@ export async function createProjectKycTeam(
   db: PrismaClient = prisma,
 ) {
   try {
+    const normalizedAddress = walletAddress.toLowerCase()
+
     const kycTeam = await db.$transaction(async (tx) => {
-      // Check if project already has a kyc team
+      // Check if project already has a kyc team with active streams
       const project = await tx.project.findUnique({
         where: {
           id: projectId,
@@ -2123,24 +2125,71 @@ export async function createProjectKycTeam(
         },
       })
 
+      // Check if there's a soft-deleted KYCTeam with the same wallet address.
+      // This handles the case where a user "starts over" but wants to reuse the same address
+      const existingSoftDeletedTeam = await tx.kYCTeam.findFirst({
+        where: {
+          walletAddress: normalizedAddress,
+          deletedAt: { not: null },
+        },
+        select: { id: true },
+      })
+
+      // If found, free up the wallet address by setting a placeholder.
+      // This allows the new KYCTeam to use the address while preserving
+      // the soft-deleted record for referential integrity.
+      // Note: Due to ON UPDATE CASCADE on SuperfluidStream.receiver FK,
+      // changing walletAddress will cascade to SuperfluidStream - we fix this below.
+      const placeholderAddress = existingSoftDeletedTeam
+        ? `_deleted_${existingSoftDeletedTeam.id}`
+        : null
+
+      if (existingSoftDeletedTeam) {
+        await tx.kYCTeam.update({
+          where: { id: existingSoftDeletedTeam.id },
+          data: {
+            walletAddress: placeholderAddress!,
+          },
+        })
+      }
+
+      // Create the new KYCTeam
       const kycTeam = await tx.kYCTeam.create({
         data: {
-          walletAddress: walletAddress.toLowerCase(),
+          walletAddress: normalizedAddress,
         },
       })
 
-      await tx.rewardStream.updateMany({
-        where: {
-          id: {
-            in:
-              project?.kycTeam?.rewardStreams.map((stream) => stream.id) ?? [],
+      // Fix SuperfluidStream.receiver values that were cascaded to the placeholder.
+      // The FK has ON UPDATE CASCADE, so when we changed the old team's address,
+      // SuperfluidStream.receiver was also updated. We need to restore it to the
+      // correct address so it points to the new team.
+      if (placeholderAddress) {
+        await tx.superfluidStream.updateMany({
+          where: {
+            receiver: placeholderAddress,
           },
-        },
-        data: {
-          kycTeamId: kycTeam.id,
-        },
-      })
+          data: {
+            receiver: normalizedAddress,
+          },
+        })
+      }
 
+      // Transfer reward streams from the project's existing team (if any)
+      if (project?.kycTeam?.rewardStreams.length) {
+        await tx.rewardStream.updateMany({
+          where: {
+            id: {
+              in: project.kycTeam.rewardStreams.map((stream) => stream.id),
+            },
+          },
+          data: {
+            kycTeamId: kycTeam.id,
+          },
+        })
+      }
+
+      // Link the current project to the new KYCTeam
       await tx.project.update({
         where: {
           id: projectId,

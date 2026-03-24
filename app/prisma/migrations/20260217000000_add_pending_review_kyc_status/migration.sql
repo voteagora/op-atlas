@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "KYCStatus" ADD VALUE 'PENDING_REVIEW';

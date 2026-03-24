@@ -1,6 +1,8 @@
 import React from "react"
 import ReactMarkdown from "react-markdown"
 
+import { fixBrokenNumberedLists } from "@/lib/utils/markdown"
+
 interface ProposalContentProps {
   description: string
 }
@@ -108,7 +110,7 @@ const Markdown = ({ description }: ProposalContentProps) => (
         ),
       }}
     >
-      {description}
+      {fixBrokenNumberedLists(description)}
     </ReactMarkdown>
   </div>
 )

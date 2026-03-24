@@ -28,7 +28,8 @@
     "graphql:generate": "pnpm graphql-codegen",
     "process:oso-data": "tsx src/scripts/process-oso-data.ts",
     "blacklist:project": "tsx src/scripts/blacklist-project.ts",
-    "seed:kyc-sample": "prisma db push && tsx src/scripts/seed-kyc-sample.ts"
+    "seed:kyc-sample": "prisma db push && tsx src/scripts/seed-kyc-sample.ts",
+    "run:tsx": "pnpm exec tsx"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -38,6 +39,7 @@
     "*.{css,md}": "prettier --write"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.10.0",
     "@eth-optimism/viem": "^0.2.0",
     "@ethereum-attestation-service/eas-sdk": "^2.1.4",
     "@farcaster/auth-client": "^0.3.0",
@@ -46,6 +48,8 @@
     "@hookform/resolvers": "^3.3.4",
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@mailchimp/mailchimp_transactional": "^1.0.59",
+    "@miradorlabs/nodejs-sdk": "^1.7.0",
+    "@miradorlabs/web-sdk": "^1.6.0",
     "@next/third-parties": "^15.1.4",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.62.0",
@@ -102,7 +106,7 @@
     "dotenv": "^16.4.7",
     "eas-indexer": "workspace:^",
     "embla-carousel-react": "^8.0.2",
-    "ethers": "^6.13.4",
+    "ethers": "^6.16.0",
     "graphql-request": "^7.1.0",
     "graphql-tag": "^2.12.6",
     "html2canvas": "^1.4.1",
@@ -111,7 +115,7 @@
     "mixpanel-browser": "^2.50.0",
     "motion": "^12.23.9",
     "nanoid": "^5.0.7",
-    "next": "14.2.21",
+    "next": "14.2.35",
     "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.3.0",
     "octokit": "^3.2.0",

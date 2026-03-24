@@ -11,10 +11,7 @@ import {
   getOrganizationKYCTeams,
   getOrganizationWithClient,
 } from "@/db/organizations"
-import {
-  getCitizenByAddress,
-  getCitizenForUser,
-} from "@/db/citizens"
+import { getCitizenByAddress, getCitizenForUser } from "@/db/citizens"
 import {
   getKYCUsersByProjectId,
   getExpiredKYCCountForOrganization,
@@ -140,10 +137,10 @@ export async function fetchProposalCandidates(
 
 export async function fetchVoteForCitizen(
   proposalId: string,
-  citizenId: number,
+  citizenIdOrAddress: number | string,
 ) {
   return withImpersonation(({ db }) =>
-    getVoteForCitizen(proposalId, citizenId, db),
+    getVoteForCitizen(proposalId, citizenIdOrAddress, db),
   )
 }
 
@@ -186,10 +183,7 @@ export async function fetchUserWorldId(userId: string) {
   return withImpersonation(({ db }) => getUserWorldId(userId, db))
 }
 
-export async function fetchUserAdminProjects(
-  userId: string,
-  roundId?: string,
-) {
+export async function fetchUserAdminProjects(userId: string, roundId?: string) {
   return withImpersonation(({ db }) =>
     getUserAdminProjectsWithDetailWithClient(
       {

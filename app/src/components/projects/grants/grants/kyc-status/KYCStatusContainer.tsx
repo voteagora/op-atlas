@@ -395,7 +395,7 @@ const KYCStatusPresenter = ({
   }, [legalEntities, legalSendingState, projectId, organizationId, kycTeamId])
   return (
     <>
-      <div className="group flex flex-col max-w border p-6 gap-6 border-[#E0E2EB] rounded-[12px]">
+      <div className="group flex flex-col max-w border p-6 gap-6 border-tertiary rounded-[12px]">
         {isLoading ? (
           <KYCSkeleton />
         ) : (

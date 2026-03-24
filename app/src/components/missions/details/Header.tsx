@@ -10,7 +10,8 @@ export default function Header() {
 
   const { data } = useGitHubMissions()
 
-  let isOpenForEnrollment = mission && mission?.startsAt < new Date()
+  let isOpenForEnrollment =
+    mission && mission?.startsAt < new Date() && mission?.endsAt > new Date()
   let missioName = mission?.name
 
   if (

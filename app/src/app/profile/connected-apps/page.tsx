@@ -6,6 +6,8 @@ import {
   Farcaster,
   Github,
   Optimism,
+  World,
+  XOptimism,
 } from "@/components/icons/socials"
 import { DiscordConnection } from "@/components/profile/DiscordConnection"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
@@ -14,6 +16,8 @@ import {
   GithubNotDeveloperToggle,
 } from "@/components/profile/GithubConnection"
 import { GovForumConnection } from "@/components/profile/GovForumConnection"
+import { WorldConnection } from "@/components/profile/WorldIdConnection"
+import { XConnection } from "@/components/profile/XConnection"
 import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const metadata: Metadata = {
@@ -40,15 +44,15 @@ export default async function Page() {
 
       <div className="flex flex-col gap-8">
         {/* Farcaster */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex-1 flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
               <Farcaster className="w-5 h-5 text-foreground" />
               <h3 className="font-medium text-foreground text-base">
                 Farcaster
               </h3>
             </div>
-            <div className="text-secondary-foreground mb-4 text-base">
+            <div className="text-secondary-foreground text-base">
               Connect your Farcaster account to import your username, bio, and
               avatar.
             </div>
@@ -61,13 +65,13 @@ export default async function Page() {
         </div>
 
         {/* Discord */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex-1 flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
               <Discord className="w-5 h-5 text-foreground" />
               <h3 className="font-medium text-foreground text-base">Discord</h3>
             </div>
-            <div className="text-secondary-foreground mb-4 text-base">
+            <div className="text-secondary-foreground text-base">
               Connect your account so anyone can find you on Discord.
             </div>
           </div>
@@ -77,8 +81,8 @@ export default async function Page() {
         </div>
 
         {/* Github */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex-1 flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
               <Github className="w-5 h-5 text-foreground" />
               <h3 className="font-medium text-foreground text-base">GitHub</h3>
@@ -100,15 +104,15 @@ export default async function Page() {
         </div>
 
         {/* Gov Forum */}
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex-1 flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
               <Optimism className="w-5 h-5" fill="#FF0000" />
               <h3 className="font-medium text-foreground text-base">
                 Collective Governance Forum
               </h3>
             </div>
-            <div className="text-secondary-foreground mb-4 text-base">
+            <div className="text-secondary-foreground text-base">
               Link your profile so anyone can find you on{" "}
               <a
                 href="https://gov.optimism.io"
@@ -123,6 +127,40 @@ export default async function Page() {
           </div>
           <div className="flex-shrink-0 self-center">
             <GovForumConnection userId={userId} readOnly={isImpersonating} />
+          </div>
+        </div>
+
+        {/* WorldID */}
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex-1 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <World className="w-5 h-5" />
+              <h3 className="font-medium text-foreground text-base">WorldID</h3>
+            </div>
+            <div className="text-secondary-foreground text-base">
+              Add your proof of personhood.
+            </div>
+          </div>
+          <div className="flex-shrink-0 self-center">
+            <WorldConnection userId={userId} variant="button" readOnly={isImpersonating}>
+              Connect
+            </WorldConnection>
+          </div>
+        </div>
+
+        {/* X */}
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex-1 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <XOptimism className="w-5 h-5" />
+              <h3 className="font-medium text-foreground text-base">X</h3>
+            </div>
+            <div className="text-secondary-foreground text-base">
+              Connect your account so anyone can find you on X.
+            </div>
+          </div>
+          <div className="flex-shrink-0 self-center">
+            <XConnection userId={userId} readOnly={isImpersonating} />
           </div>
         </div>
       </div>

@@ -6,18 +6,25 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
+import { useSession } from "next-auth/react"
 
 import { useSessionAdminProjects } from "@/hooks/db/useAdminProjects"
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
+import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { submitApplications } from "@/lib/actions/applications"
+import { MIRADOR_FLOW } from "@/lib/mirador/constants"
+import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
+import {
+  addMiradorEvent,
+  closeMiradorTrace,
+  startMiradorTrace,
+} from "@/lib/mirador/webTrace"
 import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
 import { MissionApplicationTabs } from "./MissionApplicationTabs"
-import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
-import { useSession } from "next-auth/react"
 
 export const ApplicationFormSchema = z.object({
   projects: z.array(
@@ -63,7 +70,34 @@ export function MissionApplication({ userId }: { userId: string }) {
     const promise: Promise<Application[]> = new Promise(
       async (resolve, reject) => {
         setIsSubmitting(true)
+        const trace = startMiradorTrace({
+          name: "MissionApplication",
+          flow: MIRADOR_FLOW.missionApplication,
+          context: {
+            source: "frontend",
+            userId,
+            sessionId: userId,
+          },
+          attributes: {
+            missionRound: mission?.roundName,
+            missionNumber: mission?.number,
+          },
+          tags: ["mission", "application", "frontend"],
+        })
+
+        addMiradorEvent(trace, "mission_application_submit_started", {
+          missionRound: mission?.roundName,
+          missionNumber: mission?.number,
+        })
+
         try {
+          const traceContext = await buildFrontendTraceContext(trace, {
+            flow: MIRADOR_FLOW.missionApplication,
+            step: "mission_application_submit",
+            userId,
+            sessionId: userId,
+          })
+
           const result = await submitApplications(
             form
               .getValues()
@@ -78,15 +112,28 @@ export function MissionApplication({ userId }: { userId: string }) {
             mission!.roundName,
             mission!.number,
             undefined,
+            traceContext,
           )
 
           if (result.error !== null || result.applications.length === 0) {
             throw new Error(result.error ?? "Error submitting application")
           }
 
+          addMiradorEvent(trace, "mission_application_submit_succeeded", {
+            missionRound: mission?.roundName,
+            missionNumber: mission?.number,
+            applicationCount: result.applications.length,
+          })
+          await closeMiradorTrace(trace, "Mission application succeeded")
           resolve(result.applications)
         } catch (error) {
           console.error("Error submitting application", error)
+          addMiradorEvent(trace, "mission_application_submit_failed", {
+            missionRound: mission?.roundName,
+            missionNumber: mission?.number,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          await closeMiradorTrace(trace, "Mission application failed")
           reject(error)
         } finally {
           setIsSubmitting(false)

@@ -21,6 +21,7 @@ const StatusIcon = ({ status, size = 5 }: StatusIconProps) => {
     case "EXPIRED":
       return <X className={cn(`h-${size} w-${size}`, "text-red-500")} />
     case "PENDING":
+    case "PENDING_REVIEW":
       return <Loader2 className={cn(`h-${size} w-${size}`, "animate-spin")} />
     case "APPROVED":
       return (
@@ -72,6 +73,9 @@ const StatusRow = ({
           <div className="flex flex-row gap-2">
             <RowText
               values={[
+                ...("businessName" in user && user.businessName
+                  ? [`${user.businessName} —`]
+                  : []),
                 [user.firstName, user.lastName].filter(Boolean).join(" "),
                 user.email,
               ]}

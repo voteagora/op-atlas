@@ -10,6 +10,7 @@ import AppDialogs from "@/components/dialogs/AppDialogs"
 import { CheckIconFilled } from "@/components/icons/checkIconFilled"
 import { InfoIconFilled } from "@/components/icons/infoIconFilled"
 import { Toaster } from "@/components/ui/sonner"
+import { isMiradorEnabled } from "@/lib/mirador/enabled"
 import Providers from "@/providers/Providers"
 
 import { sharedMetadata } from "./shared-metadata"
@@ -81,15 +82,22 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const miradorEnabled = isMiradorEnabled()
+  const miradorWebApiKey = process.env.MIRADOR_WEB_API_KEY
+
   return (
     <html lang="en" className={riforma.variable}>
       <body className={riforma.className}>
-        <Providers>
+        <Providers
+          defaultBanner={null}
+          miradorEnabled={miradorEnabled}
+          miradorWebApiKey={miradorWebApiKey}
+        >
           <ErrorBoundary>
             <AppDialogs />
             {children}

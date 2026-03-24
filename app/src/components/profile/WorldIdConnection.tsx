@@ -3,16 +3,27 @@
 import { IDKitWidget } from "@worldcoin/idkit"
 import { toast } from "sonner"
 
+import { Button } from "@/components/common/Button"
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { useUserWorldId } from "@/hooks/db/useUserWorldId"
+import { cn } from "@/lib/utils"
 
 export function WorldConnection({
   userId,
   children,
+  variant = "default",
+  className,
+  onConnected,
+  readOnly = false,
 }: {
   userId: string
   children: React.ReactNode
+  variant?: "default" | "button"
+  className?: string
+  onConnected?: () => void
+  readOnly?: boolean
 }) {
-  const { invalidate } = useUserWorldId({ id: userId, enabled: false })
+  const { data: worldId, invalidate } = useUserWorldId({ id: userId, enabled: true })
 
   const verifyProof = async (proof: any) => {
     const toastId = toast.loading("Verifying World ID...")
@@ -49,16 +60,50 @@ export function WorldConnection({
     }
   }
 
+  // If user is already verified, show verified state
+  if (worldId?.verified) {
+    return (
+      <div
+        className={cn(
+          "flex p-3 border items-center gap-1.5 rounded-lg h-10 w-fit",
+          className,
+        )}
+      >
+        <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
+        <p className="text-sm">Verified</p>
+      </div>
+    )
+  }
+
+  if (readOnly) {
+    return variant === "button" ? (
+      <Button variant="secondary" disabled className={className}>
+        {children}
+      </Button>
+    ) : (
+      <button disabled>{children}</button>
+    )
+  }
+
   return (
     <IDKitWidget
       app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID}
       action={process.env.NEXT_PUBLIC_WORLD_APP_ACTION}
       handleVerify={verifyProof}
-      onSuccess={() => invalidate()}
+      onSuccess={async () => {
+        await invalidate()
+        onConnected?.()
+      }}
     >
-      {({ open }: { open: () => void }) => (
-        <button onClick={open}>{children}</button>
-      )}
+      {({ open }: { open: () => void }) =>
+        variant === "button" ? (
+          <Button variant="secondary" onClick={open} className={className}>
+            {children}
+          </Button>
+        ) : (
+          <button onClick={open}>{children}</button>
+        )
+      }
     </IDKitWidget>
   )
 }

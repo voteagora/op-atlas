@@ -6,13 +6,17 @@ import { prisma } from "./client"
 
 export const getVoteForCitizen = async (
   proposalId: string,
-  citizenId: number,
+  citizenIdOrAddress: number | string,
   db: PrismaClient = prisma,
 ) => {
+  const isAddress = typeof citizenIdOrAddress === "string"
+  
   return db.offChainVote.findFirst({
     where: {
       proposalId: proposalId,
-      citizenId: citizenId,
+      ...(isAddress
+        ? { voterAddress: { equals: citizenIdOrAddress, mode: "insensitive" } }
+        : { citizenId: citizenIdOrAddress }),
     },
   })
 }

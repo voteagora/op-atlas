@@ -45,7 +45,7 @@ const RenderSuperChainInfo = (props: DialogProps<object>) => {
                   "self-stretch text-center justify-center text-[#0f111a] text-xl font-normal leading-7",
                 )}
               >
-                19 chains are eligible for rewards with more coming soon
+                20 chains are eligible for rewards with more coming soon
               </div>
               <div className="self-stretch text-center justify-center text-secondary-foreground text-base font-normal leading-normal">
                 There are more chains in the Superchain Ecosystem than what you
@@ -247,7 +247,7 @@ const SupportedChainsDesktop = () => {
           "transition-opacity duration-200",
         )}
       >
-        19 chains in the Superchain are eligible for builder rewards
+        20 chains in the Superchain are eligible for builder rewards
         <div
           className="hover:cursor-pointer ml-1.5 inline-flex align-middle"
           onClick={() => handleOpenChange(!open)}
@@ -357,7 +357,7 @@ const SupportedChainsMobile = () => {
             "text-secondary-foreground text-base font-normal leading-normal mb-6 mt-12",
           )}
         >
-          19 chains eligible for rewards
+          20 chains eligible for rewards
           <div
             className="hover:cursor-pointer ml-1.5 inline-flex align-middle"
             onClick={() => handleOpenChange(!open)}

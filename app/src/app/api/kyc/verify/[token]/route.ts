@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { verifyKYCToken, isKYCLinkExpired } from "@/lib/utils/kycToken"
+import { verifyKYCToken } from "@/lib/utils/kycToken"
 import { personaClient } from "@/lib/persona"
 import { getImpersonationContext } from "@/lib/db/sessionContext"
 
@@ -36,6 +36,7 @@ export async function POST(
     } else {
       entity = await db.kYCLegalEntity.findUnique({
         where: { id: entityId },
+        include: { kycLegalEntityController: true },
       })
       personaTemplateId = process.env.PERSONA_INQUIRY_KYB_TEMPLATE
     }
@@ -55,59 +56,66 @@ export async function POST(
       )
     }
 
-    // Check if inquiry creation date is expired (> 7 days)
-    if (entity.inquiryCreatedAt && isKYCLinkExpired(entity.inquiryCreatedAt)) {
-      return NextResponse.json(
-        {
-          error:
-            "This verification link has expired. Please restart the KYC process from your profile.",
-        },
-        { status: 410 }, // 410 Gone
-      )
+    let inquiryId = entity.personaInquiryId
+    let referenceId = entity.personaReferenceId
+    let needsNewInquiry = !inquiryId
+
+    if (inquiryId) {
+      const existingInquiry = await personaClient.getInquiryById(inquiryId)
+      if (!existingInquiry) {
+        console.log(
+          `Persona inquiry ${inquiryId} not found, will create a new one`,
+        )
+        needsNewInquiry = true
+      } else if (existingInquiry.attributes.status === "expired") {
+        console.log(
+          `Persona inquiry ${inquiryId} is expired, will create a new one`,
+        )
+        needsNewInquiry = true
+      }
     }
 
-    let inquiryId = entity.personaInquiryId
-
-    // Case 1: No inquiry exists yet - create a new one
-    // Use transaction to prevent race conditions from duplicate requests
-    if (!inquiryId) {
+    if (needsNewInquiry) {
       console.log(
         `Creating new Persona inquiry for ${entityType} ${entityId}`,
       )
 
-      // Ensure we have a reference ID
-      let referenceId = entity.personaReferenceId
       if (!referenceId) {
         const { randomBytes } = await import("crypto")
         referenceId = randomBytes(16).toString("hex")
+        console.log(
+          `Generated new Persona reference ID for ${entityType} ${entityId}`,
+        )
+      } else {
+        console.log(
+          `Reusing existing Persona reference ID for ${entityType} ${entityId}`,
+        )
+      }
 
-        // Update the entity with the new reference ID
-        if (entityType === "kycUser") {
-          await db.kYCUser.update({
-            where: { id: entityId },
-            data: { personaReferenceId: referenceId },
-          })
-        } else {
-          await db.kYCLegalEntity.update({
-            where: { id: entityId },
-            data: { personaReferenceId: referenceId },
-          })
+      const fields: Record<string, string> = {}
+      if (entityType === "legalEntity") {
+        if (entity.name) fields["business-name"] = entity.name
+        const controller = entity.kycLegalEntityController
+        if (controller) {
+          if (controller.firstName) fields["control-person-name-first"] = controller.firstName
+          if (controller.lastName) fields["control-person-name-last"] = controller.lastName
+          if (controller.email) fields["control-person-email-address"] = controller.email
         }
       }
 
-      // Create new inquiry via Persona API
       const inquiry = await personaClient.createInquiry(
         referenceId,
         personaTemplateId,
+        Object.keys(fields).length > 0 ? fields : undefined,
       )
 
       inquiryId = inquiry.id
 
-      // Store the inquiry ID and creation timestamp in database atomically
       if (entityType === "kycUser") {
         await db.kYCUser.update({
           where: { id: entityId },
           data: {
+            personaReferenceId: referenceId,
             personaInquiryId: inquiryId,
             inquiryCreatedAt: new Date(),
           },
@@ -116,6 +124,7 @@ export async function POST(
         await db.kYCLegalEntity.update({
           where: { id: entityId },
           data: {
+            personaReferenceId: referenceId,
             personaInquiryId: inquiryId,
             inquiryCreatedAt: new Date(),
           },
@@ -123,7 +132,6 @@ export async function POST(
       }
     }
 
-    // Case 2: Inquiry exists - generate a new OTL to resume
     console.log(`Generating OTL for inquiry ${inquiryId}`)
     const { redirectUrl } = await personaClient.generateOneTimeLink(inquiryId)
 

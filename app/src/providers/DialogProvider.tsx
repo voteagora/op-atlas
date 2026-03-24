@@ -23,6 +23,8 @@ type DataType = {
   allOrgKycTeams?: any[]
   email?: string
   isNewUser?: boolean
+  userId?: string
+  seasonId?: string
 }
 
 type AppDialog = {
@@ -52,6 +54,7 @@ export function DialogProvider({ children }: PropsWithChildren) {
     organizationId: "",
     kycTeamId: "",
     hasActiveStream: false,
+    userId: undefined,
   })
 
   const handleSetOpenDialog: Dispatch<

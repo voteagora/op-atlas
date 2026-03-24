@@ -36,8 +36,15 @@ import {
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
 import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
+import { extractFailedEasTxContext } from "@/lib/eas/txContext"
+import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
 
-import { createEntityAttestation } from "../eas/serverOnly"
+import { createEntityAttestationWithTx } from "../eas/serverOnly"
+import {
+  appendServerTraceEvent,
+  withMiradorTraceStep,
+} from "../mirador/serverTrace"
+import { MiradorTraceContext } from "../mirador/types"
 import { ProjectContracts, ProjectWithDetails, TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import {
@@ -54,10 +61,7 @@ export const getProjects = async (userId: string) =>
 
 export const getAllPublishedProjects = async (userId: string) =>
   withImpersonation(async ({ db }) => {
-    const projects = await getAllPublishedUserProjectsWithClient(
-      { userId },
-      db,
-    )
+    const projects = await getAllPublishedUserProjectsWithClient({ userId }, db)
     return [
       ...(projects?.projects
         .map(({ project }) => project)
@@ -100,10 +104,7 @@ export const getAdminProjects = async (userId: string, roundId?: string) =>
 
 export const getApplications = async (userId: string) =>
   withImpersonation(async ({ db }) => {
-    const userApplications = await getUserApplicationsWithClient(
-      { userId },
-      db,
-    )
+    const userApplications = await getUserApplicationsWithClient({ userId }, db)
     return userApplications
   })
 
@@ -200,8 +201,8 @@ async function setProjectOrganizationInternal(
   const validationError = projectAdmin?.error
     ? projectAdmin
     : oldOrganizationAdmin?.error
-      ? oldOrganizationAdmin
-      : null
+    ? oldOrganizationAdmin
+    : null
 
   if (validationError) {
     return validationError
@@ -242,6 +243,7 @@ async function setProjectOrganizationInternal(
 export const createNewProject = async (
   details: CreateProjectParams,
   organizationId?: string,
+  traceContext?: MiradorTraceContext,
 ) =>
   withImpersonation(
     async (ctx) => {
@@ -260,36 +262,105 @@ export const createNewProject = async (
         }
       }
 
-      const attestationId = await createEntityAttestation({
-        farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
-        type: "project",
+      await appendServerTraceEvent({
+        traceContext: withMiradorTraceStep(
+          traceContext,
+          "project_creation_start",
+          "backend",
+        ),
+        eventName: "project_creation_started",
+        details: { userId, projectName: details.name, organizationId },
+        tags: ["project", "creation"],
       })
 
-      const project = await createProject(
-        {
-          userId,
-          projectId: attestationId,
-          project: details,
+      try {
+        const { attestationId, txHash, chainId, txInputData } =
+          await createEntityAttestationWithTx({
+            farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
+            type: "project",
+          })
+        const miradorChain = getMiradorChainNameFromChainId(chainId)
+
+        const project = await createProject(
+          {
+            userId,
+            projectId: attestationId,
+            project: details,
+            organizationId,
+          },
+          { db, session },
+        )
+
+        const organizationResult = await setProjectOrganizationInternal(
+          ctx,
+          project.id,
+          undefined,
           organizationId,
-        },
-        { db, session },
-      )
+        )
 
-      const organizationResult = await setProjectOrganizationInternal(
-        ctx,
-        project.id,
-        undefined,
-        organizationId,
-      )
+        if (organizationResult.error) {
+          return organizationResult
+        }
 
-      if (organizationResult.error) {
-        return organizationResult
-      }
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "project_creation_success",
+            "backend",
+          ),
+          eventName: "project_creation_succeeded",
+          details: { userId, projectId: project.id, attestationId },
+          tags: ["project", "creation"],
+          txHashHints:
+            txHash && miradorChain
+              ? [
+                  {
+                    txHash,
+                    chain: miradorChain,
+                    details: "Project entity attestation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData,
+        })
 
-      revalidatePath("/dashboard")
-      return {
-        error: null,
-        project,
+        revalidatePath("/dashboard")
+        return {
+          error: null,
+          project,
+        }
+      } catch (error) {
+        const failedTxContext = extractFailedEasTxContext(error)
+        const failedMiradorChain = getMiradorChainNameFromChainId(
+          failedTxContext.chainId,
+        )
+
+        await appendServerTraceEvent({
+          traceContext: withMiradorTraceStep(
+            traceContext,
+            "project_creation_exception",
+            "backend",
+          ),
+          eventName: "project_creation_failed",
+          details: {
+            userId,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          tags: ["project", "creation", "error"],
+          txHashHints:
+            failedTxContext.txHash && failedMiradorChain
+              ? [
+                  {
+                    txHash: failedTxContext.txHash,
+                    chain: failedMiradorChain,
+                    details: "Failed project entity attestation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData: failedTxContext.txInputData,
+        })
+
+        throw error
       }
     },
     { requireUser: true },
@@ -298,6 +369,7 @@ export const createNewProject = async (
 export const createNewProjectOnBehalf = async (
   details: CreateProjectParams,
   userId: string,
+  traceContext?: MiradorTraceContext,
 ) =>
   withImpersonation(async ({ db, session }) => {
     const user = await getUserById(userId, db, session)
@@ -307,19 +379,96 @@ export const createNewProjectOnBehalf = async (
       }
     }
 
-    const attestationId = await createEntityAttestation({
-      farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
-      type: "project",
+    await appendServerTraceEvent({
+      traceContext: withMiradorTraceStep(
+        traceContext,
+        "project_creation_on_behalf_start",
+        "backend",
+      ),
+      eventName: "project_creation_started",
+      details: { userId, projectName: details.name, onBehalf: true },
+      tags: ["project", "creation", "api"],
     })
 
-    return createProject(
-      {
-        userId: user.id,
-        projectId: attestationId,
-        project: details,
-      },
-      { db, session },
-    )
+    try {
+      const { attestationId, txHash, chainId, txInputData } =
+        await createEntityAttestationWithTx({
+          farcasterId: user?.farcasterId ? parseInt(user.farcasterId) : 0,
+          type: "project",
+        })
+      const project = await createProject(
+        {
+          userId: user.id,
+          projectId: attestationId,
+          project: details,
+        },
+        { db, session },
+      )
+      const miradorChain = getMiradorChainNameFromChainId(chainId)
+
+      await appendServerTraceEvent({
+        traceContext: withMiradorTraceStep(
+          traceContext,
+          "project_creation_on_behalf_success",
+          "backend",
+        ),
+        eventName: "project_creation_succeeded",
+        details: {
+          userId,
+          projectId: project.id,
+          attestationId,
+          onBehalf: true,
+        },
+        tags: ["project", "creation", "api"],
+        txHashHints:
+          txHash && miradorChain
+            ? [
+                {
+                  txHash,
+                  chain: miradorChain,
+                  details: "Project entity attestation transaction",
+                },
+              ]
+            : undefined,
+        txInputData,
+      })
+
+      return project
+    } catch (error) {
+      const failedTxContext = extractFailedEasTxContext(error)
+      const failedMiradorChain = getMiradorChainNameFromChainId(
+        failedTxContext.chainId,
+      )
+
+      await appendServerTraceEvent({
+        traceContext: withMiradorTraceStep(
+          traceContext,
+          "project_creation_on_behalf_exception",
+          "backend",
+        ),
+        eventName: "project_creation_failed",
+        details: {
+          userId,
+          projectName: details.name,
+          onBehalf: true,
+          error: error instanceof Error ? error.message : String(error),
+        },
+        tags: ["project", "creation", "api", "error"],
+        txHashHints:
+          failedTxContext.txHash && failedMiradorChain
+            ? [
+                {
+                  txHash: failedTxContext.txHash,
+                  chain: failedMiradorChain,
+                  details: "Failed project entity attestation transaction",
+                },
+              ]
+            : undefined,
+        txInputData: failedTxContext.txInputData,
+      })
+
+      throw error
+    }
   })
 
 export const updateProjectDetails = async (
@@ -728,9 +877,7 @@ export const checkWalletAddressExistsAction = async (walletAddress: string) =>
     { requireUser: true },
   )
 
-export const getKycTeamByWalletAddressAction = async (
-  walletAddress: string,
-) =>
+export const getKycTeamByWalletAddressAction = async (walletAddress: string) =>
   withImpersonation(
     async ({ db, userId }) => {
       if (!userId) {

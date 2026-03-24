@@ -44,14 +44,7 @@ export const grantLinks = [
     title: "Growth Grants",
     href: "/missions/growth-grants",
   },
-  {
-    title: "Retro Funding: Dev Tooling",
-    href: "/missions/retro-funding-dev-tooling",
-  },
-  {
-    title: "Retro Funding: Onchain Builders",
-    href: "/missions/retro-funding-onchain-builders",
-  },
+
   {
     title: "Foundation Missions",
     href: "/missions/foundation-missions",

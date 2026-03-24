@@ -14,6 +14,7 @@ import ImportFromFarcasterDialog from "./ImportFromFarcasterDialog"
 import KYCEmailVerificationDialog from "./KYCEmailVerificationDialog"
 import NotRecognizedAddressDialog from "./NotRecognizedAddressDialog"
 import SelectKYCProjectDialog from "./SelectKYCProjectDialog"
+import { S9RegistrationDialog } from "./S9RegistrationDialog"
 import { DialogType } from "./types"
 import WelcomeBadgeholderDialog from "./WelcomeBadgeholderDialog"
 
@@ -91,6 +92,12 @@ export default function AppDialogs() {
         <FindMyKYCDialog
           open
           onOpenChange={onOpenChange("find_my_kyc")}
+        />
+      )}
+      {openDialog === "s9_registration" && (
+        <S9RegistrationDialog
+          open
+          onOpenChange={onOpenChange("s9_registration")}
         />
       )}
     </>

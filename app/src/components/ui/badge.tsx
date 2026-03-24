@@ -15,6 +15,10 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-red-200 text-red-600",
         outline: "text-foreground",
+        statusOpen:
+          "border-transparent bg-callout text-callout-foreground px-4 py-2 text-sm font-medium",
+        statusClosed:
+          "border-transparent bg-red-200 text-red-600 px-4 py-2 text-sm font-medium",
       },
     },
     defaultVariants: {

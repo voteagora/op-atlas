@@ -96,8 +96,8 @@ export function resolveProjectStatus(
     return "project_issue"
   }
 
-  // If any users or legal entities are PENDING, resolve to "PENDING"
-  if (allEntities.some((entity) => entity.status === "PENDING")) {
+  // If any users or legal entities are PENDING or PENDING_REVIEW, resolve to "PENDING"
+  if (allEntities.some((entity) => entity.status === "PENDING" || entity.status === "PENDING_REVIEW")) {
     return "PENDING"
   }
 

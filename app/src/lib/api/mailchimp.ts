@@ -182,6 +182,47 @@ export async function updateContactEmail({
   )
 }
 
+export async function removeMailchimpTags(
+  users: {
+    email: string
+    tagsToRemove: string[]
+  }[],
+) {
+  return withImpersonationProtection(
+    "Mailchimp",
+    `Remove tags for ${users.length} users`,
+    async () => {
+      const LIST_ID = process.env.MAILCHIMP_LIST_ID
+      const API_KEY = process.env.MAILCHIMP_API_KEY
+
+      if (!LIST_ID || !API_KEY) {
+        console.error("[-] Mailchimp API credentials missing")
+        return { success: false, error: "Missing Mailchimp credentials" }
+      }
+
+      for (const user of users) {
+        try {
+          const subscriberHash = Md5.hashStr(user.email.toLowerCase())
+          await mailchimp.lists.updateListMemberTags(LIST_ID, subscriberHash, {
+            tags: user.tagsToRemove.map((tag) => ({
+              name: tag,
+              status: "inactive",
+            })),
+          })
+          console.log(`[+] Removed tags ${user.tagsToRemove.join(", ")} from ${user.email}`)
+        } catch (error: any) {
+          if (error.status !== 404) {
+            console.error(`Failed to remove tags for ${user.email}:`, error)
+          }
+        }
+      }
+
+      return { success: true }
+    },
+    { success: true },
+  )
+}
+
 async function getContact(email: string) {
   const LIST_ID = process.env.MAILCHIMP_LIST_ID
   if (!LIST_ID) {

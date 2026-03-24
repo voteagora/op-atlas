@@ -1,8 +1,10 @@
 import { Metadata } from "next"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { Badge } from "@/components/common/Badge"
 import { EmailConnection } from "@/components/profile/EmailConnection"
+import { EmailNotificationCheckbox } from "@/components/profile/EmailNotificationCheckbox"
 import { IdentityVerification } from "@/components/profile/IdentityVerification"
 import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { updateInteractions } from "@/lib/actions/users"
@@ -43,6 +45,9 @@ export default async function Page() {
           It should be a personal email where we can reliably reach you.
         </div>
         <EmailConnection userId={userId} />
+        <div className="mt-4">
+          <EmailNotificationCheckbox userId={userId} />
+        </div>
       </div>
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
@@ -52,7 +57,10 @@ export default async function Page() {
           <Badge text="Private" size="md" />
         </div>
         <div className="mb-4 text-base text-secondary-foreground">
-          Complete KYC to add proof of personhood to your Atlas account.
+          This is your personal identity verification for Optimism governance
+          participation (citizens, delegates). <strong>This is not part of any grant application process.</strong>
+          If you need to verify your identity for a grant,
+          go to your project&apos;s or organization&apos;s Grant Address page instead.
         </div>
         <IdentityVerification userId={userId} kycUser={kycStatus.kycUser} />
       </div>

@@ -35,18 +35,11 @@ export class SafeService {
       const isDev = process.env.NEXT_PUBLIC_ENV === "dev"
       // Dev aligns to Sepolia L1 (EAS on Sepolia L1), Prod to OP Mainnet
       const chainId = isDev ? BigInt(11155111) : BigInt(10)
-      const txServiceUrlRoot = isDev
-        ? "https://safe-transaction-sepolia.safe.global"
-        : "https://safe-transaction-optimism.safe.global"
-      const txServiceUrl = isDev ? `${txServiceUrlRoot}/api` : txServiceUrlRoot
-      // Always set txServiceUrl for REST fallback, even without API key
-      this.txServiceUrl = txServiceUrl
       // Initialize SDK only when API key is available
       if (SAFE_API_KEY) {
         this.apiKit = new SafeApiKit({
           chainId,
           apiKey: SAFE_API_KEY,
-          txServiceUrl,
         } as any)
       } else {
         this.apiKit = null

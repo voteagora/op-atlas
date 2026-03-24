@@ -43,7 +43,7 @@ function OrganizationOnboardingDialog({
               Introducing Organizations
             </DialogTitle>
             <DialogDescription className="text-center text-base font-normal text-text-secondary flex flex-col gap-6">
-              Make an organization to group your team’s projects in one place.
+              Create an organization to group your team’s projects in one place.
             </DialogDescription>
           </div>
         </DialogHeader>
@@ -55,7 +55,7 @@ function OrganizationOnboardingDialog({
             type="button"
             variant="destructive"
           >
-            Make an organization
+            Create an organization
           </Button>
           <Button
             onClick={() => onOpenChange(false)}

@@ -4,6 +4,7 @@ import { FeedbackButton } from "@/components/common/FeedbackButton"
 import Dashboard from "@/components/dashboard"
 import { getUserById } from "@/db/users"
 import { getUserKycTeams } from "@/db/kyc"
+import { getCitizenSeasonByUser } from "@/db/citizenSeasons"
 import { getUserKYCStatus } from "@/lib/actions/userKyc"
 import { getUserOrganizations } from "@/lib/actions/organizations"
 import {
@@ -11,6 +12,7 @@ import {
   getApplications,
   getProjects,
 } from "@/lib/actions/projects"
+import { getActiveSeason } from "@/lib/seasons"
 import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 export const metadata = {
@@ -26,7 +28,16 @@ export default async function Page() {
     redirect("/")
   }
 
-  const [user, projects, applications, organizations, adminProjects, kycTeams, userKYCStatus] =
+  const [
+    user,
+    projects,
+    applications,
+    organizations,
+    adminProjects,
+    kycTeams,
+    userKYCStatus,
+    activeSeason,
+  ] =
     await Promise.all([
       getUserById(userId, db, session),
       getProjects(userId),
@@ -35,10 +46,40 @@ export default async function Page() {
       getAdminProjects(userId),
       getUserKycTeams(userId),
       getUserKYCStatus(userId),
+      getActiveSeason(),
     ])
 
   if (!user) {
     redirect("/")
+  }
+
+  let showCitizenReRegistrationCallout = false
+  let reRegistrationSeasonName: string | undefined
+
+  if (activeSeason) {
+    reRegistrationSeasonName = activeSeason.name
+
+    const previousSeasonNumber = Number(activeSeason.id) - 1
+    const previousSeasonId =
+      Number.isFinite(previousSeasonNumber) && previousSeasonNumber > 0
+        ? String(previousSeasonNumber)
+        : null
+
+    const [currentCitizenSeason, previousCitizenSeason] = await Promise.all([
+      getCitizenSeasonByUser({
+        seasonId: activeSeason.id,
+        userId,
+      }),
+      previousSeasonId
+        ? getCitizenSeasonByUser({
+            seasonId: previousSeasonId,
+            userId,
+          })
+        : Promise.resolve(null),
+    ])
+
+    showCitizenReRegistrationCallout =
+      !currentCitizenSeason && Boolean(previousCitizenSeason)
   }
 
   return (
@@ -51,6 +92,8 @@ export default async function Page() {
         adminProjects={adminProjects}
         kycTeams={kycTeams}
         userKYCStatus={userKYCStatus}
+        showCitizenReRegistrationCallout={showCitizenReRegistrationCallout}
+        reRegistrationSeasonName={reRegistrationSeasonName}
         className="w-full max-w-4xl"
       />
       <div className="fixed bottom-4 left-4">

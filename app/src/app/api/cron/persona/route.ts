@@ -12,13 +12,33 @@ export const revalidate = 0
 
 const MONITOR_SLUG = "cron-persona"
 
+function formatError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return String(error)
+}
+
 async function handlePersonaCron(request: NextRequest) {
-  await Promise.all([
-    // Since an Inquiry can exist without a Case, we need to process Inquiries first.
-    // An Inquiry that is associated with a Case should always take on a Case status.
-    getAndProcessPersonaInquiries(),
-    getAndProcessPersonaCases(),
-  ])
+  const failures: string[] = []
+  try {
+    // Since an Inquiry can exist without a Case, process inquiries first
+    // so case processing can reuse warmed inquiry cache data.
+    await getAndProcessPersonaInquiries()
+  } catch (error) {
+    failures.push(`inquiries: ${formatError(error)}`)
+  }
+
+  try {
+    await getAndProcessPersonaCases()
+  } catch (error) {
+    failures.push(`cases: ${formatError(error)}`)
+  }
+
+  if (failures.length > 0) {
+    throw new Error(`Persona cron sync failed - ${failures.join(" | ")}`)
+  }
 
   return Response.json({ status: "Persona cases and inquiries processed" })
 }

@@ -28,6 +28,12 @@ export const supportedChains: ChainInfo[] = [
     website: "https://www.superchain.eco/chains/bob",
   },
   {
+    id: "celo",
+    name: "Celo",
+    logo: "/assets/chain-logos/celo.png",
+    website: "https://www.superchain.eco/chains/celo",
+  },
+  {
     id: "epic",
     name: "Epic",
     logo: "/assets/chain-logos/Epic.png",

@@ -14,6 +14,7 @@ export type DialogType =
   | "governance_address"
   | "kyc_email_verification"
   | "find_my_kyc"
+  | "s9_registration"
 
 export type DialogProps<T> = {
   open: boolean

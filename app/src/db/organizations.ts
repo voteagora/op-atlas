@@ -739,6 +739,8 @@ export async function createOrganizationKycTeam(
   db: PrismaClient = prisma,
 ) {
   try {
+    const normalizedAddress = walletAddress.toLowerCase()
+
     const [orgProjects, orgProjectWithDeletedKycTeam] = await Promise.all([
       db.projectOrganization.findMany({
         where: {
@@ -796,21 +798,56 @@ export async function createOrganizationKycTeam(
       }),
     ])
 
-    // This means that user has recently stopped one of their streams
-    // and needs to create a new kyc team for the same stream
-    // and connect all projects to the same kyc team
     let createdKycTeam: { id: string; walletAddress: string }
 
     if (orgProjectWithDeletedKycTeam.length > 0) {
       createdKycTeam = await db.$transaction(async (tx) => {
+        // Check if there's a soft-deleted KYCTeam with the same wallet address.
+        // This handles the case where a user "starts over" but wants to reuse the same address
+        const existingSoftDeletedTeam = await tx.kYCTeam.findFirst({
+          where: {
+            walletAddress: normalizedAddress,
+            deletedAt: { not: null },
+          },
+          select: { id: true },
+        })
+
+        // If found, free up the wallet address by setting a placeholder.
+        // Note: Due to ON UPDATE CASCADE on SuperfluidStream.receiver FK,
+        // changing walletAddress will cascade to SuperfluidStream - we fix this below.
+        const placeholderAddress = existingSoftDeletedTeam
+          ? `_deleted_${existingSoftDeletedTeam.id}`
+          : null
+
+        if (existingSoftDeletedTeam) {
+          await tx.kYCTeam.update({
+            where: { id: existingSoftDeletedTeam.id },
+            data: {
+              walletAddress: placeholderAddress!,
+            },
+          })
+        }
+
         const kycTeam = await tx.kYCTeam.create({
           data: {
-            walletAddress: walletAddress.toLowerCase(),
+            walletAddress: normalizedAddress,
           },
         })
 
+        // Fix SuperfluidStream.receiver values that were cascaded to the placeholder.
+        if (placeholderAddress) {
+          await tx.superfluidStream.updateMany({
+            where: {
+              receiver: placeholderAddress,
+            },
+            data: {
+              receiver: normalizedAddress,
+            },
+          })
+        }
+
         await Promise.all([
-          // Connect all streams to the new kyc team
+          // Connect all reward streams to the new kyc team
           tx.rewardStream.updateMany({
             where: {
               id: {
@@ -855,11 +892,50 @@ export async function createOrganizationKycTeam(
       })
     } else {
       createdKycTeam = await db.$transaction(async (tx) => {
+        // Check if there's a soft-deleted KYCTeam with the same wallet address.
+        // This handles the case where a user "starts over" but wants to reuse the same address
+        // (e.g., updating signers on a multisig without changing the address).
+        const existingSoftDeletedTeam = await tx.kYCTeam.findFirst({
+          where: {
+            walletAddress: normalizedAddress,
+            deletedAt: { not: null },
+          },
+          select: { id: true },
+        })
+
+        // If found, free up the wallet address by setting a placeholder.
+        // Note: Due to ON UPDATE CASCADE on SuperfluidStream.receiver FK,
+        // changing walletAddress will cascade to SuperfluidStream - we fix this below.
+        const placeholderAddress = existingSoftDeletedTeam
+          ? `_deleted_${existingSoftDeletedTeam.id}`
+          : null
+
+        if (existingSoftDeletedTeam) {
+          await tx.kYCTeam.update({
+            where: { id: existingSoftDeletedTeam.id },
+            data: {
+              walletAddress: placeholderAddress!,
+            },
+          })
+        }
+
         const kycTeam = await tx.kYCTeam.create({
           data: {
-            walletAddress: walletAddress.toLowerCase(),
+            walletAddress: normalizedAddress,
           },
         })
+
+        // Fix SuperfluidStream.receiver values that were cascaded to the placeholder.
+        if (placeholderAddress) {
+          await tx.superfluidStream.updateMany({
+            where: {
+              receiver: placeholderAddress,
+            },
+            data: {
+              receiver: normalizedAddress,
+            },
+          })
+        }
 
         await Promise.all([
           // Connect all projects to the new kyc team

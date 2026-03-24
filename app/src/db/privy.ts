@@ -14,9 +14,11 @@ import {
   deleteUserEmails,
   getUserById,
   getUserByPrivyDid,
+  markUserEmailVerified,
   removeUserAddress,
   updateUser,
   updateUserEmail,
+  updateUserFarcasterId,
 } from "./users"
 
 import { linkOrphanedKYCUserToUser } from "./userKyc"
@@ -27,6 +29,9 @@ export const syncPrivyUser = async (
   const existingUser = await getUserByPrivyDid(privyUser.id)
 
   if (!existingUser) {
+    console.error(
+      `[Auth] No existing user found for Privy DID ${privyUser.id}`,
+    )
     return null
   }
 
@@ -54,31 +59,40 @@ export const syncPrivyUser = async (
     privyUser?.farcaster &&
     privyUser?.farcaster?.fid !== Number(existingUser.farcasterId)
   ) {
-    await updateUser({
-      id: existingUser.id,
-      farcasterId: String(privyUser.farcaster.fid),
-      privyDid: privyUser.id,
-      name: privyUser.farcaster.displayName || null,
-      username: privyUser.farcaster.username || null,
-      imageUrl: privyUser.farcaster.pfp || null,
-      bio: privyUser.farcaster.bio || null,
-    })
+    try {
+      await updateUserFarcasterId({
+        userId: existingUser.id,
+        farcasterId: String(privyUser.farcaster.fid),
+        name: privyUser.farcaster.displayName || null,
+        username: privyUser.farcaster.username || null,
+        imageUrl: privyUser.farcaster.pfp || null,
+        bio: privyUser.farcaster.bio || null,
+      })
+    } catch (error) {
+      console.error(
+        `[Auth] Failed to link Farcaster account (FID: ${privyUser.farcaster.fid}) to user ${existingUser.id}:`,
+        error,
+      )
+      // Don't throw - allow login to continue even if Farcaster link fails
+    }
   }
 
   // If farcaster was previously linked but now removed from privy, clear farcaster data
   if (!privyUser?.farcaster && existingUser.farcasterId) {
     try {
-      await updateUser({
-        id: existingUser.id,
+      await updateUserFarcasterId({
+        userId: existingUser.id,
         farcasterId: null,
         name: null,
-        // Reset username to a temporary one
         username: generateTemporaryUsername(existingUser.privyDid!),
         imageUrl: null,
         bio: null,
       })
     } catch (error) {
-      console.error("Failed to remove farcaster data:", error)
+      console.error(
+        `[Auth] Failed to clear farcasterId from user ${existingUser.id}:`,
+        error,
+      )
     }
   }
 
@@ -112,15 +126,22 @@ export const syncPrivyUser = async (
     }
   }
 
-  const privyEmail = privyUser?.email
-    ? privyUser?.email?.address?.toLowerCase()
-    : null
+  const privyEmail = privyUser?.email?.address?.toLowerCase() ?? null
+  // Check latestVerifiedAt from linkedAccounts to confirm email is verified in Privy
+  const privyEmailAccount = privyUser?.linkedAccounts?.find(
+    (account) => account.type === "email",
+  )
+  const privyEmailVerified =
+    privyEmailAccount && "latestVerifiedAt" in privyEmailAccount
+      ? Boolean(privyEmailAccount.latestVerifiedAt)
+      : false
   const dbEmail = existingUser?.emails[0]?.email
     ? existingUser.emails[0].email.toLowerCase()
     : null
+  const dbEmailVerified = existingUser?.emails[0]?.verified ?? false
 
   //  Add new or update existing email
-  if (privyEmail && privyEmail !== dbEmail) {
+  if (privyEmail && privyEmailVerified && privyEmail !== dbEmail) {
     try {
       await updateUserEmail({
         id: existingUser.id,
@@ -141,6 +162,15 @@ export const syncPrivyUser = async (
     } catch (error) {
       console.error("Failed to update email:", error)
     }
+  } else if (privyEmail && privyEmailVerified && privyEmail === dbEmail && !dbEmailVerified) {
+    // Email matches but is not verified in DB - mark it as verified
+    // This handles cases where the email was added through a different flow
+    // and never marked as verified, but Privy has it verified
+    try {
+      await markUserEmailVerified(privyEmail)
+    } catch (error) {
+      console.error("Failed to verify existing email:", error)
+    }
   }
 
   // Remove existing email if it doesn't exist in Privy
@@ -154,12 +184,20 @@ export const syncPrivyUser = async (
     }
   }
 
-  // Update Discord and Github
-  await updateUser({
-    id: existingUser.id,
-    discord: privyUser?.discord?.username || null,
-    github: privyUser?.github?.username || null,
-  })
+  // Update Discord, Github, and Twitter
+  try {
+    await updateUser({
+      id: existingUser.id,
+      discord: privyUser?.discord?.username || null,
+      github: privyUser?.github?.username || null,
+      twitter: privyUser?.twitter?.username || null,
+    })
+  } catch (error) {
+    console.error(
+      `[Auth] Failed to update social accounts for user ${existingUser.id}:`,
+      error,
+    )
+  }
 
   return await getUserById(existingUser.id)
 }

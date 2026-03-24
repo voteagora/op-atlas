@@ -19,10 +19,10 @@ const useMyVote = (proposalId: string) => {
   } = useQuery({
     queryKey: [MY_VOTE_QUERY_KEY, proposalId, citizen?.address],
     queryFn: () => {
-      if (!citizen?.id) return null
-      return fetchVoteForCitizen(proposalId, citizen.id)
+      if (!citizen?.address) return null
+      return fetchVoteForCitizen(proposalId, citizen.address)
     },
-    enabled: !!citizen?.id && !!citizen?.address,
+    enabled: !!citizen?.address,
   })
 
   const invalidate = () => {

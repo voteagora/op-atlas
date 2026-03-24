@@ -65,28 +65,31 @@ export const VerifiedAddress = ({
     toast.success("Address copied")
   }
 
+  const setPrimaryAddress = async (candidateAddress: string) => {
+    const normalizedAddress = getAddress(candidateAddress)
+    await makeUserAddressPrimaryAction(normalizedAddress)
+    await invalidateUser()
+  }
+
   const onSetPrimary = (address: string) => {
-    toast.promise(
-      makeUserAddressPrimaryAction(getAddress(address)).then(() => {
-        invalidateUser()
-      }),
-      {
-        loading: "Setting governance address...",
-        success: "Governance address set",
-        error: "Failed to set governance address",
-      },
-    )
+    toast.promise(setPrimaryAddress(address), {
+      loading: "Setting governance address...",
+      success: "Governance address set",
+      error: "Failed to set governance address",
+    })
   }
 
   const normalizedAddress =
-    address && isAddress(address) ? (getAddress(address) as `0x${string}`) : undefined
+    address && isAddress(address)
+      ? (getAddress(address) as `0x${string}`)
+      : undefined
   const { data: ensName } = useEnsName(normalizedAddress)
 
   const displayLabel = ensName
     ? null
     : shouldShortenAddress
-      ? shortenAddress(address)
-      : address
+    ? shortenAddress(address)
+    : address
 
   return (
     <div className="flex items-center gap-1.5 group">

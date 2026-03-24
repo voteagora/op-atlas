@@ -104,6 +104,7 @@ const config = {
         callout: {
           DEFAULT: "#D6E4FF",
           foreground: "#3374DB",
+          strong: "#B8CCFF",
         },
         contrast: {
           DEFAULT: "#05060B",

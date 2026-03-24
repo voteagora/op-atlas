@@ -10,6 +10,12 @@ export const CITIZEN_TAGS = {
   [CITIZEN_TYPES.app]: "S8_App_Citizen",
 } as const
 
+export const S9_CITIZEN_TAGS = {
+  [CITIZEN_TYPES.user]: "S9_User_Citizen",
+  [CITIZEN_TYPES.chain]: "S9_Chain_Citizen",
+  [CITIZEN_TYPES.app]: "S9_App_Citizen",
+} as const
+
 export const CITIZEN_ATTESTATION_CODE = {
   [CITIZEN_TYPES.chain]: "5.1",
   [CITIZEN_TYPES.app]: "5.2",
