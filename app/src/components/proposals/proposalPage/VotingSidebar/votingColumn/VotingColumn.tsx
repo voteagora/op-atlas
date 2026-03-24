@@ -264,7 +264,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     }
   }, [])
 
-
   const setShowConfetti = useConfetti()
   const brightColors = useMemo(
     () => [
@@ -465,7 +464,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     await closeMiradorTrace(trace, reason)
     voteTraceRef.current = null
-      }
+  }
 
   useEffect(() => {
     setHasCheckedWallet(false)
@@ -485,7 +484,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           })
           void closeMiradorTrace(trace, "Voting component unmounted")
           voteTraceRef.current = null
-                    pendingUnmountCloseTimeoutRef.current = null
+          pendingUnmountCloseTimeoutRef.current = null
         }, 0)
       }
     }

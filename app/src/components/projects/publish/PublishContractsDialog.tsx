@@ -217,7 +217,7 @@ export function PublishContractsDialog({
 
     await closeMiradorTrace(trace, reason)
     publishTraceRef.current = null
-      }
+  }
 
   const loadProgress = async () => {
     addMiradorEvent(
@@ -520,7 +520,7 @@ export function PublishContractsDialog({
         addMiradorEvent(trace, "project_publish_dialog_closed", { projectId })
         void closeMiradorTrace(trace, "Project publish dialog closed")
         publishTraceRef.current = null
-              }
+      }
       return
     }
 
@@ -546,13 +546,7 @@ export function PublishContractsDialog({
 
     publishTraceRef.current = trace
     addMiradorEvent(trace, "project_publish_dialog_opened", { projectId })
-  }, [
-    cancelPendingUnmountClose,
-    open,
-    projectId,
-    session?.user?.id,
-    viewerId,
-  ])
+  }, [cancelPendingUnmountClose, open, projectId, session?.user?.id, viewerId])
 
   useEffect(() => {
     return () => {
@@ -569,7 +563,7 @@ export function PublishContractsDialog({
           })
           void closeMiradorTrace(trace, "Project publish dialog unmounted")
           publishTraceRef.current = null
-                    pendingUnmountCloseTimeoutRef.current = null
+          pendingUnmountCloseTimeoutRef.current = null
         }, 0)
       }
     }

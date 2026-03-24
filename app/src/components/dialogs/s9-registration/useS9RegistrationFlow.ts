@@ -242,7 +242,7 @@ export function useS9RegistrationFlow({
 
       await closeMiradorTrace(trace, reason)
       registrationTraceRef.current = null
-          },
+    },
     [cancelPendingUnmountClose],
   )
 
@@ -267,7 +267,7 @@ export function useS9RegistrationFlow({
         })
         void closeMiradorTrace(trace, "S9 registration dialog closed")
         registrationTraceRef.current = null
-              }
+      }
       return
     }
 
@@ -296,13 +296,7 @@ export function useS9RegistrationFlow({
       seasonId,
       stage: RegistrationStage.ConnectSocial,
     })
-  }, [
-    cancelPendingUnmountClose,
-    open,
-    seasonId,
-    user?.farcasterId,
-    userId,
-  ])
+  }, [cancelPendingUnmountClose, open, seasonId, user?.farcasterId, userId])
 
   useEffect(() => {
     return () => {
@@ -319,7 +313,7 @@ export function useS9RegistrationFlow({
           })
           void closeMiradorTrace(trace, "S9 registration hook unmounted")
           registrationTraceRef.current = null
-                    pendingUnmountCloseTimeoutRef.current = null
+          pendingUnmountCloseTimeoutRef.current = null
         }, 0)
       }
     }
@@ -592,7 +586,7 @@ export function useS9RegistrationFlow({
         tags: ["citizen", "registration", "s9", "frontend"],
       })
       registrationTraceRef.current = trace
-            addMiradorEvent(trace, "s9_registration_trace_restarted", {
+      addMiradorEvent(trace, "s9_registration_trace_restarted", {
         seasonId,
       })
     }
