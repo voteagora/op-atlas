@@ -38,11 +38,11 @@ importers:
         specifier: ^1.0.59
         version: 1.0.59
       '@miradorlabs/nodejs-sdk':
-        specifier: ^1.7.0
-        version: 1.7.0
+        specifier: ^2.0.0
+        version: 2.0.0
       '@miradorlabs/web-sdk':
-        specifier: ^1.6.0
-        version: 1.6.0
+        specifier: ^2.0.0
+        version: 2.0.0
       '@next/third-parties':
         specifier: ^15.1.4
         version: 15.1.4(next@14.2.35(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.89.2))(react@18.3.1)
@@ -2166,11 +2166,14 @@ packages:
   '@microsoft/fetch-event-source@2.0.1':
     resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==}
 
-  '@miradorlabs/nodejs-sdk@1.7.0':
-    resolution: {integrity: sha512-R0LLXsUPx6LOh1zXZnAhcO/UGhxjKjWnm2VKtrGz5n4mVe0vWK9zJtrdB1Hzw4ceJVzkiujXGBtLAUjuAPR7ww==}
+  '@miradorlabs/nodejs-sdk@2.0.0':
+    resolution: {integrity: sha512-uU19H53l+GaeoS40HfVk93DNykJ7vjiPYUiXPZKq7S9cfMN+Qeb+hiX4Z71NGmYdN1NDmdDWTydADUabwvoLaw==}
 
-  '@miradorlabs/web-sdk@1.6.0':
-    resolution: {integrity: sha512-Fg7+dN9p72g3AU5901mruk0nbTcYdoOQy9S4F+7mgiwjoyrFYS+C7gKV2jvXcdiYez+XRf1pdvliGwKD/rw6Pg==}
+  '@miradorlabs/plugins@1.0.1':
+    resolution: {integrity: sha512-qJvJwlCNNxB26dykkuFC2oQk3iizeJon/+EondmGKe2FFRonO2Ae6WxVZwwpT7eHgIDd7BT9PSA7JI+y9ux0sQ==}
+
+  '@miradorlabs/web-sdk@2.0.0':
+    resolution: {integrity: sha512-UiA7BZSh09k066s96DX6Ze8+hsjSKq8NjaeFMtes7/CGECtPfLmHrHM5qMc1uPfSWg5WJyx5bcvnWYrZVCp66Q==}
 
   '@motionone/animation@10.18.0':
     resolution: {integrity: sha512-9z2p5GFGCm0gBsZbi8rVMOAJCtw1WqBTIPw3ozk06gDvZInBPIsQcHgYogEJ4yuHJ+akuW8g1SEIOpTOvYs8hw==}
@@ -8987,13 +8990,13 @@ packages:
       typescript:
         optional: true
 
-  mirador-gateway-ingest-grpc-web@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.6.tgz:
-    resolution: {tarball: https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.6.tgz}
-    version: 1.0.6
+  mirador-gateway-ingest-grpc-web@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.7.tgz:
+    resolution: {tarball: https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.7.tgz}
+    version: 1.0.7
 
-  mirador-gateway-ingest@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.6.tgz:
-    resolution: {tarball: https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.6.tgz}
-    version: 1.0.6
+  mirador-gateway-ingest@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.7.tgz:
+    resolution: {tarball: https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.7.tgz}
+    version: 1.0.7
 
   mitt@3.0.1:
     resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
@@ -14696,18 +14699,22 @@ snapshots:
 
   '@microsoft/fetch-event-source@2.0.1': {}
 
-  '@miradorlabs/nodejs-sdk@1.7.0':
+  '@miradorlabs/nodejs-sdk@2.0.0':
     dependencies:
       '@grpc/grpc-js': 1.14.3
+      '@miradorlabs/plugins': 1.0.1
       google-protobuf: 4.0.2
-      mirador-gateway-ingest: https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.6.tgz
+      mirador-gateway-ingest: https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.7.tgz
       rxjs: 7.8.2
 
-  '@miradorlabs/web-sdk@1.6.0':
+  '@miradorlabs/plugins@1.0.1': {}
+
+  '@miradorlabs/web-sdk@2.0.0':
     dependencies:
+      '@miradorlabs/plugins': 1.0.1
       google-protobuf: 3.21.4
       grpc-web: 2.0.2
-      mirador-gateway-ingest-web: mirador-gateway-ingest-grpc-web@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.6.tgz
+      mirador-gateway-ingest-web: mirador-gateway-ingest-grpc-web@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.7.tgz
       rxjs: 7.8.2
 
   '@motionone/animation@10.18.0':
@@ -24071,9 +24078,9 @@ snapshots:
     optionalDependencies:
       typescript: 5.7.2
 
-  mirador-gateway-ingest-grpc-web@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.6.tgz: {}
+  mirador-gateway-ingest-grpc-web@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/grpc-web/mirador-gateway-ingest-grpc-web-1.0.7.tgz: {}
 
-  mirador-gateway-ingest@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.6.tgz: {}
+  mirador-gateway-ingest@https://storage.googleapis.com/mirador-shd-packages/gateway/ingest/nodejs/mirador-gateway-ingest-1.0.7.tgz: {}
 
   mitt@3.0.1: {}
 

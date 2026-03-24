@@ -1,6 +1,11 @@
 import "server-only"
 
-import type { Trace as MiradorServerTrace } from "@miradorlabs/nodejs-sdk"
+import type {
+  Trace as MiradorServerTrace,
+  Web3Methods,
+} from "@miradorlabs/nodejs-sdk"
+
+type MiradorServerTraceWithWeb3 = MiradorServerTrace & Web3Methods
 
 import { normalizeMiradorAttributePayload } from "./attributeNormalization"
 import { getMiradorServerClient } from "./serverClient"
@@ -38,8 +43,6 @@ type StartServerTraceOptions = {
   attributes?: MiradorAttributeMap
   captureStackTrace?: boolean
   autoKeepAlive?: boolean
-  maxRetries?: number
-  retryBackoff?: number
 }
 
 type AppendServerTraceEventArgs = {
@@ -55,10 +58,24 @@ type AppendServerTraceEventArgs = {
   txInputData?: string | string[]
 }
 
-const MIRADOR_SERVER_UPDATE_MAX_RETRIES = 3
-const MIRADOR_SERVER_UPDATE_RETRY_BASE_MS = 200
 const MIRADOR_SERVER_DEFAULT_TRACE_NAME = "AgoraServerTrace"
 let hasWarnedMissingTraceId = false
+
+type EventSeverity = "info" | "warn" | "error"
+
+function inferEventSeverity(eventName: string): EventSeverity {
+  if (eventName.endsWith("_failed") || eventName.endsWith("_error")) {
+    return "error"
+  }
+  if (
+    eventName.endsWith("_skipped") ||
+    eventName.includes("_mismatch") ||
+    eventName.endsWith("_replaced")
+  ) {
+    return "warn"
+  }
+  return "info"
+}
 
 function buildContextAttributes(
   traceContext?: MiradorTraceContext | null,
@@ -170,8 +187,6 @@ export function startMiradorServerTrace({
   attributes,
   captureStackTrace = false,
   autoKeepAlive = true,
-  maxRetries = MIRADOR_SERVER_UPDATE_MAX_RETRIES,
-  retryBackoff = MIRADOR_SERVER_UPDATE_RETRY_BASE_MS,
 }: StartServerTraceOptions): MiradorServerTrace | null {
   const client = getMiradorServerClient()
   if (!client) {
@@ -183,8 +198,6 @@ export function startMiradorServerTrace({
       name,
       captureStackTrace,
       autoKeepAlive,
-      maxRetries,
-      retryBackoff,
     })
 
     applyTracePayload(
@@ -250,9 +263,6 @@ export async function appendServerTraceEvent({
         name: traceContext?.flow ?? MIRADOR_SERVER_DEFAULT_TRACE_NAME,
         traceId,
         captureStackTrace: false,
-        maxRetries: MIRADOR_SERVER_UPDATE_MAX_RETRIES,
-        retryBackoff: MIRADOR_SERVER_UPDATE_RETRY_BASE_MS,
-        // Server appenders correlate to a trace they do not own.
         autoKeepAlive: false,
       })
     } catch (error) {
@@ -268,18 +278,21 @@ export async function appendServerTraceEvent({
   try {
     applyTracePayload(targetTrace, traceContext, attributes, tags)
 
-    targetTrace.addEvent(eventName, toEventDetails(details))
+    const severity = inferEventSeverity(eventName)
+    targetTrace[severity](eventName, toEventDetails(details))
+
+    const web3Trace = targetTrace as MiradorServerTraceWithWeb3
 
     for (const inputData of normalizeTxInputData(txInputData)) {
-      targetTrace.addTxInputData(inputData)
+      web3Trace.web3.evm.addInputData(inputData)
     }
 
     for (const hint of normalizeTxHashHints(txHashHints)) {
-      targetTrace.addTxHint(hint.txHash, hint.chain, hint.details)
+      web3Trace.web3.evm.addTxHint(hint.txHash, hint.chain, hint.details)
     }
 
     for (const hint of normalizeSafeMessageHints(safeMessageHints)) {
-      targetTrace.addSafeMsgHint(
+      web3Trace.web3.safe.addMsgHint(
         hint.safeMessageHash,
         hint.chain,
         hint.details ?? undefined,
@@ -287,7 +300,7 @@ export async function appendServerTraceEvent({
     }
 
     for (const hint of normalizeSafeTxHints(safeTxHints)) {
-      targetTrace.addSafeTxHint(hint.safeTxHash, hint.chain, hint.details)
+      web3Trace.web3.safe.addTxHint(hint.safeTxHash, hint.chain, hint.details)
     }
 
     // Flush immediately so the request-scoped append is enqueued in this turn.

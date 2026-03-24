@@ -1,6 +1,9 @@
 "use client"
 
-import { Client as MiradorWebClient } from "@miradorlabs/web-sdk/dist/index.esm.js"
+import {
+  Client as MiradorWebClient,
+  Web3Plugin,
+} from "@miradorlabs/web-sdk/dist/index.esm.js"
 
 import { isMiradorEnabled } from "./enabled"
 
@@ -27,7 +30,17 @@ export function configureMiradorWebClient({
   }
 
   try {
-    miradorClient = new MiradorWebClient(apiKey)
+    miradorClient = new MiradorWebClient(apiKey, {
+      plugins: [Web3Plugin()],
+      callbacks: {
+        onFlushError: (error) => {
+          console.error("[mirador] web flush error", error)
+        },
+        onDropped: (count, reason) => {
+          console.warn("[mirador] web trace dropped", { count, reason })
+        },
+      },
+    })
     configuredApiKey = apiKey
   } catch (error) {
     console.error("Failed to initialize Mirador web client", error)

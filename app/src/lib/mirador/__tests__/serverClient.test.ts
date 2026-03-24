@@ -1,45 +1,57 @@
 jest.mock("server-only", () => ({}))
 
-jest.mock("@miradorlabs/nodejs-sdk", () => ({
-  Client: jest.fn().mockImplementation((apiKey: string) => ({ apiKey })),
+jest.mock("@sentry/nextjs", () => ({
+  captureException: jest.fn(),
 }))
+
+jest.mock("@/lib/metrics", () => ({
+  recordError: jest.fn(),
+}))
+
+const mockClient = { apiKey: "server-key" }
+jest.mock("@miradorlabs/nodejs-sdk", () => ({
+  Client: jest.fn(() => mockClient),
+  Web3Plugin: jest.fn(() => ({ name: "web3" })),
+}))
+
+import { Client } from "@miradorlabs/nodejs-sdk"
+import { getMiradorServerClient } from "../serverClient"
+
+const ClientMock = Client as jest.MockedClass<typeof Client>
 
 describe("serverClient", () => {
   const originalMiradorEnabled = process.env.NEXT_PUBLIC_MIRADOR_ENABLED
   const originalServerApiKey = process.env.MIRADOR_SERVER_API_KEY
-
-  beforeEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
-    delete process.env.NEXT_PUBLIC_MIRADOR_ENABLED
-    delete process.env.MIRADOR_SERVER_API_KEY
-  })
 
   afterAll(() => {
     process.env.NEXT_PUBLIC_MIRADOR_ENABLED = originalMiradorEnabled
     process.env.MIRADOR_SERVER_API_KEY = originalServerApiKey
   })
 
-  it("returns null unless tracing is explicitly enabled", async () => {
+  it("returns null unless tracing is explicitly enabled", () => {
+    delete process.env.NEXT_PUBLIC_MIRADOR_ENABLED
     process.env.MIRADOR_SERVER_API_KEY = "server-key"
 
-    const { getMiradorServerClient } = await import("../serverClient")
-    const MiradorServerClientMock = jest.requireMock("@miradorlabs/nodejs-sdk")
-      .Client as jest.Mock
-
     expect(getMiradorServerClient()).toBeNull()
-    expect(MiradorServerClientMock).not.toHaveBeenCalled()
   })
 
-  it("creates a server client when tracing is explicitly enabled", async () => {
+  it("creates a server client with Web3Plugin when tracing is enabled", () => {
     process.env.NEXT_PUBLIC_MIRADOR_ENABLED = "true"
     process.env.MIRADOR_SERVER_API_KEY = "server-key"
 
-    const { getMiradorServerClient } = await import("../serverClient")
-    const MiradorServerClientMock = jest.requireMock("@miradorlabs/nodejs-sdk")
-      .Client as jest.Mock
-
-    expect(getMiradorServerClient()).toEqual({ apiKey: "server-key" })
-    expect(MiradorServerClientMock).toHaveBeenCalledWith("server-key")
+    const client = getMiradorServerClient()
+    expect(client).not.toBeNull()
+    expect(ClientMock).toHaveBeenCalledWith(
+      "server-key",
+      expect.objectContaining({
+        plugins: expect.arrayContaining([
+          expect.objectContaining({ name: "web3" }),
+        ]),
+        callbacks: expect.objectContaining({
+          onFlushError: expect.any(Function),
+          onDropped: expect.any(Function),
+        }),
+      }),
+    )
   })
 })

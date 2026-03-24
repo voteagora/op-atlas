@@ -41,7 +41,7 @@ export const useCitizenAttest = (userId: string, redirectUrl?: string) => {
 
       try {
         const loadingToast = toast.loading("Issuing citizen badge")
-        const traceContext = await buildFrontendTraceContext(trace, {
+        const traceContext = buildFrontendTraceContext(trace, {
           flow: MIRADOR_FLOW.citizenS8Registration,
           step: "s8_registration_submit",
           userId,

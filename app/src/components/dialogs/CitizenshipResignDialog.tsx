@@ -57,7 +57,7 @@ export default function CitizenshipResignDialog({
       })
 
       try {
-        const traceContext = await buildFrontendTraceContext(trace, {
+        const traceContext = buildFrontendTraceContext(trace, {
           flow: MIRADOR_FLOW.citizenResign,
           step: "citizen_resign_submit",
           userId: citizen.userId,

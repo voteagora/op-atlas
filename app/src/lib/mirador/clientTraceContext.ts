@@ -1,9 +1,8 @@
 "use client"
 
-import { MiradorFlow, MiradorTraceContext } from "./types"
-import { flushAndWaitForMiradorTraceId } from "./webTrace"
+import type { Trace } from "@miradorlabs/web-sdk/dist/index.esm.js"
 
-type TraceLike = Parameters<typeof flushAndWaitForMiradorTraceId>[0]
+import { MiradorFlow, MiradorTraceContext } from "./types"
 
 type BuildFrontendTraceContextOptions = Omit<
   MiradorTraceContext,
@@ -14,16 +13,15 @@ type BuildFrontendTraceContextOptions = Omit<
   source?: "frontend"
 }
 
-export async function buildFrontendTraceContext(
-  trace: TraceLike,
+export function buildFrontendTraceContext(
+  trace: Trace | null | undefined,
   context: BuildFrontendTraceContextOptions,
-): Promise<MiradorTraceContext | undefined> {
+): MiradorTraceContext | undefined {
   if (!trace) {
     return undefined
   }
 
-  const traceId =
-    trace.getTraceId() ?? (await flushAndWaitForMiradorTraceId(trace))
+  const traceId = trace.getTraceId()
   if (!traceId) {
     return undefined
   }

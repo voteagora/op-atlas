@@ -299,7 +299,7 @@ export default function MakeOrganizationForm({
               organizationName: newValues.name,
               teamMembers: team.length,
             })
-            traceContext = await buildFrontendTraceContext(trace, {
+            traceContext = buildFrontendTraceContext(trace, {
               flow: MIRADOR_FLOW.organizationCreation,
               step: "organization_creation_submit",
               userId: user.id,

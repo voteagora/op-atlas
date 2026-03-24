@@ -50,7 +50,6 @@ import {
   addMiradorTxHint,
   addMiradorTxInputData,
   closeMiradorTrace,
-  flushAndWaitForMiradorTraceId,
   startMiradorTrace,
 } from "@/lib/mirador/webTrace"
 import { ProposalData } from "@/lib/proposals"
@@ -256,7 +255,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isCheckingWallet, setIsCheckingWallet] = useState<boolean>(false)
   const [hasCheckedWallet, setHasCheckedWallet] = useState<boolean>(false)
   const voteTraceRef = useRef<ReturnType<typeof startMiradorTrace>>(null)
-  const voteTraceIdRef = useRef<string | null>(null)
   const pendingUnmountCloseTimeoutRef = useRef<number | null>(null)
 
   const cancelPendingUnmountClose = useCallback(() => {
@@ -265,17 +263,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       pendingUnmountCloseTimeoutRef.current = null
     }
   }, [])
-
-  const syncVoteTraceIdForActiveTrace = useCallback(
-    (trace: MiradorTraceInstance) => {
-      void flushAndWaitForMiradorTraceId(trace).then((traceId) => {
-        if (traceId && voteTraceRef.current === trace) {
-          voteTraceIdRef.current = traceId
-        }
-      })
-    },
-    [],
-  )
 
   const setShowConfetti = useConfetti()
   const brightColors = useMemo(
@@ -418,38 +405,17 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
     })
 
     voteTraceRef.current = trace
-    voteTraceIdRef.current = null
 
     addMiradorEvent(trace, "vote_flow_started", {
       proposalId: proposalData.offchainProposalId,
       selectedVoteType: vote.voteType,
       selectedVoteCount: vote.selections?.length ?? 0,
     })
-    if (trace) {
-      syncVoteTraceIdForActiveTrace(trace)
-    }
 
     return trace
   }
 
-  const ensureVoteTraceId = async () => {
-    const activeTrace = voteTraceRef.current
-    if (!activeTrace) {
-      return null
-    }
-
-    const currentTraceId = activeTrace.getTraceId()
-    if (currentTraceId) {
-      voteTraceIdRef.current = currentTraceId
-      return currentTraceId
-    }
-
-    const traceId = await flushAndWaitForMiradorTraceId(activeTrace)
-    if (traceId && voteTraceRef.current === activeTrace) {
-      voteTraceIdRef.current = traceId
-      return traceId
-    }
-
+  const getVoteTraceId = () => {
     return voteTraceRef.current?.getTraceId() ?? null
   }
 
@@ -498,7 +464,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     await closeMiradorTrace(trace, reason)
     voteTraceRef.current = null
-    voteTraceIdRef.current = null
   }
 
   useEffect(() => {
@@ -519,7 +484,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           })
           void closeMiradorTrace(trace, "Voting component unmounted")
           voteTraceRef.current = null
-          voteTraceIdRef.current = null
           pendingUnmountCloseTimeoutRef.current = null
         }, 0)
       }
@@ -972,7 +936,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               walletAddress: signerAddress,
             })
 
-            const traceId = await ensureVoteTraceId()
+            const traceId = getVoteTraceId()
 
             attestationId = await submitVoteWithTrace(traceId, {
               data: attestationData.data,
