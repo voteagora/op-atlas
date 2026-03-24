@@ -1,12 +1,8 @@
 "use client"
 
-import type { Trace } from "@miradorlabs/web-sdk/dist/index.esm.js"
+import type { Trace, Web3Methods } from "@miradorlabs/web-sdk/dist/index.esm.js"
 
 import { normalizeMiradorAttributePayload } from "./attributeNormalization"
-import {
-  MIRADOR_DEFAULT_TRACE_ID_WAIT_INTERVAL_MS,
-  MIRADOR_DEFAULT_TRACE_ID_WAIT_TIMEOUT_MS,
-} from "./constants"
 import {
   MiradorAttributeMap,
   MiradorChainName,
@@ -14,6 +10,8 @@ import {
   MiradorTraceContext,
 } from "./types"
 import { getMiradorWebClient } from "./webClient"
+
+type MiradorTrace = Trace & Web3Methods
 
 type MiradorTransactionLike = {
   hash: string
@@ -31,8 +29,6 @@ type StartMiradorTraceOptions = {
   includeUserMeta?: boolean
   autoClose?: boolean
   autoKeepAlive?: boolean
-  maxRetries?: number
-  retryBackoff?: number
 }
 
 function applyContextAttributes(trace: Trace, context?: MiradorTraceContext) {
@@ -74,7 +70,7 @@ function applyAttributes(trace: Trace, attributes?: MiradorAttributeMap) {
 
 export function startMiradorTrace(
   options: StartMiradorTraceOptions,
-): Trace | null {
+): MiradorTrace | null {
   const client = getMiradorWebClient()
   if (!client) {
     return null
@@ -91,8 +87,6 @@ export function startMiradorTrace(
       includeUserMeta: options.includeUserMeta,
       autoClose: options.autoClose,
       autoKeepAlive,
-      maxRetries: options.maxRetries,
-      retryBackoff: options.retryBackoff,
     })
 
     applyContextAttributes(trace, {
@@ -106,11 +100,27 @@ export function startMiradorTrace(
       trace.addTags(options.tags)
     }
 
-    return trace
+    return trace as MiradorTrace
   } catch (error) {
     console.error("Failed to create Mirador trace", error)
     return null
   }
+}
+
+type EventSeverity = "info" | "warn" | "error"
+
+function inferEventSeverity(eventName: string): EventSeverity {
+  if (eventName.endsWith("_failed") || eventName.endsWith("_error")) {
+    return "error"
+  }
+  if (
+    eventName.endsWith("_skipped") ||
+    eventName.includes("_mismatch") ||
+    eventName.endsWith("_replaced")
+  ) {
+    return "warn"
+  }
+  return "info"
 }
 
 export function addMiradorEvent(
@@ -123,7 +133,8 @@ export function addMiradorEvent(
   }
 
   try {
-    trace.addEvent(eventName, details)
+    const severity = inferEventSeverity(eventName)
+    trace[severity](eventName, details)
   } catch (error) {
     console.error("Failed to add Mirador event", { eventName, error })
   }
@@ -145,7 +156,7 @@ export function addMiradorAttributes(
 }
 
 export function addMiradorTxHint(
-  trace: Trace | null | undefined,
+  trace: MiradorTrace | null | undefined,
   txHash: string,
   chain: MiradorChainName,
   details?: string,
@@ -155,14 +166,14 @@ export function addMiradorTxHint(
   }
 
   try {
-    trace.addTxHint(txHash, chain, details)
+    trace.web3.evm.addTxHint(txHash, chain, details)
   } catch (error) {
     console.error("Failed to add Mirador tx hint", { txHash, chain, error })
   }
 }
 
 export function addMiradorTx(
-  trace: Trace | null | undefined,
+  trace: MiradorTrace | null | undefined,
   tx: MiradorTransactionLike | null | undefined,
   chain?: MiradorChainName,
 ) {
@@ -171,7 +182,7 @@ export function addMiradorTx(
   }
 
   try {
-    trace.addTx(tx as any, chain)
+    trace.web3.evm.addTx(tx as any, chain)
   } catch (error) {
     console.error("Failed to add Mirador transaction", {
       txHash: tx.hash,
@@ -182,7 +193,7 @@ export function addMiradorTx(
 }
 
 export function addMiradorTxInputData(
-  trace: Trace | null | undefined,
+  trace: MiradorTrace | null | undefined,
   inputData: string | null | undefined,
 ) {
   if (!trace || !inputData || inputData === "0x") {
@@ -190,14 +201,14 @@ export function addMiradorTxInputData(
   }
 
   try {
-    trace.addTxInputData(inputData)
+    trace.web3.evm.addInputData(inputData)
   } catch (error) {
     console.error("Failed to add Mirador tx input data", { error })
   }
 }
 
 export function addMiradorSafeMsgHint(
-  trace: Trace | null | undefined,
+  trace: MiradorTrace | null | undefined,
   safeMessageHash: string,
   chain: MiradorChainName,
   details?: string,
@@ -207,7 +218,7 @@ export function addMiradorSafeMsgHint(
   }
 
   try {
-    trace.addSafeMsgHint(safeMessageHash, chain, details)
+    trace.web3.safe.addMsgHint(safeMessageHash, chain, details)
   } catch (error) {
     console.error("Failed to add Mirador safe message hint", {
       safeMessageHash,
@@ -218,7 +229,7 @@ export function addMiradorSafeMsgHint(
 }
 
 export function addMiradorSafeTxHint(
-  trace: Trace | null | undefined,
+  trace: MiradorTrace | null | undefined,
   safeTxHash: string,
   chain: MiradorChainName,
   details?: string,
@@ -228,7 +239,7 @@ export function addMiradorSafeTxHint(
   }
 
   try {
-    trace.addSafeTxHint(safeTxHash, chain, details)
+    trace.web3.safe.addTxHint(safeTxHash, chain, details)
   } catch (error) {
     console.error("Failed to add Mirador safe tx hint", {
       safeTxHash,
@@ -250,38 +261,19 @@ export function flushMiradorTrace(trace: Trace | null | undefined) {
   }
 }
 
+export function getMiradorTraceId(
+  trace: Trace | null | undefined,
+): string | null {
+  return trace?.getTraceId() ?? null
+}
+
+/**
+ * @deprecated Use getMiradorTraceId() — v2 generates trace IDs at creation time.
+ */
 export async function flushAndWaitForMiradorTraceId(
   trace: Trace | null | undefined,
-  timeoutMs = MIRADOR_DEFAULT_TRACE_ID_WAIT_TIMEOUT_MS,
-  pollIntervalMs = MIRADOR_DEFAULT_TRACE_ID_WAIT_INTERVAL_MS,
 ): Promise<string | null> {
-  if (!trace) {
-    return null
-  }
-
-  const currentTraceId = trace.getTraceId()
-  if (currentTraceId) {
-    return currentTraceId
-  }
-
-  try {
-    trace.flush()
-  } catch (error) {
-    console.error("Failed to flush trace before waiting for trace ID", error)
-  }
-
-  const start = Date.now()
-
-  while (Date.now() - start <= timeoutMs) {
-    const traceId = trace.getTraceId()
-    if (traceId) {
-      return traceId
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
-  }
-
-  return trace.getTraceId()
+  return getMiradorTraceId(trace)
 }
 
 export async function closeMiradorTrace(
@@ -292,73 +284,11 @@ export async function closeMiradorTrace(
     return
   }
 
-  const traceId = trace.getTraceId()
-  const CLOSE_STEP_TIMEOUT_MS = 1_500
-  const CLOSE_TIMEOUT = Symbol("mirador-close-timeout")
-
-  const awaitWithTimeout = async <T>(
-    value: Promise<T>,
-    step: "flushQueue" | "close",
-  ) => {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined
-
-    try {
-      const result = await Promise.race([
-        value,
-        new Promise<typeof CLOSE_TIMEOUT>((resolve) => {
-          timeoutId = setTimeout(
-            () => resolve(CLOSE_TIMEOUT),
-            CLOSE_STEP_TIMEOUT_MS,
-          )
-        }),
-      ])
-
-      if (result === CLOSE_TIMEOUT) {
-        console.warn("[mirador-close] client close timed out", {
-          traceId,
-          reason,
-          step,
-          timeoutMs: CLOSE_STEP_TIMEOUT_MS,
-        })
-      }
-
-      return result
-    } finally {
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
-    }
-  }
-
   try {
-    const traceWithInternals = trace as any as {
-      autoKeepAlive?: boolean
-      flushQueue?: Promise<void>
-      stopKeepAlive?: () => void
-    }
-
-    if ("autoKeepAlive" in traceWithInternals) {
-      traceWithInternals.autoKeepAlive = false
-    }
-    if (typeof traceWithInternals.stopKeepAlive === "function") {
-      traceWithInternals.stopKeepAlive()
-    }
-
-    // The current web SDK does not flush or await its internal queue on close,
-    // so force a final flush before shutting the trace down.
-    trace.flush()
-
-    if (traceWithInternals.flushQueue) {
-      await awaitWithTimeout(traceWithInternals.flushQueue, "flushQueue")
-    }
-
-    const closeResult = await awaitWithTimeout(trace.close(reason), "close")
-    if (closeResult === CLOSE_TIMEOUT) {
-      return
-    }
+    await trace.close(reason)
   } catch (error) {
     console.error("[mirador-close] client close failed", {
-      traceId,
+      traceId: trace.getTraceId(),
       reason,
       error,
     })

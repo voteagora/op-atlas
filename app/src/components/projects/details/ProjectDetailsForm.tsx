@@ -294,7 +294,7 @@ export default function ProjectDetailsForm({
               },
             )
 
-            createTraceContext = await buildFrontendTraceContext(
+            createTraceContext = buildFrontendTraceContext(
               projectCreationTrace,
               {
                 flow: MIRADOR_FLOW.projectCreation,

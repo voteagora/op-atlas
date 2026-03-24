@@ -114,7 +114,7 @@ function CreateOrganizationDialog({ onOpenChange, open }: DialogProps<object>) {
         })
 
         try {
-          const traceContext = await buildFrontendTraceContext(trace, {
+          const traceContext = buildFrontendTraceContext(trace, {
             flow: MIRADOR_FLOW.organizationCreation,
             step: "organization_creation_submit",
             userId: user?.id,

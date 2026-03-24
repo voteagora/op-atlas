@@ -26,7 +26,6 @@ import { withMiradorTraceHeaders } from "@/lib/mirador/headers"
 import {
   addMiradorEvent,
   closeMiradorTrace,
-  flushAndWaitForMiradorTraceId,
   startMiradorTrace,
 } from "@/lib/mirador/webTrace"
 import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
@@ -153,7 +152,6 @@ export function useS9RegistrationFlow({
   const stageRef = useRef<RegistrationStage>(RegistrationStage.ConnectSocial)
   const registrationTraceRef =
     useRef<ReturnType<typeof startMiradorTrace>>(null)
-  const registrationTraceIdRef = useRef<string | null>(null)
   const pendingUnmountCloseTimeoutRef = useRef<number | null>(null)
   const walletEligibilityRunKeyRef = useRef<string | null>(null)
   const walletEligibilityPromiseRef =
@@ -175,35 +173,7 @@ export function useS9RegistrationFlow({
     }
   }, [])
 
-  const syncTraceIdForActiveTrace = useCallback(
-    (trace: MiradorTraceInstance) => {
-      void flushAndWaitForMiradorTraceId(trace).then((traceId) => {
-        if (traceId && registrationTraceRef.current === trace) {
-          registrationTraceIdRef.current = traceId
-        }
-      })
-    },
-    [],
-  )
-
-  const ensureRegistrationTraceId = useCallback(async () => {
-    const activeTrace = registrationTraceRef.current
-    if (!activeTrace) {
-      return null
-    }
-
-    const currentTraceId = activeTrace.getTraceId()
-    if (currentTraceId) {
-      registrationTraceIdRef.current = currentTraceId
-      return currentTraceId
-    }
-
-    const traceId = await flushAndWaitForMiradorTraceId(activeTrace)
-    if (traceId && registrationTraceRef.current === activeTrace) {
-      registrationTraceIdRef.current = traceId
-      return traceId
-    }
-
+  const getRegistrationTraceId = useCallback(() => {
     return registrationTraceRef.current?.getTraceId() ?? null
   }, [])
 
@@ -272,8 +242,7 @@ export function useS9RegistrationFlow({
 
       await closeMiradorTrace(trace, reason)
       registrationTraceRef.current = null
-      registrationTraceIdRef.current = null
-    },
+          },
     [cancelPendingUnmountClose],
   )
 
@@ -298,8 +267,7 @@ export function useS9RegistrationFlow({
         })
         void closeMiradorTrace(trace, "S9 registration dialog closed")
         registrationTraceRef.current = null
-        registrationTraceIdRef.current = null
-      }
+              }
       return
     }
 
@@ -324,19 +292,14 @@ export function useS9RegistrationFlow({
     })
 
     registrationTraceRef.current = trace
-    registrationTraceIdRef.current = null
     addMiradorEvent(trace, "s9_registration_dialog_opened", {
       seasonId,
       stage: RegistrationStage.ConnectSocial,
     })
-    if (trace) {
-      syncTraceIdForActiveTrace(trace)
-    }
   }, [
     cancelPendingUnmountClose,
     open,
     seasonId,
-    syncTraceIdForActiveTrace,
     user?.farcasterId,
     userId,
   ])
@@ -356,8 +319,7 @@ export function useS9RegistrationFlow({
           })
           void closeMiradorTrace(trace, "S9 registration hook unmounted")
           registrationTraceRef.current = null
-          registrationTraceIdRef.current = null
-          pendingUnmountCloseTimeoutRef.current = null
+                    pendingUnmountCloseTimeoutRef.current = null
         }, 0)
       }
     }
@@ -630,13 +592,9 @@ export function useS9RegistrationFlow({
         tags: ["citizen", "registration", "s9", "frontend"],
       })
       registrationTraceRef.current = trace
-      registrationTraceIdRef.current = null
-      addMiradorEvent(trace, "s9_registration_trace_restarted", {
+            addMiradorEvent(trace, "s9_registration_trace_restarted", {
         seasonId,
       })
-      if (trace) {
-        syncTraceIdForActiveTrace(trace)
-      }
     }
 
     addMiradorEvent(
@@ -653,8 +611,6 @@ export function useS9RegistrationFlow({
         walletCount: sortedWallets.length,
       },
     )
-    void ensureRegistrationTraceId()
-
     setIsRegistering(true)
     setStage(RegistrationStage.Checking)
     setResult(null)
@@ -675,7 +631,7 @@ export function useS9RegistrationFlow({
       )
 
       try {
-        const traceContext = await buildFrontendTraceContext(
+        const traceContext = buildFrontendTraceContext(
           registrationTraceRef.current,
           {
             flow: MIRADOR_FLOW.citizenS9Registration,
@@ -781,14 +737,13 @@ export function useS9RegistrationFlow({
     // Fallback return
     return false
   }, [
-    ensureRegistrationTraceId,
+    getRegistrationTraceId,
     farcasterConnected,
     githubConnected,
     invalidateUserQueries,
     seasonId,
     selectedGovernance,
     sortedWallets,
-    syncTraceIdForActiveTrace,
     user?.farcasterId,
     userId,
     xConnected,
@@ -910,7 +865,7 @@ export function useS9RegistrationFlow({
         return
       }
 
-      const traceId = await ensureRegistrationTraceId()
+      const traceId = getRegistrationTraceId()
       const attestationResult = await createS9CitizenWithTrace({
         traceId,
         userId,
@@ -982,7 +937,7 @@ export function useS9RegistrationFlow({
   }, [
     closeRegistrationTrace,
     createS9CitizenWithTrace,
-    ensureRegistrationTraceId,
+    getRegistrationTraceId,
     result,
     seasonId,
     selectedGovernance,

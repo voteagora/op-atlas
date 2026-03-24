@@ -13,6 +13,3 @@ export const MIRADOR_FLOW = {
   organizationCreation: "organization_creation",
   missionApplication: "mission_application",
 } as const
-
-export const MIRADOR_DEFAULT_TRACE_ID_WAIT_TIMEOUT_MS = 1000
-export const MIRADOR_DEFAULT_TRACE_ID_WAIT_INTERVAL_MS = 50

@@ -18,7 +18,6 @@ import { withMiradorTraceHeaders } from "@/lib/mirador/headers"
 import {
   addMiradorEvent,
   closeMiradorTrace,
-  flushAndWaitForMiradorTraceId,
   startMiradorTrace,
 } from "@/lib/mirador/webTrace"
 
@@ -188,7 +187,6 @@ export function PublishContractsDialog({
   const abortRef = useRef(false)
   const processingRef = useRef(false)
   const publishTraceRef = useRef<ReturnType<typeof startMiradorTrace>>(null)
-  const publishTraceIdRef = useRef<string | null>(null)
   const pendingUnmountCloseTimeoutRef = useRef<number | null>(null)
 
   const cancelPendingUnmountClose = useCallback(() => {
@@ -198,35 +196,7 @@ export function PublishContractsDialog({
     }
   }, [])
 
-  const syncTraceIdForActiveTrace = useCallback(
-    (trace: MiradorTraceInstance) => {
-      void flushAndWaitForMiradorTraceId(trace).then((traceId) => {
-        if (traceId && publishTraceRef.current === trace) {
-          publishTraceIdRef.current = traceId
-        }
-      })
-    },
-    [],
-  )
-
-  const ensurePublishTraceId = async () => {
-    const activeTrace = publishTraceRef.current
-    if (!activeTrace) {
-      return null
-    }
-
-    const currentTraceId = activeTrace.getTraceId()
-    if (currentTraceId) {
-      publishTraceIdRef.current = currentTraceId
-      return currentTraceId
-    }
-
-    const traceId = await flushAndWaitForMiradorTraceId(activeTrace)
-    if (traceId && publishTraceRef.current === activeTrace) {
-      publishTraceIdRef.current = traceId
-      return traceId
-    }
-
+  const getPublishTraceId = () => {
     return publishTraceRef.current?.getTraceId() ?? null
   }
 
@@ -247,8 +217,7 @@ export function PublishContractsDialog({
 
     await closeMiradorTrace(trace, reason)
     publishTraceRef.current = null
-    publishTraceIdRef.current = null
-  }
+      }
 
   const loadProgress = async () => {
     addMiradorEvent(
@@ -321,7 +290,7 @@ export function PublishContractsDialog({
         },
       )
 
-      const traceId = await ensurePublishTraceId()
+      const traceId = getPublishTraceId()
       const finalizeResult = await finalizeProjectSnapshotWithTrace(
         projectId,
         traceId,
@@ -433,7 +402,7 @@ export function PublishContractsDialog({
         }
 
         const previous = current
-        const traceId = await ensurePublishTraceId()
+        const traceId = getPublishTraceId()
         const batchResult = await publishContractsBatchWithTrace(
           projectId,
           traceId,
@@ -551,8 +520,7 @@ export function PublishContractsDialog({
         addMiradorEvent(trace, "project_publish_dialog_closed", { projectId })
         void closeMiradorTrace(trace, "Project publish dialog closed")
         publishTraceRef.current = null
-        publishTraceIdRef.current = null
-      }
+              }
       return
     }
 
@@ -577,17 +545,12 @@ export function PublishContractsDialog({
     })
 
     publishTraceRef.current = trace
-    publishTraceIdRef.current = null
     addMiradorEvent(trace, "project_publish_dialog_opened", { projectId })
-    if (trace) {
-      syncTraceIdForActiveTrace(trace)
-    }
   }, [
     cancelPendingUnmountClose,
     open,
     projectId,
     session?.user?.id,
-    syncTraceIdForActiveTrace,
     viewerId,
   ])
 
@@ -606,8 +569,7 @@ export function PublishContractsDialog({
           })
           void closeMiradorTrace(trace, "Project publish dialog unmounted")
           publishTraceRef.current = null
-          publishTraceIdRef.current = null
-          pendingUnmountCloseTimeoutRef.current = null
+                    pendingUnmountCloseTimeoutRef.current = null
         }, 0)
       }
     }
@@ -648,7 +610,7 @@ export function PublishContractsDialog({
             projectId,
           },
         )
-        const traceId = await ensurePublishTraceId()
+        const traceId = getPublishTraceId()
         const snapshotResult = await createProjectSnapshotWithTrace(
           projectId,
           traceId,

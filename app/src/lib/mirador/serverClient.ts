@@ -1,6 +1,12 @@
 import "server-only"
 
-import { Client as MiradorServerClient } from "@miradorlabs/nodejs-sdk"
+import * as Sentry from "@sentry/nextjs"
+import {
+  Client as MiradorServerClient,
+  Web3Plugin,
+} from "@miradorlabs/nodejs-sdk"
+
+import { recordError } from "@/lib/metrics"
 
 import { isMiradorEnabled } from "./enabled"
 
@@ -26,7 +32,20 @@ export function getMiradorServerClient(): MiradorServerClient | null {
 
   if (!miradorServerClient) {
     try {
-      miradorServerClient = new MiradorServerClient(apiKey)
+      miradorServerClient = new MiradorServerClient(apiKey, {
+        plugins: [Web3Plugin()],
+        callbacks: {
+          onFlushError: (error) => {
+            Sentry.captureException(error, {
+              tags: { source: "mirador", side: "server" },
+            })
+          },
+          onDropped: (count, reason) => {
+            console.warn("[mirador] server trace dropped", { count, reason })
+            recordError("mirador_trace_dropped", "mirador_server")
+          },
+        },
+      })
     } catch (error) {
       console.error("Failed to initialize Mirador server client", error)
       miradorServerClient = null
