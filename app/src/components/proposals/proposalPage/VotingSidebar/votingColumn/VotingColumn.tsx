@@ -60,7 +60,10 @@ import {
   mapValueToVoteType,
   mapVoteTypeToValue,
 } from "@/lib/utils/voting"
-import { isSmartContractWallet } from "@/lib/utils/walletDetection"
+import {
+  detectWalletType,
+  type WalletType,
+} from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useConfetti } from "@/providers/LayoutProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
@@ -251,7 +254,8 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
-  const [isSmartContract, setIsSmartContract] = useState<boolean>(false)
+  const [walletType, setWalletType] = useState<WalletType>("eoa")
+  const isSmartContract = walletType === "smart_contract"
   const [isCheckingWallet, setIsCheckingWallet] = useState<boolean>(false)
   const [hasCheckedWallet, setHasCheckedWallet] = useState<boolean>(false)
   const voteTraceRef = useRef<ReturnType<typeof startMiradorTrace>>(null)
@@ -400,6 +404,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         proposalStatus: proposalData.status,
         votingContext: currentContext,
         selectedVoteType: vote.voteType,
+        walletType,
       },
       tags: ["governance", "vote", "frontend"],
     })
@@ -410,6 +415,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       proposalId: proposalData.offchainProposalId,
       selectedVoteType: vote.voteType,
       selectedVoteCount: vote.selections?.length ?? 0,
+    })
+
+    addMiradorEvent(trace, "wallet_type_detected", {
+      walletType,
+      walletAddress: citizen?.address,
     })
 
     return trace
@@ -468,7 +478,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
   useEffect(() => {
     setHasCheckedWallet(false)
-    setIsSmartContract(false)
+    setWalletType("eoa")
     setIsCheckingWallet(false)
   }, [citizen?.address])
 
@@ -496,14 +506,14 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       setIsCheckingWallet(true)
       try {
-        const isSmartContractDetected = await isSmartContractWallet(
+        const detected = await detectWalletType(
           signer.provider,
           citizen.address,
         )
-        setIsSmartContract(isSmartContractDetected)
+        setWalletType(detected)
       } catch (error) {
         console.warn("Error checking wallet type:", error)
-        setIsSmartContract(false)
+        setWalletType("eoa")
       } finally {
         setIsCheckingWallet(false)
         setHasCheckedWallet(true)
