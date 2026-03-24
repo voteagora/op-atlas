@@ -1,41 +1,34 @@
-/**
- * Utilities for detecting different types of wallets
- */
+export type WalletType = "eoa" | "eip7702" | "smart_contract"
 
-import { ethers } from "ethers"
+const EIP_7702_DELEGATION_PREFIX = "0xef0100"
 
-/**
- * Detects if the connected wallet is a smart contract wallet (Safe, Argent, etc.)
- * @param provider - The wallet provider
- * @param address - The wallet address
- * @returns Promise<boolean> - true if it's a smart contract wallet
- */
+export async function detectWalletType(
+  provider: any,
+  address: string,
+): Promise<WalletType> {
+  try {
+    const ethereum = (window as any).ethereum
+    if (ethereum?.isSafe || ethereum?.isGnosisSafe) {
+      return "smart_contract"
+    }
+
+    const code = await provider.getCode(address)
+    if (code === "0x") return "eoa"
+    if (code.toLowerCase().startsWith(EIP_7702_DELEGATION_PREFIX))
+      return "eip7702"
+    return "smart_contract"
+  } catch (error) {
+    return "eoa"
+  }
+}
+
 export async function isSmartContractWallet(
   provider: any,
   address: string,
 ): Promise<boolean> {
-  try {
-    // Method 1: Check if provider has smart contract wallet properties
-    const ethereum = (window as any).ethereum
-    
-    // Check for Safe App provider
-    if (ethereum?.isSafe || ethereum?.isGnosisSafe) {
-      return true
-    }
-
-    // Method 2: Check if the address is a contract (smart contract wallets are contracts)
-    const code = await provider.getCode(address)
-    const isContract = code !== "0x"
-    
-    return isContract
-  } catch (error) {
-    // Silently fail - not all addresses are contracts and that's normal
-    return false
-  }
+  const type = await detectWalletType(provider, address)
+  return type === "smart_contract"
 }
 
-/**
- * Legacy function name for backward compatibility
- * @deprecated Use isSmartContractWallet instead
- */
-export const isMultisigWallet = isSmartContractWallet 
+/** @deprecated Use isSmartContractWallet instead */
+export const isMultisigWallet = isSmartContractWallet
