@@ -13,10 +13,6 @@ import { cache } from "react"
 import { Address, getAddress } from "viem"
 import type { Session } from "next-auth"
 
-import {
-  Oso_ProjectsByCollectionV1,
-  Oso_ProjectsV1,
-} from "@/graphql/__generated__/types"
 import { sendKYBStartedEmail, sendKYCStartedEmail } from "@/lib/actions/emails"
 import {
   ApplicationWithDetails,
@@ -2971,6 +2967,16 @@ export async function getProjectOSOByIds(
       osoId: true,
     },
   })
+}
+
+type Oso_ProjectsV1 = {
+  projectName: string
+  projectId: string
+}
+
+type Oso_ProjectsByCollectionV1 = {
+  projectName: string
+  collectionName: string
 }
 
 export async function createOSOProjects(
