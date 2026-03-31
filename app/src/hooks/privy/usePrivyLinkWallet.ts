@@ -10,7 +10,6 @@ import { MIRADOR_FLOW } from "@/lib/mirador/constants"
 import {
   addMiradorEvent,
   closeMiradorTrace,
-  flushAndWaitForMiradorTraceId,
   startMiradorTrace,
 } from "@/lib/mirador/webTrace"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
@@ -73,7 +72,6 @@ export const usePrivyLinkWallet = (userId: string) => {
     })
 
     addMiradorEvent(trace, "wallet_link_started", { primary, strategy })
-    void flushAndWaitForMiradorTraceId(trace)
 
     return beginWalletLinkAttempt(strategy, trace)
   }
@@ -98,7 +96,7 @@ export const usePrivyLinkWallet = (userId: string) => {
       await syncPrivyUser(updatedPrivyUser)
 
       if (attempt.strategy === "primary") {
-        const traceContext = await buildFrontendTraceContext(attempt.trace, {
+        const traceContext = buildFrontendTraceContext(attempt.trace, {
           flow: MIRADOR_FLOW.walletLink,
           step: "wallet_link_primary_address_submit",
           userId,

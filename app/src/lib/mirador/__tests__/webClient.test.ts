@@ -1,55 +1,56 @@
 jest.mock("@miradorlabs/web-sdk/dist/index.esm.js", () => ({
-  Client: jest.fn().mockImplementation((apiKey: string) => ({ apiKey })),
+  Client: jest
+    .fn()
+    .mockImplementation((apiKey: string, options?: unknown) => ({
+      apiKey,
+      options,
+    })),
+  Web3Plugin: jest.fn(() => ({ name: "web3" })),
 }))
 
+import { Client } from "@miradorlabs/web-sdk/dist/index.esm.js"
+import {
+  configureMiradorWebClient,
+  getMiradorWebClient,
+} from "../webClient"
+
+const ClientMock = Client as jest.MockedClass<typeof Client>
+
 describe("webClient", () => {
-  const originalMiradorEnabled = process.env.NEXT_PUBLIC_MIRADOR_ENABLED
-
   beforeEach(() => {
-    jest.resetModules()
     jest.clearAllMocks()
-    delete process.env.NEXT_PUBLIC_MIRADOR_ENABLED
+    configureMiradorWebClient({ enabled: false })
   })
 
-  afterAll(() => {
-    process.env.NEXT_PUBLIC_MIRADOR_ENABLED = originalMiradorEnabled
-  })
-
-  it("does not initialize a web client unless tracing is explicitly enabled", async () => {
-    process.env.NEXT_PUBLIC_MIRADOR_ENABLED = "false"
-
-    const { configureMiradorWebClient, getMiradorWebClient } = await import(
-      "../webClient"
-    )
-    const MiradorWebClientMock = jest.requireMock(
-      "@miradorlabs/web-sdk/dist/index.esm.js",
-    ).Client as jest.Mock
-
+  it("does not initialize a web client unless tracing is explicitly enabled", () => {
     configureMiradorWebClient({
       apiKey: "web-key",
-      enabled: process.env.NEXT_PUBLIC_MIRADOR_ENABLED === "true",
+      enabled: false,
     })
 
-    expect(MiradorWebClientMock).not.toHaveBeenCalled()
+    expect(ClientMock).not.toHaveBeenCalled()
     expect(getMiradorWebClient()).toBeNull()
   })
 
-  it("initializes a web client when tracing is explicitly enabled", async () => {
+  it("initializes a web client with Web3Plugin when tracing is enabled", () => {
     process.env.NEXT_PUBLIC_MIRADOR_ENABLED = "true"
-
-    const { configureMiradorWebClient, getMiradorWebClient } = await import(
-      "../webClient"
-    )
-    const MiradorWebClientMock = jest.requireMock(
-      "@miradorlabs/web-sdk/dist/index.esm.js",
-    ).Client as jest.Mock
-
     configureMiradorWebClient({
       apiKey: "web-key",
-      enabled: process.env.NEXT_PUBLIC_MIRADOR_ENABLED === "true",
+      enabled: true,
     })
 
-    expect(MiradorWebClientMock).toHaveBeenCalledWith("web-key")
-    expect(getMiradorWebClient()).toEqual({ apiKey: "web-key" })
+    expect(ClientMock).toHaveBeenCalledWith(
+      "web-key",
+      expect.objectContaining({
+        plugins: expect.arrayContaining([
+          expect.objectContaining({ name: "web3" }),
+        ]),
+        callbacks: expect.objectContaining({
+          onFlushError: expect.any(Function),
+          onDropped: expect.any(Function),
+        }),
+      }),
+    )
+    expect(getMiradorWebClient()).not.toBeNull()
   })
 })

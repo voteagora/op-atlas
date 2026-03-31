@@ -50,7 +50,6 @@ import {
   addMiradorTxHint,
   addMiradorTxInputData,
   closeMiradorTrace,
-  flushAndWaitForMiradorTraceId,
   startMiradorTrace,
 } from "@/lib/mirador/webTrace"
 import { ProposalData } from "@/lib/proposals"
@@ -61,7 +60,10 @@ import {
   mapValueToVoteType,
   mapVoteTypeToValue,
 } from "@/lib/utils/voting"
-import { isSmartContractWallet } from "@/lib/utils/walletDetection"
+import {
+  detectWalletType,
+  type WalletType,
+} from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useConfetti } from "@/providers/LayoutProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"
@@ -252,11 +254,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
   const [isVoting, setIsVoting] = useState<boolean>(false)
   const [addressMismatch, setAddressMismatch] = useState<boolean>(false)
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true)
-  const [isSmartContract, setIsSmartContract] = useState<boolean>(false)
+  const [walletType, setWalletType] = useState<WalletType>("eoa")
+  const isSmartContract = walletType === "smart_contract"
   const [isCheckingWallet, setIsCheckingWallet] = useState<boolean>(false)
   const [hasCheckedWallet, setHasCheckedWallet] = useState<boolean>(false)
   const voteTraceRef = useRef<ReturnType<typeof startMiradorTrace>>(null)
-  const voteTraceIdRef = useRef<string | null>(null)
   const pendingUnmountCloseTimeoutRef = useRef<number | null>(null)
 
   const cancelPendingUnmountClose = useCallback(() => {
@@ -265,17 +267,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
       pendingUnmountCloseTimeoutRef.current = null
     }
   }, [])
-
-  const syncVoteTraceIdForActiveTrace = useCallback(
-    (trace: MiradorTraceInstance) => {
-      void flushAndWaitForMiradorTraceId(trace).then((traceId) => {
-        if (traceId && voteTraceRef.current === trace) {
-          voteTraceIdRef.current = traceId
-        }
-      })
-    },
-    [],
-  )
 
   const setShowConfetti = useConfetti()
   const brightColors = useMemo(
@@ -413,43 +404,28 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
         proposalStatus: proposalData.status,
         votingContext: currentContext,
         selectedVoteType: vote.voteType,
+        walletType,
       },
       tags: ["governance", "vote", "frontend"],
     })
 
     voteTraceRef.current = trace
-    voteTraceIdRef.current = null
 
     addMiradorEvent(trace, "vote_flow_started", {
       proposalId: proposalData.offchainProposalId,
       selectedVoteType: vote.voteType,
       selectedVoteCount: vote.selections?.length ?? 0,
     })
-    if (trace) {
-      syncVoteTraceIdForActiveTrace(trace)
-    }
+
+    addMiradorEvent(trace, "wallet_type_detected", {
+      walletType,
+      walletAddress: citizen?.address,
+    })
 
     return trace
   }
 
-  const ensureVoteTraceId = async () => {
-    const activeTrace = voteTraceRef.current
-    if (!activeTrace) {
-      return null
-    }
-
-    const currentTraceId = activeTrace.getTraceId()
-    if (currentTraceId) {
-      voteTraceIdRef.current = currentTraceId
-      return currentTraceId
-    }
-
-    const traceId = await flushAndWaitForMiradorTraceId(activeTrace)
-    if (traceId && voteTraceRef.current === activeTrace) {
-      voteTraceIdRef.current = traceId
-      return traceId
-    }
-
+  const getVoteTraceId = () => {
     return voteTraceRef.current?.getTraceId() ?? null
   }
 
@@ -498,12 +474,11 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
     await closeMiradorTrace(trace, reason)
     voteTraceRef.current = null
-    voteTraceIdRef.current = null
   }
 
   useEffect(() => {
     setHasCheckedWallet(false)
-    setIsSmartContract(false)
+    setWalletType("eoa")
     setIsCheckingWallet(false)
   }, [citizen?.address])
 
@@ -519,7 +494,6 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
           })
           void closeMiradorTrace(trace, "Voting component unmounted")
           voteTraceRef.current = null
-          voteTraceIdRef.current = null
           pendingUnmountCloseTimeoutRef.current = null
         }, 0)
       }
@@ -532,14 +506,14 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
 
       setIsCheckingWallet(true)
       try {
-        const isSmartContractDetected = await isSmartContractWallet(
+        const detected = await detectWalletType(
           signer.provider,
           citizen.address,
         )
-        setIsSmartContract(isSmartContractDetected)
+        setWalletType(detected)
       } catch (error) {
         console.warn("Error checking wallet type:", error)
-        setIsSmartContract(false)
+        setWalletType("eoa")
       } finally {
         setIsCheckingWallet(false)
         setHasCheckedWallet(true)
@@ -972,7 +946,7 @@ const VotingColumn = ({ proposalData }: { proposalData: ProposalData }) => {
               walletAddress: signerAddress,
             })
 
-            const traceId = await ensureVoteTraceId()
+            const traceId = getVoteTraceId()
 
             attestationId = await submitVoteWithTrace(traceId, {
               data: attestationData.data,

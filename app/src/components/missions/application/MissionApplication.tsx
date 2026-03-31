@@ -91,7 +91,7 @@ export function MissionApplication({ userId }: { userId: string }) {
         })
 
         try {
-          const traceContext = await buildFrontendTraceContext(trace, {
+          const traceContext = buildFrontendTraceContext(trace, {
             flow: MIRADOR_FLOW.missionApplication,
             step: "mission_application_submit",
             userId,
