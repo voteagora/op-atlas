@@ -1,3 +1,4 @@
 packages:
   - "app"
   - "eas-indexer"
+minimumReleaseAge: 4320
