@@ -8,5 +8,6 @@
   "scripts": {
     "format": "prettier --write .",
     "app:dev": "pnpm --filter op-atlas dev"
-  }
+  },
+  "packageManager": "pnpm@10.17.1"
 }
