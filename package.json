@@ -3,10 +3,11 @@
   "private": true,
   "engines": {
     "node": ">=21",
-    "pnpm": ">=10.16.0"
+    "pnpm": ">=10"
   },
   "scripts": {
     "format": "prettier --write .",
     "app:dev": "pnpm --filter op-atlas dev"
-  }
+  },
+  "packageManager": "pnpm@10.17.1"
 }
