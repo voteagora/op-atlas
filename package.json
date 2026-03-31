@@ -2,7 +2,7 @@
   "name": "atlas",
   "private": true,
   "engines": {
-    "node": ">=21",
+    "node": ">=22",
     "pnpm": ">=10"
   },
   "scripts": {
