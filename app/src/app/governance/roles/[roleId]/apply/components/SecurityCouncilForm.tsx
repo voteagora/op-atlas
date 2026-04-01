@@ -68,7 +68,9 @@ export const SecurityCouncilForm = ({
   const [externalLinks, setExternalLinks] = useState<
     Array<{ url: string; description: string }>
   >([])
-  const [selectedProjects, setSelectedProjects] = useState<ProjectSelectionLinkDTO[]>([])
+  const [selectedProjects, setSelectedProjects] = useState<
+    ProjectSelectionLinkDTO[]
+  >([])
   const [projectRelevanceText, setProjectRelevanceText] = useState<
     Record<string, string>
   >({})
@@ -416,9 +418,7 @@ export const SecurityCouncilForm = ({
       {/* Disclosures Section */}
       <div className="flex flex-col gap-12">
         <div className="flex flex-col gap-6">
-          <div className="text-xl font-normal text-foreground">
-            Disclosures
-          </div>
+          <div className="text-xl font-normal text-foreground">Disclosures</div>
           <div className="flex flex-col leading-6">
             <div className="font-normal text-base text-foreground">
               Please disclose any anticipated conflicts of interest, or verify
