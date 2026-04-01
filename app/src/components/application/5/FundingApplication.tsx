@@ -1,9 +1,9 @@
 import { useSession } from "next-auth/react"
 
+import type { ProjectActionDTO } from "@/lib/dto"
 import {
   ApplicationWithDetails,
   CategoryWithImpact,
-  ProjectWithDetails,
 } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -19,7 +19,7 @@ export const FundingApplication = ({
   categories,
 }: {
   className?: string
-  projects?: ProjectWithDetails[]
+  projects?: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
   categories: CategoryWithImpact[]
   onApplied: (application: ApplicationWithDetails) => void

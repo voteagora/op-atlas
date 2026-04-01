@@ -4,37 +4,21 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
+import { requireAdminSession } from "@/lib/auth/adminSession"
 import { impersonationService } from "@/lib/services/impersonationService"
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin impersonation not enabled' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      disabledMessage: "Admin impersonation not enabled",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      )
-    }
-
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { adminUserId } = adminSession
 
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('q') || ''

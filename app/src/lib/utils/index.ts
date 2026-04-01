@@ -1,4 +1,4 @@
-import { Organization, ProjectSnapshot } from "@prisma/client"
+import { ProjectSnapshot } from "@prisma/client"
 import { type ClassValue, clsx } from "clsx"
 import { customAlphabet } from "nanoid"
 import { sortBy } from "ramda"
@@ -27,7 +27,7 @@ export const nanoid = customAlphabet(
 )
 
 export function formatNumber(
-  amount: string | number,
+  amount: string | number | { toString(): string },
   maximumSignificantDigits = 2,
   notation: "standard" | "scientific" | "engineering" | "compact" = "standard",
 ) {
@@ -118,8 +118,26 @@ export type ProjectStatus = {
   progressPercent: number
 }
 
+type ProjectStatusProject = {
+  name: string | null
+  description: string | null
+  addedTeamMembers: boolean | null
+  repos: Array<{
+    type: string
+    verified: boolean
+  }>
+  hasCodeRepositories: boolean | null
+  openSourceObserverSlug: string | null
+  isOnChainContract: boolean | null
+  funding: unknown[]
+  addedFunding: boolean | null
+  pricingModel: string | null
+  snapshots: Array<Pick<ProjectSnapshot, "createdAt">>
+  lastMetadataUpdate: Date
+}
+
 export function getProjectStatus(
-  project: ProjectWithFullDetails | null,
+  project: ProjectStatusProject | null,
   contracts: ProjectContracts | null,
 ): ProjectStatus {
   const completedSections: ProjectSection[] = []
@@ -176,7 +194,7 @@ export function getProjectStatus(
 }
 
 export function projectHasUnpublishedChanges(
-  snapshots: ProjectSnapshot[],
+  snapshots: Array<Pick<ProjectSnapshot, "createdAt">>,
   lastMetadataUpdate: Date,
 ): boolean {
   const latestSnapshot = sortBy(
@@ -232,7 +250,12 @@ export function shortenAddress(address: string) {
   return `${prefix}...${suffix}`
 }
 
-export function isOrganizationSetupComplete(organization: Organization) {
+export function isOrganizationSetupComplete(organization: {
+  name: string | null
+  description: string | null
+  avatarUrl: string | null
+  coverUrl: string | null
+}) {
   return (
     organization.name &&
     organization.description &&

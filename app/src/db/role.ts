@@ -1,5 +1,3 @@
-"use server"
-
 import {
   PrismaClient,
   Role,
@@ -9,9 +7,7 @@ import {
 
 import { prisma } from "./client"
 
-export async function getAllRoles(
-  db: PrismaClient = prisma,
-): Promise<Role[]> {
+export async function getAllRoles(db: PrismaClient = prisma): Promise<Role[]> {
   return db.role.findMany({
     where: {
       voteEndAt: {

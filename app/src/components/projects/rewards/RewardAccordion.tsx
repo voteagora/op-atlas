@@ -102,7 +102,6 @@ const RewardAccordion = ({
             )}
 
             <div className="text-sm text-secondary-foreground">
-              {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
               {formatNumber(reward.amount)} OP
             </div>
             {reward.claim?.address && (

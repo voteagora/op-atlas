@@ -2,13 +2,17 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { isProjectBlacklisted } from "@/db/projects"
 import { getClaimByRewardId, getReward, updateClaim } from "@/db/rewards"
-import { authenticateApiUser } from "@/serverAuth"
+import { API_USER_SCOPE, authenticateApiUser } from "@/serverAuth"
 
 export const POST = async (req: NextRequest) => {
-  const authResponse = await authenticateApiUser(req)
+  const authResponse = await authenticateApiUser(req, {
+    requiredScopes: [API_USER_SCOPE.claimsWrite],
+  })
 
   if (!authResponse.authenticated) {
-    return new Response(authResponse.failReason, { status: 401 })
+    return new Response(authResponse.failReason, {
+      status: authResponse.status ?? 401,
+    })
   }
 
   const formData = await req.formData()

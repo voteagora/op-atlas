@@ -4,7 +4,7 @@ import { memo, useMemo, useState } from "react"
 import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useProjectDetails } from "@/hooks/db/useProjectDetails"
-import { ProjectWithDetails } from "@/lib/types"
+import type { ProjectActionDTO } from "@/lib/dto"
 import { cn, getProjectStatus } from "@/lib/utils"
 
 import { Badge } from "../common/Badge"
@@ -19,7 +19,7 @@ export const ProjectCard = memo(function ProjectCard({
   onSelect,
 }: {
   className?: string
-  project: ProjectWithDetails
+  project: ProjectActionDTO
   hasApplied?: boolean
   isSelected: boolean
   onSelect: (projectId: string) => void
@@ -60,7 +60,7 @@ export const ProjectCard = memo(function ProjectCard({
         {project.thumbnailUrl ? (
           <Image
             alt={project.name}
-            src={project.thumbnailUrl ?? undefined}
+            src={project.thumbnailUrl}
             height={64}
             width={64}
             className={cn(

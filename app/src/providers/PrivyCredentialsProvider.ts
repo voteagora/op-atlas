@@ -36,8 +36,7 @@ export const PrivyCredentialsProvider = CredentialsProvider({
       testUserId,
     } = credentials
 
-    // Check if we're in test mode OR if testMode is explicitly set to 'true'
-    if ((isTestMode() || testMode === "true") && testMode === "true") {
+    if (isTestMode() && testMode === "true") {
       try {
         // Get or create test user
         const testUser = await getOrCreateTestUser(testUserId as string)

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 
-import { processKYC } from "@/lib/actions/kyc"
+import { processKYC } from "@/lib/kyc/processing"
 import { withCronObservability } from "@/lib/cron"
 
 // We process these inline, so use a generous time limit

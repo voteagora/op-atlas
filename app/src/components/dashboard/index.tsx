@@ -9,11 +9,13 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Callout } from "@/components/common/Callout"
+import type {
+  ProjectActionDTO,
+  UserOrganizationActionDTO,
+} from "@/lib/dto"
 import { unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
-  ProjectWithDetails,
-  UserOrganizationsWithDetails,
   UserWithAddresses,
   UserKYCTeam,
 } from "@/lib/types"
@@ -52,10 +54,10 @@ const Dashboard = ({
 }: {
   className?: string
   user: UserWithAddresses
-  projects: ProjectWithDetails[]
+  projects: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
-  organizations?: UserOrganizationsWithDetails[]
-  adminProjects: ProjectWithDetails[]
+  organizations?: UserOrganizationActionDTO[]
+  adminProjects: ProjectActionDTO[]
   kycTeams?: UserKYCTeam[]
   userKYCStatus?: UserKYCStatus
   showCitizenReRegistrationCallout?: boolean
@@ -284,9 +286,7 @@ const Dashboard = ({
                       {organization.organization.projects?.map((project) => (
                         <UserProjectCard
                           key={project.id}
-                          project={
-                            project.project as unknown as ProjectWithDetails
-                          }
+                          project={project.project!}
                           applications={applications}
                         />
                       ))}

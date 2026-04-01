@@ -6,9 +6,9 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/common/Button"
 import { CheckboxCircleFIll } from "@/components/icons/remix"
-import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 import { cn } from "@/lib/utils"
 
 type Props = {
@@ -65,7 +65,7 @@ const DiscordConnectionInteractive = ({ userId }: { userId: string }) => {
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "discord") {
         toast.promise(
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()),
+          syncCurrentPrivyUser(updatedPrivyUser).then(() => invalidateUser()),
           {
             loading: "Linking discord...",
             success: "Discord linked successfully",
@@ -82,7 +82,7 @@ const DiscordConnectionInteractive = ({ userId }: { userId: string }) => {
       toast.promise(unlinkDiscord(privyUser.discord.subject), {
         loading: "Unlinking discord...",
         success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
+          syncCurrentPrivyUser(updatedPrivyUser).then(() => invalidateUser())
           return "Discord unlinked successfully"
         },
         error: (error) => {

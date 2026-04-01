@@ -6,7 +6,7 @@ import { createNewProjectOnBehalf } from "@/lib/actions/projects"
 import { MIRADOR_FLOW } from "@/lib/mirador/constants"
 import { getMiradorTraceContextFromHeaders } from "@/lib/mirador/requestContext"
 import { traceApiOperation } from "@/lib/tracing"
-import { authenticateApiUser } from "@/serverAuth"
+import { API_USER_SCOPE, authenticateApiUser } from "@/serverAuth"
 
 const payloadValidator = z.object({
   name: z.string(),
@@ -15,10 +15,14 @@ const payloadValidator = z.object({
 
 export const POST = async (req: NextRequest) => {
   return traceApiOperation("projects.create", async () => {
-    const authResponse = await authenticateApiUser(req)
+    const authResponse = await authenticateApiUser(req, {
+      requiredScopes: [API_USER_SCOPE.projectsCreate],
+    })
 
     if (!authResponse.authenticated) {
-      return new Response(authResponse.failReason, { status: 401 })
+      return new Response(authResponse.failReason, {
+        status: authResponse.status ?? 401,
+      })
     }
 
     try {

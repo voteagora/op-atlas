@@ -6,10 +6,10 @@ import { z } from "zod"
 import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
+import type { ProjectActionDTO } from "@/lib/dto"
 import {
   ApplicationWithDetails,
   CategoryWithImpact,
-  ProjectWithDetails,
 } from "@/lib/types"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
@@ -23,7 +23,7 @@ const ApplicationProjectImpactForm = ({
   categories,
 }: {
   onNext?: () => void
-  projects?: ProjectWithDetails[]
+  projects?: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   categories: CategoryWithImpact[]

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server"
 
-import { processSuperfluidStream } from "@/lib/actions/rewards"
+import { processSuperfluidStream } from "@/lib/rewards/processing"
 import { withCronObservability } from "@/lib/cron"
 import { getStreamsForRound } from "@/lib/superfluid"
 

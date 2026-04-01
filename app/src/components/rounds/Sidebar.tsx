@@ -5,8 +5,9 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 
 import { useGetRandomProjects } from "@/hooks/db/useGetRandomProjects"
+import type { ProjectActionDTO } from "@/lib/dto"
 import { noRewardsForRound, unclaimedRewards } from "@/lib/rewards"
-import { ProjectWithDetails, UserWithAddresses } from "@/lib/types"
+import { UserWithAddresses } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import { Button } from "../ui/button"
@@ -20,7 +21,7 @@ export const Sidebar = ({
 }: {
   className?: string
   user?: UserWithAddresses | null
-  userProjects?: ProjectWithDetails[] | null
+  userProjects?: ProjectActionDTO[] | null
 }) => {
   const { data: projects } = useGetRandomProjects()
 

@@ -1,5 +1,3 @@
-"use server"
-
 import {
   Prisma,
   User,
@@ -64,15 +62,16 @@ export async function getUserById(
 
   // If user is not logged in or requesting different user's data (and not an authorized admin impersonation),
   // remove sensitive information but keep shape consistent.
-  const isAuthorizedImpersonationTarget = !!session?.impersonation &&
+  const isAuthorizedImpersonationTarget =
+    !!session?.impersonation &&
     isSignedImpersonationSessionValid(session.impersonation as any, {
       currentAdminUserId: session.user?.id,
     }) &&
     (session.impersonation as any).targetUserId === userId
 
-  const isSelfOrAuthorizedTarget = !!session?.user && (
-    session.user.id === userId || isAuthorizedImpersonationTarget
-  )
+  const isSelfOrAuthorizedTarget =
+    !!session?.user &&
+    (session.user.id === userId || isAuthorizedImpersonationTarget)
 
   if (!isSelfOrAuthorizedTarget && user) {
     user.emails = []
@@ -347,10 +346,7 @@ export async function upsertUser(
   })
 }
 
-export async function deleteUserEmails(
-  uid: string,
-  db: PrismaClient = prisma,
-) {
+export async function deleteUserEmails(uid: string, db: PrismaClient = prisma) {
   try {
     // Only delete verified emails that don't have active verification processes
     // This preserves unverified emails with verification tokens (like KYC email verification)
@@ -849,9 +845,7 @@ export async function getAllOnchainBuilders(db: PrismaClient = prisma) {
     },
   })
 }
-export async function getAllGithubRepoBuiulders(
-  db: PrismaClient = prisma,
-) {
+export async function getAllGithubRepoBuiulders(db: PrismaClient = prisma) {
   return db.user.findMany({
     where: {
       OR: [
@@ -1231,10 +1225,7 @@ export async function updateUserFarcasterId(
   }
 }
 
-export async function createUser(
-  privyDid: string,
-  db: PrismaClient = prisma,
-) {
+export async function createUser(privyDid: string, db: PrismaClient = prisma) {
   return db.user.create({
     data: {
       privyDid,
@@ -1296,7 +1287,10 @@ export async function getUserPassports(
   })
 }
 
-export async function deleteUserPassport(id: number, db: PrismaClient = prisma) {
+export async function deleteUserPassport(
+  id: number,
+  db: PrismaClient = prisma,
+) {
   return db.userPassport.delete({
     where: { id },
   })

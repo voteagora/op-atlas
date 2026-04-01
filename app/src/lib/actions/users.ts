@@ -17,6 +17,7 @@ import {
   upsertUserPassport,
 } from "@/db/users"
 import { withImpersonation } from "@/lib/db/sessionContext"
+import { toUserSearchDTO } from "@/lib/dto"
 import { withImpersonationProtection } from "@/lib/impersonationContext"
 
 const client = createPublicClient({
@@ -158,7 +159,7 @@ export const searchUsers = async (query: string) =>
 
     return {
       error: null,
-      users: uniqueUsers,
+      users: uniqueUsers.map((user) => toUserSearchDTO(user)).filter(Boolean),
     }
   })
 
@@ -198,7 +199,11 @@ export const refreshUserPassport = async () =>
     return withImpersonationProtection(
       "Passport API",
       `Refresh passport scores for user ${userId}`,
-      async (): Promise<{ error: string | null; success: boolean; mocked?: boolean }> => {
+      async (): Promise<{
+        error: string | null
+        success: boolean
+        mocked?: boolean
+      }> => {
         const user = await getUserById(userId, db, session)
 
         if (!user) {

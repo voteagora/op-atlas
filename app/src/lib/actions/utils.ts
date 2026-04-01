@@ -5,11 +5,9 @@ import {
   getUserProjectOrganizationsWithClient,
   isUserAdminOfOrganization,
 } from "@/db/organizations"
-import {
-  getUserProjects,
-  getUserProjectsWithClient,
-} from "@/db/projects"
+import { getUserProjects, getUserProjectsWithClient } from "@/db/projects"
 import type { PrismaClient } from "@prisma/client"
+import { getAddress } from "viem"
 
 import { ProjectWithDetails } from "../types"
 
@@ -51,12 +49,10 @@ export const projectMembers = (project: ProjectWithDetails) => {
   ]
 }
 
-export type MembershipError =
-  | null
-  | {
-      error: string
-      context: "project" | "organization" | "both"
-    }
+export type MembershipError = null | {
+  error: string
+  context: "project" | "organization" | "both"
+}
 
 export const verifyMembership = async (
   projectId: string,
@@ -190,15 +186,71 @@ export const getUserProjectRole = async (
   )
 
   // Determine role
-  if (projectMembership?.role === "admin" || organizationMembership?.role === "admin") {
+  if (
+    projectMembership?.role === "admin" ||
+    organizationMembership?.role === "admin"
+  ) {
     return "admin"
   }
-  
+
   if (projectMembership || organizationMembership) {
     return "member"
   }
 
   return null
+}
+
+export const resolveSessionUserId = (
+  sessionUserId: string | null,
+  requestedUserId?: string | null,
+): { userId?: string; error?: string } => {
+  if (!sessionUserId) {
+    return { error: "Unauthorized" }
+  }
+
+  if (requestedUserId && requestedUserId !== sessionUserId) {
+    return { error: "Unauthorized" }
+  }
+
+  return { userId: sessionUserId }
+}
+
+export const userOwnsAddress = async (
+  userId: string,
+  address: string,
+  db: PrismaClient,
+): Promise<boolean> => {
+  const normalizedAddress = getAddress(address).toLowerCase()
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      addresses: {
+        select: {
+          address: true,
+        },
+      },
+      safeAddresses: {
+        select: {
+          safeAddress: true,
+        },
+      },
+    },
+  })
+
+  if (!user) {
+    return false
+  }
+
+  return (
+    user.addresses.some(
+      (userAddress) =>
+        getAddress(userAddress.address).toLowerCase() === normalizedAddress,
+    ) ||
+    user.safeAddresses.some(
+      (safeAddress) =>
+        getAddress(safeAddress.safeAddress).toLowerCase() === normalizedAddress,
+    )
+  )
 }
 
 export const getUserOrganizationRole = async (

@@ -39,6 +39,7 @@ import {
 import { MiradorTraceContext } from "@/lib/mirador/types"
 import { getActiveSeason } from "@/lib/seasons"
 import { CitizenLookup, CitizenshipQualification } from "@/lib/types"
+import { resolveSessionUserId } from "@/lib/actions/utils"
 
 interface S8QualifyingUser {
   address: string
@@ -219,12 +220,16 @@ async function computeS8CitizenshipQualification(
 export const s8CitizenshipQualification = async (
   userId: string,
 ): Promise<CitizenshipQualification | null> => {
-  if (!userId) {
-    return null
-  }
+  return withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        return null
+      }
 
-  return withImpersonation(({ db }) =>
-    computeS8CitizenshipQualification(userId, db),
+      return computeS8CitizenshipQualification(resolution.userId, db)
+    },
+    { requireUser: true },
   )
 }
 

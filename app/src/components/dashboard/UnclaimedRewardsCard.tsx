@@ -2,15 +2,15 @@
 
 import { memo, useMemo } from "react"
 
+import type { ProjectActionDTO } from "@/lib/dto"
 import { unclaimedRewards } from "@/lib/rewards"
-import { ProjectWithDetails } from "@/lib/types"
 
 import { ProjectRewardRow } from "./dialogs/UnclaimedRewardsDialog"
 
 function UnclaimedRewardsCard({
   projects,
 }: {
-  projects: ProjectWithDetails[]
+  projects: ProjectActionDTO[]
 }) {
   const projectsWithUnclaimedRewards = useMemo(() => {
     return projects.filter((project) => unclaimedRewards(project).length > 0)

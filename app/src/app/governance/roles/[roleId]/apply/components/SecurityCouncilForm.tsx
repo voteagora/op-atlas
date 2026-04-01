@@ -8,7 +8,10 @@ import { AddFill, Close } from "@/components/icons/remix"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { UserProjectsWithDetails } from "@/lib/types"
+import type {
+  ProjectSelectionLinkDTO,
+  UserAdminProjectsActionDTO,
+} from "@/lib/dto"
 
 import { ProjectSelectionModal } from "./ProjectSelectionModal"
 
@@ -33,18 +36,10 @@ const SECURITY_ROLE_TERMS = [
   "Please verify that you are able to commit ~5 active hours / month to fulfill the Member Responsibilities",
 ] as const
 
-interface Project {
-  project: {
-    id: string
-    name: string
-    thumbnailUrl?: string | null
-  }
-}
-
 interface SecurityCouncilFormProps {
   role: Role
   user: User
-  userProjects?: UserProjectsWithDetails
+  userProjects?: UserAdminProjectsActionDTO
   onSubmit: (data: {
     personalStatement: string
     conflictsOfInterest: string
@@ -73,7 +68,7 @@ export const SecurityCouncilForm = ({
   const [externalLinks, setExternalLinks] = useState<
     Array<{ url: string; description: string }>
   >([])
-  const [selectedProjects, setSelectedProjects] = useState<Project[]>([])
+  const [selectedProjects, setSelectedProjects] = useState<ProjectSelectionLinkDTO[]>([])
   const [projectRelevanceText, setProjectRelevanceText] = useState<
     Record<string, string>
   >({})
@@ -96,7 +91,7 @@ export const SecurityCouncilForm = ({
     }))
   }
 
-  const handleProjectSelection = (project: Project) => {
+  const handleProjectSelection = (project: ProjectSelectionLinkDTO) => {
     setSelectedProjects((prev) => {
       const isSelected = prev.some((p) => p.project.id === project.project.id)
       if (isSelected) {

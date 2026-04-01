@@ -8,7 +8,7 @@ import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { OrganizationWithTeamAndProjects } from "@/lib/types"
+import type { PublicOrganizationProfileDTO } from "@/lib/dto"
 import { cn } from "@/lib/utils"
 
 import OrganizationHeaderLinks from "./OrganizationHeaderLinks"
@@ -18,9 +18,8 @@ const OrganizationHeader = ({
   organization,
 }: {
   className?: string
-  organization: OrganizationWithTeamAndProjects
+  organization: PublicOrganizationProfileDTO
 }) => {
-
   const [showMore, setShowMore] = useState(false)
   const { data: citizen } = useCitizen({ query: { type: CITIZEN_TYPES.chain, id: organization.id } })
 

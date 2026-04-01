@@ -101,7 +101,7 @@ const AddTeamMemberDialog = ({
       try {
         const result = await searchUsers(debouncedSearchText)
         if (result.users) {
-          setSearchResults(result.users)
+          setSearchResults(result.users.filter(Boolean) as unknown as User[])
         }
       } catch (error) {
         console.error("Error searching users", error)

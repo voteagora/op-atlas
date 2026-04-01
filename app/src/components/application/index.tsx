@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import type { ProjectActionDTO } from "@/lib/dto"
+import { ApplicationWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { FundingApplication } from "./FundingApplication"
@@ -13,7 +14,7 @@ export const ApplicationFlow = ({
   applications,
 }: {
   className?: string
-  projects: ProjectWithDetails[]
+  projects: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
 }) => {
   const [submittedApp, setSubmittedApp] =

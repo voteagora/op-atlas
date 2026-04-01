@@ -7,7 +7,7 @@ import {
   ProposalType,
   VoteType,
 } from "@/components/proposals/proposal.types"
-import { ProposalData } from "@/lib/proposals"
+import type { ProposalData } from "@/lib/proposals"
 import { CitizenshipQualification } from "@/lib/types"
 import { getAgoraProposalLink, getVotingProps } from "@/lib/utils/voting"
 

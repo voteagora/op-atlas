@@ -1,4 +1,4 @@
-import { processPersonaCases, processPersonaInquiries } from "./actions/kyc"
+import { processPersonaCases, processPersonaInquiries } from "./kyc/processing"
 
 const PERSONA_API_URL = "https://app.withpersona.com"
 
@@ -233,7 +233,11 @@ class PersonaClient {
         ) {
           const delayMs = getRetryDelayMs(response, attempt)
           console.warn(
-            `Persona request ${path} returned ${response.status}; retrying in ${delayMs}ms (attempt ${attempt + 1}/${MAX_PERSONA_RETRIES})`,
+            `Persona request ${path} returned ${
+              response.status
+            }; retrying in ${delayMs}ms (attempt ${
+              attempt + 1
+            }/${MAX_PERSONA_RETRIES})`,
           )
           await sleep(delayMs)
           continue
@@ -256,13 +260,17 @@ class PersonaClient {
 
       if (!Array.isArray(data)) {
         throw new Error(
-          `Persona response missing data array for ${path}: ${truncateForLogs(rawBody || "<empty>")}`,
+          `Persona response missing data array for ${path}: ${truncateForLogs(
+            rawBody || "<empty>",
+          )}`,
         )
       }
 
       if (next !== undefined && next !== null && typeof next !== "string") {
         throw new Error(
-          `Persona response has invalid links.next for ${path}: ${truncateForLogs(rawBody || "<empty>")}`,
+          `Persona response has invalid links.next for ${path}: ${truncateForLogs(
+            rawBody || "<empty>",
+          )}`,
         )
       }
 
@@ -320,7 +328,11 @@ class PersonaClient {
           ) {
             const delayMs = getRetryDelayMs(response, attempt)
             console.warn(
-              `Persona inquiry ${inquiryId} returned ${response.status}; retrying in ${delayMs}ms (attempt ${attempt + 1}/${MAX_PERSONA_RETRIES})`,
+              `Persona inquiry ${inquiryId} returned ${
+                response.status
+              }; retrying in ${delayMs}ms (attempt ${
+                attempt + 1
+              }/${MAX_PERSONA_RETRIES})`,
             )
             await sleep(delayMs)
             continue
@@ -330,7 +342,8 @@ class PersonaClient {
           )
         }
 
-        const data: PersonaSingleResponse<PersonaInquiry> = await response.json()
+        const data: PersonaSingleResponse<PersonaInquiry> =
+          await response.json()
         if (data?.data?.id) {
           inquiryByIdCache.set(data.data.id, data.data)
         }
@@ -385,7 +398,9 @@ class PersonaClient {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(
-          `Failed to create inquiry: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`,
+          `Failed to create inquiry: ${response.status} ${
+            response.statusText
+          } - ${JSON.stringify(errorData)}`,
         )
       }
 
@@ -432,7 +447,9 @@ class PersonaClient {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(
-          `Failed to generate OTL: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`,
+          `Failed to generate OTL: ${response.status} ${
+            response.statusText
+          } - ${JSON.stringify(errorData)}`,
         )
       }
 
@@ -443,9 +460,9 @@ class PersonaClient {
         meta["one-time-link"].trim().length > 0
           ? meta["one-time-link"]
           : typeof meta["one-time-link-short"] === "string" &&
-              meta["one-time-link-short"].trim().length > 0
-            ? meta["one-time-link-short"]
-            : undefined
+            meta["one-time-link-short"].trim().length > 0
+          ? meta["one-time-link-short"]
+          : undefined
 
       if (!linkCandidate) {
         console.error(
@@ -462,7 +479,9 @@ class PersonaClient {
           : undefined)
 
       console.log(
-        `Generated OTL for inquiry ${inquiryId}, expires at ${expiresAt ?? "unknown"}`,
+        `Generated OTL for inquiry ${inquiryId}, expires at ${
+          expiresAt ?? "unknown"
+        }`,
       )
 
       return {

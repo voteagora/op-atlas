@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 
@@ -12,17 +13,26 @@ import { Avatar, AvatarBadge } from "@/components/ui/avatar"
 import { useProject } from "@/hooks/db/useProject"
 import { useAllRoleApplications } from "@/hooks/role/useAllUserAppications"
 import { useRole } from "@/hooks/role/useRole"
-import { OrganizationWithTeamAndProjects, UserWithAddresses } from "@/lib/types"
+import type {
+  PublicOrganizationProfileDTO,
+  UserProfilePublicDTO,
+} from "@/lib/dto"
 import { cn } from "@/lib/utils"
 import { formatMMMd, formatMMMdyyyy } from "@/lib/utils/date"
+
+type RoleApplicationUserTarget = Pick<UserProfilePublicDTO, "id" | "imageUrl">
+type RoleApplicationOrganizationTarget = Pick<
+  PublicOrganizationProfileDTO,
+  "id" | "avatarUrl"
+>
 
 export default function RoleApplication({
   user,
   organization,
   className,
 }: {
-  user?: UserWithAddresses
-  organization?: OrganizationWithTeamAndProjects
+  user?: RoleApplicationUserTarget
+  organization?: RoleApplicationOrganizationTarget
   className?: string
 }) {
   const [roleId, setRoleId] = useState<number | null>(null)
@@ -35,11 +45,18 @@ export default function RoleApplication({
   const [externalLinks, setExternalLinks] = useState<
     { url: string; description: string }[]
   >([])
+  const { data: session } = useSession()
+  const viewerUserId = session?.impersonation?.targetUserId ?? session?.user?.id
+  const requestedUserId =
+    user?.id && viewerUserId === user.id ? user.id : undefined
+  const queryEnabled = Boolean(
+    viewerUserId && (requestedUserId || organization?.id),
+  )
 
   const { data: activeApplications, isLoading } = useAllRoleApplications({
-    userId: user?.id,
+    userId: requestedUserId,
     organizationId: organization?.id,
-    enabled: !!user?.id || !!organization?.id,
+    enabled: queryEnabled,
   })
   const router = useRouter()
 
@@ -76,6 +93,7 @@ export default function RoleApplication({
   }, [activeApplications, organization])
 
   if (
+    !queryEnabled ||
     isLoading ||
     !activeApplications ||
     activeApplications.length === 0 ||

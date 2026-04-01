@@ -1,8 +1,8 @@
 "use client"
 
+import type { PublicOrganizationProfileDTO } from "@/lib/dto"
 
 import RoleApplication from "@/components/common/RoleApplication"
-import { OrganizationWithTeamAndProjects } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import OrganizationHeader from "./OrganizationHeader"
@@ -14,22 +14,19 @@ const PublicUserProfile = ({
   organization,
 }: {
   className?: string
-  organization: OrganizationWithTeamAndProjects
+  organization: PublicOrganizationProfileDTO
 }) => {
-
   return (
     <div className={cn("flex flex-col gap-y-6 mt-12", className)}>
       <div className="flex flex-col w-full items-start max-w-4xl mx-auto my-18">
         <OrganizationHeader organization={organization} />
 
         <div className="max-w-3xl">
-
           <RoleApplication organization={organization} className="px-8" />
           {/* Team */}
           <OrganizationTeam organization={organization} className="px-8" />
           {/* Projects */}
           <OrganizationProjects organization={organization} className="px-8" />
-
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-"use server"
+import "server-only"
 
 import { AggregatedType } from "eas-indexer/src/types"
 

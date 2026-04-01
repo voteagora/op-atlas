@@ -2,19 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query"
 
-import { verifyMembership } from "@/lib/actions/utils"
+import { getProjectMembershipStatus } from "@/lib/actions/projects"
 
 export const useMembership = (projectId: string, userId?: string) => {
   return useQuery({
     queryKey: ["membership", projectId, userId],
     queryFn: async () => {
       if (!userId) return { isMember: false }
-
-      const result = await verifyMembership(projectId, userId)
-      return {
-        isMember: !result?.error,
-        error: result?.error || null,
-      }
+      return getProjectMembershipStatus(projectId, userId)
     },
     enabled: !!userId && !!projectId,
     staleTime: 5 * 60 * 1000, // 5 minutes

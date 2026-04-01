@@ -6,10 +6,15 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import { signIn } from "@/auth"
+import { isTestMode } from "@/lib/auth/testMode"
 
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
+  if (!isTestMode()) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
+
   try {
     const body = await request.json().catch(() => ({}))
     const testUserId: string = body?.userId || "test-user-123"
@@ -30,4 +35,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

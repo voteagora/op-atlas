@@ -1,4 +1,3 @@
-import { User } from "@prisma/client"
 import { useMemo } from "react"
 import { getAddress, isAddress } from "viem"
 
@@ -12,13 +11,16 @@ import { useEnsName } from "./useEnsName"
  * 4. null if no suitable display name can be determined
  */
 export const useUsername = (
-  user?: User & {
+  user?: {
+    name?: string | null
+    username?: string | null
     emails?: { email: string }[]
-    addresses?: { address: string; primary?: boolean }[]
+    addresses?: { address: string; primary?: boolean | null }[]
   },
 ) => {
   const primaryOrFirstAddress =
-    user?.addresses?.find((a) => a.primary)?.address ?? user?.addresses?.[0]?.address
+    user?.addresses?.find((a) => a.primary)?.address ??
+    user?.addresses?.[0]?.address
 
   const validAddress =
     primaryOrFirstAddress && isAddress(primaryOrFirstAddress)

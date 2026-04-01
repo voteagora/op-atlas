@@ -1,17 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import { getRewardStreamsForRound } from "@/lib/actions/rewards"
-import { ROUND_IDS, VALID_SEASONS, SEASON_TRANCHES } from "@/lib/constants/rewards"
-import { authenticateApiUser } from "@/serverAuth"
+import { getRewardStreamsForRound } from "@/lib/rewards/processing"
+import {
+  ROUND_IDS,
+  VALID_SEASONS,
+  SEASON_TRANCHES,
+} from "@/lib/constants/rewards"
+import { API_USER_SCOPE, authenticateApiUser } from "@/serverAuth"
 
 export const GET = async (
   req: NextRequest,
   { params }: { params: { season: string; round: string } },
 ) => {
-  const authResponse = await authenticateApiUser(req)
+  const authResponse = await authenticateApiUser(req, {
+    requiredScopes: [API_USER_SCOPE.rewardsRead],
+  })
 
   if (!authResponse.authenticated) {
-    return new Response(authResponse.failReason, { status: 401 })
+    return new Response(authResponse.failReason, {
+      status: authResponse.status ?? 401,
+    })
   }
 
   // Validate season
@@ -30,8 +38,8 @@ export const GET = async (
   const seasonKey = `${season}-${roundId}`
   if (!(seasonKey in SEASON_TRANCHES)) {
     return new Response(
-      `Round ${params.round} not available for season ${season}`, 
-      { status: 400 }
+      `Round ${params.round} not available for season ${season}`,
+      { status: 400 },
     )
   }
 

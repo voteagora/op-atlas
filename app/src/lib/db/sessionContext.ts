@@ -1,4 +1,4 @@
-"use server"
+import "server-only"
 
 import { PrismaClient } from "@prisma/client"
 import { Session } from "next-auth"
@@ -48,7 +48,7 @@ export type SessionContextOptions = {
  * ```
  */
 export async function getImpersonationContext(
-  options: SessionContextOptions = {}
+  options: SessionContextOptions = {},
 ): Promise<SessionContext> {
   const hasSessionOverride = Object.prototype.hasOwnProperty.call(
     options,
@@ -86,7 +86,7 @@ export async function getImpersonationContext(
  */
 export async function withImpersonation<T>(
   handler: (ctx: SessionContext) => Promise<T>,
-  options: SessionContextOptions = {}
+  options: SessionContextOptions = {},
 ): Promise<T> {
   const ctx = await getImpersonationContext(options)
   return handler(ctx)

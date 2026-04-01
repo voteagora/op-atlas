@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { fetchUserAdminProjects } from "@/lib/actions/hookFetchers"
-import { UserProjectsWithDetails } from "@/lib/types"
+import type { UserAdminProjectsActionDTO } from "@/lib/dto"
 
 export const USER_ADMIN_PROJECTS_QUERY_KEY = "userAdminProjects"
 
@@ -19,7 +19,7 @@ export const useUserAdminProjects = ({
     queryFn: async () => {
       return (await fetchUserAdminProjects(
         userId,
-      )) as UserProjectsWithDetails | null
+      )) as UserAdminProjectsActionDTO | null
     },
     enabled: enabled ?? true,
   })

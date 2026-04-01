@@ -3,7 +3,7 @@
 import { usePrivy } from "@privy-io/react-auth"
 import { toast } from "sonner"
 
-import { syncPrivyUser } from "@/db/privy"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 
 import { useUser } from "../db/useUser"
 
@@ -15,7 +15,7 @@ export const usePrivyUnlinkWallet = (userId: string) => {
     toast.promise(unlinkWallet(address), {
       loading: "Removing wallet address...",
       success: (updatedPrivyUser) => {
-        syncPrivyUser(updatedPrivyUser).then(() => {
+        syncCurrentPrivyUser(updatedPrivyUser).then(() => {
           invalidateUser()
         })
         return "Wallet address removed successfully"

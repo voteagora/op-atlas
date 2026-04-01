@@ -1,5 +1,3 @@
-"use server"
-
 import { KYCUser, KYCLegalEntity, PrismaClient } from "@prisma/client"
 
 import { prisma } from "./client"
@@ -15,14 +13,17 @@ type UpdateKYCUserStatusParams = {
   expiresAt?: Date | null
 }
 
-export async function updateKYCUserStatus({
-  parsedStatus,
-  personaStatus,
-  updatedAt,
-  inquiryId,
-  referenceId,
-  expiresAt,
-}: UpdateKYCUserStatusParams, db: PrismaClient = prisma) {
+export async function updateKYCUserStatus(
+  {
+    parsedStatus,
+    personaStatus,
+    updatedAt,
+    inquiryId,
+    referenceId,
+    expiresAt,
+  }: UpdateKYCUserStatusParams,
+  db: PrismaClient = prisma,
+) {
   if (!inquiryId) {
     throw new Error("Inquiry ID is required for KYC user status update")
   }
@@ -81,13 +82,16 @@ type UpdateLegalEntityStatusParams = {
   expiresAt?: Date | null
 }
 
-export async function updateLegalEntityStatus({
-  parsedStatus,
-  updatedAt,
-  inquiryId,
-  referenceId,
-  expiresAt,
-}: UpdateLegalEntityStatusParams, db: PrismaClient = prisma) {
+export async function updateLegalEntityStatus(
+  {
+    parsedStatus,
+    updatedAt,
+    inquiryId,
+    referenceId,
+    expiresAt,
+  }: UpdateLegalEntityStatusParams,
+  db: PrismaClient = prisma,
+) {
   if (!inquiryId) {
     throw new Error("Inquiry ID is required for legal entity status update")
   }
@@ -218,12 +222,15 @@ export async function getKycTeamByWalletAddress(
   })
 }
 
-export async function deleteKycTeam({
-  kycTeamId,
-}: {
-  kycTeamId: string
-  hasActiveStream?: boolean // kept for backwards compatibility, but no longer used
-}, db: PrismaClient = prisma) {
+export async function deleteKycTeam(
+  {
+    kycTeamId,
+  }: {
+    kycTeamId: string
+    hasActiveStream?: boolean // kept for backwards compatibility, but no longer used
+  },
+  db: PrismaClient = prisma,
+) {
   await db.$transaction(async (tx) => {
     // Mark any active (draft) GrantEligibility forms linked to this KYC team as deleted
     // This ensures users truly "start over" after removing an address
@@ -333,11 +340,14 @@ export async function rejectProjectKYC(
   return kycUsers.length
 }
 
-export async function getExpiredKYCCountForProject({
-  projectId,
-}: {
-  projectId: string
-}, db: PrismaClient = prisma): Promise<number> {
+export async function getExpiredKYCCountForProject(
+  {
+    projectId,
+  }: {
+    projectId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<number> {
   const project = await db.project.findUnique({
     where: { id: projectId },
     select: {
@@ -393,11 +403,14 @@ export async function getExpiredKYCCountForProject({
   return count
 }
 
-export async function getExpiredKYCCountForOrganization({
-  organizationId,
-}: {
-  organizationId: string
-}, db: PrismaClient = prisma): Promise<number> {
+export async function getExpiredKYCCountForOrganization(
+  {
+    organizationId,
+  }: {
+    organizationId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<number> {
   const orgKycTeams = await db.organizationKYCTeam.findMany({
     where: {
       organizationId,
@@ -453,11 +466,14 @@ export async function getExpiredKYCCountForOrganization({
   return count
 }
 
-export async function getKYCUsersByProjectId({
-  projectId,
-}: {
-  projectId: string
-}, db: PrismaClient = prisma) {
+export async function getKYCUsersByProjectId(
+  {
+    projectId,
+  }: {
+    projectId: string
+  },
+  db: PrismaClient = prisma,
+) {
   // Fetch project with KYC team data including both users and legal entities in a single query
   const project = await db.project.findUnique({
     where: { id: projectId },
@@ -499,15 +515,17 @@ export async function getKYCUsersByProjectId({
   const legalEntities =
     project?.kycTeam?.KYCLegalEntityTeams?.map((entityTeam) => {
       const e = entityTeam.legalEntity
-      return e ? {
-        id: e.id,
-        name: e.name,
-        status: e.status,
-        expiry: e.expiry ?? null,
-        controllerFirstName: e.kycLegalEntityController?.firstName || "",
-        controllerLastName: e.kycLegalEntityController?.lastName || "",
-        controllerEmail: e.kycLegalEntityController?.email || "",
-      } : null
+      return e
+        ? {
+            id: e.id,
+            name: e.name,
+            status: e.status,
+            expiry: e.expiry ?? null,
+            controllerFirstName: e.kycLegalEntityController?.firstName || "",
+            controllerLastName: e.kycLegalEntityController?.lastName || "",
+            controllerEmail: e.kycLegalEntityController?.email || "",
+          }
+        : null
     }).filter((e): e is NonNullable<typeof e> => e !== null) || []
 
   return { users, legalEntities }
@@ -592,8 +610,10 @@ export async function getUserKycTeams(
   userId: string,
   db: PrismaClient = prisma,
 ): Promise<UserKYCTeam[]> {
-  const { adminProjects, adminOrganizations } =
-    await getUserKycTeamSources(userId, db)
+  const { adminProjects, adminOrganizations } = await getUserKycTeamSources(
+    userId,
+    db,
+  )
 
   const kycTeams: UserKYCTeam[] = []
 

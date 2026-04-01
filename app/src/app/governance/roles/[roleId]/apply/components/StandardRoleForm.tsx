@@ -7,7 +7,10 @@ import { Button } from "@/components/common/Button"
 import { Close } from "@/components/icons/remix"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
-import { UserProjectsWithDetails } from "@/lib/types"
+import type {
+  ProjectSelectionLinkDTO,
+  UserAdminProjectsActionDTO,
+} from "@/lib/dto"
 
 import { ProjectSelectionModal } from "./ProjectSelectionModal"
 
@@ -18,18 +21,10 @@ const TERMS = [
   "Please verify that you are able to commit the necessary time to this role.",
 ] as const
 
-interface Project {
-  project: {
-    id: string
-    name: string
-    thumbnailUrl?: string | null
-  }
-}
-
 interface StandardRoleFormProps {
   role: Role
   user: User
-  userProjects?: UserProjectsWithDetails
+  userProjects?: UserAdminProjectsActionDTO
   onSubmit: (data: {
     conflictsOfInterest: string
     projects: Array<{projectId: string, projectName: string, description: string}>
@@ -48,7 +43,7 @@ export const StandardRoleForm = ({
 }: StandardRoleFormProps) => {
   const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
   const [conflictsOfInterest, setConflictsOfInterest] = useState("")
-  const [selectedProjects, setSelectedProjects] = useState<Project[]>([])
+  const [selectedProjects, setSelectedProjects] = useState<ProjectSelectionLinkDTO[]>([])
   const [projectRelevanceText, setProjectRelevanceText] = useState<Record<string, string>>({})
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
 
@@ -62,7 +57,7 @@ export const StandardRoleForm = ({
     }))
   }
 
-  const handleProjectSelection = (project: Project) => {
+  const handleProjectSelection = (project: ProjectSelectionLinkDTO) => {
     setSelectedProjects((prev) => {
       const isSelected = prev.some((p) => p.project.id === project.project.id)
       if (isSelected) {

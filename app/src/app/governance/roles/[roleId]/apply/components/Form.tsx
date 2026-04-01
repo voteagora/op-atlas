@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useUsername } from "@/hooks/useUsername"
-import { UserOrganizationsWithDetails } from "@/lib/types"
+import type { UserOrganizationActionDTO } from "@/lib/dto"
 
 import { UserForm } from "./UserForm"
 
@@ -31,7 +31,7 @@ export const Form = ({
 }: {
   role: Role
   user: User
-  userOrgs: UserOrganizationsWithDetails[]
+  userOrgs: UserOrganizationActionDTO[]
 }) => {
   const username = useUsername(user)
 

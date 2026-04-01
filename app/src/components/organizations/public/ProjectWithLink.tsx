@@ -1,10 +1,9 @@
 import Image from "next/image"
 
 import TrackedExtendedLink from "@/components/common/TrackedExtendedLink"
-import { ProjectWithDetailsLite } from "@/lib/types"
+import type { PublicProjectCardDTO } from "@/lib/dto"
 
-function ProjectWithLink({ project }: { project: ProjectWithDetailsLite }) {
-
+function ProjectWithLink({ project }: { project: PublicProjectCardDTO }) {
   return (
     <div className="flex items-center space-x-2">
       <TrackedExtendedLink

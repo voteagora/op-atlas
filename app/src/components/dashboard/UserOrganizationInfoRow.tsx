@@ -5,7 +5,8 @@ import React from "react"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { updateInteractions } from "@/lib/actions/users"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { UserOrganizationsWithDetails, UserWithAddresses } from "@/lib/types"
+import type { UserOrganizationActionDTO } from "@/lib/dto"
+import { UserWithAddresses } from "@/lib/types"
 import { isOrganizationSetupComplete } from "@/lib/utils"
 
 import { CitizenshipBadge } from "../common/CitizenshipBadge"
@@ -17,7 +18,7 @@ const UserOrganizationInfoRow = ({
   organization,
   user,
 }: {
-  organization: UserOrganizationsWithDetails
+  organization: UserOrganizationActionDTO
   user: UserWithAddresses
 }) => {
   const { data: citizen } = useCitizen({

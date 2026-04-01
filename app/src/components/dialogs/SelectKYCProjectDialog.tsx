@@ -62,7 +62,7 @@ export default function SelectKYCProjectDialog({
       // A project has active streams if it has a kycTeam with rewardStreams that have active rounds
       if (!project.kycTeam?.rewardStreams?.length) return true
 
-      return !project.kycTeam.rewardStreams.some((stream) => stream.round)
+      return !project.kycTeam.rewardStreams.some((stream: any) => stream.round)
     })
   }, [projects])
 
@@ -107,23 +107,25 @@ export default function SelectKYCProjectDialog({
   // Detect conflicts: projects that are selected but belong to other KYC teams
   const conflictingProjects = React.useMemo(() => {
     if (!allOrgKycTeams || !selectedProjectIds.length) return []
-    
+
     const conflicts: Array<{
       projectId: string
       projectName: string
       currentKycTeamId: string
       currentWalletAddress: string
     }> = []
-    
-    selectedProjectIds.forEach(projectId => {
+
+    selectedProjectIds.forEach((projectId) => {
       // Skip if this project is already assigned to the current KYC team
       if (alreadySelectedProjectIds?.includes(projectId)) return
-      
+
       // Check if this project is assigned to any other KYC team
-      allOrgKycTeams.forEach(kycTeam => {
+      allOrgKycTeams.forEach((kycTeam) => {
         if (kycTeam.kycTeamId === kycTeamId) return // Skip current team
-        
-        const projectInTeam = kycTeam.team.projects.find((p: Project) => p.id === projectId)
+
+        const projectInTeam = kycTeam.team.projects.find(
+          (p: Project) => p.id === projectId,
+        )
         if (projectInTeam) {
           conflicts.push({
             projectId,
@@ -134,7 +136,7 @@ export default function SelectKYCProjectDialog({
         }
       })
     })
-    
+
     return conflicts
   }, [selectedProjectIds, allOrgKycTeams, kycTeamId, alreadySelectedProjectIds])
 
@@ -221,7 +223,7 @@ export default function SelectKYCProjectDialog({
                 </li>
               ))}
             </ul>
-            
+
             {/* Warning message for conflicting projects */}
             {conflictingProjects.length > 0 && (
               <div className="w-full p-4 border border-orange-200 bg-orange-50 rounded-md">
@@ -232,16 +234,27 @@ export default function SelectKYCProjectDialog({
                       Project Reassignment Warning
                     </p>
                     <p className="text-sm text-orange-700">
-                      The following {conflictingProjects.length === 1 ? 'project is' : 'projects are'} currently associated with other wallet addresses and will be moved:
+                      The following{" "}
+                      {conflictingProjects.length === 1
+                        ? "project is"
+                        : "projects are"}{" "}
+                      currently associated with other wallet addresses and will
+                      be moved:
                     </p>
                     <ul className="text-sm text-orange-700 space-y-1">
-                      {conflictingProjects.map(conflict => (
-                        <li key={conflict.projectId} className="flex items-center gap-2">
+                      {conflictingProjects.map((conflict) => (
+                        <li
+                          key={conflict.projectId}
+                          className="flex items-center gap-2"
+                        >
                           <span className="w-1 h-1 bg-orange-600 rounded-full" />
-                          <span className="font-normal">{conflict.projectName}</span>
+                          <span className="font-normal">
+                            {conflict.projectName}
+                          </span>
                           <span>from</span>
                           <span className="font-mono text-xs bg-orange-100 px-1 py-0.5 rounded">
-                            {conflict.currentWalletAddress.slice(0, 6)}...{conflict.currentWalletAddress.slice(-4)}
+                            {conflict.currentWalletAddress.slice(0, 6)}...
+                            {conflict.currentWalletAddress.slice(-4)}
                           </span>
                         </li>
                       ))}
@@ -257,8 +270,10 @@ export default function SelectKYCProjectDialog({
                 disabled={createIsPending || deleteIsPending}
                 onClick={onSubmit}
               >
-                {(createIsPending || deleteIsPending) && <Loader2 className="animate-spin mr-2" size={16} />}
-                {conflictingProjects.length > 0 ? 'Confirm Changes' : 'Submit'}
+                {(createIsPending || deleteIsPending) && (
+                  <Loader2 className="animate-spin mr-2" size={16} />
+                )}
+                {conflictingProjects.length > 0 ? "Confirm Changes" : "Submit"}
               </Button>
               <Button
                 className="w-full"

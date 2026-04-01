@@ -26,10 +26,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useUsername } from "@/hooks/useUsername"
 import { useWallet } from "@/hooks/useWallet"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 import { linkExistingKYCForEmail } from "@/lib/actions/userKyc"
 import { isTestMode } from "@/lib/auth/testMode"
 import { AUTH_STATUS, LOCAL_STORAGE_LOGIN_REDIRECT } from "@/lib/constants"
@@ -209,7 +209,7 @@ const AccountContent = () => {
     onSuccess: async ({ user: updatedPrivyUser, linkMethod }) => {
       if (linkMethod === "email" && isLinking.current) {
         toast.promise(
-          syncPrivyUser(updatedPrivyUser)
+          syncCurrentPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
             .then(() => (isLinking.current = false)),
           {

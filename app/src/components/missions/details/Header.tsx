@@ -7,8 +7,9 @@ import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 
 export default function Header() {
   const mission = useMissionFromPath()
+  const isFoundationMission = mission?.pageName === "foundation-missions"
 
-  const { data } = useGitHubMissions()
+  const { data } = useGitHubMissions({ enabled: isFoundationMission })
 
   let isOpenForEnrollment =
     mission && mission?.startsAt < new Date() && mission?.endsAt > new Date()
@@ -21,7 +22,7 @@ export default function Header() {
     missioName = `Retro Funding: ${mission.name}`
   }
 
-  if (mission?.pageName === "foundation-missions" && data) {
+  if (isFoundationMission && data) {
     isOpenForEnrollment = data?.AreMissionsOpen
   }
 

@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 
+import type { ProjectActionDTO } from "@/lib/dto"
 import {
   ApplicationWithDetails,
   CategoryWithImpact,
-  ProjectWithDetails,
 } from "@/lib/types"
 
 import { ApplicationSubmitted } from "../ApplicationSubmitted"
@@ -18,7 +18,7 @@ export const ApplicationFlow = ({
   categories,
 }: {
   className?: string
-  projects?: ProjectWithDetails[]
+  projects?: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
   categories: CategoryWithImpact[]
 }) => {

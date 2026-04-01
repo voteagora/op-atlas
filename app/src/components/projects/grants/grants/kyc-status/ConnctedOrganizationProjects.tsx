@@ -1,15 +1,13 @@
-import { OrganizationKYCTeam, KYCTeam, Project, KYCUser, RewardStream } from "@prisma/client"
 import KYCSubSection from "@/components/projects/grants/grants/kyc-status/KYCSubSection"
+import type {
+  OrganizationKycTeamAdminDTO,
+  OrganizationKycTeamMemberDTO,
+  OrganizationKycTeamProjectDTO,
+} from "@/lib/dto"
 
-type KYCTeamWithProjects = OrganizationKYCTeam & {
-  team: KYCTeam & {
-    projects: Project[]
-    team: {
-      users: KYCUser[]
-    }[]
-    rewardStreams: RewardStream[]
-  }
-}
+type KYCTeamWithProjects =
+  | OrganizationKycTeamAdminDTO
+  | OrganizationKycTeamMemberDTO
 
 const ConnectedOrganizationProjects = ({
   kycTeam,
@@ -20,7 +18,6 @@ const ConnectedOrganizationProjects = ({
   hasActiveStream?: boolean
   isAdmin?: boolean
 }) => {
-  console.log({ kycTeam, ln: kycTeam?.team.projects.length })
   return (
     <KYCSubSection
       title="Projects"
@@ -42,7 +39,7 @@ const ConnectedOrganizationProjects = ({
   )
 }
 
-const ProjectRow = ({ project }: { project: Project }) => {
+const ProjectRow = ({ project }: { project: OrganizationKycTeamProjectDTO }) => {
   return (
     <div className="flex flex-row items-center justify-between py-2 px-3 gap-2 border rounded-md">
       <div className="flex flex-row gap-2">

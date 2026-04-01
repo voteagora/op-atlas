@@ -6,9 +6,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
 import { prisma } from "@/db/client"
+import { requireAdminSession } from "@/lib/auth/adminSession"
 
 export const dynamic = 'force-dynamic'
 
@@ -17,29 +16,14 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(request: NextRequest) {
   try {
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin features not enabled' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      noSessionMessage: "Unauthorized: No active session",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized: No active session" },
-        { status: 401 },
-      )
-    }
-
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { adminUserId } = adminSession
 
     // Parse pagination params
     const { searchParams } = new URL(request.url)
@@ -147,29 +131,14 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin features not enabled' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      noSessionMessage: "Unauthorized: No active session",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized: No active session" },
-        { status: 401 },
-      )
-    }
-
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { adminUserId } = adminSession
 
     const body = await request.json()
     const { projectId, reason } = body
@@ -242,29 +211,14 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin features not enabled' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      noSessionMessage: "Unauthorized: No active session",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized: No active session" },
-        { status: 401 },
-      )
-    }
-
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { adminUserId } = adminSession
 
     const body = await request.json()
     const { projectId } = body

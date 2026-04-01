@@ -5,41 +5,23 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
+import { requireAdminSession } from "@/lib/auth/adminSession"
 import { impersonationService } from "@/lib/services/impersonationService"
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if impersonation is enabled
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin impersonation is not enabled. Check ENABLE_ADMIN_IMPERSONATION and admin wallet configuration.' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      disabledMessage:
+        "Admin impersonation is not enabled. Check ENABLE_ADMIN_IMPERSONATION and admin wallet configuration.",
+      noSessionMessage: "Unauthorized: No active session",
+      forbiddenMessage:
+        "Forbidden: Admin access required. Only authorized wallets can impersonate users.",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    // Get current session
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized: No active session" },
-        { status: 401 },
-      )
-    }
-
-    // Verify admin permission
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        {
-          error:
-            "Forbidden: Admin access required. Only authorized wallets can impersonate users.",
-        },
-        { status: 403 },
-      )
-    }
+    const { session, adminUserId } = adminSession
 
     // Parse request body
     const body = await request.json()
@@ -95,22 +77,14 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      )
+    const adminSession = await requireAdminSession({
+      noSessionMessage: "Unauthorized",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { session, adminUserId } = adminSession
 
     if (!session.impersonation?.isActive) {
       return NextResponse.json(

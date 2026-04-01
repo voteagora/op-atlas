@@ -10,23 +10,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { UserProjectsWithDetails } from "@/lib/types"
+import type {
+  ProjectSelectionLinkDTO,
+  UserAdminProjectsActionDTO,
+} from "@/lib/dto"
 import { useMemo } from "react"
 
-interface Project {
-  project: {
-    id: string
-    name: string
-    thumbnailUrl?: string | null
-  }
-}
-
 interface ProjectSelectionModalProps {
-  userProjects?: UserProjectsWithDetails
-  selectedProjects: Project[]
+  userProjects?: UserAdminProjectsActionDTO
+  selectedProjects: ProjectSelectionLinkDTO[]
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onProjectSelect: (project: Project) => void
+  onProjectSelect: (project: ProjectSelectionLinkDTO) => void
   onAddProject?: () => void
   triggerText?: string
   showTrigger?: boolean
@@ -59,11 +54,11 @@ export const ProjectSelectionModal = ({
       ) ?? []
 
     // Dedupe by project.project.id
-    const byId = new Map<string, Project>()
-    ;[...direct, ...orgProjects].forEach((p: any) => {
+    const byId = new Map<string, ProjectSelectionLinkDTO>()
+    ;[...direct, ...orgProjects].forEach((p) => {
       const id = p?.project?.id
       if (id && !byId.has(id)) {
-        byId.set(id, p as Project)
+        byId.set(id, p)
       }
     })
 

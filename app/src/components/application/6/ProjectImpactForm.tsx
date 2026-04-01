@@ -19,7 +19,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useProjectDetails } from "@/hooks/db/useProjectDetails"
-import { CategoryWithImpact, ProjectWithDetails } from "@/lib/types"
+import type { ProjectActionDTO } from "@/lib/dto"
+import { CategoryWithImpact } from "@/lib/types"
 import { EAS_URL_PREFIX, getProjectStatus } from "@/lib/utils"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
@@ -30,7 +31,7 @@ const ProjectImpactForm = ({
   form,
   index,
 }: {
-  project: ProjectWithDetails
+  project: ProjectActionDTO
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   categories: CategoryWithImpact[]
   index: number

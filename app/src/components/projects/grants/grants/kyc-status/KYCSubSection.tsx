@@ -3,6 +3,14 @@ import { ChevronRight, SquareCheck, LockIcon } from "lucide-react"
 import { useKYCProject } from "@/hooks/db/useKYCProject"
 import { useAppDialogs } from "@/providers/DialogProvider"
 import { useOrganizationKycTeams } from "@/hooks/db/useOrganizationKycTeam"
+import type {
+  OrganizationKycTeamAdminDTO,
+  OrganizationKycTeamMemberDTO,
+} from "@/lib/dto"
+
+type OrganizationKycTeamRecord =
+  | OrganizationKycTeamAdminDTO
+  | OrganizationKycTeamMemberDTO
 
 interface KYCSubSectionProps {
   title: string
@@ -54,17 +62,20 @@ const SelectProjectsButton = ({
   const { data: allOrgKycTeams } = useOrganizationKycTeams({
     organizationId,
   })
-  
+
   const openSelectKYCProjectDialog = () => {
     // Find the current KYC team and get its project IDs
-    const currentKycTeam = allOrgKycTeams?.find(team => team.kycTeamId === kycTeamId)
-    const alreadySelectedProjectIds = currentKycTeam?.team.projects.map((project) => project.id) || []
-    
+    const currentKycTeam = allOrgKycTeams?.find(
+      (team) => team.kycTeamId === kycTeamId,
+    )
+    const alreadySelectedProjectIds =
+      currentKycTeam?.team.projects.map((project) => project.id) || []
+
     setData({
       kycTeamId: kycTeamId,
       organizationId: organizationId,
       alreadySelectedProjectIds,
-      allOrgKycTeams, // Pass all KYC teams to detect conflicts
+      allOrgKycTeams: allOrgKycTeams as OrganizationKycTeamRecord[] | undefined, // Pass all KYC teams to detect conflicts
     })
     setOpenDialog("select_kyc_project")
   }

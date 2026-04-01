@@ -2,10 +2,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
 import { getProjects } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
 
 export function useUserProjects(userId: string | undefined): {
-  data: ProjectWithDetails[] | undefined
+  data: Awaited<ReturnType<typeof getProjects>> | undefined
   isLoading: boolean
   error: Error | null
 } {
@@ -19,7 +18,7 @@ export function useUserProjects(userId: string | undefined): {
 }
 
 export function useSessionProjects(): {
-  data: ProjectWithDetails[] | undefined
+  data: Awaited<ReturnType<typeof getProjects>> | undefined
   isLoading: boolean
   error: Error | null
 } {

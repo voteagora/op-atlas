@@ -10,7 +10,7 @@ import { useLayoutEffect, useState } from "react"
 import Confetti from "react-dom-confetti"
 
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
-import { ProjectWithDetails } from "@/lib/types"
+import type { ProjectActionDTO } from "@/lib/dto"
 import { cn } from "@/lib/utils"
 
 import ExternalLink from "../../ExternalLink"
@@ -67,7 +67,7 @@ export const ApplicationSubmitted = ({
 }: {
   className?: string
   application: Application
-  submittedProjects: ProjectWithDetails[]
+  submittedProjects: ProjectActionDTO[]
   onClose?: () => void
 }) => {
   const mission = useMissionFromPath()

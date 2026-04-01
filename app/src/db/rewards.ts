@@ -1,9 +1,7 @@
-"use server"
-
 import { Prisma, PrismaClient } from "@prisma/client"
-import { cache } from "react"
 
 import { isProjectBlacklisted } from "@/db/projects"
+import { cache } from "@/lib/cache"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { SuperfluidVestingSchedule } from "@/lib/superfluid"
 import { generateRewardStreamId } from "@/lib/utils/rewards"
@@ -113,10 +111,7 @@ export async function getFundingRewardsByRoundIdsAndSearchWithClient(
   return getFundingRewardsByRoundIdsAndSearchFn(params, db)
 }
 
-async function getRewardFn(
-  { id }: { id: string },
-  db: PrismaClient = prisma,
-) {
+async function getRewardFn({ id }: { id: string }, db: PrismaClient = prisma) {
   return db.fundingReward.findUnique({
     where: {
       id,
@@ -281,10 +276,7 @@ export async function updateClaim(
   })
 }
 
-export async function ensureClaim(
-  rewardId: string,
-  db: PrismaClient = prisma,
-) {
+export async function ensureClaim(rewardId: string, db: PrismaClient = prisma) {
   return db.rewardClaim.upsert({
     where: {
       rewardId,
@@ -308,10 +300,7 @@ async function getClaimByRewardIdFn(
   })
 }
 
-export async function deleteClaim(
-  rewardId: string,
-  db: PrismaClient = prisma,
-) {
+export async function deleteClaim(rewardId: string, db: PrismaClient = prisma) {
   return db.rewardClaim.delete({
     where: {
       rewardId,

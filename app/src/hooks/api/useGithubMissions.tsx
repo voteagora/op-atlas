@@ -25,11 +25,15 @@ export interface MissionStatusCounts {
   total: number
 }
 
+interface UseGitHubMissionsOptions {
+  enabled?: boolean
+}
+
 async function fetchGitHubMissions(): Promise<GitHubMission[]> {
-  const response = await fetch('/api/github/missions', {
-    method: 'GET',
+  const response = await fetch("/api/github/missions", {
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   })
 
@@ -45,14 +49,14 @@ function categorizeMissions(missions: GitHubMission[]): MissionStatusCounts {
     open: 0,
     inProgress: 0,
     done: 0,
-    total: missions.length
+    total: missions.length,
   }
 
-  missions.forEach(mission => {
-    const columnName = mission.column?.toLowerCase() || ''
-    if (columnName.includes('done')) {
+  missions.forEach((mission) => {
+    const columnName = mission.column?.toLowerCase() || ""
+    if (columnName.includes("done")) {
       counts.done++
-    } else if (columnName.includes('in progress')) {
+    } else if (columnName.includes("in progress")) {
       counts.inProgress++
     } else {
       counts.open++
@@ -62,15 +66,26 @@ function categorizeMissions(missions: GitHubMission[]): MissionStatusCounts {
   return counts
 }
 
-export function useGitHubMissions() {
+export function useGitHubMissions(options: UseGitHubMissionsOptions = {}) {
+  const { enabled = true } = options
+
   return useQuery({
-    queryKey: ['github-missions'],
+    queryKey: ["github-missions"],
     queryFn: fetchGitHubMissions,
-    staleTime: 5 * 60 * 1000,
-    select: (data: GitHubMission[]) => ({
-      missions: data,
-      statusCounts: categorizeMissions(data),
-      AreMissionsOpen: categorizeMissions(data).open > 0
-    })
+    enabled,
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+    select: (data: GitHubMission[]) => {
+      const statusCounts = categorizeMissions(data)
+
+      return {
+        missions: data,
+        statusCounts,
+        AreMissionsOpen: statusCounts.open > 0,
+      }
+    },
   })
 }
