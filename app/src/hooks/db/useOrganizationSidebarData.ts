@@ -24,7 +24,11 @@ export const useOrganizationSidebarData = ({
   enabled?: boolean
 }) => {
   const { data, isLoading, isSuccess, isError, error } = useQuery({
-    queryKey: [ORGANIZATION_SIDEBAR_DATA_QUERY_KEY, organizations?.map(o => o.id), pathname],
+    queryKey: [
+      ORGANIZATION_SIDEBAR_DATA_QUERY_KEY,
+      organizations?.map((o) => o.id),
+      pathname,
+    ],
     queryFn: async (): Promise<OrganizationSidebarData[]> => {
       if (!organizations) return []
 
@@ -67,8 +71,8 @@ export const useOrganizationSidebarData = ({
           const orgResolvedStatus = teamHasExpired
             ? "EXPIRED"
             : tamUsers && tamUsers.length > 0
-              ? resolveProjectStatus(tamUsers, legalEntities)
-              : "PENDING"
+            ? resolveProjectStatus(tamUsers, legalEntities)
+            : "PENDING"
 
           // If org TAM users indicate incomplete status, show the incomplete card by associating it with a representative project
           // We pick the first available project as a handle for the IncompleteCard component

@@ -195,9 +195,9 @@ export default function RoleApplication({
         <div className="text-foreground font-normal">
           Share any links that demonstrate your expertise:
         </div>
-        {externalLinks.length > 0 && externalLinks.map((link) => (
-          <>
-
+        {externalLinks.length > 0 &&
+          externalLinks.map((link) => (
+            <>
               <div
                 key={link.url}
                 className="text-secondary-foreground hover:underline flex flex-row gap-2"
@@ -207,12 +207,14 @@ export default function RoleApplication({
                   {link.url}
                 </Link>
               </div>
-            <p className="text-secondary-foreground">
-              {link.description || "None"}
-            </p>
-          </>
-        ))}
-        {externalLinks.length === 0 && <div className="text-secondary-foreground">None</div>}
+              <p className="text-secondary-foreground">
+                {link.description || "None"}
+              </p>
+            </>
+          ))}
+        {externalLinks.length === 0 && (
+          <div className="text-secondary-foreground">None</div>
+        )}
       </>
     )
   }

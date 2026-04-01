@@ -79,11 +79,7 @@ const StatusRow = ({
         >
           <StatusIcon status={displayStatus} />
           <div className="flex flex-row gap-2">
-            <RowText
-              values={[
-                label,
-              ]}
-            />
+            <RowText values={[label]} />
           </div>
           <div className="flex flex-row gap-2">
             {user.status === "APPROVED" &&

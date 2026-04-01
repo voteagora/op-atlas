@@ -1,10 +1,7 @@
 import { useSession } from "next-auth/react"
 
 import type { ProjectActionDTO } from "@/lib/dto"
-import {
-  ApplicationWithDetails,
-  CategoryWithImpact,
-} from "@/lib/types"
+import { ApplicationWithDetails, CategoryWithImpact } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"

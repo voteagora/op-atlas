@@ -38,7 +38,9 @@ let mockSessionContext: {
 
 jest.mock("@/lib/db/sessionContext", () => ({
   __esModule: true,
-  withImpersonation: jest.fn(async (handler: any) => handler(mockSessionContext)),
+  withImpersonation: jest.fn(async (handler: any) =>
+    handler(mockSessionContext),
+  ),
 }))
 
 jest.mock("../utils", () => ({
@@ -52,8 +54,9 @@ const mockCreateDelegatedVoteAttestationWithTx =
   createDelegatedVoteAttestationWithTx as jest.MockedFunction<
     typeof createDelegatedVoteAttestationWithTx
   >
-const mockUserOwnsAddress =
-  userOwnsAddress as jest.MockedFunction<typeof userOwnsAddress>
+const mockUserOwnsAddress = userOwnsAddress as jest.MockedFunction<
+  typeof userOwnsAddress
+>
 
 describe("vote action", () => {
   beforeEach(() => {

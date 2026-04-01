@@ -23,7 +23,6 @@ export function useSessionProjects(): {
   error: Error | null
 } {
   const { data: session } = useSession()
-  const viewerId =
-    session?.impersonation?.targetUserId ?? session?.user?.id
+  const viewerId = session?.impersonation?.targetUserId ?? session?.user?.id
   return useUserProjects(viewerId)
 }

@@ -7,11 +7,7 @@ import { unclaimedRewards } from "@/lib/rewards"
 
 import { ProjectRewardRow } from "./dialogs/UnclaimedRewardsDialog"
 
-function UnclaimedRewardsCard({
-  projects,
-}: {
-  projects: ProjectActionDTO[]
-}) {
+function UnclaimedRewardsCard({ projects }: { projects: ProjectActionDTO[] }) {
   const projectsWithUnclaimedRewards = useMemo(() => {
     return projects.filter((project) => unclaimedRewards(project).length > 0)
   }, [projects])

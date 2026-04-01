@@ -34,7 +34,10 @@ const UserProjectCard = ({
   project: ProjectActionDTO
   applications: ApplicationWithDetails[]
 }) => {
-  const team = [...project.team, ...(project.organization?.organization?.team ?? [])]
+  const team = [
+    ...project.team,
+    ...(project.organization?.organization?.team ?? []),
+  ]
 
   const isAdmin = useIsAdmin(team)
 

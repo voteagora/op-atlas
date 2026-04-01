@@ -15,8 +15,7 @@ export const API_USER_SCOPE = {
   claimsWrite: "claims:write",
 } as const
 
-export type ApiUserScope =
-  (typeof API_USER_SCOPE)[keyof typeof API_USER_SCOPE]
+export type ApiUserScope = (typeof API_USER_SCOPE)[keyof typeof API_USER_SCOPE]
 
 type ApiUserScopeRules = {
   default?: ApiUserScope[]
@@ -92,7 +91,10 @@ export function parseApiUserScopeRules(
       byName,
     }
   } catch (error) {
-    console.error("Invalid API_KEY_SCOPE_RULES_JSON; using safe defaults", error)
+    console.error(
+      "Invalid API_KEY_SCOPE_RULES_JSON; using safe defaults",
+      error,
+    )
     return {
       default: [...DEFAULT_API_USER_SCOPES],
       byId: {},
@@ -174,7 +176,9 @@ export async function authenticateApiUser(
       name: apiUser.name,
       userId: apiUser.id,
       scopes,
-      failReason: `Forbidden: Api key lacks required scopes (${requiredScopes.join(", ")})`,
+      failReason: `Forbidden: Api key lacks required scopes (${requiredScopes.join(
+        ", ",
+      )})`,
       status: 403,
     }
   }

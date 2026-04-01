@@ -177,10 +177,7 @@ export const getApplications = async (userId: string) =>
         return []
       }
 
-      return getUserApplicationsWithClient(
-        { userId: resolution.userId },
-        db,
-      )
+      return getUserApplicationsWithClient({ userId: resolution.userId }, db)
     },
     { requireUser: true },
   )

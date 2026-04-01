@@ -21,7 +21,9 @@ const OrganizationHeader = ({
   organization: PublicOrganizationProfileDTO
 }) => {
   const [showMore, setShowMore] = useState(false)
-  const { data: citizen } = useCitizen({ query: { type: CITIZEN_TYPES.chain, id: organization.id } })
+  const { data: citizen } = useCitizen({
+    query: { type: CITIZEN_TYPES.chain, id: organization.id },
+  })
 
   return (
     <div className={cn("flex w-full h-full gap-x-4", className)}>
@@ -43,10 +45,16 @@ const OrganizationHeader = ({
 
         <div className="flex flex-col gap-4 px-8">
           <Avatar className="w-28 h-28">
-            <AvatarImage src={organization.avatarUrl ?? ""} className="border border-white" />
+            <AvatarImage
+              src={organization.avatarUrl ?? ""}
+              className="border border-white"
+            />
             {citizen && citizen.attestationId && (
               <AvatarBadge className="absolute w-[20px] h-[20px] top-[20px] right-2 bg-white rounded-full">
-                <CheckboxCircleFIll className="w-[20px] h-[20px]" fill="#FF0000" />
+                <CheckboxCircleFIll
+                  className="w-[20px] h-[20px]"
+                  fill="#FF0000"
+                />
               </AvatarBadge>
             )}
           </Avatar>

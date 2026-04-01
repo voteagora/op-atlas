@@ -49,7 +49,12 @@ export enum EmailState {
 }
 
 export type KycStatusRowUser = KycUserMemberDTO &
-  Partial<Pick<KycUserAdminDTO, "firstName" | "lastName" | "email" | "personaReferenceId">>
+  Partial<
+    Pick<
+      KycUserAdminDTO,
+      "firstName" | "lastName" | "email" | "personaReferenceId"
+    >
+  >
 
 // Minimal shape for a Legal Entity contact used in status rows
 export type LegalEntityContact = {

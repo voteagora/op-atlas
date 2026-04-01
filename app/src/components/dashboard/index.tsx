@@ -9,10 +9,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Callout } from "@/components/common/Callout"
-import type {
-  ProjectActionDTO,
-  UserOrganizationActionDTO,
-} from "@/lib/dto"
+import type { ProjectActionDTO, UserOrganizationActionDTO } from "@/lib/dto"
 import { unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
@@ -66,7 +63,7 @@ const Dashboard = ({
   const { data: session } = useSession()
   const isImpersonating = !!session?.impersonation?.isActive
   // Use last 16 chars of privyDid for user-specific cookie
-  const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
+  const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : "default"
   const completeProfileAccordionDismissed = document.cookie.includes(
     `completeProfileAccordionDismissed_${userIdentifier}`,
   )
@@ -117,7 +114,8 @@ const Dashboard = ({
         type="info"
         leftAlignedContent={
           <p className="ml-2 text-sm font-normal text-blue-800">
-            To continue your citizenship, you must re-register for {seasonLabel}.{" "}
+            To continue your citizenship, you must re-register for {seasonLabel}
+            .{" "}
             <Link href="/citizenship" className="underline">
               See details
             </Link>
@@ -137,7 +135,6 @@ const Dashboard = ({
       {/* KYC Status Callouts */}
       <KYCCalloutsContainer kycTeams={kycTeams} />
 
-      
       {/* <RewardsCallout
         roundName="Onchain Builders"
         rewardPeriodStart={new Date("2025-02-01T21:53:13.300Z")}

@@ -2,9 +2,12 @@ import { KYCUser, User } from "@prisma/client"
 
 type KYCUserWithRelations = Partial<KYCUser> &
   Pick<KYCUser, "id" | "email"> & {
-  KYCUserTeams?: any[]
-  UserKYCUsers?: Array<{ user?: Pick<User, "name"> | null; users?: Pick<User, "name"> | null }>
-}
+    KYCUserTeams?: any[]
+    UserKYCUsers?: Array<{
+      user?: Pick<User, "name"> | null
+      users?: Pick<User, "name"> | null
+    }>
+  }
 
 // Helper function to get display name with fallbacks
 function getDisplayName(kycUser: KYCUserWithRelations): string {

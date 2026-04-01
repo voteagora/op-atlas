@@ -4,10 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 
 import type { ProjectActionDTO } from "@/lib/dto"
-import {
-  ApplicationWithDetails,
-  CategoryWithImpact,
-} from "@/lib/types"
+import { ApplicationWithDetails, CategoryWithImpact } from "@/lib/types"
 
 import { ApplicationSubmitted } from "../ApplicationSubmitted"
 import { FundingApplication } from "./FundingApplication"

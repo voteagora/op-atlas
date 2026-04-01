@@ -7,10 +7,7 @@ import { Callout } from "@/components/common/Callout"
 import ExternalLink from "@/components/ExternalLink"
 import { Button } from "@/components/ui/button"
 import type { ProjectActionDTO } from "@/lib/dto"
-import {
-  ApplicationWithDetails,
-  CategoryWithImpact,
-} from "@/lib/types"
+import { ApplicationWithDetails, CategoryWithImpact } from "@/lib/types"
 
 import { ApplicationFormSchema } from "./ApplicationFormTabs"
 import ProjectImpactForm from "./ProjectImpactForm"

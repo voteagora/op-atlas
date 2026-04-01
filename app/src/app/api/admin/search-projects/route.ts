@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/db/client"
 import { requireAdminSession } from "@/lib/auth/adminSession"
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,31 +19,34 @@ export async function GET(request: NextRequest) {
     const { adminUserId } = adminSession
 
     const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q') || ''
-    const limitParam = searchParams.get('limit')
-    const excludeBlacklisted = searchParams.get('excludeBlacklisted') === 'true'
+    const query = searchParams.get("q") || ""
+    const limitParam = searchParams.get("limit")
+    const excludeBlacklisted = searchParams.get("excludeBlacklisted") === "true"
     const limit = limitParam ? parseInt(limitParam, 10) : 10
 
     if (query.length < 2) {
       return NextResponse.json({
         success: true,
         projects: [],
-        message: 'Query too short (minimum 2 characters)'
+        message: "Query too short (minimum 2 characters)",
       })
     }
 
     if (limit > 50) {
-      return NextResponse.json({
-        error: 'Limit too high (maximum 50 projects)'
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: "Limit too high (maximum 50 projects)",
+        },
+        { status: 400 },
+      )
     }
 
     const projects = await prisma.project.findMany({
       where: {
         deletedAt: null,
         OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { id: { contains: query, mode: 'insensitive' } },
+          { name: { contains: query, mode: "insensitive" } },
+          { id: { contains: query, mode: "insensitive" } },
         ],
         ...(excludeBlacklisted ? { blacklist: null } : {}),
       },
@@ -58,32 +61,30 @@ export async function GET(request: NextRequest) {
             organization: {
               select: {
                 name: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         blacklist: {
           select: {
             id: true,
-          }
+          },
         },
         _count: {
           select: {
             team: true,
             applications: true,
             rewards: true,
-          }
-        }
+          },
+        },
       },
       take: limit,
-      orderBy: [
-        { name: 'asc' }
-      ]
+      orderBy: [{ name: "asc" }],
     })
 
     return NextResponse.json({
       success: true,
-      projects: projects.map(project => ({
+      projects: projects.map((project) => ({
         id: project.id,
         name: project.name,
         description: project.description,
@@ -100,13 +101,13 @@ export async function GET(request: NextRequest) {
       viewerId: adminUserId,
     })
   } catch (error) {
-    console.error('Project Search Error:', error)
+    console.error("Project Search Error:", error)
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : 'Search failed',
-        details: 'Failed to search projects. Check server logs for details.'
+        error: error instanceof Error ? error.message : "Search failed",
+        details: "Failed to search projects. Check server logs for details.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

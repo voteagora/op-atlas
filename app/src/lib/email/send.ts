@@ -46,7 +46,10 @@ export interface EmailResponse {
   message?: string
 }
 
-export type KycReminderUser = Pick<KYCUser, "id" | "email" | "personaReferenceId">
+export type KycReminderUser = Pick<
+  KYCUser,
+  "id" | "email" | "personaReferenceId"
+>
 
 export type LegalEntityWithController = KYCLegalEntity & {
   kycLegalEntityController: {

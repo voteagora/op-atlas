@@ -83,7 +83,9 @@ let mockSessionContext: {
 
 jest.mock("@/lib/db/sessionContext", () => ({
   __esModule: true,
-  withImpersonation: jest.fn(async (handler: any) => handler(mockSessionContext)),
+  withImpersonation: jest.fn(async (handler: any) =>
+    handler(mockSessionContext),
+  ),
 }))
 
 jest.mock("../utils", () => ({
@@ -94,14 +96,18 @@ jest.mock("../utils", () => ({
 
 const mockGetKYCUsersByProjectId =
   getKYCUsersByProjectId as jest.MockedFunction<typeof getKYCUsersByProjectId>
-const mockGetUserPassports =
-  getUserPassports as jest.MockedFunction<typeof getUserPassports>
-const mockToProjectKycUsersDTO =
-  toProjectKycUsersDTO as jest.MockedFunction<typeof toProjectKycUsersDTO>
-const mockResolveSessionUserId =
-  resolveSessionUserId as jest.MockedFunction<typeof resolveSessionUserId>
-const mockVerifyAdminStatus =
-  verifyAdminStatus as jest.MockedFunction<typeof verifyAdminStatus>
+const mockGetUserPassports = getUserPassports as jest.MockedFunction<
+  typeof getUserPassports
+>
+const mockToProjectKycUsersDTO = toProjectKycUsersDTO as jest.MockedFunction<
+  typeof toProjectKycUsersDTO
+>
+const mockResolveSessionUserId = resolveSessionUserId as jest.MockedFunction<
+  typeof resolveSessionUserId
+>
+const mockVerifyAdminStatus = verifyAdminStatus as jest.MockedFunction<
+  typeof verifyAdminStatus
+>
 
 describe("hook fetcher auth boundaries", () => {
   beforeEach(() => {

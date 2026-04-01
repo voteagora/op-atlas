@@ -19,10 +19,7 @@ describe("serverAuth", () => {
 
   it("uses safe read-only defaults when no scope config is provided", () => {
     expect(parseApiUserScopeRules(undefined)).toEqual({
-      default: [
-        API_USER_SCOPE.projectMetadataRead,
-        API_USER_SCOPE.rewardsRead,
-      ],
+      default: [API_USER_SCOPE.projectMetadataRead, API_USER_SCOPE.rewardsRead],
       byId: {},
       byName: {},
     })
@@ -74,13 +71,9 @@ describe("serverAuth", () => {
 
     expect(result).toEqual({
       authenticated: false,
-      failReason:
-        "Forbidden: Api key lacks required scopes (projects:create)",
+      failReason: "Forbidden: Api key lacks required scopes (projects:create)",
       name: "Read Only Key",
-      scopes: [
-        API_USER_SCOPE.projectMetadataRead,
-        API_USER_SCOPE.rewardsRead,
-      ],
+      scopes: [API_USER_SCOPE.projectMetadataRead, API_USER_SCOPE.rewardsRead],
       status: 403,
       userId: "user-1",
     })

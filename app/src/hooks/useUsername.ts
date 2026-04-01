@@ -10,14 +10,12 @@ import { useEnsName } from "./useEnsName"
  * 3. Email local part (before @) truncated to 20 characters if needed
  * 4. null if no suitable display name can be determined
  */
-export const useUsername = (
-  user?: {
-    name?: string | null
-    username?: string | null
-    emails?: { email: string }[]
-    addresses?: { address: string; primary?: boolean | null }[]
-  },
-) => {
+export const useUsername = (user?: {
+  name?: string | null
+  username?: string | null
+  emails?: { email: string }[]
+  addresses?: { address: string; primary?: boolean | null }[]
+}) => {
   const primaryOrFirstAddress =
     user?.addresses?.find((a) => a.primary)?.address ??
     user?.addresses?.[0]?.address
@@ -32,7 +30,9 @@ export const useUsername = (
     if (!user) return null
     if (user.name) return user.name
     if (validAddress) {
-      return ensName ?? `0x${validAddress.slice(2, 5)}...${validAddress.slice(-3)}`
+      return (
+        ensName ?? `0x${validAddress.slice(2, 5)}...${validAddress.slice(-3)}`
+      )
     }
 
     if (user.username) {

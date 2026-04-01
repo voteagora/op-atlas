@@ -14,8 +14,7 @@ export async function GET() {
       {
         status: "unhealthy",
         timestamp: new Date().toISOString(),
-        error:
-          error instanceof Error ? error.message : "Database unreachable",
+        error: error instanceof Error ? error.message : "Database unreachable",
       },
       { status: 503 },
     )

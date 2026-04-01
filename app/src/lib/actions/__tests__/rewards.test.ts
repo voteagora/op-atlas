@@ -35,7 +35,9 @@ let mockSessionContext: {
 
 jest.mock("@/lib/db/sessionContext", () => ({
   __esModule: true,
-  withImpersonation: jest.fn(async (handler: any) => handler(mockSessionContext)),
+  withImpersonation: jest.fn(async (handler: any) =>
+    handler(mockSessionContext),
+  ),
 }))
 
 jest.mock("../utils", () => ({
@@ -44,10 +46,12 @@ jest.mock("../utils", () => ({
   verifyAdminStatus: jest.fn(),
 }))
 
-const mockGetActiveStreams =
-  getActiveStreams as jest.MockedFunction<typeof getActiveStreams>
-const mockUserOwnsAddress =
-  userOwnsAddress as jest.MockedFunction<typeof userOwnsAddress>
+const mockGetActiveStreams = getActiveStreams as jest.MockedFunction<
+  typeof getActiveStreams
+>
+const mockUserOwnsAddress = userOwnsAddress as jest.MockedFunction<
+  typeof userOwnsAddress
+>
 
 describe("rewards actions", () => {
   beforeEach(() => {

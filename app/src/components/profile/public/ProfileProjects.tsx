@@ -94,11 +94,7 @@ function ProfileProjects({ projects }: { projects: PublicProjectCardDTO[] }) {
                         height={14}
                       />
                       <span className="text-center text-sm font-normal">
-                        {formatNumber(
-                          Math.round(reward.amount),
-                          0,
-                          "compact",
-                        )}
+                        {formatNumber(Math.round(reward.amount), 0, "compact")}
                       </span>
                     </span>
                   )

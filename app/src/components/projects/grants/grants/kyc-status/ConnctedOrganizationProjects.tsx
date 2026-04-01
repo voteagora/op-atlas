@@ -39,7 +39,11 @@ const ConnectedOrganizationProjects = ({
   )
 }
 
-const ProjectRow = ({ project }: { project: OrganizationKycTeamProjectDTO }) => {
+const ProjectRow = ({
+  project,
+}: {
+  project: OrganizationKycTeamProjectDTO
+}) => {
   return (
     <div className="flex flex-row items-center justify-between py-2 px-3 gap-2 border rounded-md">
       <div className="flex flex-row gap-2">

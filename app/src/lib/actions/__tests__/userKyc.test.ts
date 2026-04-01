@@ -54,14 +54,17 @@ let mockSessionContext: {
 
 jest.mock("@/lib/db/sessionContext", () => ({
   __esModule: true,
-  withImpersonation: jest.fn(async (handler: any) => handler(mockSessionContext)),
+  withImpersonation: jest.fn(async (handler: any) =>
+    handler(mockSessionContext),
+  ),
 }))
 
 const mockGetUserKYCUser = getUserKYCUser as jest.MockedFunction<
   typeof getUserKYCUser
 >
-const mockResolveSessionUserId =
-  resolveSessionUserId as jest.MockedFunction<typeof resolveSessionUserId>
+const mockResolveSessionUserId = resolveSessionUserId as jest.MockedFunction<
+  typeof resolveSessionUserId
+>
 
 describe("userKyc actions", () => {
   beforeEach(() => {

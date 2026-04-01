@@ -316,9 +316,7 @@ type KycLegalEntityDTO<A extends KycAudience> = A extends "admin"
   ? KycLegalEntityAdminDTO
   : KycLegalEntityMemberDTO
 
-export type ProjectKycUsersDTO<
-  A extends KycAudience = "member",
-> = {
+export type ProjectKycUsersDTO<A extends KycAudience = "member"> = {
   users: Array<KycUserDTO<A>>
   legalEntities: Array<KycLegalEntityDTO<A>>
 }
@@ -335,29 +333,26 @@ export type OrganizationKycTeamLegalEntityLinkDTO<
   legalEntity: KycLegalEntityDTO<A> | null
 }
 
-export type OrganizationKycTeamPayloadDTO<
-  A extends KycAudience = "member",
-> = UnknownRecord & {
-  walletAddress: string
-  rewardStreams: Array<UnknownRecord>
-  team: Array<OrganizationKycTeamMemberLinkDTO<A>>
-  KYCLegalEntityTeams: Array<OrganizationKycTeamLegalEntityLinkDTO<A>>
-  projects: Array<OrganizationKycTeamProjectDTO>
-}
+export type OrganizationKycTeamPayloadDTO<A extends KycAudience = "member"> =
+  UnknownRecord & {
+    walletAddress: string
+    rewardStreams: Array<UnknownRecord>
+    team: Array<OrganizationKycTeamMemberLinkDTO<A>>
+    KYCLegalEntityTeams: Array<OrganizationKycTeamLegalEntityLinkDTO<A>>
+    projects: Array<OrganizationKycTeamProjectDTO>
+  }
 
-export type OrganizationKycTeamDTO<
-  A extends KycAudience = "member",
-> = UnknownRecord & {
-  organizationId: string
-  kycTeamId: string
-  team: OrganizationKycTeamPayloadDTO<A>
-}
+export type OrganizationKycTeamDTO<A extends KycAudience = "member"> =
+  UnknownRecord & {
+    organizationId: string
+    kycTeamId: string
+    team: OrganizationKycTeamPayloadDTO<A>
+  }
 
-export type OrganizationKycTeamMemberLinkDTO<
-  A extends KycAudience = "member",
-> = UnknownRecord & {
-  users: KycUserDTO<A> | null
-}
+export type OrganizationKycTeamMemberLinkDTO<A extends KycAudience = "member"> =
+  UnknownRecord & {
+    users: KycUserDTO<A> | null
+  }
 
 export type ProjectKycTeamMemberDTO = {
   id: string
@@ -378,9 +373,8 @@ export type ProjectKycUsersMemberDTO = ProjectKycUsersDTO<"member">
 export type OrganizationKycTeamAdminDTO = OrganizationKycTeamDTO<"admin">
 export type OrganizationKycTeamMemberDTO = OrganizationKycTeamDTO<"member">
 
-type ProjectKycTeamDTO<
-  A extends Extract<TrustAudience, "member" | "admin">,
-> = A extends "admin" ? ProjectKycTeamAdminDTO : ProjectKycTeamMemberDTO
+type ProjectKycTeamDTO<A extends Extract<TrustAudience, "member" | "admin">> =
+  A extends "admin" ? ProjectKycTeamAdminDTO : ProjectKycTeamMemberDTO
 
 export type ProjectDTO<
   T extends UnknownRecord = UnknownRecord,
@@ -421,7 +415,10 @@ export type OrganizationDTO<
     : Array<OrganizationMemberDTO<UnknownArrayItem<Prop<T, "team">> & WithUser>>
   projects: Array<
     Omit<UnknownArrayItem<Prop<T, "projects">>, "project"> & {
-      project: RecordProp<UnknownArrayItem<Prop<T, "projects">>, "project"> extends never
+      project: RecordProp<
+        UnknownArrayItem<Prop<T, "projects">>,
+        "project"
+      > extends never
         ? null
         : ProjectDTO<
             RecordProp<UnknownArrayItem<Prop<T, "projects">>, "project">,
@@ -443,9 +440,9 @@ export type OrganizationRelationDTO<
   A extends Extract<TrustAudience, "public" | "member" | "admin"> = "public",
 > = Omit<T, "organization"> & {
   organization:
-    | (RecordProp<T, "organization"> extends never
+    | RecordProp<T, "organization"> extends never
         ? null
-        : ToOrganizationDTO<RecordProp<T, "organization">, A> | null)
+        : ToOrganizationDTO<RecordProp<T, "organization">, A> | null
 }
 
 function isRecord(value: unknown): value is UnknownRecord {
@@ -519,9 +516,7 @@ function sanitizeAddress(address: UnknownRecord) {
   }
 }
 
-function sanitizePublicAddress(
-  address: UnknownRecord,
-): PublicUserAddressDTO {
+function sanitizePublicAddress(address: UnknownRecord): PublicUserAddressDTO {
   return {
     address: getString(address.address),
     primary: Boolean(address.primary),
@@ -695,7 +690,9 @@ function sanitizeMemberWithPublicUser<T extends WithUser>(
   }
 }
 
-function sanitizeRewardClaim<A extends Extract<TrustAudience, "member" | "admin">>(
+function sanitizeRewardClaim<
+  A extends Extract<TrustAudience, "member" | "admin">,
+>(
   claim: UnknownRecord | null | undefined,
   audience: A,
 ): RewardClaimDTO<A> | null {
@@ -726,10 +723,7 @@ function sanitizeRewardClaim<A extends Extract<TrustAudience, "member" | "admin"
 function sanitizeRewards<
   T extends UnknownRecord,
   A extends Extract<TrustAudience, "public" | "member" | "admin">,
->(
-  rewards: T[] | null | undefined,
-  audience: A,
-): Array<RewardDTO<T, A>> {
+>(rewards: T[] | null | undefined, audience: A): Array<RewardDTO<T, A>> {
   if (!Array.isArray(rewards)) {
     return []
   }
@@ -893,19 +887,22 @@ function sanitizeKycTeam<A extends Extract<TrustAudience, "member" | "admin">>(
     return {
       ...base,
       team: getRecordArray(kycTeam.team).map((member) => ({
-            ...member,
-            users: sanitizeKycUser(getRecord(member.users), "admin"),
-          })),
+        ...member,
+        users: sanitizeKycUser(getRecord(member.users), "admin"),
+      })),
       KYCLegalEntityTeams: getRecordArray(kycTeam.KYCLegalEntityTeams).map(
         (link) => ({
-            ...link,
-            legalEntity: sanitizeLegalEntity(getRecord(link.legalEntity), "admin"),
-          }),
+          ...link,
+          legalEntity: sanitizeLegalEntity(
+            getRecord(link.legalEntity),
+            "admin",
+          ),
+        }),
       ),
       projects: getRecordArray(kycTeam.projects)
         .map((project) => toKycTeamProjectDTO(project))
-        .filter(
-          (project): project is OrganizationKycTeamProjectDTO => Boolean(project),
+        .filter((project): project is OrganizationKycTeamProjectDTO =>
+          Boolean(project),
         ),
     } as ProjectKycTeamDTO<A>
   }
@@ -956,7 +953,10 @@ export function toOrganizationDTO<
 export function toOrganizationDTO<
   T extends UnknownRecord,
   A extends Extract<TrustAudience, "public" | "member" | "admin">,
->(organization: T | null | undefined, audience: A): ToOrganizationDTO<T, A> | null
+>(
+  organization: T | null | undefined,
+  audience: A,
+): ToOrganizationDTO<T, A> | null
 export function toOrganizationDTO<
   T extends UnknownRecord,
   A extends Extract<TrustAudience, "public" | "member" | "admin">,
@@ -979,23 +979,23 @@ export function toOrganizationDTO<
   return {
     ...organization,
     team: getRecordArray(organization.team).map((member) =>
-          audience === "admin"
-            ? sanitizeMemberWithPublicUser(member as WithUser)
-            : {
-                ...member,
-                id: getString(member.id),
-                organizationId: getString(member.organizationId),
-                userId: getString(member.userId),
-                user: toUserPublicDTO(getRecord(member.user)),
-              },
-        ),
+      audience === "admin"
+        ? sanitizeMemberWithPublicUser(member as WithUser)
+        : {
+            ...member,
+            id: getString(member.id),
+            organizationId: getString(member.organizationId),
+            userId: getString(member.userId),
+            user: toUserPublicDTO(getRecord(member.user)),
+          },
+    ),
     projects: getRecordArray(organization.projects).map((projectRef) => ({
-          ...projectRef,
-          project: toProjectDTO(
-            getRecord(projectRef.project),
-            audience === "public" ? "public" : audience,
-          ),
-        })),
+      ...projectRef,
+      project: toProjectDTO(
+        getRecord(projectRef.project),
+        audience === "public" ? "public" : audience,
+      ),
+    })),
   } as unknown as ToOrganizationDTO<T, A>
 }
 
@@ -1049,13 +1049,16 @@ export function toOrganizationKycTeamsDTO<A extends KycAudience>(
         KYCLegalEntityTeams: getRecordArray(team?.KYCLegalEntityTeams).map(
           (link) => ({
             ...link,
-            legalEntity: sanitizeLegalEntity(getRecord(link.legalEntity), audience),
+            legalEntity: sanitizeLegalEntity(
+              getRecord(link.legalEntity),
+              audience,
+            ),
           }),
         ),
         projects: getRecordArray(team?.projects)
           .map((project) => toKycTeamProjectDTO(project))
-          .filter(
-            (project): project is OrganizationKycTeamProjectDTO => Boolean(project),
+          .filter((project): project is OrganizationKycTeamProjectDTO =>
+            Boolean(project),
           ),
       },
     }

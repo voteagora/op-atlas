@@ -85,8 +85,9 @@ const mockGetPublicRoundApplicationProjectsWithClient =
 const mockWithImpersonation = withImpersonation as jest.MockedFunction<
   typeof withImpersonation
 >
-const mockResolveSessionUserId =
-  resolveSessionUserId as jest.MockedFunction<typeof resolveSessionUserId>
+const mockResolveSessionUserId = resolveSessionUserId as jest.MockedFunction<
+  typeof resolveSessionUserId
+>
 
 describe("project action auth boundaries", () => {
   beforeEach(() => {
@@ -114,10 +115,9 @@ describe("project action auth boundaries", () => {
       "Unauthorized",
     )
     expect(mockGetUserApplicationsWithClient).not.toHaveBeenCalled()
-    expect(mockWithImpersonation).toHaveBeenCalledWith(
-      expect.any(Function),
-      { requireUser: true },
-    )
+    expect(mockWithImpersonation).toHaveBeenCalledWith(expect.any(Function), {
+      requireUser: true,
+    })
   })
 
   it("returns an empty list when getApplications is called for another user", async () => {
@@ -158,10 +158,9 @@ describe("project action auth boundaries", () => {
       },
       mockDb,
     )
-    expect(mockWithImpersonation).toHaveBeenCalledWith(
-      expect.any(Function),
-      { requireUser: true },
-    )
+    expect(mockWithImpersonation).toHaveBeenCalledWith(expect.any(Function), {
+      requireUser: true,
+    })
   })
 
   it("keeps the public round project list available without a session", async () => {
@@ -176,9 +175,8 @@ describe("project action auth boundaries", () => {
     const result = await getPublicRoundApplicationProjects(6)
 
     expect(result).toEqual(publicProjects)
-    expect(mockGetPublicRoundApplicationProjectsWithClient).toHaveBeenCalledWith(
-      { roundId: "6" },
-      mockDb,
-    )
+    expect(
+      mockGetPublicRoundApplicationProjectsWithClient,
+    ).toHaveBeenCalledWith({ roundId: "6" }, mockDb)
   })
 })

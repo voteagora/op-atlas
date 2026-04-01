@@ -89,7 +89,9 @@ export function ProjectRewardRow({ project }: { project: ProjectActionDTO }) {
           width={24}
           alt="Optimism"
         />
-        <div className="font-normal">{formatNumber(project.rewards[0].amount)}</div>
+        <div className="font-normal">
+          {formatNumber(project.rewards[0].amount)}
+        </div>
       </div>
       {parseInt(rewardRound) > 6 ? (
         <Link href={`/project/${project.id}`}>

@@ -34,10 +34,7 @@ export async function requireAdminSession({
   if (requireAdminFeature && !isImpersonationEnabled()) {
     return {
       ok: false,
-      response: NextResponse.json(
-        { error: disabledMessage },
-        { status: 503 },
-      ),
+      response: NextResponse.json({ error: disabledMessage }, { status: 503 }),
     }
   }
 
@@ -47,10 +44,7 @@ export async function requireAdminSession({
   if (!adminUserId) {
     return {
       ok: false,
-      response: NextResponse.json(
-        { error: noSessionMessage },
-        { status: 401 },
-      ),
+      response: NextResponse.json({ error: noSessionMessage }, { status: 401 }),
     }
   }
 
@@ -58,10 +52,7 @@ export async function requireAdminSession({
   if (!isAdmin) {
     return {
       ok: false,
-      response: NextResponse.json(
-        { error: forbiddenMessage },
-        { status: 403 },
-      ),
+      response: NextResponse.json({ error: forbiddenMessage }, { status: 403 }),
     }
   }
 

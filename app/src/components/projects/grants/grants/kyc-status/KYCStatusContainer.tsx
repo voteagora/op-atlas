@@ -54,9 +54,14 @@ type OrganizationKycTeamRecord =
   | OrganizationKycTeamAdminDTO
   | OrganizationKycTeamMemberDTO
 
-type ResendableKycUser = Pick<KycUserAdminDTO, "id" | "email" | "personaReferenceId">
+type ResendableKycUser = Pick<
+  KycUserAdminDTO,
+  "id" | "email" | "personaReferenceId"
+>
 
-function isResendableKycUser(target: KYCOrLegal): target is KycStatusRowUser & ResendableKycUser {
+function isResendableKycUser(
+  target: KYCOrLegal,
+): target is KycStatusRowUser & ResendableKycUser {
   return !isLegalEntityContact(target) && typeof target.email === "string"
 }
 
@@ -506,27 +511,26 @@ const ProjectKYCStatusContainer = ({
     ? resolveProjectStatus(kycUsers, kycLegalEntities)
     : "PENDING"
 
-  const { sendingEmailUsers, handleEmailResend: handleUserEmailResend } = useKYCEmailResend({
-    projectId: project.id,
-  })
+  const { sendingEmailUsers, handleEmailResend: handleUserEmailResend } =
+    useKYCEmailResend({
+      projectId: project.id,
+    })
 
-  const users: KYCUserStatusProps[] | undefined = kycUsers?.map(
-    (user) => ({
-      user,
-      handleEmailResend: async (target) => {
-        if (!isResendableKycUser(target)) {
-          return
-        }
+  const users: KYCUserStatusProps[] | undefined = kycUsers?.map((user) => ({
+    user,
+    handleEmailResend: async (target) => {
+      if (!isResendableKycUser(target)) {
+        return
+      }
 
-        await handleUserEmailResend(target)
-      },
-      emailResendBlock:
-        !isAdmin ||
-        projectStatus === "project_issue" ||
-        user.status === "APPROVED",
-      emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
-    }),
-  )
+      await handleUserEmailResend(target)
+    },
+    emailResendBlock:
+      !isAdmin ||
+      projectStatus === "project_issue" ||
+      user.status === "APPROVED",
+    emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
+  }))
 
   if (isError) {
     console.error(`Error loading KYC users data: ${useKYCProjectError}`)
@@ -577,7 +581,8 @@ const OrganizationKYCStatusContainer = ({
         teamMember.users ? [teamMember.users] : [],
       )
       const legalEntities = kycOrg.team.KYCLegalEntityTeams.flatMap(
-        (entityTeam) => (entityTeam.legalEntity ? [entityTeam.legalEntity] : []),
+        (entityTeam) =>
+          entityTeam.legalEntity ? [entityTeam.legalEntity] : [],
       )
       const hasActiveStream = kycOrg.team.rewardStreams.length > 0
       const legalEntityCount = legalEntities.length
@@ -686,9 +691,10 @@ const OrganizationKYCTeamCard = ({
   hasActiveStream: boolean
   isAdmin?: boolean
 }) => {
-  const { sendingEmailUsers, handleEmailResend: handleUserEmailResend } = useKYCEmailResend({
-    organizationId: kycOrg.organizationId,
-  })
+  const { sendingEmailUsers, handleEmailResend: handleUserEmailResend } =
+    useKYCEmailResend({
+      organizationId: kycOrg.organizationId,
+    })
 
   const userMappings: KYCUserStatusProps[] = users.map((user) => ({
     user,
@@ -705,7 +711,9 @@ const OrganizationKYCTeamCard = ({
   }))
 
   const legalEntities = kycOrg.team.KYCLegalEntityTeams.flatMap((entityTeam) =>
-    entityTeam.legalEntity ? [toLegalEntityContact(entityTeam.legalEntity)] : [],
+    entityTeam.legalEntity
+      ? [toLegalEntityContact(entityTeam.legalEntity)]
+      : [],
   )
 
   return (

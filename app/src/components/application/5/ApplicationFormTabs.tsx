@@ -15,10 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { submitApplications } from "@/lib/actions/applications"
 import { fetchProject, fetchProjectContracts } from "@/lib/actions/hookFetchers"
 import type { ProjectActionDTO } from "@/lib/dto"
-import {
-  ApplicationWithDetails,
-  CategoryWithImpact,
-} from "@/lib/types"
+import { ApplicationWithDetails, CategoryWithImpact } from "@/lib/types"
 import { getProjectStatus } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"

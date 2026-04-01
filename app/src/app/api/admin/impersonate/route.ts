@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
 
     if (!targetUserId) {
       return NextResponse.json(
-        { error: 'targetUserId is required' },
-        { status: 400 }
+        { error: "targetUserId is required" },
+        { status: 400 },
       )
     }
 
@@ -48,10 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
     return NextResponse.json({
@@ -108,8 +105,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Internal server error",
-        details:
-          "Failed to stop impersonation. Check server logs for details.",
+        details: "Failed to stop impersonation. Check server logs for details.",
       },
       { status: 500 },
     )
