@@ -68,11 +68,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate GraphQL types
-        run: |
-          cd app
-          pnpm graphql:generate
-
       - name: Generate Prisma client
         run: |
           cd app
