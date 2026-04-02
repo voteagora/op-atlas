@@ -1,8 +1,23 @@
-import { fetchKycProjectUsers, fetchUserPassports } from "../hookFetchers"
-import { getKYCUsersByProjectId } from "@/db/kyc"
+import {
+  getExpiredKYCCountForOrganization,
+  getExpiredKYCCountForProject,
+  getKYCUsersByProjectId,
+} from "@/db/kyc"
 import { getUserPassports } from "@/db/users"
 import { toProjectKycUsersDTO } from "@/lib/dto"
-import { resolveSessionUserId, verifyAdminStatus } from "../utils"
+
+import {
+  fetchExpiredKycCountForOrganization,
+  fetchExpiredKycCountForProject,
+  fetchKycProjectUsers,
+  fetchUserPassports,
+} from "../hookFetchers"
+import {
+  resolveSessionUserId,
+  verifyAdminStatus,
+  verifyMembership,
+  verifyOrganizationMembership,
+} from "../utils"
 
 jest.mock("@/db/projects", () => ({
   __esModule: true,
@@ -92,8 +107,18 @@ jest.mock("../utils", () => ({
   __esModule: true,
   resolveSessionUserId: jest.fn(),
   verifyAdminStatus: jest.fn(),
+  verifyMembership: jest.fn(),
+  verifyOrganizationMembership: jest.fn(),
 }))
 
+const mockGetExpiredKYCCountForOrganization =
+  getExpiredKYCCountForOrganization as jest.MockedFunction<
+    typeof getExpiredKYCCountForOrganization
+  >
+const mockGetExpiredKYCCountForProject =
+  getExpiredKYCCountForProject as jest.MockedFunction<
+    typeof getExpiredKYCCountForProject
+  >
 const mockGetKYCUsersByProjectId =
   getKYCUsersByProjectId as jest.MockedFunction<typeof getKYCUsersByProjectId>
 const mockGetUserPassports = getUserPassports as jest.MockedFunction<
@@ -108,6 +133,13 @@ const mockResolveSessionUserId = resolveSessionUserId as jest.MockedFunction<
 const mockVerifyAdminStatus = verifyAdminStatus as jest.MockedFunction<
   typeof verifyAdminStatus
 >
+const mockVerifyMembership = verifyMembership as jest.MockedFunction<
+  typeof verifyMembership
+>
+const mockVerifyOrganizationMembership =
+  verifyOrganizationMembership as jest.MockedFunction<
+    typeof verifyOrganizationMembership
+  >
 
 describe("hook fetcher auth boundaries", () => {
   beforeEach(() => {
@@ -177,5 +209,94 @@ describe("hook fetcher auth boundaries", () => {
       "Unauthorized",
     )
     expect(mockGetUserPassports).not.toHaveBeenCalled()
+  })
+
+  it("rejects unauthenticated expired project KYC count fetches", async () => {
+    mockSessionContext.userId = null
+
+    await expect(fetchExpiredKycCountForProject("project-1")).rejects.toThrow(
+      "Unauthorized",
+    )
+    expect(mockVerifyMembership).not.toHaveBeenCalled()
+    expect(mockGetExpiredKYCCountForProject).not.toHaveBeenCalled()
+  })
+
+  it("rejects expired project KYC count fetches for non-members", async () => {
+    mockVerifyMembership.mockResolvedValue({
+      context: "project",
+      error: "Unauthorized",
+    })
+
+    await expect(fetchExpiredKycCountForProject("project-1")).rejects.toThrow(
+      "Unauthorized",
+    )
+    expect(mockVerifyMembership).toHaveBeenCalledWith(
+      "project-1",
+      "session-user",
+      mockDb,
+    )
+    expect(mockGetExpiredKYCCountForProject).not.toHaveBeenCalled()
+  })
+
+  it("returns expired project KYC counts for members", async () => {
+    mockVerifyMembership.mockResolvedValue(null)
+    mockGetExpiredKYCCountForProject.mockResolvedValue(3)
+
+    const result = await fetchExpiredKycCountForProject("project-1")
+
+    expect(result).toBe(3)
+    expect(mockVerifyMembership).toHaveBeenCalledWith(
+      "project-1",
+      "session-user",
+      mockDb,
+    )
+    expect(mockGetExpiredKYCCountForProject).toHaveBeenCalledWith(
+      { projectId: "project-1" },
+      mockDb,
+    )
+  })
+
+  it("rejects unauthenticated expired organization KYC count fetches", async () => {
+    mockSessionContext.userId = null
+
+    await expect(
+      fetchExpiredKycCountForOrganization("organization-1"),
+    ).rejects.toThrow("Unauthorized")
+    expect(mockVerifyOrganizationMembership).not.toHaveBeenCalled()
+    expect(mockGetExpiredKYCCountForOrganization).not.toHaveBeenCalled()
+  })
+
+  it("rejects expired organization KYC count fetches for non-members", async () => {
+    mockVerifyOrganizationMembership.mockResolvedValue({
+      error: "Unauthorized",
+    })
+
+    await expect(
+      fetchExpiredKycCountForOrganization("organization-1"),
+    ).rejects.toThrow("Unauthorized")
+    expect(mockVerifyOrganizationMembership).toHaveBeenCalledWith(
+      "organization-1",
+      "session-user",
+      mockDb,
+    )
+    expect(mockGetExpiredKYCCountForOrganization).not.toHaveBeenCalled()
+  })
+
+  it("returns expired organization KYC counts for members", async () => {
+    mockVerifyOrganizationMembership.mockResolvedValue(null)
+    mockGetExpiredKYCCountForOrganization.mockResolvedValue(2)
+
+    const result = await fetchExpiredKycCountForOrganization("organization-1")
+
+    expect(result).toBe(2)
+    expect(mockVerifyOrganizationMembership).toHaveBeenCalledWith(
+      "organization-1",
+      "session-user",
+      mockDb,
+    )
+    expect(mockGetExpiredKYCCountForOrganization).toHaveBeenCalledWith(
+      { organizationId: "organization-1" },
+      mockDb,
+    )
   })
 })

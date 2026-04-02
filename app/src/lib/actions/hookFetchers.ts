@@ -1,5 +1,16 @@
 "use server"
 
+import { getCitizenByAddress, getCitizenForUser } from "@/db/citizens"
+import { getGithubProximity } from "@/db/githubProxomity"
+import {
+  getExpiredKYCCountForOrganization,
+  getExpiredKYCCountForProject,
+  getKYCUsersByProjectId,
+} from "@/db/kyc"
+import {
+  getOrganizationKYCTeams,
+  getOrganizationWithClient,
+} from "@/db/organizations"
 import {
   getAllProjectContractsWithClient,
   getProjectContractsWithClient,
@@ -7,17 +18,6 @@ import {
   getRandomProjectsWithClient,
   getUserAdminProjectsWithDetailWithClient,
 } from "@/db/projects"
-import {
-  getOrganizationKYCTeams,
-  getOrganizationWithClient,
-} from "@/db/organizations"
-import { getCitizenByAddress, getCitizenForUser } from "@/db/citizens"
-import {
-  getKYCUsersByProjectId,
-  getExpiredKYCCountForOrganization,
-  getExpiredKYCCountForProject,
-} from "@/db/kyc"
-import { getGithubProximity } from "@/db/githubProxomity"
 import {
   getUserByAddress,
   getUserById,
@@ -31,15 +31,20 @@ import {
   getKycAudienceForOrganization,
   getOrganizationAudience,
   getProjectAudience,
-  toOrganizationKycTeamsDTO,
   toOrganizationDTO,
+  toOrganizationKycTeamsDTO,
   toProjectDTO,
   toProjectKycUsersDTO,
   toScopedUserDTO,
 } from "@/lib/dto"
 import { getProjectMetrics } from "@/lib/oso"
 
-import { resolveSessionUserId, verifyAdminStatus } from "./utils"
+import {
+  resolveSessionUserId,
+  verifyAdminStatus,
+  verifyMembership,
+  verifyOrganizationMembership,
+} from "./utils"
 
 export async function fetchProject(projectId: string) {
   return withImpersonation(async ({ db, userId }) => {
@@ -234,16 +239,44 @@ export async function fetchUserPassports(userId: string) {
 }
 
 export async function fetchExpiredKycCountForProject(projectId: string) {
-  return withImpersonation(({ db }) =>
-    getExpiredKYCCountForProject({ projectId }, db),
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthorized")
+      }
+
+      const membership = await verifyMembership(projectId, userId, db)
+      if (membership?.error) {
+        throw new Error(membership.error)
+      }
+
+      return getExpiredKYCCountForProject({ projectId }, db)
+    },
+    { requireUser: true },
   )
 }
 
 export async function fetchExpiredKycCountForOrganization(
   organizationId: string,
 ) {
-  return withImpersonation(({ db }) =>
-    getExpiredKYCCountForOrganization({ organizationId }, db),
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthorized")
+      }
+
+      const membership = await verifyOrganizationMembership(
+        organizationId,
+        userId,
+        db,
+      )
+      if (membership?.error) {
+        throw new Error(membership.error)
+      }
+
+      return getExpiredKYCCountForOrganization({ organizationId }, db)
+    },
+    { requireUser: true },
   )
 }
 
