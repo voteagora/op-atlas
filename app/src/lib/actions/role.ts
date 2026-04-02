@@ -9,7 +9,33 @@ import {
   upsertRoleApplication,
 } from "@/db/role"
 import { withImpersonation } from "@/lib/db/sessionContext"
-import { resolveSessionUserId } from "@/lib/actions/utils"
+import {
+  resolveSessionUserId,
+  verifyOrganizationMembership,
+} from "@/lib/actions/utils"
+
+async function authorizeRoleApplicationOrganization(
+  organizationId: string | undefined,
+  sessionUserId: string | null,
+  db: Parameters<typeof getRoleById>[1],
+) {
+  if (!organizationId) {
+    return
+  }
+
+  if (!sessionUserId) {
+    throw new Error("Unauthorized")
+  }
+
+  const membership = await verifyOrganizationMembership(
+    organizationId,
+    sessionUserId,
+    db,
+  )
+  if (membership?.error) {
+    throw new Error(membership.error)
+  }
+}
 
 export async function applyForRole(
   id: number,
@@ -22,12 +48,8 @@ export async function applyForRole(
   return withImpersonation(
     async ({ db, userId: sessionUserId }) => {
       try {
-        const resolution = resolveSessionUserId(
-          sessionUserId,
-          applicationParams.userId,
-        )
-        if (resolution.error || !resolution.userId) {
-          throw new Error("Unauthorized")
+        if (applicationParams.userId && applicationParams.organizationId) {
+          throw new Error("Invalid application target")
         }
 
         const role = await getRoleById(id, db)
@@ -41,11 +63,34 @@ export async function applyForRole(
         ) {
           throw new Error("Application window is closed")
         }
+
+        await authorizeRoleApplicationOrganization(
+          applicationParams.organizationId,
+          sessionUserId,
+          db,
+        )
+
+        const resolution = resolveSessionUserId(
+          sessionUserId,
+          applicationParams.userId,
+        )
+        const resolvedUserId = applicationParams.organizationId
+          ? undefined
+          : resolution.userId
+
+        if (
+          (!applicationParams.organizationId &&
+            (resolution.error || !resolvedUserId)) ||
+          (!resolvedUserId && !applicationParams.organizationId)
+        ) {
+          throw new Error("Unauthorized")
+        }
+
         return await upsertRoleApplication(
           id,
           {
             ...applicationParams,
-            userId: resolution.userId,
+            userId: resolvedUserId,
           },
           db,
         )
@@ -67,17 +112,28 @@ export async function activeUserApplications(
   organizationId?: string,
 ): Promise<RoleApplication[]> {
   return withImpersonation(
-    ({ db, userId: sessionUserId }) => {
+    async ({ db, userId: sessionUserId }) => {
+      await authorizeRoleApplicationOrganization(
+        organizationId,
+        sessionUserId,
+        db,
+      )
+
       const resolution = resolveSessionUserId(sessionUserId, userId)
-      if (resolution.error || !resolution.userId) {
+      const resolvedUserId = organizationId
+        ? userId
+          ? resolution.userId
+          : undefined
+        : resolution.userId
+
+      if (
+        (userId && (resolution.error || !resolution.userId)) ||
+        (!resolvedUserId && !organizationId)
+      ) {
         throw new Error("Unauthorized")
       }
 
-      return getActiveUserRoleApplications(
-        resolution.userId,
-        organizationId,
-        db,
-      )
+      return getActiveUserRoleApplications(resolvedUserId, organizationId, db)
     },
     { requireUser: true },
   )
@@ -88,13 +144,28 @@ export async function getAllUserRoleApplications(
   organizationId?: string,
 ): Promise<RoleApplication[]> {
   return withImpersonation(
-    ({ db, userId: sessionUserId }) => {
+    async ({ db, userId: sessionUserId }) => {
+      await authorizeRoleApplicationOrganization(
+        organizationId,
+        sessionUserId,
+        db,
+      )
+
       const resolution = resolveSessionUserId(sessionUserId, userId)
-      if (resolution.error || !resolution.userId) {
+      const resolvedUserId = organizationId
+        ? userId
+          ? resolution.userId
+          : undefined
+        : resolution.userId
+
+      if (
+        (userId && (resolution.error || !resolution.userId)) ||
+        (!resolvedUserId && !organizationId)
+      ) {
         throw new Error("Unauthorized")
       }
 
-      return getUserRoleApplications(resolution.userId, organizationId, db)
+      return getUserRoleApplications(resolvedUserId, organizationId, db)
     },
     { requireUser: true },
   )

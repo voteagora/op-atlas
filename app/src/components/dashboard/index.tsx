@@ -288,12 +288,16 @@ const Dashboard = ({
                         />
                       ))}
                     </>
-                  ) : (
+                  ) : organization.role === "admin" ? (
                     <Link
                       href={`/projects/new?orgId=${organization.organizationId}`}
                     >
                       <AddFirstOrganizationProject />
                     </Link>
+                  ) : (
+                    <p className="text-sm text-secondary-foreground">
+                      Organization project creation is available to org admins.
+                    </p>
                   )}
                 </div>
               )

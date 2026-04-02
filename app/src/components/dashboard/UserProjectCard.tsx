@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { reverse } from "ramda"
 import { memo, useMemo } from "react"
 
@@ -51,6 +50,9 @@ const UserProjectCard = ({
     project.lastMetadataUpdate,
   )
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
+  const projectHref = hasBeenPublished
+    ? `/project/${project.id}`
+    : `/projects/${project.id}/details`
 
   const { data: contracts } = useProjectContracts(project.id)
   const { data: projectDetails } = useProjectDetails(project.id)
@@ -78,8 +80,6 @@ const UserProjectCard = ({
       }, [])
   }, [applications, project.id])
 
-  const router = useRouter()
-
   return (
     <div
       className={cn(
@@ -87,7 +87,7 @@ const UserProjectCard = ({
         className,
       )}
     >
-      <Link href={`/project/${project.id}`} className="flex gap-x-6 pt-8 px-8">
+      <Link href={projectHref} className="flex gap-x-6 pt-8 px-8">
         <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-32 w-32 shrink-0">
           {project.thumbnailUrl ? (
             <Image

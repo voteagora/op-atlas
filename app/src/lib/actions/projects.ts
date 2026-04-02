@@ -52,7 +52,7 @@ import {
   resolveSessionUserId,
   verifyAdminStatus,
   verifyMembership,
-  verifyOrganizationMembership,
+  verifyOrganizationAdmin,
 } from "./utils"
 
 export const getProjects = async (userId: string) =>
@@ -274,7 +274,7 @@ async function setProjectOrganizationInternal(
   const [projectAdmin, oldOrganizationAdmin] = await Promise.all([
     verifyAdminStatus(projectId, userId, db),
     oldOrganizationId
-      ? verifyOrganizationMembership(oldOrganizationId, userId, db)
+      ? verifyOrganizationAdmin(oldOrganizationId, userId, db)
       : Promise.resolve(null),
   ])
 
@@ -295,7 +295,7 @@ async function setProjectOrganizationInternal(
       await createOrganizationSnapshot(oldOrganizationId)
     }
   } else {
-    const isOrganizationAdmin = await verifyOrganizationMembership(
+    const isOrganizationAdmin = await verifyOrganizationAdmin(
       organizationId,
       userId,
       db,
@@ -332,6 +332,17 @@ export const createNewProject = async (
       if (!userId) {
         return {
           error: "Unauthorized",
+        }
+      }
+
+      if (organizationId) {
+        const isInvalid = await verifyOrganizationAdmin(
+          organizationId,
+          userId,
+          db,
+        )
+        if (isInvalid?.error) {
+          return isInvalid
         }
       }
 
