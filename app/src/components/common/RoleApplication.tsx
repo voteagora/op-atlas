@@ -66,7 +66,8 @@ export default function RoleApplication({
   )
   const queryEnabled = Boolean(
     viewerUserId &&
-      (requestedUserId || (organization?.id && canViewOrganizationApplications)),
+      (requestedUserId ||
+        (organization?.id && canViewOrganizationApplications)),
   )
 
   const { data: activeApplications, isLoading } = useAllRoleApplications({

@@ -219,7 +219,10 @@ describe("project action auth boundaries", () => {
   it("blocks project creation before side effects when the target organization is unauthorized", async () => {
     mockVerifyOrganizationAdmin.mockResolvedValue({ error: "Unauthorized" })
 
-    const result = await createNewProject({ name: "New project" } as any, "org-1")
+    const result = await createNewProject(
+      { name: "New project" } as any,
+      "org-1",
+    )
 
     expect(result).toEqual({ error: "Unauthorized" })
     expect(mockCreateEntityAttestationWithTx).not.toHaveBeenCalled()

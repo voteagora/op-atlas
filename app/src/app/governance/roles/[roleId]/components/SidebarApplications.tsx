@@ -110,7 +110,8 @@ export default function SidebarApplications({
   }
 
   const renderFooter = () => {
-    const proposalId = (role as unknown as { proposalId?: string | null })?.proposalId
+    const proposalId = (role as unknown as { proposalId?: string | null })
+      ?.proposalId
     if (!isSecurityRole || !proposalId || !isVotingPhase) return null
 
     const onClick = () => {
@@ -177,7 +178,10 @@ export default function SidebarApplications({
       </div>
       <div className="text-center text-sm text-secondary-foreground">
         <span className="font-normal">Need help? </span>
-        <ExternalLink href="https://discord.gg/tGyeUqRqgE" className="underline">
+        <ExternalLink
+          href="https://discord.gg/tGyeUqRqgE"
+          className="underline"
+        >
           Ask on Discord
         </ExternalLink>
       </div>

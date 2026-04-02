@@ -15,7 +15,9 @@ export async function generateMetadata({
 }: {
   params: { organizationId: string }
 }): Promise<Metadata> {
-  const organization = await getOrganizationWithClient({ id: params.organizationId })
+  const organization = await getOrganizationWithClient({
+    id: params.organizationId,
+  })
   const title = `Profile Organizations: ${organization?.name ?? ""} - OP Atlas`
   const description = organization?.description ?? ""
   return {

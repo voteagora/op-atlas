@@ -10,10 +10,7 @@ import {
   upsertRoleApplication,
 } from "@/db/role"
 import { withImpersonation } from "@/lib/db/sessionContext"
-import {
-  resolveSessionUserId,
-  verifyOrganizationMembership,
-} from "../utils"
+import { resolveSessionUserId, verifyOrganizationMembership } from "../utils"
 
 jest.mock("@/db/role", () => ({
   __esModule: true,
@@ -57,8 +54,9 @@ const mockGetActiveUserRoleApplications =
 const mockGetRoleById = getRoleById as jest.MockedFunction<typeof getRoleById>
 const mockGetUserRoleApplications =
   getUserRoleApplications as jest.MockedFunction<typeof getUserRoleApplications>
-const mockUpsertRoleApplication =
-  upsertRoleApplication as jest.MockedFunction<typeof upsertRoleApplication>
+const mockUpsertRoleApplication = upsertRoleApplication as jest.MockedFunction<
+  typeof upsertRoleApplication
+>
 const mockWithImpersonation = withImpersonation as jest.MockedFunction<
   typeof withImpersonation
 >
@@ -123,9 +121,9 @@ describe("role action auth boundaries", () => {
       error: "Unauthorized",
     })
 
-    await expect(
-      activeUserApplications(undefined, "org-1"),
-    ).rejects.toThrow("Unauthorized")
+    await expect(activeUserApplications(undefined, "org-1")).rejects.toThrow(
+      "Unauthorized",
+    )
 
     expect(mockGetActiveUserRoleApplications).not.toHaveBeenCalled()
   })

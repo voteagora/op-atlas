@@ -59,12 +59,7 @@ const PaginatedProposals = ({
     } finally {
       setIsLoading(false)
     }
-  }, [
-    pagination.has_next,
-    pagination.next_offset,
-    isLoading,
-    currentOffset,
-  ])
+  }, [pagination.has_next, pagination.next_offset, isLoading, currentOffset])
 
   // Set up intersection observer
   useEffect(() => {

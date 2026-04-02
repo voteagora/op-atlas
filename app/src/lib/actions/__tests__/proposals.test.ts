@@ -9,7 +9,9 @@ jest.mock("@/lib/proposals", () => ({
 
 jest.mock("@/lib/db/sessionContext", () => ({
   __esModule: true,
-  withImpersonation: jest.fn(async (handler: any) => handler(mockSessionContext)),
+  withImpersonation: jest.fn(async (handler: any) =>
+    handler(mockSessionContext),
+  ),
 }))
 
 const mockDb = {}
