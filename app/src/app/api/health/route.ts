@@ -1,5 +1,7 @@
 import { prisma } from "@/db/client"
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const start = Date.now()
   try {

@@ -6,15 +6,13 @@ import {
   VALID_SEASONS,
   SEASON_TRANCHES,
 } from "@/lib/constants/rewards"
-import { API_USER_SCOPE, authenticateApiUser } from "@/serverAuth"
+import { authenticateApiUser } from "@/serverAuth"
 
 export const GET = async (
   req: NextRequest,
   { params }: { params: { season: string; round: string } },
 ) => {
-  const authResponse = await authenticateApiUser(req, {
-    requiredScopes: [API_USER_SCOPE.rewardsRead],
-  })
+  const authResponse = await authenticateApiUser(req)
 
   if (!authResponse.authenticated) {
     return new Response(authResponse.failReason, {

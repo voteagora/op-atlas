@@ -14,15 +14,13 @@ import {
   buildFullProjectMetadata,
   FullProjectMetadataValidator,
 } from "@/lib/utils/metadata"
-import { API_USER_SCOPE, authenticateApiUser } from "@/serverAuth"
+import { authenticateApiUser } from "@/serverAuth"
 
 export const POST = async (
   req: NextRequest,
   route: { params: { projectId: string } },
 ) => {
-  const authResponse = await authenticateApiUser(req, {
-    requiredScopes: [API_USER_SCOPE.projectMetadataWrite],
-  })
+  const authResponse = await authenticateApiUser(req)
   const traceContext = getMiradorTraceContextFromHeaders(req)
   const resolvedTraceContext = traceContext
     ? {
@@ -119,9 +117,7 @@ export const GET = async (
   req: NextRequest,
   route: { params: { projectId: string } },
 ) => {
-  const authResponse = await authenticateApiUser(req, {
-    requiredScopes: [API_USER_SCOPE.projectMetadataRead],
-  })
+  const authResponse = await authenticateApiUser(req)
 
   if (!authResponse.authenticated) {
     return new Response(authResponse.failReason, {

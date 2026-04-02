@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { deleteProject } from "@/db/projects"
-import { API_USER_SCOPE, authenticateApiUser } from "@/serverAuth"
+import { authenticateApiUser } from "@/serverAuth"
 
 export const DELETE = async (
   req: NextRequest,
   route: { params: { projectId: string } },
 ) => {
-  const authResponse = await authenticateApiUser(req, {
-    requiredScopes: [API_USER_SCOPE.projectsDelete],
-  })
+  const authResponse = await authenticateApiUser(req)
 
   if (!authResponse.authenticated) {
     return new Response(authResponse.failReason, {
