@@ -12,13 +12,10 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form } from "@/components/ui/form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getProject, getProjectContracts } from "@/db/projects"
 import { submitApplications } from "@/lib/actions/applications"
-import {
-  ApplicationWithDetails,
-  CategoryWithImpact,
-  ProjectWithDetails,
-} from "@/lib/types"
+import { fetchProject, fetchProjectContracts } from "@/lib/actions/hookFetchers"
+import type { ProjectActionDTO } from "@/lib/dto"
+import { ApplicationWithDetails, CategoryWithImpact } from "@/lib/types"
 import { getProjectStatus } from "@/lib/utils"
 
 import ApplicationDetails from "./ApplicationDetails"
@@ -119,7 +116,7 @@ const ApplicationFormTabs = ({
   categories,
   round,
 }: {
-  projects?: ProjectWithDetails[]
+  projects?: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
   onApplied: (application: ApplicationWithDetails) => void
   categories: CategoryWithImpact[]
@@ -137,8 +134,8 @@ const ApplicationFormTabs = ({
   const completedProjects = useMemo(() => {
     return projects?.filter(async (project) => {
       const [contract, projectDetails] = await Promise.all([
-        getProjectContracts({ projectId: project.id }),
-        getProject({ id: project.id }),
+        fetchProjectContracts(project.id),
+        fetchProject(project.id),
       ])
       return getProjectStatus(projectDetails, contract).progressPercent === 100
     })

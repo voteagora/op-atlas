@@ -1,5 +1,3 @@
-"use server"
-
 import { User } from "@prisma/client"
 import { User as PrivyUser } from "@privy-io/react-auth"
 import { getAddress } from "viem"
@@ -29,9 +27,7 @@ export const syncPrivyUser = async (
   const existingUser = await getUserByPrivyDid(privyUser.id)
 
   if (!existingUser) {
-    console.error(
-      `[Auth] No existing user found for Privy DID ${privyUser.id}`,
-    )
+    console.error(`[Auth] No existing user found for Privy DID ${privyUser.id}`)
     return null
   }
 
@@ -148,7 +144,10 @@ export const syncPrivyUser = async (
         email: privyEmail,
         verified: true,
       })
-      const linkResult = await linkOrphanedKYCUserToUser(existingUser.id, privyEmail)
+      const linkResult = await linkOrphanedKYCUserToUser(
+        existingUser.id,
+        privyEmail,
+      )
       if (linkResult.linked) {
         revalidatePath("/dashboard")
         revalidatePath("/profile/details")
@@ -162,7 +161,12 @@ export const syncPrivyUser = async (
     } catch (error) {
       console.error("Failed to update email:", error)
     }
-  } else if (privyEmail && privyEmailVerified && privyEmail === dbEmail && !dbEmailVerified) {
+  } else if (
+    privyEmail &&
+    privyEmailVerified &&
+    privyEmail === dbEmail &&
+    !dbEmailVerified
+  ) {
     // Email matches but is not verified in DB - mark it as verified
     // This handles cases where the email was added through a different flow
     // and never marked as verified, but Privy has it verified

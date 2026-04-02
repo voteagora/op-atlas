@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { fetchProject } from "@/lib/actions/hookFetchers"
-import { ProjectWithFullDetails } from "@/lib/types"
 
 export function useProjectDetails(projectId: string): {
-  data: ProjectWithFullDetails | undefined
+  data: Awaited<ReturnType<typeof fetchProject>> | undefined
   isLoading: boolean
   error: Error | null
 } {

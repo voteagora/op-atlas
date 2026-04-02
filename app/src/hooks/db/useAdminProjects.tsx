@@ -2,10 +2,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
 import { getAdminProjects } from "@/lib/actions/projects"
-import { ProjectWithDetails } from "@/lib/types"
 
 export function useAdminProjects(userId: string | undefined): {
-  data: ProjectWithDetails[] | undefined
+  data: Awaited<ReturnType<typeof getAdminProjects>> | undefined
   isLoading: boolean
   error: Error | null
 } {
@@ -19,14 +18,13 @@ export function useAdminProjects(userId: string | undefined): {
 }
 
 export function useSessionAdminProjects(): {
-  data: ProjectWithDetails[] | undefined
+  data: Awaited<ReturnType<typeof getAdminProjects>> | undefined
   isLoading: boolean
   error: Error | null
 } {
   const { data: session } = useSession()
 
-  const viewerId =
-    session?.impersonation?.targetUserId ?? session?.user?.id
+  const viewerId = session?.impersonation?.targetUserId ?? session?.user?.id
 
   return useAdminProjects(viewerId)
 }

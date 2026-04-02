@@ -1,8 +1,10 @@
 "use client"
 
-import { Organization } from "@prisma/client"
-
-import { ProjectWithDetailsLite, UserWithAddresses } from "@/lib/types"
+import type {
+  OrganizationListItemDTO,
+  PublicProjectCardDTO,
+  UserProfilePublicDTO,
+} from "@/lib/dto"
 
 import RoleApplication from "../../common/RoleApplication"
 import ProfileGithubProximity from "./ProfileGithubProximity"
@@ -15,20 +17,17 @@ const PublicUserProfile = ({
   user,
   organizations,
   projects,
-                             kycStatus,
 }: {
-  user: UserWithAddresses
-  organizations: Organization[]
-  projects: ProjectWithDetailsLite[]
-  kycStatus?: string
+  user: UserProfilePublicDTO
+  organizations: OrganizationListItemDTO[]
+  projects: PublicProjectCardDTO[]
 }) => {
-
   return (
     <div className={"w-full overflow-x-hidden pb-12"}>
       <div className="w-full lg:max-w-6xl lg:mx-auto pt-20 pb-12 lg:px-0 px-6 lg:grid lg:grid-cols-3 lg:gap-x-12">
         <div className="lg:col-span-1 max-w-[340px] lg:h-screen lg:overflow-y-auto">
           <div className="sticky top-0 pt-4 pb-6 z-10">
-            <ProfileHeader user={user} kycStatus={kycStatus} />
+            <ProfileHeader user={user} />
             <ProfileOrganizations organizations={organizations} />
           </div>
         </div>

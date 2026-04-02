@@ -1,10 +1,11 @@
-"use server"
-
 import type { PrismaClient } from "@prisma/client"
 
 import { prisma } from "./client"
 
-export async function getUserKYCUser(userId: string, db: PrismaClient = prisma) {
+export async function getUserKYCUser(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
   return await db.userKYCUser.findFirst({
     where: {
       userId,
@@ -20,7 +21,11 @@ export async function getUserKYCUser(userId: string, db: PrismaClient = prisma) 
   })
 }
 
-export async function createUserKYCUser(userId: string, kycUserId: string, db: PrismaClient = prisma) {
+export async function createUserKYCUser(
+  userId: string,
+  kycUserId: string,
+  db: PrismaClient = prisma,
+) {
   return await db.userKYCUser.create({
     data: {
       userId,
@@ -29,7 +34,10 @@ export async function createUserKYCUser(userId: string, kycUserId: string, db: P
   })
 }
 
-export async function getUserPersonalKYC(userId: string, db: PrismaClient = prisma) {
+export async function getUserPersonalKYC(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
   const userKyc = await db.userKYCUser.findFirst({
     where: {
       userId,
@@ -38,14 +46,17 @@ export async function getUserPersonalKYC(userId: string, db: PrismaClient = pris
       kycUser: true,
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
   })
 
   return userKyc?.kycUser || null
 }
 
-export async function getKYCUserStatus(userId: string, db: PrismaClient = prisma) {
+export async function getKYCUserStatus(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
   return await db.userKYCUser.findFirst({
     where: {
       userId,
@@ -62,13 +73,18 @@ export async function getKYCUserStatus(userId: string, db: PrismaClient = prisma
 
 export interface LinkOrphanedKYCResult {
   linked: boolean
-  reason?: "invalid-email" | "no-user" | "already-linked" | "not-found" | "link-failed"
+  reason?:
+    | "invalid-email"
+    | "no-user"
+    | "already-linked"
+    | "not-found"
+    | "link-failed"
 }
 
 export async function linkOrphanedKYCUserToUser(
   userId: string,
   email: string,
-  db: PrismaClient = prisma
+  db: PrismaClient = prisma,
 ): Promise<LinkOrphanedKYCResult> {
   if (!email || !email.trim()) {
     return { linked: false, reason: "invalid-email" }

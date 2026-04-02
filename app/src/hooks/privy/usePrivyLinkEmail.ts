@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react"
 import { useRef } from "react"
 import { toast } from "sonner"
 
-import { syncPrivyUser } from "@/db/privy"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { useUser } from "../db/useUser"
@@ -18,7 +18,10 @@ type UsePrivyEmailOptions = {
   onUpdateSuccess?: () => void
 }
 
-export const usePrivyEmail = (userId: string, options?: UsePrivyEmailOptions) => {
+export const usePrivyEmail = (
+  userId: string,
+  options?: UsePrivyEmailOptions,
+) => {
   const isLinking = useRef(false)
   const { data: session } = useSession()
   const { track } = useAnalytics()
@@ -35,7 +38,7 @@ export const usePrivyEmail = (userId: string, options?: UsePrivyEmailOptions) =>
       })
       if (linkMethod === "email" && isLinking.current) {
         toast.promise(
-          syncPrivyUser(updatedPrivyUser)
+          syncCurrentPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
             .then(() => {
               isLinking.current = false
@@ -56,7 +59,7 @@ export const usePrivyEmail = (userId: string, options?: UsePrivyEmailOptions) =>
     onSuccess: async ({ user: updatedPrivyUser, updateMethod }) => {
       if (updateMethod === "email" && isLinking.current) {
         toast.promise(
-          syncPrivyUser(updatedPrivyUser)
+          syncCurrentPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
             .then(() => {
               isLinking.current = false
@@ -91,7 +94,7 @@ export const usePrivyEmail = (userId: string, options?: UsePrivyEmailOptions) =>
       toast.promise(unlinkEmail(privyUser.email.address), {
         loading: "Deleting email...",
         success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
+          syncCurrentPrivyUser(updatedPrivyUser).then(() => invalidateUser())
           return "Email deleted successfully"
         },
         error: (error) => error.message,

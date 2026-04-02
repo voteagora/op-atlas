@@ -18,14 +18,12 @@ interface PaginationMetadata {
 interface PaginatedProposalsProps {
   initialProposals: StandardProposalProps[]
   initialPagination: PaginationMetadata
-  userId?: string
   securityRoles?: Role[]
 }
 
 const PaginatedProposals = ({
   initialProposals,
   initialPagination,
-  userId,
   securityRoles = [],
 }: PaginatedProposalsProps) => {
   const [proposals, setProposals] =
@@ -46,7 +44,7 @@ const PaginatedProposals = ({
       // Calculate the next page based on next_offset
       const nextOffset = pagination.next_offset
 
-      const result = await fetchMoreProposals(userId, currentOffset)
+      const result = await fetchMoreProposals(currentOffset)
 
       setCurrentOffset(nextOffset)
       // Add new proposals to the existing ones
@@ -61,13 +59,7 @@ const PaginatedProposals = ({
     } finally {
       setIsLoading(false)
     }
-  }, [
-    pagination.has_next,
-    pagination.next_offset,
-    userId,
-    isLoading,
-    currentOffset,
-  ])
+  }, [pagination.has_next, pagination.next_offset, isLoading, currentOffset])
 
   // Set up intersection observer
   useEffect(() => {

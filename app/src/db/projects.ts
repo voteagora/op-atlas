@@ -1,5 +1,3 @@
-"use server"
-
 import {
   KYCUser,
   Prisma,
@@ -9,11 +7,10 @@ import {
   PublishedContract,
 } from "@prisma/client"
 import { unstable_cache } from "next/cache"
-import { cache } from "react"
 import { Address, getAddress } from "viem"
 import type { Session } from "next-auth"
 
-import { sendKYBStartedEmail, sendKYCStartedEmail } from "@/lib/actions/emails"
+import { cache } from "@/lib/cache"
 import {
   ApplicationWithDetails,
   ProjectContracts,
@@ -28,7 +25,7 @@ import {
   UserProjectsWithDetails,
   UserWithProjects,
 } from "@/lib/types"
-import { chunkArray } from "@/lib/utils"
+import { chunkArray } from "@/lib/utils/arrays"
 import { withChangelogTracking } from "@/lib/utils/changelog"
 import { ProjectMetadata } from "@/lib/utils/metadata"
 
@@ -410,8 +407,8 @@ async function getUserProjectsWithDetailsFn(
   return result[0]?.result
 }
 
-export const getUserProjectsWithDetails = cache(
-  (params: { userId: string }) => getUserProjectsWithDetailsFn(params, prisma),
+export const getUserProjectsWithDetails = cache((params: { userId: string }) =>
+  getUserProjectsWithDetailsFn(params, prisma),
 )
 
 export async function getUserProjectsWithDetailsWithClient(
@@ -429,9 +426,7 @@ async function getAllPublishedUserProjectsFn(
   },
   db: PrismaClient = prisma,
 ): Promise<PublishedUserProjectsResult> {
-  const result = await db.$queryRaw<
-    [{ result: PublishedUserProjectsResult }]
-  >`
+  const result = await db.$queryRaw<[{ result: PublishedUserProjectsResult }]>`
     WITH "user_projects" AS (
       SELECT 
         p.*,
@@ -534,9 +529,8 @@ async function getAllPublishedUserProjectsFn(
   return transformed
 }
 
-export const getAllPublishedUserProjects = cache(
-  (params: { userId: string }) =>
-    getAllPublishedUserProjectsFn(params, prisma),
+export const getAllPublishedUserProjects = cache((params: { userId: string }) =>
+  getAllPublishedUserProjectsFn(params, prisma),
 )
 
 export async function getAllPublishedUserProjectsWithClient(
@@ -791,9 +785,7 @@ async function getProjectContractsByDeployerFn(
   },
   db: PrismaClient = prisma,
 ): Promise<ProjectContractWithProject[]> {
-  const result = await db.$queryRaw<
-    { result: ProjectContractWithProject[] }[]
-  >`
+  const result = await db.$queryRaw<{ result: ProjectContractWithProject[] }[]>`
     WITH contract_data AS (
       SELECT 
         c.*,
@@ -1294,10 +1286,7 @@ export async function addProjectContracts(
   }
 
   const existingKeys = new Set<string>()
-  const lookupChunks = chunkArray(
-    Array.from(uniqueLookupTargets.values()),
-    500,
-  )
+  const lookupChunks = chunkArray(Array.from(uniqueLookupTargets.values()), 500)
 
   for (const chunk of lookupChunks) {
     if (chunk.length === 0) continue
@@ -1637,10 +1626,7 @@ export async function addProjectRepository(
     },
   })
 
-  const [repository] = await client.$transaction([
-    repoCreate,
-    projectUpdate,
-  ])
+  const [repository] = await client.$transaction([repoCreate, projectUpdate])
 
   return repository
 }
@@ -1956,9 +1942,8 @@ async function getAllApplicationsForRoundFn(
   return applications
 }
 
-export const getAllApplicationsForRound = cache(
-  (params: { roundId: string }) =>
-    getAllApplicationsForRoundFn(params, prisma),
+export const getAllApplicationsForRound = cache((params: { roundId: string }) =>
+  getAllApplicationsForRoundFn(params, prisma),
 )
 
 export async function getAllApplicationsForRoundWithClient(
@@ -1966,6 +1951,51 @@ export async function getAllApplicationsForRoundWithClient(
   db: PrismaClient = prisma,
 ) {
   return getAllApplicationsForRoundFn(params, db)
+}
+
+export type PublicRoundApplicationProject = {
+  projectId: string
+  thumbnailUrl: string | null
+}
+
+async function getPublicRoundApplicationProjectsFn(
+  {
+    roundId,
+  }: {
+    roundId: string
+  },
+  db: PrismaClient = prisma,
+): Promise<PublicRoundApplicationProject[]> {
+  const applications = await db.application.findMany({
+    where: {
+      roundId,
+    },
+    select: {
+      projectId: true,
+      project: {
+        select: {
+          thumbnailUrl: true,
+        },
+      },
+    },
+  })
+
+  return applications.map(({ projectId, project }) => ({
+    projectId,
+    thumbnailUrl: project.thumbnailUrl,
+  }))
+}
+
+export const getPublicRoundApplicationProjects = cache(
+  (params: { roundId: string }) =>
+    getPublicRoundApplicationProjectsFn(params, prisma),
+)
+
+export async function getPublicRoundApplicationProjectsWithClient(
+  params: { roundId: string },
+  db: PrismaClient = prisma,
+) {
+  return getPublicRoundApplicationProjectsFn(params, db)
 }
 
 export async function updateAllForProject(
@@ -2283,36 +2313,32 @@ export async function addKYCTeamMembers(
   const individualEmails = individuals.map((i) => i.email)
   const businessControllerEmails = businesses.map((b) => b.email)
 
-  const [
-    existingUsers,
-    existingEntities,
-    currentUserTeam,
-    currentEntityTeam,
-  ] = await Promise.all([
-    db.kYCUser.findMany({
-      where: { email: { in: individualEmails } },
-      include: {
-        KYCUserTeams: true,
-      },
-    }),
-    db.kYCLegalEntity.findMany({
-      where: {
-        kycLegalEntityController: {
-          email: { in: businessControllerEmails },
+  const [existingUsers, existingEntities, currentUserTeam, currentEntityTeam] =
+    await Promise.all([
+      db.kYCUser.findMany({
+        where: { email: { in: individualEmails } },
+        include: {
+          KYCUserTeams: true,
         },
-      },
-      include: {
-        kycLegalEntityController: true,
-        teamLinks: true,
-      },
-    }),
-    db.kYCUserTeams.findMany({
-      where: { kycTeamId, team: { deletedAt: null } },
-    }),
-    db.kYCLegalEntityTeams.findMany({
-      where: { kycTeamId },
-    }),
-  ])
+      }),
+      db.kYCLegalEntity.findMany({
+        where: {
+          kycLegalEntityController: {
+            email: { in: businessControllerEmails },
+          },
+        },
+        include: {
+          kycLegalEntityController: true,
+          teamLinks: true,
+        },
+      }),
+      db.kYCUserTeams.findMany({
+        where: { kycTeamId, team: { deletedAt: null } },
+      }),
+      db.kYCLegalEntityTeams.findMany({
+        where: { kycTeamId },
+      }),
+    ])
 
   const existingIndividualUserMap = new Map(
     existingUsers.map((u) => [u.email, u]),
@@ -2343,7 +2369,12 @@ export async function addKYCTeamMembers(
   const entitiesToRemove = [
     ...existingEntities
       .filter((e) => e.teamLinks.some((t) => t.kycTeamId === kycTeamId))
-      .filter((e) => !businesses.some((b) => b.email === e.kycLegalEntityController?.email))
+      .filter(
+        (e) =>
+          !businesses.some(
+            (b) => b.email === e.kycLegalEntityController?.email,
+          ),
+      )
       .map((e) => ({ kycTeamId, legalEntityId: e.id })),
     ...currentEntityTeam
       .filter((t) => !existingEntities.some((e) => e.id === t.legalEntityId))
@@ -2358,7 +2389,12 @@ export async function addKYCTeamMembers(
   // Add existing entities not yet in the team
   const entitiesToAdd = existingEntities
     .filter((e) => e.teamLinks.every((t) => t.kycTeamId !== kycTeamId))
-    .filter((e) => !newBusinesses.some((b) => b.email === e.kycLegalEntityController?.email))
+    .filter(
+      (e) =>
+        !newBusinesses.some(
+          (b) => b.email === e.kycLegalEntityController?.email,
+        ),
+    )
 
   await db.$transaction(async (tx) => {
     // Create new individual KYC users
@@ -2393,8 +2429,11 @@ export async function addKYCTeamMembers(
     }
 
     // Send transactional emails
+    const { sendKYBStartedEmail, sendKYCStartedEmail } = await import(
+      "@/lib/email/send"
+    )
     await Promise.all([
-      ...createdIndividuals.map(sendKYCStartedEmail),
+      ...createdIndividuals.map((kycUser) => sendKYCStartedEmail(kycUser)),
       ...createdEntities.map((e) => sendKYBStartedEmail(e as any)),
     ])
 
@@ -2785,24 +2824,26 @@ export async function getProjectOSOData(
         tranche: true,
       },
     }),
-    db.recurringReward.findMany({
-      where: {
-        projectId,
-        roundId: {
-          in: ["7", "8"],
+    db.recurringReward
+      .findMany({
+        where: {
+          projectId,
+          roundId: {
+            in: ["7", "8"],
+          },
         },
-      },
-      select: {
-        roundId: true,
-        amount: true,
-        tranche: true,
-      },
-    }).then(rewards =>
-      rewards.map(r => ({
-        ...r,
-        amount: r.amount.toString(), // Convert Decimal to string
-      }))
-    ),
+        select: {
+          roundId: true,
+          amount: true,
+          tranche: true,
+        },
+      })
+      .then((rewards) =>
+        rewards.map((r) => ({
+          ...r,
+          amount: r.amount.toString(), // Convert Decimal to string
+        })),
+      ),
   ])
 
   return {

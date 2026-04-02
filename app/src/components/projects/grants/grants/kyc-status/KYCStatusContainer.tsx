@@ -1,6 +1,6 @@
 "use client"
 
-import { KYCUser, Organization } from "@prisma/client"
+import { Organization } from "@prisma/client"
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ReactNode, useCallback } from "react"
@@ -14,23 +14,73 @@ import IndividualStatuses from "@/components/projects/grants/grants/kyc-status/u
 import LegalEntities from "@/components/projects/grants/grants/kyc-status/user-status/LegalEntities"
 import {
   EmailState,
+  ExtendedPersonaStatus,
+  LegalEntityContact,
   ProjectWithKycTeam,
+  KycStatusRowUser,
   KYCUserStatusProps,
   KYCOrLegal,
   isLegalEntityContact,
 } from "@/components/projects/types"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useKYCProject, KYC_PROJECT_USERS_QUERY_KEY } from "@/hooks/db/useKYCProject"
-import { useOrganizationKycTeams, ORGANIZATION_KYC_TEAM_QUERY_KEY } from "@/hooks/db/useOrganizationKycTeam"
-import { sendKYCReminderEmail, sendKYBReminderEmail } from "@/lib/actions/emails"
-import { resolveProjectStatus, hasExpiredKYC, isExpired } from "@/lib/utils/kyc"
+import {
+  useKYCProject,
+  KYC_PROJECT_USERS_QUERY_KEY,
+} from "@/hooks/db/useKYCProject"
+import {
+  useOrganizationKycTeams,
+  ORGANIZATION_KYC_TEAM_QUERY_KEY,
+} from "@/hooks/db/useOrganizationKycTeam"
+import {
+  sendKYCReminderEmail,
+  sendKYBReminderEmail,
+} from "@/lib/actions/emails"
+import type {
+  KycLegalEntityAdminDTO,
+  KycLegalEntityMemberDTO,
+  KycUserAdminDTO,
+  OrganizationKycTeamAdminDTO,
+  OrganizationKycTeamMemberDTO,
+} from "@/lib/dto"
+import { resolveProjectStatus, isExpired } from "@/lib/utils/kyc"
 import { useAppDialogs } from "@/providers/DialogProvider"
-import { getSelectedLegalEntitiesForTeam } from "@/lib/actions/kyc"
 import { Button } from "@/components/ui/button"
 import {
   EXPIRED_KYC_COUNT_PROJECT_QUERY_KEY,
-  EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY
+  EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY,
 } from "@/hooks/db/useExpiredKYCCount"
+
+type OrganizationKycTeamRecord =
+  | OrganizationKycTeamAdminDTO
+  | OrganizationKycTeamMemberDTO
+
+type ResendableKycUser = Pick<
+  KycUserAdminDTO,
+  "id" | "email" | "personaReferenceId"
+>
+
+function isResendableKycUser(
+  target: KYCOrLegal,
+): target is KycStatusRowUser & ResendableKycUser {
+  return !isLegalEntityContact(target) && typeof target.email === "string"
+}
+
+function toLegalEntityContact(
+  entity: KycLegalEntityAdminDTO | KycLegalEntityMemberDTO,
+): LegalEntityContact {
+  const adminEntity = entity as Partial<KycLegalEntityAdminDTO>
+
+  return {
+    id: entity.id,
+    email: adminEntity.controllerEmail ?? "",
+    firstName: adminEntity.controllerFirstName ?? "",
+    lastName: adminEntity.controllerLastName ?? "",
+    businessName: adminEntity.businessName,
+    status: entity.status,
+    expiry: entity.expiry,
+    kycUserType: "LEGAL_ENTITY",
+  }
+}
 
 const KYCStatusContainer = ({
   project,
@@ -134,7 +184,7 @@ const useKYCEmailResend = (context: {
   >({})
 
   const handleEmailResend = useCallback(
-    async (kycUser: KYCUser) => {
+    async (kycUser: ResendableKycUser) => {
       console.log(`attempting to send email to ${kycUser.email}`)
       setSendingEmailUsers((prev) => ({
         ...prev,
@@ -218,20 +268,23 @@ const RestartAllExpiredButton = ({
         if (projectId) {
           // Invalidate project-specific queries
           await queryClient.invalidateQueries({
-            queryKey: [KYC_PROJECT_USERS_QUERY_KEY, projectId]
+            queryKey: [KYC_PROJECT_USERS_QUERY_KEY, projectId],
           })
           await queryClient.invalidateQueries({
-            queryKey: [EXPIRED_KYC_COUNT_PROJECT_QUERY_KEY, projectId]
+            queryKey: [EXPIRED_KYC_COUNT_PROJECT_QUERY_KEY, projectId],
           })
         }
 
         if (organizationId) {
           // Invalidate organization-specific queries
           await queryClient.invalidateQueries({
-            queryKey: [ORGANIZATION_KYC_TEAM_QUERY_KEY, organizationId]
+            queryKey: [ORGANIZATION_KYC_TEAM_QUERY_KEY, organizationId],
           })
           await queryClient.invalidateQueries({
-            queryKey: [EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY, organizationId]
+            queryKey: [
+              EXPIRED_KYC_COUNT_ORGANIZATION_QUERY_KEY,
+              organizationId,
+            ],
           })
         }
       }
@@ -272,15 +325,7 @@ const KYCStatusPresenter = ({
   status: import("@/components/projects/types").ExtendedPersonaStatus
   address: string
   users: import("@/components/projects/types").KYCUserStatusProps[] | undefined
-  legalEntities?: Array<{
-    id: string
-    name: string
-    status: import("@prisma/client").KYCStatus
-    expiry: Date | null
-    controllerFirstName: string
-    controllerLastName: string
-    controllerEmail: string
-  }>
+  legalEntities?: LegalEntityContact[]
   isLoading: boolean
   kycTeamId?: string
   extraMiddleContent?: ReactNode
@@ -314,12 +359,9 @@ const KYCStatusPresenter = ({
   // Map legal entities prop to UI rows; recompute when spinner state or context changes
   useEffect(() => {
     const mapped: KYCUserStatusProps[] = (legalEntities || []).map((e) => {
-      const contact: import("@/components/projects/types").LegalEntityContact = {
-        id: e.id,
-        email: e.controllerEmail || "",
-        firstName: e.controllerFirstName || "",
-        lastName: e.controllerLastName || "",
-        businessName: e.name,
+      const contact: LegalEntityContact = {
+        ...e,
+        businessName: e.businessName,
         status: e.status ?? undefined,
         expiry: e.expiry || null,
         kycUserType: "LEGAL_ENTITY",
@@ -363,7 +405,10 @@ const KYCStatusPresenter = ({
                 organizationId: organizationId as string | undefined,
               },
             )
-            console.debug("[KYCLegalEntity][UI] sendKYBReminderEmail response", res)
+            console.debug(
+              "[KYCLegalEntity][UI] sendKYBReminderEmail response",
+              res,
+            )
 
             if (!res.success) {
               toast.error(res.error || "Failed to send reminder email")
@@ -416,8 +461,10 @@ const KYCStatusPresenter = ({
               users={users}
               legalEntities={legalEntitiesStatuses}
               kycTeamId={kycTeamId}
-              projectId={typeof projectId === 'string' ? projectId : undefined}
-              organizationId={typeof organizationId === 'string' ? organizationId : undefined}
+              projectId={typeof projectId === "string" ? projectId : undefined}
+              organizationId={
+                typeof organizationId === "string" ? organizationId : undefined
+              }
               isAdmin={isAdmin}
             />
             {showEditFooter && isAdmin && (
@@ -458,19 +505,26 @@ const ProjectKYCStatusContainer = ({
 
   const kycUsers = kycData?.users
   const kycLegalEntities = kycData?.legalEntities
+  const legalEntityContacts = kycLegalEntities?.map(toLegalEntityContact)
 
   const projectStatus = kycUsers
     ? resolveProjectStatus(kycUsers, kycLegalEntities)
     : "PENDING"
 
-  const { sendingEmailUsers, handleEmailResend } = useKYCEmailResend({
-    projectId: project.id,
-  })
+  const { sendingEmailUsers, handleEmailResend: handleUserEmailResend } =
+    useKYCEmailResend({
+      projectId: project.id,
+    })
 
   const users: KYCUserStatusProps[] | undefined = kycUsers?.map((user) => ({
     user,
-    handleEmailResend:
-      handleEmailResend as KYCUserStatusProps["handleEmailResend"],
+    handleEmailResend: async (target) => {
+      if (!isResendableKycUser(target)) {
+        return
+      }
+
+      await handleUserEmailResend(target)
+    },
     emailResendBlock:
       !isAdmin ||
       projectStatus === "project_issue" ||
@@ -487,7 +541,7 @@ const ProjectKYCStatusContainer = ({
       status={projectStatus}
       address={project.kycTeam?.walletAddress || ""}
       users={users}
-      legalEntities={kycLegalEntities}
+      legalEntities={legalEntityContacts}
       isLoading={isLoading}
       kycTeamId={project.kycTeam?.id}
       showEditFooter
@@ -521,59 +575,26 @@ const OrganizationKYCStatusContainer = ({
     return null
   }
 
-  // Group KYC organizations by status - only include teams that have users
   const kycTeamsWithStatus = kycOrganizations
     .map((kycOrg) => {
-      // We need to check TAM users (all users in the org's KYC team)
-      // Flatten all users from the organization's KYC team structure
-      const tamUsers = kycOrg.team.team.flatMap((t: any) => t.users || [])
-      const legalEntities =
-        kycOrg.team.KYCLegalEntityTeams?.map(
-          (entityTeam: any) => entityTeam.legalEntity,
-        ).filter(Boolean) ?? []
-      const hasActiveStream =
-        kycOrg.team.rewardStreams && kycOrg.team.rewardStreams.length > 0
-      const teamHasExpired = hasExpiredKYC(kycOrg.team)
+      const tamUsers = kycOrg.team.team.flatMap((teamMember) =>
+        teamMember.users ? [teamMember.users] : [],
+      )
+      const legalEntities = kycOrg.team.KYCLegalEntityTeams.flatMap(
+        (entityTeam) =>
+          entityTeam.legalEntity ? [entityTeam.legalEntity] : [],
+      )
+      const hasActiveStream = kycOrg.team.rewardStreams.length > 0
       const legalEntityCount = legalEntities.length
-
-      const userStatus =
-        tamUsers && tamUsers.length > 0
-          ? resolveProjectStatus(tamUsers)
-          : undefined
-      const legalHasRejected = legalEntities.some(
-        (entity: any) => entity?.status === "REJECTED",
-      )
-      const legalHasPending = legalEntities.some(
-        (entity: any) => entity?.status !== "APPROVED",
-      )
-
-      let orgStatus: import("@/components/projects/types").ExtendedPersonaStatus =
-        "PENDING"
-
-      if (teamHasExpired) {
-        orgStatus = "EXPIRED"
-      } else if (
-        userStatus === "project_issue" ||
-        legalHasRejected
-      ) {
-        orgStatus = "project_issue"
-      } else if (
-        userStatus === "PENDING" ||
-        legalHasPending
-      ) {
-        orgStatus = "PENDING"
-      } else if (
-        (userStatus === "APPROVED" || userStatus === undefined) &&
-        !legalHasPending &&
-        (tamUsers.length > 0 || legalEntityCount > 0)
-      ) {
-        orgStatus = "APPROVED"
-      }
+      const status: ExtendedPersonaStatus =
+        tamUsers.length > 0 || legalEntityCount > 0
+          ? resolveProjectStatus(tamUsers, legalEntities)
+          : "PENDING"
 
       return {
         kycOrg,
         users: tamUsers,
-        status: orgStatus,
+        status,
         hasActiveStream,
         legalEntityCount,
       }
@@ -583,7 +604,7 @@ const OrganizationKYCStatusContainer = ({
         team.users.length > 0 ||
         team.legalEntityCount > 0 ||
         team.status === "EXPIRED",
-    ) // Only show teams that have users, legal entities, or expired records
+    )
 
   const verifiedTeams = kycTeamsWithStatus.filter(
     (team) => team.status === "APPROVED",
@@ -664,38 +685,36 @@ const OrganizationKYCTeamCard = ({
   hasActiveStream,
   isAdmin = true,
 }: {
-  kycOrg: any // TODO: type this properly
-  users: any[]
-  status: import("@/components/projects/types").ExtendedPersonaStatus
+  kycOrg: OrganizationKycTeamRecord
+  users: KycStatusRowUser[]
+  status: ExtendedPersonaStatus
   hasActiveStream: boolean
   isAdmin?: boolean
 }) => {
-  const { sendingEmailUsers, handleEmailResend } = useKYCEmailResend({
-    organizationId: kycOrg.organizationId,
-  })
+  const { sendingEmailUsers, handleEmailResend: handleUserEmailResend } =
+    useKYCEmailResend({
+      organizationId: kycOrg.organizationId,
+    })
 
   const userMappings: KYCUserStatusProps[] = users.map((user) => ({
     user,
-    handleEmailResend:
-      handleEmailResend as KYCUserStatusProps["handleEmailResend"],
+    handleEmailResend: async (target) => {
+      if (!isResendableKycUser(target)) {
+        return
+      }
+
+      await handleUserEmailResend(target)
+    },
     emailResendBlock:
       !isAdmin || status === "project_issue" || user.status === "APPROVED",
     emailState: sendingEmailUsers[user.id] || EmailState.NOT_SENT,
   }))
 
-  // Extract legal entities from the kycOrg
-  const legalEntities = kycOrg.team.KYCLegalEntityTeams?.map((entityTeam: any) => {
-    const e = entityTeam.legalEntity
-    return {
-      id: e.id,
-      name: e.name,
-      status: e.status,
-      expiry: e.expiry ?? null,
-      controllerFirstName: e.kycLegalEntityController?.firstName || "",
-      controllerLastName: e.kycLegalEntityController?.lastName || "",
-      controllerEmail: e.kycLegalEntityController?.email || "",
-    }
-  }).filter(Boolean) || []
+  const legalEntities = kycOrg.team.KYCLegalEntityTeams.flatMap((entityTeam) =>
+    entityTeam.legalEntity
+      ? [toLegalEntityContact(entityTeam.legalEntity)]
+      : [],
+  )
 
   return (
     <KYCStatusPresenter

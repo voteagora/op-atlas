@@ -1,17 +1,32 @@
 import { Suspense } from "react"
+import { redirect } from "next/navigation"
 
 import { FeedbackButton } from "@/components/common/FeedbackButton"
 import { ProjectSidebar } from "@/components/projects/ProjectSidebar"
+import { verifyMembership } from "@/lib/actions/utils"
+import { getImpersonationContext } from "@/lib/db/sessionContext"
 
 import UnsavedChangesToastServer from "./components/UnsavedChangesToast.Server"
 
-export default function Layout({
+export default async function Layout({
   children,
   params,
 }: Readonly<{
   children: React.ReactNode
   params: { projectId: string }
 }>) {
+  const { db, userId } = await getImpersonationContext()
+
+  if (!userId) {
+    redirect("/")
+  }
+
+  const membership = await verifyMembership(params.projectId, userId, db)
+
+  if (membership?.error) {
+    redirect("/dashboard")
+  }
+
   return (
     <div className="h-full bg-secondary flex flex-1 px-6">
       <div className="flex items-start w-full max-w-6xl mx-auto my-18 gap-x-10">

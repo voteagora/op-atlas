@@ -24,20 +24,23 @@ async function withProjectMember<T>(
   projectId: string,
   handler: (ctx: ProjectMemberContext) => Promise<T>,
 ) {
-  return withImpersonation(async (ctx) => {
-    if (!ctx.userId) {
-      return {
-        error: "Not authenticated",
-      } as T
-    }
+  return withImpersonation(
+    async (ctx) => {
+      if (!ctx.userId) {
+        return {
+          error: "Not authenticated",
+        } as T
+      }
 
-    const membership = await verifyMembership(projectId, ctx.userId, ctx.db)
-    if (membership?.error) {
-      return membership as T
-    }
+      const membership = await verifyMembership(projectId, ctx.userId, ctx.db)
+      if (membership?.error) {
+        return membership as T
+      }
 
-    return handler({ ...ctx, userId: ctx.userId })
-  }, { requireUser: true })
+      return handler({ ...ctx, userId: ctx.userId })
+    },
+    { requireUser: true },
+  )
 }
 
 export const verifyContract = async ({
@@ -215,6 +218,31 @@ export const verifyContract = async ({
     }
   })
 }
+
+export const addContract = async ({
+  projectId,
+  contract,
+}: {
+  projectId: string
+  contract: Parameters<typeof addProjectContract>[0]["contract"]
+}) =>
+  withProjectMember(projectId, async ({ db }) => {
+    const createdContract = await addProjectContract(
+      {
+        projectId,
+        contract,
+      },
+      db,
+    )
+
+    revalidatePath("/dashboard")
+    revalidatePath("/projects", "layout")
+
+    return {
+      error: null,
+      contract: createdContract,
+    }
+  })
 
 export const updateContractDetails = async ({
   projectId,

@@ -1,5 +1,3 @@
-"use server"
-
 import type { Citizen, PrismaClient } from "@prisma/client"
 import { getAddress } from "viem"
 
@@ -7,20 +5,23 @@ import { prisma } from "./client"
 import { CITIZEN_TYPES } from "@/lib/constants"
 import { CitizenLookup } from "@/lib/types"
 
-export async function upsertCitizen({
-  id,
-  citizen,
-}: {
-  id: string
-  citizen: {
-    type: string
-    address: string
-    attestationId?: string
-    timeCommitment?: string
-    projectId?: string | null
-    organizationId?: string | null
-  }
-}, db: PrismaClient = prisma) {
+export async function upsertCitizen(
+  {
+    id,
+    citizen,
+  }: {
+    id: string
+    citizen: {
+      type: string
+      address: string
+      attestationId?: string
+      timeCommitment?: string
+      projectId?: string | null
+      organizationId?: string | null
+    }
+  },
+  db: PrismaClient = prisma,
+) {
   const checksummedAddress = getAddress(citizen.address)
   return db.citizen.upsert({
     where: {
@@ -38,20 +39,23 @@ export async function upsertCitizen({
   })
 }
 
-export async function updateCitizen({
-  id,
-  citizen,
-}: {
-  id: string
-  citizen: {
-    type?: string
-    address?: string
-    attestationId?: string
-    timeCommitment?: string
-    projectId?: string | null
-    organizationId?: string | null
-  }
-}, db: PrismaClient = prisma) {
+export async function updateCitizen(
+  {
+    id,
+    citizen,
+  }: {
+    id: string
+    citizen: {
+      type?: string
+      address?: string
+      attestationId?: string
+      timeCommitment?: string
+      projectId?: string | null
+      organizationId?: string | null
+    }
+  },
+  db: PrismaClient = prisma,
+) {
   const data = citizen.address
     ? { ...citizen, address: getAddress(citizen.address) }
     : citizen
@@ -121,7 +125,7 @@ export async function getCitizenProposalVote(
   db: PrismaClient = prisma,
 ): Promise<any> {
   const isAddress = typeof citizenIdOrAddress === "string"
-  
+
   return db.offChainVote.findFirst({
     where: {
       proposalId: proposalId,
@@ -132,10 +136,7 @@ export async function getCitizenProposalVote(
   })
 }
 
-export async function deleteCitizen(
-  id: number,
-  db: PrismaClient = prisma,
-) {
+export async function deleteCitizen(id: number, db: PrismaClient = prisma) {
   return db.citizen.delete({
     where: { id },
   })

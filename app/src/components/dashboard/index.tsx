@@ -9,11 +9,10 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Callout } from "@/components/common/Callout"
+import type { ProjectActionDTO, UserOrganizationActionDTO } from "@/lib/dto"
 import { unclaimedRewards } from "@/lib/rewards"
 import {
   ApplicationWithDetails,
-  ProjectWithDetails,
-  UserOrganizationsWithDetails,
   UserWithAddresses,
   UserKYCTeam,
 } from "@/lib/types"
@@ -52,10 +51,10 @@ const Dashboard = ({
 }: {
   className?: string
   user: UserWithAddresses
-  projects: ProjectWithDetails[]
+  projects: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
-  organizations?: UserOrganizationsWithDetails[]
-  adminProjects: ProjectWithDetails[]
+  organizations?: UserOrganizationActionDTO[]
+  adminProjects: ProjectActionDTO[]
   kycTeams?: UserKYCTeam[]
   userKYCStatus?: UserKYCStatus
   showCitizenReRegistrationCallout?: boolean
@@ -64,7 +63,7 @@ const Dashboard = ({
   const { data: session } = useSession()
   const isImpersonating = !!session?.impersonation?.isActive
   // Use last 16 chars of privyDid for user-specific cookie
-  const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : 'default'
+  const userIdentifier = user.privyDid ? user.privyDid.slice(-16) : "default"
   const completeProfileAccordionDismissed = document.cookie.includes(
     `completeProfileAccordionDismissed_${userIdentifier}`,
   )
@@ -115,7 +114,8 @@ const Dashboard = ({
         type="info"
         leftAlignedContent={
           <p className="ml-2 text-sm font-normal text-blue-800">
-            To continue your citizenship, you must re-register for {seasonLabel}.{" "}
+            To continue your citizenship, you must re-register for {seasonLabel}
+            .{" "}
             <Link href="/citizenship" className="underline">
               See details
             </Link>
@@ -135,7 +135,6 @@ const Dashboard = ({
       {/* KYC Status Callouts */}
       <KYCCalloutsContainer kycTeams={kycTeams} />
 
-      
       {/* <RewardsCallout
         roundName="Onchain Builders"
         rewardPeriodStart={new Date("2025-02-01T21:53:13.300Z")}
@@ -284,19 +283,21 @@ const Dashboard = ({
                       {organization.organization.projects?.map((project) => (
                         <UserProjectCard
                           key={project.id}
-                          project={
-                            project.project as unknown as ProjectWithDetails
-                          }
+                          project={project.project!}
                           applications={applications}
                         />
                       ))}
                     </>
-                  ) : (
+                  ) : organization.role === "admin" ? (
                     <Link
                       href={`/projects/new?orgId=${organization.organizationId}`}
                     >
                       <AddFirstOrganizationProject />
                     </Link>
+                  ) : (
+                    <p className="text-sm text-secondary-foreground">
+                      Organization project creation is available to org admins.
+                    </p>
                   )}
                 </div>
               )

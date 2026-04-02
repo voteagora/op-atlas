@@ -2,7 +2,7 @@ import Breadcrumbs from "@/components/proposals/proposalPage/proposalContent/Bre
 import Markdown from "@/components/proposals/proposalPage/proposalContent/Markdown"
 import ProposalHeader from "@/components/proposals/proposalPage/proposalContent/ProposalHeader"
 import VotingSidebar from "@/components/proposals/proposalPage/VotingSidebar/VotingSidebar"
-import { ProposalData } from "@/lib/proposals"
+import type { ProposalData } from "@/lib/proposals"
 import { formatMMMdyyyy } from "@/lib/utils/date"
 
 function stripTitleFromDescription(title: string, description: string) {

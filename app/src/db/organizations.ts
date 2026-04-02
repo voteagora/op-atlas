@@ -1,8 +1,6 @@
-"use server"
-
 import { Organization, Prisma, PrismaClient } from "@prisma/client"
-import { cache } from "react"
 
+import { cache } from "@/lib/cache"
 import {
   OrganizationWithDetails,
   UserOrganizationsWithDetails,
@@ -58,7 +56,10 @@ export async function getOrganizationsWithClient(
   return getOrganizationsFn(userId, db)
 }
 
-async function getAdminOrganizationsFn(userId: string, db: PrismaClient = prisma) {
+async function getAdminOrganizationsFn(
+  userId: string,
+  db: PrismaClient = prisma,
+) {
   const result = await db.$queryRaw<
     {
       result: {

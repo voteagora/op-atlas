@@ -1,8 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
+import { useQuery } from "@tanstack/react-query"
 
 import { Button } from "@/components/common/Button"
 import { ArrowDownS, ArrowUpS, Information } from "@/components/icons/remix"
@@ -11,18 +13,28 @@ import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
 import { useProject } from "@/hooks/db/useProject"
 import { useAllRoleApplications } from "@/hooks/role/useAllUserAppications"
+import { getUserOrganizations } from "@/lib/actions/organizations"
 import { useRole } from "@/hooks/role/useRole"
-import { OrganizationWithTeamAndProjects, UserWithAddresses } from "@/lib/types"
+import type {
+  PublicOrganizationProfileDTO,
+  UserProfilePublicDTO,
+} from "@/lib/dto"
 import { cn } from "@/lib/utils"
 import { formatMMMd, formatMMMdyyyy } from "@/lib/utils/date"
+
+type RoleApplicationUserTarget = Pick<UserProfilePublicDTO, "id" | "imageUrl">
+type RoleApplicationOrganizationTarget = Pick<
+  PublicOrganizationProfileDTO,
+  "id" | "avatarUrl"
+>
 
 export default function RoleApplication({
   user,
   organization,
   className,
 }: {
-  user?: UserWithAddresses
-  organization?: OrganizationWithTeamAndProjects
+  user?: RoleApplicationUserTarget
+  organization?: RoleApplicationOrganizationTarget
   className?: string
 }) {
   const [roleId, setRoleId] = useState<number | null>(null)
@@ -35,11 +47,33 @@ export default function RoleApplication({
   const [externalLinks, setExternalLinks] = useState<
     { url: string; description: string }[]
   >([])
+  const { data: session } = useSession()
+  const viewerUserId = session?.impersonation?.targetUserId ?? session?.user?.id
+  const requestedUserId =
+    user?.id && viewerUserId === user.id ? user.id : undefined
+  const { data: viewerOrganizations = [] } = useQuery({
+    queryKey: ["viewerOrganizations", viewerUserId],
+    queryFn: () => getUserOrganizations(viewerUserId!),
+    enabled: Boolean(viewerUserId && organization?.id),
+    staleTime: 1000 * 60 * 5,
+  })
+  const canViewOrganizationApplications = Boolean(
+    organization?.id &&
+      viewerOrganizations.some(
+        (viewerOrganization) =>
+          viewerOrganization.organizationId === organization.id,
+      ),
+  )
+  const queryEnabled = Boolean(
+    viewerUserId &&
+      (requestedUserId ||
+        (organization?.id && canViewOrganizationApplications)),
+  )
 
   const { data: activeApplications, isLoading } = useAllRoleApplications({
-    userId: user?.id,
+    userId: requestedUserId,
     organizationId: organization?.id,
-    enabled: !!user?.id || !!organization?.id,
+    enabled: queryEnabled,
   })
   const router = useRouter()
 
@@ -76,6 +110,7 @@ export default function RoleApplication({
   }, [activeApplications, organization])
 
   if (
+    !queryEnabled ||
     isLoading ||
     !activeApplications ||
     activeApplications.length === 0 ||
@@ -177,9 +212,9 @@ export default function RoleApplication({
         <div className="text-foreground font-normal">
           Share any links that demonstrate your expertise:
         </div>
-        {externalLinks.length > 0 && externalLinks.map((link) => (
-          <>
-
+        {externalLinks.length > 0 &&
+          externalLinks.map((link) => (
+            <>
               <div
                 key={link.url}
                 className="text-secondary-foreground hover:underline flex flex-row gap-2"
@@ -189,12 +224,14 @@ export default function RoleApplication({
                   {link.url}
                 </Link>
               </div>
-            <p className="text-secondary-foreground">
-              {link.description || "None"}
-            </p>
-          </>
-        ))}
-        {externalLinks.length === 0 && <div className="text-secondary-foreground">None</div>}
+              <p className="text-secondary-foreground">
+                {link.description || "None"}
+              </p>
+            </>
+          ))}
+        {externalLinks.length === 0 && (
+          <div className="text-secondary-foreground">None</div>
+        )}
       </>
     )
   }

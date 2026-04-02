@@ -14,9 +14,9 @@ import {
   deleteProject,
   deleteProjectKycTeams,
   detachProjectsFromKycTeam,
-  getAllApplicationsForRoundWithClient,
   getAllPublishedUserProjectsWithClient,
   getKycTeamForProject,
+  getPublicRoundApplicationProjectsWithClient,
   getProjectContractsWithClient,
   getProjectMetadataWithClient,
   getProjectsForKycTeam,
@@ -36,6 +36,7 @@ import {
 } from "@/db/projects"
 import { getUserById } from "@/db/users"
 import { SessionContext, withImpersonation } from "@/lib/db/sessionContext"
+import { getProjectAudience, toProjectDTO } from "@/lib/dto"
 import { extractFailedEasTxContext } from "@/lib/eas/txContext"
 import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
 
@@ -48,21 +49,45 @@ import { MiradorTraceContext } from "../mirador/types"
 import { ProjectContracts, ProjectWithDetails, TeamRole } from "../types"
 import { createOrganizationSnapshot } from "./snapshots"
 import {
+  resolveSessionUserId,
   verifyAdminStatus,
   verifyMembership,
-  verifyOrganizationMembership,
+  verifyOrganizationAdmin,
 } from "./utils"
 
 export const getProjects = async (userId: string) =>
-  withImpersonation(async ({ db }) => {
-    const teams = await getUserProjectsWithDetailsWithClient({ userId }, db)
-    return (teams?.projects ?? []).map(({ project }) => project)
-  })
+  withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        return []
+      }
+
+      const requesterUserId = resolution.userId
+
+      const teams = await getUserProjectsWithDetailsWithClient(
+        { userId: requesterUserId },
+        db,
+      )
+
+      return Promise.all(
+        (teams?.projects ?? []).map(async ({ project }) => {
+          const audience = await getProjectAudience(
+            db,
+            project.id,
+            requesterUserId,
+          )
+          return toProjectDTO(project, audience)
+        }),
+      )
+    },
+    { requireUser: true },
+  )
 
 export const getAllPublishedProjects = async (userId: string) =>
   withImpersonation(async ({ db }) => {
     const projects = await getAllPublishedUserProjectsWithClient({ userId }, db)
-    return [
+    const publishedProjects = [
       ...(projects?.projects
         .map(({ project }) => project)
         .filter((project) => project.snapshots.length > 0) ?? []),
@@ -72,67 +97,122 @@ export const getAllPublishedProjects = async (userId: string) =>
         .map(({ project }) => project)
         .filter((project) => project.snapshots.length > 0) ?? []),
     ]
+
+    return publishedProjects.map((project) => toProjectDTO(project, "public"))
   })
 
 export const getAdminProjects = async (userId: string, roundId?: string) =>
-  withImpersonation(async ({ db }) => {
-    const teams = await getUserAdminProjectsWithDetailWithClient(
-      { userId, roundId },
-      db,
-    )
-    const teamProjects = teams?.projects.map(({ project }) => project) ?? []
-    const organizationProjects =
-      teams?.organizations
-        .map(({ organization }) => organization.projects)
-        .flat()
-        .map(({ project }) => project) ?? []
+  withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        return []
+      }
 
-    // Filter out duplicates
-    const organizationProjectIds = organizationProjects.map(({ id }) => id)
-    const filteredTeamProjects = teamProjects.filter(
-      ({ id }) => !organizationProjectIds.includes(id),
-    )
-    // Only allow published (snapshotted) projects in application flows
-    const hasSnapshots = (p: ProjectWithDetails) =>
-      Array.isArray(p.snapshots) && p.snapshots.length > 0
+      const requesterUserId = resolution.userId
 
-    const publishedTeamProjects = filteredTeamProjects.filter(hasSnapshots)
-    const publishedOrgProjects = organizationProjects.filter(hasSnapshots)
+      const teams = await getUserAdminProjectsWithDetailWithClient(
+        { userId: requesterUserId, roundId },
+        db,
+      )
+      const teamProjects = teams?.projects.map(({ project }) => project) ?? []
+      const organizationProjects =
+        teams?.organizations
+          .map(({ organization }) => organization.projects)
+          .flat()
+          .map(({ project }) => project) ?? []
 
-    return [...publishedTeamProjects, ...publishedOrgProjects]
-  })
+      // Filter out duplicates
+      const organizationProjectIds = organizationProjects.map(({ id }) => id)
+      const filteredTeamProjects = teamProjects.filter(
+        ({ id }) => !organizationProjectIds.includes(id),
+      )
+      // Only allow published (snapshotted) projects in application flows
+      const hasSnapshots = (p: ProjectWithDetails) =>
+        Array.isArray(p.snapshots) && p.snapshots.length > 0
+
+      const publishedTeamProjects = filteredTeamProjects.filter(hasSnapshots)
+      const publishedOrgProjects = organizationProjects.filter(hasSnapshots)
+
+      return [...publishedTeamProjects, ...publishedOrgProjects].map(
+        (project) => toProjectDTO(project, "admin"),
+      )
+    },
+    { requireUser: true },
+  )
+
+export const getProjectMembershipStatus = async (
+  projectId: string,
+  userId?: string,
+) =>
+  withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        return {
+          isMember: false,
+          error: "Unauthorized",
+        }
+      }
+
+      const membership = await verifyMembership(
+        projectId,
+        resolution.userId,
+        db,
+      )
+
+      return {
+        isMember: !membership?.error,
+        error: membership?.error ?? null,
+      }
+    },
+    { requireUser: true },
+  )
 
 export const getApplications = async (userId: string) =>
-  withImpersonation(async ({ db }) => {
-    const userApplications = await getUserApplicationsWithClient({ userId }, db)
-    return userApplications
-  })
+  withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        return []
+      }
 
-export const getApplicationsForRound = async (roundId: number) =>
+      return getUserApplicationsWithClient({ userId: resolution.userId }, db)
+    },
+    { requireUser: true },
+  )
+
+export const getPublicRoundApplicationProjects = async (roundId: number) =>
   withImpersonation(async ({ db }) => {
-    const userApplications = await getAllApplicationsForRoundWithClient(
+    return getPublicRoundApplicationProjectsWithClient(
       {
         roundId: roundId.toString(),
       },
       db,
     )
-    return userApplications
   })
 
 export const getUserApplicationsForRound = async (
   userId: string,
   roundId: number,
 ) =>
-  withImpersonation(async ({ db }) => {
-    const userApplications = await getUserApplicationsWithClient(
-      {
-        userId,
-        roundId: roundId.toString(),
-      },
-      db,
-    )
-    return userApplications
-  })
+  withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        return []
+      }
+
+      return getUserApplicationsWithClient(
+        {
+          userId: resolution.userId,
+          roundId: roundId.toString(),
+        },
+        db,
+      )
+    },
+    { requireUser: true },
+  )
 
 export const getUnpublishedContractChanges = async (
   projectId: string,
@@ -194,7 +274,7 @@ async function setProjectOrganizationInternal(
   const [projectAdmin, oldOrganizationAdmin] = await Promise.all([
     verifyAdminStatus(projectId, userId, db),
     oldOrganizationId
-      ? verifyOrganizationMembership(oldOrganizationId, userId, db)
+      ? verifyOrganizationAdmin(oldOrganizationId, userId, db)
       : Promise.resolve(null),
   ])
 
@@ -215,7 +295,7 @@ async function setProjectOrganizationInternal(
       await createOrganizationSnapshot(oldOrganizationId)
     }
   } else {
-    const isOrganizationAdmin = await verifyOrganizationMembership(
+    const isOrganizationAdmin = await verifyOrganizationAdmin(
       organizationId,
       userId,
       db,
@@ -252,6 +332,17 @@ export const createNewProject = async (
       if (!userId) {
         return {
           error: "Unauthorized",
+        }
+      }
+
+      if (organizationId) {
+        const isInvalid = await verifyOrganizationAdmin(
+          organizationId,
+          userId,
+          db,
+        )
+        if (isInvalid?.error) {
+          return isInvalid
         }
       }
 

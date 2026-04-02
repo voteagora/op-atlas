@@ -8,7 +8,7 @@ import {
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
-import { UserWithAddresses } from "@/lib/types"
+import type { UserProfilePublicDTO } from "@/lib/dto"
 import { formatNumber } from "@/lib/utils"
 import { truncateAddress } from "@/lib/utils/string"
 
@@ -17,7 +17,7 @@ import ProfileSidebarLink from "./ProfileSidebarLink"
 export default function ProfileHeaderLinks({
   user,
 }: {
-  user: UserWithAddresses
+  user: UserProfilePublicDTO
 }) {
   const { delegate } = useDelegateData(user?.addresses?.map((a) => a.address))
   const { user: farcasterUsers } = useFarcasterUserData(

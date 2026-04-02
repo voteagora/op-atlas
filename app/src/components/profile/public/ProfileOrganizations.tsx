@@ -1,14 +1,14 @@
-import { Organization } from "@prisma/client"
 import Image from "next/image"
+
+import type { OrganizationListItemDTO } from "@/lib/dto"
 
 import ProfileSidebarLink from "./ProfileSidebarLink"
 
 function ProfileOrganizations({
   organizations,
 }: {
-  organizations: Organization[]
+  organizations: OrganizationListItemDTO[]
 }) {
-
   if (organizations.length === 0) {
     return null
   }

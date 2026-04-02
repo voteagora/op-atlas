@@ -16,7 +16,7 @@ import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
-import { ProjectWithDetails } from "@/lib/types"
+import type { ProjectActionDTO } from "@/lib/dto"
 import { getProjectStatus, ProjectSection } from "@/lib/utils"
 
 import CircleWithCheckmark from "../../common/CircleWithGreenCheckmark"
@@ -52,7 +52,7 @@ export const ProjectApplication = ({
   form,
   isAppliedToRound,
 }: {
-  project: ProjectWithDetails
+  project: ProjectActionDTO
   index: number
   form: UseFormReturn<z.infer<typeof ApplicationFormSchema>>
   isAppliedToRound: boolean
@@ -84,7 +84,7 @@ export const ProjectApplication = ({
 
     if (criterion.type && criterion.type === "hasCodeRepositories") {
       roundEligibilityCriteriaChecks[i] =
-        project.hasCodeRepositories &&
+        Boolean(project.hasCodeRepositories) &&
         !!projectDetails &&
         projectDetails.repos.length > 0
     }
@@ -166,8 +166,8 @@ export const ProjectApplication = ({
                   <h5 className="font-normal text-primary truncate w-96">
                     {project.name}
                   </h5>
-                  {project.organization?.organization.name && (
-                    <p>{project.organization?.organization.name}</p>
+                  {project.organization?.organization?.name && (
+                    <p>{project.organization.organization.name}</p>
                   )}
                 </div>
               </div>

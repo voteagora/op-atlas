@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react"
 import { useRef } from "react"
 import { toast } from "sonner"
 
-import { syncPrivyUser } from "@/db/privy"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 import { useUser } from "../db/useUser"
@@ -26,7 +26,7 @@ export const usePrivyFarcaster = (userId: string) => {
           elementName: "usePrivyFarcaster",
         })
         toast.promise(
-          syncPrivyUser(updatedPrivyUser)
+          syncCurrentPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
             .then(() => (isLinking.current = false)),
           {
@@ -57,7 +57,7 @@ export const usePrivyFarcaster = (userId: string) => {
       toast.promise(unlinkFarcaster(Number(privyUser.farcaster.fid)), {
         loading: "Unlinking farcaster...",
         success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
+          syncCurrentPrivyUser(updatedPrivyUser).then(() => invalidateUser())
           return "Farcaster unlinked successfully"
         },
         error: (error) => error.message,

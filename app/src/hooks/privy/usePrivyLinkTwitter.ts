@@ -1,9 +1,9 @@
 import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { toast } from "sonner"
 
-import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 export const usePrivyLinkTwitter = (userId: string) => {
@@ -25,7 +25,7 @@ export const usePrivyLinkTwitter = (userId: string) => {
       toast.promise(unlinkTwitter(privyUser.twitter.subject), {
         loading: "Unlinking X...",
         success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
+          syncCurrentPrivyUser(updatedPrivyUser).then(() => invalidateUser())
           return "X unlinked successfully"
         },
         error: (error) => {
@@ -44,7 +44,7 @@ export const usePrivyLinkTwitter = (userId: string) => {
           elementName: "usePrivyLinkTwitter",
         })
         toast.promise(
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser()),
+          syncCurrentPrivyUser(updatedPrivyUser).then(() => invalidateUser()),
           {
             loading: "Linking X...",
             success: "X linked successfully",

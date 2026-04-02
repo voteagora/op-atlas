@@ -10,7 +10,7 @@ import { Avatar, AvatarBadge, AvatarImage } from "@/components/ui/avatar"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useUsername } from "@/hooks/useUsername"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { UserWithAddresses } from "@/lib/types"
+import type { UserProfilePublicDTO } from "@/lib/dto"
 import { cn } from "@/lib/utils"
 
 import ProfileHeaderLinks from "./ProfileHeaderLinks"
@@ -18,22 +18,18 @@ import ProfileHeaderLinks from "./ProfileHeaderLinks"
 const ProfileHeader = ({
   className,
   user,
-  kycStatus
 }: {
   className?: string
-  user: UserWithAddresses
-  kycStatus?: string
+  user: UserProfilePublicDTO
 }) => {
   const { data: session } = useSession()
-  const viewerId =
-    session?.impersonation?.targetUserId ?? session?.user?.id
+  const viewerId = session?.impersonation?.targetUserId ?? session?.user?.id
   const username = useUsername(user)
 
   const { data: citizen } = useCitizen({
     query: { type: CITIZEN_TYPES.user, id: user.id },
   })
   const [isCitizen, setIsCitizen] = useState(false)
-  const isVerified = kycStatus === "APPROVED"
 
   useEffect(() => {
     if (
@@ -67,25 +63,12 @@ const ProfileHeader = ({
             {username}
             <div className="flex items-center gap-1 ml-2">
               {isCitizen && <CitizenshipBadge variant="icon" />}
-              {isVerified && <VerifiedBadge />}
             </div>
           </div>
           <div className="text-sm text-muted-foreground ml-3">{user.bio}</div>
           <ProfileHeaderLinks user={user} />
         </div>
       </div>
-    </div>
-  )
-}
-
-const VerifiedBadge = () => {
-  return (
-    <div title="Identity verified" className="cursor-default">
-      <img
-        src="/assets/icons/verified-badge.svg"
-        alt="verified"
-        className="w-[20px] h-[20px]"
-      />
     </div>
   )
 }

@@ -3,12 +3,9 @@ import { notFound } from "next/navigation"
 import PublicOrganizationProfile from "@/components/organizations/public/PublicOrganizationProfile"
 import PublicUserProfile from "@/components/profile/public/PublicProfile"
 import {
-  getOrganizations,
-  getOrganizationWithDetails,
-} from "@/db/organizations"
-import { getUserByUsername } from "@/db/users"
-import { getAllPublishedProjects } from "@/lib/actions/projects"
-import { getKYCUserStatus } from "@/db/userKyc"
+  getPublicOrganizationPageData,
+  getPublicUserPageData,
+} from "@/lib/publicProfiles"
 
 import ProfileNotFound from "./profile-not-found"
 
@@ -18,7 +15,7 @@ export default async function PublicProfile({
   params: { id: string }
 }) {
   if (params.id.startsWith("0x") && params.id.length === 66) {
-    const organization = await getOrganizationWithDetails({ id: params.id })
+    const organization = await getPublicOrganizationPageData(params.id)
 
     if (!organization) {
       notFound()
@@ -27,24 +24,17 @@ export default async function PublicProfile({
     return <PublicOrganizationProfile organization={organization} />
   }
 
-  const user = await getUserByUsername(params.id)
+  const publicUserPage = await getPublicUserPageData(params.id)
 
-  if (!user) {
+  if (!publicUserPage) {
     return <ProfileNotFound params={params} />
   }
 
-  const [organizations, projects, kycStatus] = await Promise.all([
-    getOrganizations(user.id),
-    getAllPublishedProjects(user.id),
-    getKYCUserStatus(user.id),
-  ])
-
   return (
     <PublicUserProfile
-      user={user}
-      organizations={organizations || []}
-      projects={projects}
-      kycStatus={kycStatus?.kycUser.status}
+      user={publicUserPage.user}
+      organizations={publicUserPage.organizations}
+      projects={publicUserPage.projects}
     />
   )
 }

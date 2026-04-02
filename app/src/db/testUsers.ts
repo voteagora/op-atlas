@@ -1,5 +1,3 @@
-"use server"
-
 import { User, UserAddress, UserEmail, UserInteraction } from "@prisma/client"
 import { requireTestMode, TestUser, createTestUser } from "@/lib/auth/testMode"
 import { createUser, getUserByPrivyDid, updateUser } from "./users"

@@ -3,11 +3,11 @@ import Link from "next/link"
 import { useState } from "react"
 
 import { ArrowDownS } from "@/components/icons/remix"
-import { ProjectWithDetailsLite } from "@/lib/types"
+import type { PublicProjectCardDTO } from "@/lib/dto"
 import { cn, formatNumber } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
-function ProfileProjects({ projects }: { projects: ProjectWithDetailsLite[] }) {
+function ProfileProjects({ projects }: { projects: PublicProjectCardDTO[] }) {
   const [showAll, setShowAll] = useState(false)
 
   const filteredProjects = showAll ? projects : projects.slice(0, 5)
@@ -94,11 +94,7 @@ function ProfileProjects({ projects }: { projects: ProjectWithDetailsLite[] }) {
                         height={14}
                       />
                       <span className="text-center text-sm font-normal">
-                        {formatNumber(
-                          Number(reward.amount.toFixed(0)),
-                          0,
-                          "compact",
-                        )}
+                        {formatNumber(Math.round(reward.amount), 0, "compact")}
                       </span>
                     </span>
                   )

@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client"
-import { cache } from "react"
+
+import { cache } from "@/lib/cache"
 
 import { prisma } from "./client"
 

@@ -1,5 +1,16 @@
 "use server"
 
+import { getCitizenByAddress, getCitizenForUser } from "@/db/citizens"
+import { getGithubProximity } from "@/db/githubProxomity"
+import {
+  getExpiredKYCCountForOrganization,
+  getExpiredKYCCountForProject,
+  getKYCUsersByProjectId,
+} from "@/db/kyc"
+import {
+  getOrganizationKYCTeams,
+  getOrganizationWithClient,
+} from "@/db/organizations"
 import {
   getAllProjectContractsWithClient,
   getProjectContractsWithClient,
@@ -7,17 +18,6 @@ import {
   getRandomProjectsWithClient,
   getUserAdminProjectsWithDetailWithClient,
 } from "@/db/projects"
-import {
-  getOrganizationKYCTeams,
-  getOrganizationWithClient,
-} from "@/db/organizations"
-import { getCitizenByAddress, getCitizenForUser } from "@/db/citizens"
-import {
-  getKYCUsersByProjectId,
-  getExpiredKYCCountForOrganization,
-  getExpiredKYCCountForProject,
-} from "@/db/kyc"
-import { getGithubProximity } from "@/db/githubProxomity"
 import {
   getUserByAddress,
   getUserById,
@@ -27,11 +27,34 @@ import {
 } from "@/db/users"
 import { getVoteForCitizen } from "@/db/votes"
 import { withImpersonation } from "@/lib/db/sessionContext"
+import {
+  getKycAudienceForOrganization,
+  getOrganizationAudience,
+  getProjectAudience,
+  toOrganizationDTO,
+  toOrganizationKycTeamsDTO,
+  toProjectDTO,
+  toProjectKycUsersDTO,
+  toScopedUserDTO,
+} from "@/lib/dto"
+import { getProjectMetrics } from "@/lib/oso"
+
+import {
+  resolveSessionUserId,
+  verifyAdminStatus,
+  verifyMembership,
+  verifyOrganizationMembership,
+} from "./utils"
 
 export async function fetchProject(projectId: string) {
-  return withImpersonation(({ db }) =>
-    getProjectWithClient({ id: projectId }, db),
-  )
+  return withImpersonation(async ({ db, userId }) => {
+    const [project, audience] = await Promise.all([
+      getProjectWithClient({ id: projectId }, db),
+      getProjectAudience(db, projectId, userId),
+    ])
+
+    return toProjectDTO(project, audience)
+  })
 }
 
 export async function fetchProjectContracts(projectId: string) {
@@ -47,21 +70,44 @@ export async function fetchAllProjectContracts(projectId: string) {
 }
 
 export async function fetchOrganization(organizationId: string) {
-  return withImpersonation(({ db }) =>
-    getOrganizationWithClient({ id: organizationId }, db),
-  )
+  return withImpersonation(async ({ db, userId }) => {
+    const [organization, audience] = await Promise.all([
+      getOrganizationWithClient({ id: organizationId }, db),
+      getOrganizationAudience(db, organizationId, userId),
+    ])
+
+    return toOrganizationDTO(organization, audience)
+  })
 }
 
 export async function fetchOrganizationKycTeams(organizationId: string) {
-  return withImpersonation(({ db }) =>
-    getOrganizationKYCTeams({ organizationId }, db),
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthorized")
+      }
+
+      const audience = await getKycAudienceForOrganization(
+        db,
+        organizationId,
+        userId,
+      )
+      if (!audience) {
+        throw new Error("Unauthorized")
+      }
+
+      const teams = await getOrganizationKYCTeams({ organizationId }, db)
+      return toOrganizationKycTeamsDTO(teams, audience)
+    },
+    { requireUser: true },
   )
 }
 
 export async function fetchUser(userId: string) {
-  return withImpersonation(({ db, session }) =>
-    getUserById(userId, db, session),
-  )
+  return withImpersonation(async ({ db, session, userId: sessionUserId }) => {
+    const user = await getUserById(userId, db, session)
+    return toScopedUserDTO(user, sessionUserId === userId ? "viewer" : "public")
+  })
 }
 
 export async function fetchUserByAddress(address: string) {
@@ -155,42 +201,131 @@ export async function fetchRandomProjects() {
   return withImpersonation(({ db }) => getRandomProjectsWithClient(db))
 }
 
+export async function fetchProjectMetrics(projectId: string) {
+  return withImpersonation(() => getProjectMetrics(projectId))
+}
+
 export async function fetchKycProjectUsers(projectId: string) {
-  return withImpersonation(({ db }) =>
-    getKYCUsersByProjectId({ projectId }, db),
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthorized")
+      }
+
+      const isInvalid = await verifyAdminStatus(projectId, userId, db)
+      if (isInvalid?.error) {
+        throw new Error(isInvalid.error)
+      }
+
+      const payload = await getKYCUsersByProjectId({ projectId }, db)
+      return toProjectKycUsersDTO(payload, "admin")
+    },
+    { requireUser: true },
   )
 }
 
 export async function fetchUserPassports(userId: string) {
-  return withImpersonation(({ db }) => getUserPassports(userId, db))
+  return withImpersonation(
+    ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        throw new Error("Unauthorized")
+      }
+
+      return getUserPassports(resolution.userId, db)
+    },
+    { requireUser: true },
+  )
 }
 
 export async function fetchExpiredKycCountForProject(projectId: string) {
-  return withImpersonation(({ db }) =>
-    getExpiredKYCCountForProject({ projectId }, db),
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthorized")
+      }
+
+      const membership = await verifyMembership(projectId, userId, db)
+      if (membership?.error) {
+        throw new Error(membership.error)
+      }
+
+      return getExpiredKYCCountForProject({ projectId }, db)
+    },
+    { requireUser: true },
   )
 }
 
 export async function fetchExpiredKycCountForOrganization(
   organizationId: string,
 ) {
-  return withImpersonation(({ db }) =>
-    getExpiredKYCCountForOrganization({ organizationId }, db),
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthorized")
+      }
+
+      const membership = await verifyOrganizationMembership(
+        organizationId,
+        userId,
+        db,
+      )
+      if (membership?.error) {
+        throw new Error(membership.error)
+      }
+
+      return getExpiredKYCCountForOrganization({ organizationId }, db)
+    },
+    { requireUser: true },
   )
 }
 
 export async function fetchUserWorldId(userId: string) {
-  return withImpersonation(({ db }) => getUserWorldId(userId, db))
+  return withImpersonation(
+    ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        throw new Error("Unauthorized")
+      }
+
+      return getUserWorldId(resolution.userId, db)
+    },
+    { requireUser: true },
+  )
 }
 
 export async function fetchUserAdminProjects(userId: string, roundId?: string) {
-  return withImpersonation(({ db }) =>
-    getUserAdminProjectsWithDetailWithClient(
-      {
-        userId,
-        roundId,
-      },
-      db,
-    ),
+  return withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, userId)
+      if (resolution.error || !resolution.userId) {
+        throw new Error("Unauthorized")
+      }
+
+      const teams = await getUserAdminProjectsWithDetailWithClient(
+        {
+          userId: resolution.userId,
+          roundId,
+        },
+        db,
+      )
+
+      if (!teams) {
+        return null
+      }
+
+      return {
+        ...teams,
+        projects: teams.projects.map((membership) => ({
+          ...membership,
+          project: toProjectDTO(membership.project, "admin"),
+        })),
+        organizations: teams.organizations.map((membership) => ({
+          ...membership,
+          organization: toOrganizationDTO(membership.organization, "admin"),
+        })),
+      }
+    },
+    { requireUser: true },
   )
 }

@@ -1,5 +1,5 @@
 import { createHash } from "crypto"
-import { NextRequest } from "next/server"
+import type { NextRequest } from "next/server"
 
 import { getApiUser } from "./db/apiUser"
 
@@ -11,12 +11,13 @@ type AuthInfo = {
   name?: string
   userId?: string
   failReason?: string
+  status?: number
 }
 
 // Note: this is not included in lib/middleware/auth.ts since that file will be
 // used in a non-node environment. This file is only intended to be used in/on node.
 export async function authenticateApiUser(
-  request: NextRequest,
+  request: Pick<NextRequest, "headers">,
 ): Promise<AuthInfo> {
   const authHeader = request.headers.get("Authorization")
   const key = authHeader?.replace("Bearer ", "")
@@ -25,6 +26,7 @@ export async function authenticateApiUser(
     return {
       authenticated: false,
       failReason: "Unauthorized: No api key provided",
+      status: 401,
     }
   }
 
@@ -35,11 +37,13 @@ export async function authenticateApiUser(
     return {
       authenticated: false,
       failReason: "Unauthorized: Invalid api key token",
+      status: 401,
     }
   } else if (!apiUser.enabled) {
     return {
       authenticated: false,
       failReason: "Unauthorized: Api key is disabled",
+      status: 401,
     }
   }
 

@@ -6,7 +6,8 @@ import { toast } from "sonner"
 
 import { CheckboxCircleFIll } from "@/components/icons/remix"
 import { submitApplications } from "@/lib/actions/applications"
-import { ApplicationWithDetails, ProjectWithDetails } from "@/lib/types"
+import type { ProjectActionDTO } from "@/lib/dto"
+import { ApplicationWithDetails } from "@/lib/types"
 import { cn, EAS_URL_PREFIX } from "@/lib/utils"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -32,7 +33,7 @@ export const FundingApplication = ({
   onApplied,
 }: {
   className?: string
-  projects: ProjectWithDetails[]
+  projects: ProjectActionDTO[]
   applications: ApplicationWithDetails[]
   onApplied: (application: ApplicationWithDetails) => void
 }) => {

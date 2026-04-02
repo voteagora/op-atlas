@@ -4,7 +4,7 @@ import { useState } from "react"
 import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import { Badge } from "@/components/ui/badge"
 import useGithubProximity from "@/hooks/db/useGithubProximity"
-import { UserWithAddresses } from "@/lib/types"
+import type { UserProfilePublicDTO } from "@/lib/dto"
 
 const labels = [
   {
@@ -24,7 +24,7 @@ const labels = [
   },
 ] as const
 
-function ProfileGithubProximity({ user }: { user: UserWithAddresses }) {
+function ProfileGithubProximity({ user }: { user: UserProfilePublicDTO }) {
   const { data, isLoading, error } = useGithubProximity(user.github)
   const [isContentVisible, setIsContentVisible] = useState(false)
 

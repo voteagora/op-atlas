@@ -2,7 +2,7 @@ import { Citizen } from "@prisma/client"
 import Link from "next/link"
 
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { ProposalData } from "@/lib/proposals"
+import type { ProposalData } from "@/lib/proposals"
 import { CitizenshipQualification } from "@/lib/types"
 import { getAgoraProposalLink } from "@/lib/utils/voting"
 

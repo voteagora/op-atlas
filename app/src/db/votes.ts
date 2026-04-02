@@ -1,5 +1,3 @@
-"use server"
-
 import type { PrismaClient } from "@prisma/client"
 
 import { prisma } from "./client"
@@ -10,7 +8,7 @@ export const getVoteForCitizen = async (
   db: PrismaClient = prisma,
 ) => {
   const isAddress = typeof citizenIdOrAddress === "string"
-  
+
   return db.offChainVote.findFirst({
     where: {
       proposalId: proposalId,

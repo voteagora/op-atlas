@@ -56,6 +56,14 @@ const StatusRow = ({
   const displayStatus = expired
     ? "EXPIRED"
     : (user.status as ExtendedPersonaStatus)
+  const name = [user.firstName, user.lastName].filter(Boolean).join(" ")
+  const label =
+    ("businessName" in user && user.businessName) ||
+    name ||
+    user.email ||
+    ("businessName" in user
+      ? "Legal entity verification"
+      : "Identity verification")
 
   return (
     <div className="flex flex-row w-[664px] h-[40px] pt-[10px] pr-[12px] pb-[10px] pl-[12px] gap-[8px] rotate-0 opacity-100 rounded-[6px] border border-border bg-background">
@@ -71,15 +79,7 @@ const StatusRow = ({
         >
           <StatusIcon status={displayStatus} />
           <div className="flex flex-row gap-2">
-            <RowText
-              values={[
-                ...("businessName" in user && user.businessName
-                  ? [`${user.businessName} —`]
-                  : []),
-                [user.firstName, user.lastName].filter(Boolean).join(" "),
-                user.email,
-              ]}
-            />
+            <RowText values={[label]} />
           </div>
           <div className="flex flex-row gap-2">
             {user.status === "APPROVED" &&

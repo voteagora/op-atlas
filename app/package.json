@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "auth:guardrails": "bash ./scripts/check-auth-guardrails.sh",
     "dev": "npx prisma generate && next dev",
     "build": "npx prisma generate && next build && prisma migrate deploy",
     "start": "next start",

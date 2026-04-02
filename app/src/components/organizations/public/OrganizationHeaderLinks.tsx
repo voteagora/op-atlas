@@ -1,10 +1,11 @@
+import type { PublicOrganizationProfileDTO } from "@/lib/dto"
+
 import BubbleLink from "@/components/common/BubbleLink"
-import { OrganizationWithTeamAndProjects } from "@/lib/types"
 
 export default function OrganizationHeaderLinks({
   organization,
 }: {
-  organization: OrganizationWithTeamAndProjects
+  organization: PublicOrganizationProfileDTO
 }) {
   return (
     <div className="mt-2 mr-4 flex items-center gap-x-4 gap-y-2 flex-wrap">

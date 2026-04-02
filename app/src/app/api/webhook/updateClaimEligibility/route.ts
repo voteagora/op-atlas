@@ -8,7 +8,9 @@ export const POST = async (req: NextRequest) => {
   const authResponse = await authenticateApiUser(req)
 
   if (!authResponse.authenticated) {
-    return new Response(authResponse.failReason, { status: 401 })
+    return new Response(authResponse.failReason, {
+      status: authResponse.status ?? 401,
+    })
   }
 
   const formData = await req.formData()

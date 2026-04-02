@@ -2,6 +2,8 @@
 
 import { Signature } from "@ethereum-attestation-service/eas-sdk"
 
+import { userOwnsAddress } from "@/lib/actions/utils"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { extractFailedEasTxContext } from "@/lib/eas/txContext"
 import { createDelegatedVoteAttestationWithTx } from "@/lib/eas/serverOnly"
 import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
@@ -29,82 +31,97 @@ export async function vote(
     tags: ["governance", "vote", "server"],
   })
 
-  try {
-    console.info("[vote] createDelegatedVoteAttestation params:", {
-      dataLength: data?.length,
-      signerAddress,
-      hasSignature: !!delegateAttestationSignature,
-      citizenRefUID,
-    })
-    const { attestationId, txHash, chainId, txInputData } =
-      await createDelegatedVoteAttestationWithTx(
-        data,
-        delegateAttestationSignature,
-        signerAddress,
-        citizenRefUID,
-      )
-    const miradorChain = getMiradorChainNameFromChainId(chainId)
-    console.info("[vote] attested UID:", attestationId)
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthorized")
+      }
 
-    await appendServerTraceEvent({
-      traceContext: {
-        ...traceContext,
-        source: "backend",
-        step: "vote_create_delegated_attestation_success",
-      },
-      eventName: "vote_server_attestation_succeeded",
-      details: {
-        signerAddress,
-        uid: attestationId,
-        txHash,
-      },
-      tags: ["governance", "vote", "server"],
-      txHashHints:
-        txHash && miradorChain
-          ? [
-              {
-                txHash,
-                chain: miradorChain,
-                details: "Delegated governance vote attestation transaction",
-              },
-            ]
-          : undefined,
-      txInputData,
-    })
+      const ownsSignerAddress = await userOwnsAddress(userId, signerAddress, db)
+      if (!ownsSignerAddress) {
+        throw new Error("Unauthorized")
+      }
 
-    return attestationId
-  } catch (error) {
-    console.error("[vote] error:", error)
-    const failedTxContext = extractFailedEasTxContext(error)
-    const failedMiradorChain = getMiradorChainNameFromChainId(
-      failedTxContext.chainId,
-    )
+      try {
+        console.info("[vote] createDelegatedVoteAttestation params:", {
+          dataLength: data?.length,
+          signerAddress,
+          hasSignature: !!delegateAttestationSignature,
+          citizenRefUID,
+        })
+        const { attestationId, txHash, chainId, txInputData } =
+          await createDelegatedVoteAttestationWithTx(
+            data,
+            delegateAttestationSignature,
+            signerAddress,
+            citizenRefUID,
+          )
+        const miradorChain = getMiradorChainNameFromChainId(chainId)
+        console.info("[vote] attested UID:", attestationId)
 
-    await appendServerTraceEvent({
-      traceContext: {
-        ...traceContext,
-        source: "backend",
-        step: "vote_create_delegated_attestation_failed",
-      },
-      eventName: "vote_server_attestation_failed",
-      details: {
-        signerAddress,
-        error: error instanceof Error ? error.message : String(error),
-      },
-      tags: ["governance", "vote", "server", "error"],
-      txHashHints:
-        failedTxContext.txHash && failedMiradorChain
-          ? [
-              {
-                txHash: failedTxContext.txHash,
-                chain: failedMiradorChain,
-                details: "Failed delegated governance vote attestation tx",
-              },
-            ]
-          : undefined,
-      txInputData: failedTxContext.txInputData,
-    })
+        await appendServerTraceEvent({
+          traceContext: {
+            ...traceContext,
+            source: "backend",
+            step: "vote_create_delegated_attestation_success",
+          },
+          eventName: "vote_server_attestation_succeeded",
+          details: {
+            signerAddress,
+            uid: attestationId,
+            txHash,
+          },
+          tags: ["governance", "vote", "server"],
+          txHashHints:
+            txHash && miradorChain
+              ? [
+                  {
+                    txHash,
+                    chain: miradorChain,
+                    details:
+                      "Delegated governance vote attestation transaction",
+                  },
+                ]
+              : undefined,
+          txInputData,
+        })
 
-    throw error
-  }
+        return attestationId
+      } catch (error) {
+        console.error("[vote] error:", error)
+        const failedTxContext = extractFailedEasTxContext(error)
+        const failedMiradorChain = getMiradorChainNameFromChainId(
+          failedTxContext.chainId,
+        )
+
+        await appendServerTraceEvent({
+          traceContext: {
+            ...traceContext,
+            source: "backend",
+            step: "vote_create_delegated_attestation_failed",
+          },
+          eventName: "vote_server_attestation_failed",
+          details: {
+            signerAddress,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          tags: ["governance", "vote", "server", "error"],
+          txHashHints:
+            failedTxContext.txHash && failedMiradorChain
+              ? [
+                  {
+                    txHash: failedTxContext.txHash,
+                    chain: failedMiradorChain,
+                    details: "Failed delegated governance vote attestation tx",
+                  },
+                ]
+              : undefined,
+          txInputData: failedTxContext.txInputData,
+        })
+
+        throw error
+      }
+    },
+    { requireUser: true },
+  )
 }

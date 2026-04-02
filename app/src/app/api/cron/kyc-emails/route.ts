@@ -3,11 +3,11 @@ import { NextRequest } from "next/server"
 import { getImpersonationContext } from "@/lib/db/sessionContext"
 import { withCronObservability } from "@/lib/cron"
 import {
-  sendKYBReminderEmail,
-  sendKYCApprovedEmail,
   sendKYBApprovedEmail,
-  sendKYCReminderEmail,
-} from "@/lib/actions/emails"
+  sendKYBReminderEmailInternal,
+  sendKYCApprovedEmail,
+  sendKYCReminderEmailInternal,
+} from "@/lib/email/send"
 
 export const maxDuration = 300
 export const dynamic = "force-dynamic"
@@ -24,7 +24,10 @@ async function handleKYCEmailsCron(request: NextRequest) {
     errors: [] as string[],
   }
 
-  const { db } = await getImpersonationContext({ forceProd: true, session: null })
+  const { db } = await getImpersonationContext({
+    forceProd: true,
+    session: null,
+  })
 
   try {
     console.log("🔍 Processing KYC reminder emails...")
@@ -46,11 +49,11 @@ async function handleKYCEmailsCron(request: NextRequest) {
         KYCUserTeams: true,
         UserKYCUsers: {
           include: {
-            user: true
-          }
-        }
+            user: true,
+          },
+        },
       },
-      take: 500
+      take: 500,
     })
 
     console.log(`Found ${kycReminderCandidates.length} KYC reminder candidates`)
@@ -59,13 +62,16 @@ async function handleKYCEmailsCron(request: NextRequest) {
       try {
         // Double-check to prevent race conditions
         const alreadySent = await db.emailNotification.findFirst({
-          where: { referenceId: user.personaReferenceId || user.id, type: "KYCB_REMINDER" },
+          where: {
+            referenceId: user.personaReferenceId || user.id,
+            type: "KYCB_REMINDER",
+          },
         })
 
         if (!alreadySent) {
           console.log(`Sending KYC reminder to ${user.email}`)
 
-          const result = await sendKYCReminderEmail(user, { bypassAuth: true })
+          const result = await sendKYCReminderEmailInternal(user, db)
 
           if (result.success) {
             results.remindersSent++
@@ -98,7 +104,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
       include: {
         kycLegalEntityController: true,
       },
-      take: 500
+      take: 500,
     })
 
     console.log(`Found ${kybReminderCandidates.length} KYB reminder candidates`)
@@ -112,15 +118,18 @@ async function handleKYCEmailsCron(request: NextRequest) {
 
         // Double-check to prevent race conditions
         const alreadySent = await db.emailNotification.findFirst({
-          where: { referenceId: entity.personaReferenceId || entity.id, type: "KYCB_REMINDER" },
+          where: {
+            referenceId: entity.personaReferenceId || entity.id,
+            type: "KYCB_REMINDER",
+          },
         })
 
         if (!alreadySent) {
-          console.log(`Sending KYB reminder to ${entity.kycLegalEntityController.email} for ${entity.name}`)
+          console.log(
+            `Sending KYB reminder to ${entity.kycLegalEntityController.email} for ${entity.name}`,
+          )
 
-          const result = await sendKYBReminderEmail(entity as any, {
-            bypassAuth: true,
-          })
+          const result = await sendKYBReminderEmailInternal(entity as any, db)
 
           if (result.success) {
             results.remindersSent++
@@ -153,11 +162,11 @@ async function handleKYCEmailsCron(request: NextRequest) {
         KYCUserTeams: true,
         UserKYCUsers: {
           include: {
-            user: true
-          }
-        }
+            user: true,
+          },
+        },
       },
-      take: 500
+      take: 500,
     })
 
     console.log(`Found ${kycApprovalCandidates.length} KYC approval candidates`)
@@ -166,13 +175,16 @@ async function handleKYCEmailsCron(request: NextRequest) {
       try {
         // Double-check to prevent race conditions
         const alreadySent = await db.emailNotification.findFirst({
-          where: { referenceId: user.personaReferenceId || user.id, type: "KYCB_APPROVED" },
+          where: {
+            referenceId: user.personaReferenceId || user.id,
+            type: "KYCB_APPROVED",
+          },
         })
 
         if (!alreadySent) {
           console.log(`Sending KYC approval to ${user.email}`)
 
-          const result = await sendKYCApprovedEmail(user)
+          const result = await sendKYCApprovedEmail(user, db)
 
           if (result.success) {
             results.approvalsSent++
@@ -204,7 +216,7 @@ async function handleKYCEmailsCron(request: NextRequest) {
       include: {
         kycLegalEntityController: true,
       },
-      take: 500
+      take: 500,
     })
 
     console.log(`Found ${kybApprovalCandidates.length} KYB approval candidates`)
@@ -218,16 +230,22 @@ async function handleKYCEmailsCron(request: NextRequest) {
 
         // Double-check to prevent race conditions
         const alreadySent = await db.emailNotification.findFirst({
-          where: { referenceId: entity.personaReferenceId || entity.id, type: "KYCB_APPROVED" },
+          where: {
+            referenceId: entity.personaReferenceId || entity.id,
+            type: "KYCB_APPROVED",
+          },
         })
 
         if (!alreadySent) {
-          console.log(`Sending KYB approval to ${entity.kycLegalEntityController.email} for ${entity.name}`)
+          console.log(
+            `Sending KYB approval to ${entity.kycLegalEntityController.email} for ${entity.name}`,
+          )
 
           const result = await sendKYBApprovedEmail(
             entity.kycLegalEntityController.firstName,
             entity.kycLegalEntityController.email,
-            entity.personaReferenceId || entity.id
+            entity.personaReferenceId || entity.id,
+            db,
           )
 
           if (result.success) {

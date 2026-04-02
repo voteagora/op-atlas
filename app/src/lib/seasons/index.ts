@@ -1,9 +1,9 @@
 import "server-only"
 
-import { cache } from "react"
 import { Prisma, Season } from "@prisma/client"
 
 import { prisma } from "@/db/client"
+import { cache } from "@/lib/cache"
 
 export type SeasonRuntimeConfig = Record<string, unknown>
 

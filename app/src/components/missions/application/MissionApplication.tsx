@@ -13,6 +13,7 @@ import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useSessionRoundApplications } from "@/hooks/db/useUserRoundApplications"
 import { usePrivyEmail } from "@/hooks/privy/usePrivyLinkEmail"
 import { submitApplications } from "@/lib/actions/applications"
+import type { ProjectActionDTO } from "@/lib/dto"
 import { MIRADOR_FLOW } from "@/lib/mirador/constants"
 import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
 import {
@@ -20,7 +21,6 @@ import {
   closeMiradorTrace,
   startMiradorTrace,
 } from "@/lib/mirador/webTrace"
-import { ProjectWithDetails } from "@/lib/types"
 
 import { ApplicationSubmitted } from "./ApplicationSubmitted"
 import { MissionApplicationBreadcrumbs } from "./MissionApplicationBreadcrumbs"
@@ -153,10 +153,10 @@ export function MissionApplication({ userId }: { userId: string }) {
     })
   }
 
-  const submittedProjects: ProjectWithDetails[] = []
+  const submittedProjects: ProjectActionDTO[] = []
 
   submittedApplications?.map((application) => {
-    const isProjectSubmitted = projects?.find((project: ProjectWithDetails) => {
+    const isProjectSubmitted = projects?.find((project) => {
       return project.id === application.projectId
     })
 

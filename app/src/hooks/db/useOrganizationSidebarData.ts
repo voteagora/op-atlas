@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Organization } from "@prisma/client"
 
 import { getOrganizationKycTeamsAction } from "@/lib/actions/organizations"
-import { resolveProjectStatus, hasExpiredKYC } from "@/lib/utils/kyc"
+import { resolveProjectStatus } from "@/lib/utils/kyc"
 
 export const ORGANIZATION_SIDEBAR_DATA_QUERY_KEY = "organizationSidebarData"
 
@@ -24,7 +24,11 @@ export const useOrganizationSidebarData = ({
   enabled?: boolean
 }) => {
   const { data, isLoading, isSuccess, isError, error } = useQuery({
-    queryKey: [ORGANIZATION_SIDEBAR_DATA_QUERY_KEY, organizations?.map(o => o.id), pathname],
+    queryKey: [
+      ORGANIZATION_SIDEBAR_DATA_QUERY_KEY,
+      organizations?.map((o) => o.id),
+      pathname,
+    ],
     queryFn: async (): Promise<OrganizationSidebarData[]> => {
       if (!organizations) return []
 
@@ -47,17 +51,28 @@ export const useOrganizationSidebarData = ({
 
           // Determine organization completeness based on TAM users (across the org's KYC teams)
           const tamUsers = organizationKycTeams.flatMap((org) =>
-            (org.team.team || []).flatMap((t: any) => t.users || []),
+            org.team.team.flatMap((teamMember) =>
+              teamMember.users ? [teamMember.users] : [],
+            ),
           )
-          const teamHasExpired = organizationKycTeams.some((org) =>
-            hasExpiredKYC(org.team),
+          const legalEntities = organizationKycTeams.flatMap((org) =>
+            org.team.KYCLegalEntityTeams.flatMap((entityTeam) =>
+              entityTeam.legalEntity ? [entityTeam.legalEntity] : [],
+            ),
+          )
+          const teamHasExpired = [...tamUsers, ...legalEntities].some(
+            (entry) =>
+              entry.status === "APPROVED" &&
+              entry.expiry !== null &&
+              entry.expiry !== undefined &&
+              new Date(entry.expiry) < new Date(),
           )
 
           const orgResolvedStatus = teamHasExpired
             ? "EXPIRED"
             : tamUsers && tamUsers.length > 0
-              ? resolveProjectStatus(tamUsers)
-              : "PENDING"
+            ? resolveProjectStatus(tamUsers, legalEntities)
+            : "PENDING"
 
           // If org TAM users indicate incomplete status, show the incomplete card by associating it with a representative project
           // We pick the first available project as a handle for the IncompleteCard component

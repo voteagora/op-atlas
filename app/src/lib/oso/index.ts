@@ -1,7 +1,6 @@
 "server-only"
 
-import { cache } from "react"
-
+import { cache } from "@/lib/cache"
 import {
   getDevToolingRecurringReward,
   getOnchainBuilderRecurringReward,
@@ -352,4 +351,3 @@ const getTopProjects = cache(async (osoId: string) => {
 
   return trancheData
 })
-

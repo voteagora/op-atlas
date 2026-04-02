@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useCitizenQualification } from "@/hooks/citizen/useCitizenQualification"
 import { useUserByContext } from "@/hooks/citizen/useUserCitizen"
 import { useWallet } from "@/hooks/useWallet"
-import { ProposalData } from "@/lib/proposals"
+import type { ProposalData } from "@/lib/proposals"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
 interface VotingSidebarProps {
@@ -46,8 +46,7 @@ const VotingSidebar = ({ proposalData }: VotingSidebarProps) => {
     useCitizenQualification(user?.id)
   const { citizen, isLoading: isCitizenLoading } = useUserByContext()
   const { data: session } = useSession()
-  const viewerId =
-    session?.impersonation?.targetUserId ?? session?.user?.id
+  const viewerId = session?.impersonation?.targetUserId ?? session?.user?.id
   useEffect(() => {
     if (!isEligibilityLoading && !isCitizenLoading) {
       const timer = setTimeout(() => {

@@ -5,20 +5,15 @@ import { isAddress } from "viem"
 
 import {
   canClaimToAddressWithClient,
-  createOrUpdateSuperfluidStream,
-  createRewardStream,
   deleteClaim,
-  getKYCTeamsWithRewardsForRound,
   getRewardWithClient,
-  getRewardStreamsWithRewardsForRound,
   startClaim,
   updateClaim,
 } from "@/db/rewards"
 import { withImpersonation, SessionContext } from "@/lib/db/sessionContext"
 
-import { getActiveStreams, SuperfluidVestingSchedule } from "../superfluid"
-import { processStream } from "../utils/rewards"
-import { verifyAdminStatus } from "./utils"
+import { getActiveStreams } from "../superfluid"
+import { userOwnsAddress, verifyAdminStatus } from "./utils"
 
 type RewardMemberContext = SessionContext & {
   userId: string
@@ -29,31 +24,34 @@ async function withRewardMember<T>(
   rewardId: string,
   handler: (ctx: RewardMemberContext) => Promise<T>,
 ) {
-  return withImpersonation(async (ctx) => {
-    if (!ctx.userId) {
-      return {
-        error: "Unauthorized",
-      } as T
-    }
+  return withImpersonation(
+    async (ctx) => {
+      if (!ctx.userId) {
+        return {
+          error: "Unauthorized",
+        } as T
+      }
 
-    const reward = await getRewardWithClient({ id: rewardId }, ctx.db)
-    if (!reward) {
-      return {
-        error: "Reward not found",
-      } as T
-    }
+      const reward = await getRewardWithClient({ id: rewardId }, ctx.db)
+      if (!reward) {
+        return {
+          error: "Reward not found",
+        } as T
+      }
 
-    const membership = await verifyAdminStatus(
-      reward.project.id,
-      ctx.userId,
-      ctx.db,
-    )
-    if (membership?.error) {
-      return membership as T
-    }
+      const membership = await verifyAdminStatus(
+        reward.project.id,
+        ctx.userId,
+        ctx.db,
+      )
+      if (membership?.error) {
+        return membership as T
+      }
 
-    return handler({ ...ctx, userId: ctx.userId, reward })
-  }, { requireUser: true })
+      return handler({ ...ctx, userId: ctx.userId, reward })
+    },
+    { requireUser: true },
+  )
 }
 
 // TODO: Can filter by sender once we have it
@@ -64,17 +62,35 @@ export const getActiveStream = async (address: string) => {
     }
   }
 
-  try {
-    const streams = await getActiveStreams(address.toLowerCase())
-    return {
-      error: null,
-      stream: streams[0] ?? null,
-    }
-  } catch (error: unknown) {
-    return {
-      error: (error as Error).message,
-    }
-  }
+  return withImpersonation(
+    async ({ db, userId }) => {
+      if (!userId) {
+        return {
+          error: "Unauthorized",
+        }
+      }
+
+      const ownsAddress = await userOwnsAddress(userId, address, db)
+      if (!ownsAddress) {
+        return {
+          error: "Unauthorized",
+        }
+      }
+
+      try {
+        const streams = await getActiveStreams(address.toLowerCase())
+        return {
+          error: null,
+          stream: streams[0] ?? null,
+        }
+      } catch (error: unknown) {
+        return {
+          error: (error as Error).message,
+        }
+      }
+    },
+    { requireUser: true },
+  )
 }
 
 export const addAddressToRewardsClaim = async (
@@ -141,45 +157,3 @@ export const resetRewardsClaim = async (rewardId: string) => {
     }
   })
 }
-
-type RewardStream = {
-  id: string
-  projectIds: string[]
-  projectNames: string[]
-  wallets: string[]
-  KYCStatusCompleted: boolean
-  amounts: string[]
-}
-
-export const getRewardStreamsForRound = async (
-  roundId: string,
-  season: number,
-): Promise<RewardStream[]> =>
-  withImpersonation(async ({ db }) => {
-    const existingStreams = await getRewardStreamsWithRewardsForRound(
-      roundId,
-      db,
-    )
-    const processedExistingStreams = await Promise.all(
-      existingStreams.map((stream) =>
-        processStream(stream.streams, stream.team, roundId, season, stream.id),
-      ),
-    )
-
-    const kycTeams = await getKYCTeamsWithRewardsForRound(roundId, db)
-    const newStreams = await Promise.all(
-      kycTeams.map((kycTeam) => processStream([], kycTeam, roundId, season)),
-    )
-
-    const allStreams = [...processedExistingStreams, ...newStreams]
-    return allStreams.filter((stream): stream is RewardStream => stream !== null)
-  })
-
-export const processSuperfluidStream = async (
-  stream: SuperfluidVestingSchedule,
-  roundId: string,
-) =>
-  withImpersonation(async ({ db }) => {
-    const rewardStreamId = await createRewardStream(stream, roundId, db)
-    await createOrUpdateSuperfluidStream(stream, rewardStreamId, db)
-  })

@@ -4,7 +4,7 @@ import { useLinkAccount } from "@privy-io/react-auth"
 import { toast } from "sonner"
 
 import { makeUserAddressPrimaryAction } from "@/app/profile/verified-addresses/actions"
-import { syncPrivyUser } from "@/db/privy"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 import { buildFrontendTraceContext } from "@/lib/mirador/clientTraceContext"
 import { MIRADOR_FLOW } from "@/lib/mirador/constants"
 import {
@@ -78,7 +78,7 @@ export const usePrivyLinkWallet = (userId: string) => {
 
   const runWalletLinkSuccessFlow = async (
     attempt: WalletLinkAttempt,
-    updatedPrivyUser: Parameters<typeof syncPrivyUser>[0],
+    updatedPrivyUser: Parameters<typeof syncCurrentPrivyUser>[0],
     walletAddress: string,
   ) => {
     addMiradorEvent(attempt.trace, "wallet_link_account_received", {
@@ -93,7 +93,7 @@ export const usePrivyLinkWallet = (userId: string) => {
     })
 
     try {
-      await syncPrivyUser(updatedPrivyUser)
+      await syncCurrentPrivyUser(updatedPrivyUser)
 
       if (attempt.strategy === "primary") {
         const traceContext = buildFrontendTraceContext(attempt.trace, {

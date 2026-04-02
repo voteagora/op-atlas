@@ -7,7 +7,10 @@ import { Button } from "@/components/common/Button"
 import { Close } from "@/components/icons/remix"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
-import { UserProjectsWithDetails } from "@/lib/types"
+import type {
+  ProjectSelectionLinkDTO,
+  UserAdminProjectsActionDTO,
+} from "@/lib/dto"
 
 import { ProjectSelectionModal } from "./ProjectSelectionModal"
 
@@ -18,21 +21,17 @@ const TERMS = [
   "Please verify that you are able to commit the necessary time to this role.",
 ] as const
 
-interface Project {
-  project: {
-    id: string
-    name: string
-    thumbnailUrl?: string | null
-  }
-}
-
 interface StandardRoleFormProps {
   role: Role
   user: User
-  userProjects?: UserProjectsWithDetails
+  userProjects?: UserAdminProjectsActionDTO
   onSubmit: (data: {
     conflictsOfInterest: string
-    projects: Array<{projectId: string, projectName: string, description: string}>
+    projects: Array<{
+      projectId: string
+      projectName: string
+      description: string
+    }>
   }) => void
   isLoading: boolean
   requirementsSatisfied: boolean
@@ -48,8 +47,12 @@ export const StandardRoleForm = ({
 }: StandardRoleFormProps) => {
   const [checkedRules, setCheckedRules] = useState<Record<number, boolean>>({})
   const [conflictsOfInterest, setConflictsOfInterest] = useState("")
-  const [selectedProjects, setSelectedProjects] = useState<Project[]>([])
-  const [projectRelevanceText, setProjectRelevanceText] = useState<Record<string, string>>({})
+  const [selectedProjects, setSelectedProjects] = useState<
+    ProjectSelectionLinkDTO[]
+  >([])
+  const [projectRelevanceText, setProjectRelevanceText] = useState<
+    Record<string, string>
+  >({})
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
 
   const allTermsChecked = TERMS.every((_, index) => checkedRules[index])
@@ -62,7 +65,7 @@ export const StandardRoleForm = ({
     }))
   }
 
-  const handleProjectSelection = (project: Project) => {
+  const handleProjectSelection = (project: ProjectSelectionLinkDTO) => {
     setSelectedProjects((prev) => {
       const isSelected = prev.some((p) => p.project.id === project.project.id)
       if (isSelected) {
@@ -129,9 +132,7 @@ export const StandardRoleForm = ({
         />
         <div className="absolute top-[90px] left-[12px] text-xs text-muted-foreground">
           <span
-            className={
-              conflictsOfInterest.length >= 280 ? "text-red-500" : ""
-            }
+            className={conflictsOfInterest.length >= 280 ? "text-red-500" : ""}
           >
             {conflictsOfInterest.length}/280
           </span>
@@ -168,8 +169,8 @@ export const StandardRoleForm = ({
           <Link href="/projects/new" className="underline">
             add your project
           </Link>{" "}
-          before continuing here. To join a project or organization that
-          already exists in Atlas, please have their admin add you.{" "}
+          before continuing here. To join a project or organization that already
+          exists in Atlas, please have their admin add you.{" "}
         </div>
       </div>
 
@@ -251,8 +252,7 @@ export const StandardRoleForm = ({
             <div className="absolute top-[90px] left-[12px] text-xs text-muted-foreground">
               <span
                 className={
-                  (projectRelevanceText[project.project.id] || "").length >=
-                  280
+                  (projectRelevanceText[project.project.id] || "").length >= 280
                     ? "text-red-500"
                     : ""
                 }

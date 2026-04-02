@@ -6,6 +6,7 @@
     "pnpm": ">=9"
   },
   "scripts": {
+    "auth:guardrails": "pnpm --filter op-atlas auth:guardrails",
     "format": "prettier --write .",
     "app:dev": "pnpm --filter op-atlas dev"
   },

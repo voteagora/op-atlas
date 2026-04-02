@@ -2,9 +2,9 @@ import { useLinkAccount, usePrivy } from "@privy-io/react-auth"
 import { useEffect } from "react"
 import { toast } from "sonner"
 
-import { syncPrivyUser } from "@/db/privy"
 import { useUser } from "@/hooks/db/useUser"
 import { useHandlePrivyErrors } from "@/hooks/useHandlePrivyErrors"
+import { syncCurrentPrivyUser } from "@/lib/actions/privy"
 import { setUserIsNotDeveloper } from "@/lib/actions/users"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 
@@ -32,7 +32,7 @@ export const usePrivyLinkGithub = (userId: string) => {
       toast.promise(unlinkGithub(privyUser.github.subject), {
         loading: "Unlinking github...",
         success: (updatedPrivyUser) => {
-          syncPrivyUser(updatedPrivyUser).then(() => invalidateUser())
+          syncCurrentPrivyUser(updatedPrivyUser).then(() => invalidateUser())
           return "Github unlinked successfully"
         },
         error: (error) => {
@@ -51,7 +51,7 @@ export const usePrivyLinkGithub = (userId: string) => {
       })
       if (linkMethod === "github" && isLinking()) {
         toast.promise(
-          syncPrivyUser(updatedPrivyUser)
+          syncCurrentPrivyUser(updatedPrivyUser)
             .then(() => invalidateUser())
             .then(() => setIsLinking(false)),
           {

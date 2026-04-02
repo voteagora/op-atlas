@@ -6,7 +6,7 @@ import {
   VoteType,
   VotingCardProps,
 } from "@/components/proposals/proposal.types"
-import { ProposalData } from "@/lib/proposals"
+import type { ProposalData } from "@/lib/proposals"
 import { CitizenshipQualification } from "@/lib/types"
 
 const API_URL = process.env.NEXT_PUBLIC_AGORA_API_URL

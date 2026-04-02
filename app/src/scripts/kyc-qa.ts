@@ -22,7 +22,7 @@
 
 import { PrismaClient } from "@prisma/client"
 
-import { sendKYCStartedEmail } from "@/lib/actions/emails"
+import { sendKYCStartedEmail } from "@/lib/email/send"
 import { createPersonaInquiryLink } from "@/lib/actions/persona"
 
 const prisma = new PrismaClient()
@@ -256,10 +256,10 @@ async function createKYCUser({
           KYCUserTeams: true,
           UserKYCUsers: {
             include: {
-              user: true
-            }
-          }
-        }
+              user: true,
+            },
+          },
+        },
       })
 
       if (newUserWithRelations) {

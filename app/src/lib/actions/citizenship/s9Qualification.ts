@@ -15,6 +15,8 @@ import {
   findBlockedCitizenSeasonEvaluation,
   checkWalletEligibility as checkWalletEligibilityDb,
 } from "@/db/citizenSeasons"
+import { resolveSessionUserId } from "@/lib/actions/utils"
+import { withImpersonation } from "@/lib/db/sessionContext"
 import { hasPriorityAttestation } from "@/lib/services/priorityAttestations"
 import {
   evaluateTrustScores,
@@ -64,297 +66,307 @@ export type S9QualificationResult = {
 }
 
 export async function s9Qualification({
-  userId,
+  userId: requestedUserId,
   governanceAddress,
   seasonId,
 }: S9QualificationInput): Promise<S9QualificationResult> {
-  if (!userId) {
-    throw new Error("User ID is required for S9 qualification")
-  }
+  return withImpersonation(
+    async ({ userId: sessionUserId }) => {
+      const resolution = resolveSessionUserId(sessionUserId, requestedUserId)
+      if (resolution.error || !resolution.userId) {
+        throw new Error("Unauthorized")
+      }
 
-  const user = await getUserById(userId)
-  if (!user) {
-    throw new Error(`User ${userId} not found`)
-  }
+      const userId = resolution.userId
 
-  const season =
-    (seasonId && (await getSeasonOrThrow(seasonId))) ||
-    (await getActiveSeason())
+      const user = await getUserById(userId)
+      if (!user) {
+        throw new Error(`User ${userId} not found`)
+      }
 
-  if (!season) {
-    throw new Error("No active season configured")
-  }
+      const season =
+        (seasonId && (await getSeasonOrThrow(seasonId))) ||
+        (await getActiveSeason())
 
-  const seasonInfo = { id: season.id, name: season.name }
-  const citizenType = citizenCategory.USER
+      if (!season) {
+        throw new Error("No active season configured")
+      }
 
-  const wallets = extractUserWallets(user.addresses ?? [])
-  const socialProfiles = await buildSocialProfiles({
-    farcasterId: user.farcasterId,
-    github: user.github,
-    privyDid: user.privyDid,
-  })
+      const seasonInfo = { id: season.id, name: season.name }
+      const citizenType = citizenCategory.USER
 
-  const [kycRecord, worldIdRecord] = await Promise.all([
-    getUserKYCUser(userId),
-    getUserWorldId(userId),
-  ])
+      const wallets = extractUserWallets(user.addresses ?? [])
+      const socialProfiles = await buildSocialProfiles({
+        farcasterId: user.farcasterId,
+        github: user.github,
+        privyDid: user.privyDid,
+      })
 
-  const kycApproved = Boolean(
-    kycRecord?.kycUser && kycRecord.kycUser.status === "APPROVED",
+      const [kycRecord, worldIdRecord] = await Promise.all([
+        getUserKYCUser(userId),
+        getUserWorldId(userId),
+      ])
+
+      const kycApproved = Boolean(
+        kycRecord?.kycUser && kycRecord.kycUser.status === "APPROVED",
+      )
+      const worldIdVerified = Boolean(worldIdRecord?.verified)
+
+      const existingCitizen = await getCitizenSeasonByUser({
+        seasonId: season.id,
+        userId,
+      })
+      const evaluationContext = {
+        seasonId: season.id,
+        userId,
+        wallets,
+        socials: socialProfiles,
+      }
+
+      const returnWithEvaluation = async ({
+        status,
+        outcome,
+        message,
+        reason,
+        trust,
+        hasGold = false,
+        hasPlatinum = false,
+        openRankRaw,
+        passportRaw,
+      }: {
+        status: S9QualificationStatus
+        outcome: CitizenRegistrationStatus
+        message?: string
+        reason?: string
+        trust?: TrustEvaluationResult
+        hasGold?: boolean
+        hasPlatinum?: boolean
+        openRankRaw?: unknown
+        passportRaw?: unknown
+      }): Promise<S9QualificationResult> => {
+        const evaluation = await recordEvaluation({
+          ...evaluationContext,
+          outcome,
+          openRankRaw,
+          passportRaw,
+        })
+
+        return {
+          status,
+          season: seasonInfo,
+          citizenType,
+          kycApproved,
+          worldIdVerified,
+          hasGold,
+          hasPlatinum,
+          trust,
+          message,
+          reason,
+          evaluationId: evaluation.id,
+          existingCitizen,
+        }
+      }
+
+      const canContinueAfterClose = async (): Promise<boolean> => {
+        const existingEvaluation =
+          await prisma.citizenSeasonEvaluation.findFirst({
+            where: {
+              seasonId: season.id,
+              userId,
+              outcome: CitizenRegistrationStatus.VERIFICATION_REQUIRED,
+            },
+          })
+        if (!existingEvaluation) return false
+
+        const existingCitizenRecord = await prisma.citizenSeason.findFirst({
+          where: {
+            seasonId: season.id,
+            userId,
+            registrationStatus: "ATTESTED",
+          },
+        })
+        if (existingCitizenRecord) return false
+
+        const registrationEndDate = season.registrationEndDate
+        if (!registrationEndDate) return false
+
+        const kycStartedBeforeClose =
+          kycRecord && kycRecord.createdAt < registrationEndDate
+        const worldIdStartedBeforeClose =
+          worldIdRecord && worldIdRecord.createdAt < registrationEndDate
+
+        return Boolean(kycStartedBeforeClose || worldIdStartedBeforeClose)
+      }
+
+      if (!hasRegistrationStarted(season)) {
+        return returnWithEvaluation({
+          status: "REGISTRATION_CLOSED",
+          outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+          message: "Season registration has not started yet.",
+        })
+      }
+
+      if (hasRegistrationEnded(season)) {
+        const canContinue = await canContinueAfterClose()
+        if (!canContinue) {
+          return returnWithEvaluation({
+            status: "REGISTRATION_CLOSED",
+            outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+            message: "Season registration has ended.",
+          })
+        }
+      }
+
+      if (existingCitizen) {
+        return returnWithEvaluation({
+          status: "ALREADY_REGISTERED",
+          outcome: existingCitizen.registrationStatus,
+          message: "You have already registered for this season.",
+        })
+      }
+
+      const blockedEvaluation = await findBlockedCitizenSeasonEvaluation({
+        seasonId: season.id,
+        userId,
+      })
+
+      if (blockedEvaluation) {
+        return {
+          status: "BLOCKED",
+          season: seasonInfo,
+          citizenType,
+          kycApproved,
+          worldIdVerified,
+          hasGold: false,
+          hasPlatinum: false,
+          message: `Your onchain activity disqualifies you from becoming a citizen in ${seasonInfo.name}.`,
+          reason: "BLOCKED",
+          evaluationId: blockedEvaluation.id,
+          existingCitizen,
+        }
+      }
+
+      const priorityOpen = isPriorityWindowOpen(season)
+      if (priorityOpen) {
+        const hasPriority = await hasPriorityAttestation({
+          seasonId: season.id,
+          addresses: wallets,
+        })
+
+        if (!hasPriority) {
+          return returnWithEvaluation({
+            status: "PRIORITY_REQUIRED",
+            outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+            message:
+              "A qualifying attestation is required to register during the priority window.",
+          })
+        }
+      }
+
+      if (wallets.length === 0) {
+        return returnWithEvaluation({
+          status: "NOT_ELIGIBLE",
+          outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+          reason: "NO_WALLETS",
+          message: "Link at least one wallet before registering.",
+        })
+      }
+
+      const normalizedGovernance = governanceAddress?.toLowerCase()
+      if (!normalizedGovernance) {
+        return returnWithEvaluation({
+          status: "NOT_ELIGIBLE",
+          outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+          reason: "MISSING_GOVERNANCE_ADDRESS",
+          message: "A governance address must be provided for registration.",
+        })
+      }
+
+      if (!wallets.includes(normalizedGovernance)) {
+        return returnWithEvaluation({
+          status: "NOT_ELIGIBLE",
+          outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+          reason: "INVALID_GOVERNANCE_ADDRESS",
+          message:
+            "Select a governance address from one of your linked wallets.",
+        })
+      }
+
+      const userQualification = await evaluateUserQualification({
+        seasonId: season.id,
+        wallets,
+      })
+
+      if (!userQualification) {
+        return returnWithEvaluation({
+          status: "NOT_ELIGIBLE",
+          outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
+          reason: "INSUFFICIENT_ACTIVITY",
+          message:
+            "No qualifying wallets were found. Please try connecting other wallets.",
+        })
+      }
+
+      if (kycApproved || worldIdVerified) {
+        return returnWithEvaluation({
+          status: "READY",
+          outcome: CitizenRegistrationStatus.READY,
+          message: "Identity verification already complete.",
+          hasGold: true,
+          hasPlatinum: true,
+        })
+      }
+
+      const trust = await evaluateTrustScores({
+        seasonId: season.id,
+        userId,
+        citizenType,
+        wallets,
+        socials: socialProfiles,
+      })
+
+      const { socialRaw, passportRaw } = serializeTrustScores(trust)
+
+      if (trust.decision === "BLOCKED") {
+        return returnWithEvaluation({
+          status: "BLOCKED",
+          outcome: CitizenRegistrationStatus.BLOCKED,
+          reason: "BLOCKED",
+          message:
+            "Your onchain activity disqualifies you from citizenship for this season.",
+          trust,
+          hasGold: trust.hasGold,
+          hasPlatinum: trust.hasPlatinum,
+          openRankRaw: socialRaw,
+          passportRaw,
+        })
+      }
+
+      if (trust.decision === "NEEDS_VERIFICATION") {
+        return returnWithEvaluation({
+          status: "NEEDS_VERIFICATION",
+          outcome: CitizenRegistrationStatus.VERIFICATION_REQUIRED,
+          reason: "ADDITIONAL_VERIFICATION_REQUIRED",
+          trust,
+          hasGold: trust.hasGold,
+          hasPlatinum: trust.hasPlatinum,
+          openRankRaw: socialRaw,
+          passportRaw,
+        })
+      }
+
+      return returnWithEvaluation({
+        status: "READY",
+        outcome: CitizenRegistrationStatus.READY,
+        trust,
+        hasGold: trust.hasGold,
+        hasPlatinum: trust.hasPlatinum,
+        openRankRaw: socialRaw,
+        passportRaw,
+      })
+    },
+    { requireUser: true },
   )
-  const worldIdVerified = Boolean(worldIdRecord?.verified)
-
-  const existingCitizen = await getCitizenSeasonByUser({
-    seasonId: season.id,
-    userId,
-  })
-  const evaluationContext = {
-    seasonId: season.id,
-    userId,
-    wallets,
-    socials: socialProfiles,
-  }
-
-  const returnWithEvaluation = async ({
-    status,
-    outcome,
-    message,
-    reason,
-    trust,
-    hasGold = false,
-    hasPlatinum = false,
-    openRankRaw,
-    passportRaw,
-  }: {
-    status: S9QualificationStatus
-    outcome: CitizenRegistrationStatus
-    message?: string
-    reason?: string
-    trust?: TrustEvaluationResult
-    hasGold?: boolean
-    hasPlatinum?: boolean
-    openRankRaw?: unknown
-    passportRaw?: unknown
-  }): Promise<S9QualificationResult> => {
-    const evaluation = await recordEvaluation({
-      ...evaluationContext,
-      outcome,
-      openRankRaw,
-      passportRaw,
-    })
-
-    return {
-      status,
-      season: seasonInfo,
-      citizenType,
-      kycApproved,
-      worldIdVerified,
-      hasGold,
-      hasPlatinum,
-      trust,
-      message,
-      reason,
-      evaluationId: evaluation.id,
-      existingCitizen,
-    }
-  }
-
-  const canContinueAfterClose = async (): Promise<boolean> => {
-    const existingEvaluation = await prisma.citizenSeasonEvaluation.findFirst({
-      where: {
-        seasonId: season.id,
-        userId,
-        outcome: CitizenRegistrationStatus.VERIFICATION_REQUIRED,
-      },
-    })
-    if (!existingEvaluation) return false
-
-    const existingCitizenRecord = await prisma.citizenSeason.findFirst({
-      where: {
-        seasonId: season.id,
-        userId,
-        registrationStatus: "ATTESTED",
-      },
-    })
-    if (existingCitizenRecord) return false
-
-    const registrationEndDate = season.registrationEndDate
-    if (!registrationEndDate) return false
-
-    const kycStartedBeforeClose =
-      kycRecord && kycRecord.createdAt < registrationEndDate
-    const worldIdStartedBeforeClose =
-      worldIdRecord && worldIdRecord.createdAt < registrationEndDate
-
-    return Boolean(kycStartedBeforeClose || worldIdStartedBeforeClose)
-  }
-
-  if (!hasRegistrationStarted(season)) {
-    return returnWithEvaluation({
-      status: "REGISTRATION_CLOSED",
-      outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-      message: "Season registration has not started yet.",
-    })
-  }
-
-  if (hasRegistrationEnded(season)) {
-    const canContinue = await canContinueAfterClose()
-    if (!canContinue) {
-      return returnWithEvaluation({
-        status: "REGISTRATION_CLOSED",
-        outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-        message: "Season registration has ended.",
-      })
-    }
-  }
-
-  if (existingCitizen) {
-    return returnWithEvaluation({
-      status: "ALREADY_REGISTERED",
-      outcome: existingCitizen.registrationStatus,
-      message: "You have already registered for this season.",
-    })
-  }
-
-  const blockedEvaluation = await findBlockedCitizenSeasonEvaluation({
-    seasonId: season.id,
-    userId,
-  })
-
-  if (blockedEvaluation) {
-    return {
-      status: "BLOCKED",
-      season: seasonInfo,
-      citizenType,
-      kycApproved,
-      worldIdVerified,
-      hasGold: false,
-      hasPlatinum: false,
-      message: `Your onchain activity disqualifies you from becoming a citizen in ${seasonInfo.name}.`,
-      reason: "BLOCKED",
-      evaluationId: blockedEvaluation.id,
-      existingCitizen,
-    }
-  }
-
-  const priorityOpen = isPriorityWindowOpen(season)
-  if (priorityOpen) {
-    const hasPriority = await hasPriorityAttestation({
-      seasonId: season.id,
-      addresses: wallets,
-    })
-
-    if (!hasPriority) {
-      return returnWithEvaluation({
-        status: "PRIORITY_REQUIRED",
-        outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-        message:
-          "A qualifying attestation is required to register during the priority window.",
-      })
-    }
-  }
-
-  if (wallets.length === 0) {
-    return returnWithEvaluation({
-      status: "NOT_ELIGIBLE",
-      outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-      reason: "NO_WALLETS",
-      message: "Link at least one wallet before registering.",
-    })
-  }
-
-  const normalizedGovernance = governanceAddress?.toLowerCase()
-  if (!normalizedGovernance) {
-    return returnWithEvaluation({
-      status: "NOT_ELIGIBLE",
-      outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-      reason: "MISSING_GOVERNANCE_ADDRESS",
-      message: "A governance address must be provided for registration.",
-    })
-  }
-
-  if (!wallets.includes(normalizedGovernance)) {
-    return returnWithEvaluation({
-      status: "NOT_ELIGIBLE",
-      outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-      reason: "INVALID_GOVERNANCE_ADDRESS",
-      message: "Select a governance address from one of your linked wallets.",
-    })
-  }
-
-  const userQualification = await evaluateUserQualification({
-    seasonId: season.id,
-    wallets,
-  })
-
-  if (!userQualification) {
-    return returnWithEvaluation({
-      status: "NOT_ELIGIBLE",
-      outcome: CitizenRegistrationStatus.ELIGIBILITY_FAILED,
-      reason: "INSUFFICIENT_ACTIVITY",
-      message:
-        "No qualifying wallets were found. Please try connecting other wallets.",
-    })
-  }
-
-  if (kycApproved || worldIdVerified) {
-    return returnWithEvaluation({
-      status: "READY",
-      outcome: CitizenRegistrationStatus.READY,
-      message: "Identity verification already complete.",
-      hasGold: true,
-      hasPlatinum: true,
-    })
-  }
-
-  const trust = await evaluateTrustScores({
-    seasonId: season.id,
-    userId,
-    citizenType,
-    wallets,
-    socials: socialProfiles,
-  })
-
-  const { socialRaw, passportRaw } = serializeTrustScores(trust)
-
-  if (trust.decision === "BLOCKED") {
-    return returnWithEvaluation({
-      status: "BLOCKED",
-      outcome: CitizenRegistrationStatus.BLOCKED,
-      reason: "BLOCKED",
-      message:
-        "Your onchain activity disqualifies you from citizenship for this season.",
-      trust,
-      hasGold: trust.hasGold,
-      hasPlatinum: trust.hasPlatinum,
-      openRankRaw: socialRaw,
-      passportRaw,
-    })
-  }
-
-  if (trust.decision === "NEEDS_VERIFICATION") {
-    return returnWithEvaluation({
-      status: "NEEDS_VERIFICATION",
-      outcome: CitizenRegistrationStatus.VERIFICATION_REQUIRED,
-      reason: "ADDITIONAL_VERIFICATION_REQUIRED",
-      trust,
-      hasGold: trust.hasGold,
-      hasPlatinum: trust.hasPlatinum,
-      openRankRaw: socialRaw,
-      passportRaw,
-    })
-  }
-
-  return returnWithEvaluation({
-    status: "READY",
-    outcome: CitizenRegistrationStatus.READY,
-    trust,
-    hasGold: trust.hasGold,
-    hasPlatinum: trust.hasPlatinum,
-    openRankRaw: socialRaw,
-    passportRaw,
-  })
 }
 
 async function evaluateUserQualification({
@@ -404,7 +416,8 @@ async function buildSocialProfiles({
   github?: string | null
   privyDid?: string | null
 }): Promise<Array<{ platform: SocialTrustPlatform; identifier: string }>> {
-  const socials: Array<{ platform: SocialTrustPlatform; identifier: string }> = []
+  const socials: Array<{ platform: SocialTrustPlatform; identifier: string }> =
+    []
 
   if (farcasterId) {
     socials.push({ platform: "FARCASTER", identifier: farcasterId })

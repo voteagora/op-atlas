@@ -1,13 +1,13 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import type { ProjectActionDTO } from "@/lib/dto"
 import { noRewardsPriorToRound } from "@/lib/rewards"
-import { ProjectWithDetails } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 
-export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
+export function ProjectRewardRow({ project }: { project: ProjectActionDTO }) {
   if (!project.applications.length || noRewardsPriorToRound(project, 7)) {
     return null
   }
@@ -43,10 +43,7 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
               width={24}
               alt="Optimism"
             />
-            <div className="font-normal">
-              {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
-              {formatNumber(reward.amount)}
-            </div>
+            <div className="font-normal">{formatNumber(reward.amount)}</div>
           </div>
           <Link href={`/projects/${project.id}/rewards`}>
             <Button variant="secondary">Claim</Button>

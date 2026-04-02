@@ -52,7 +52,7 @@ import {
   closeMiradorTrace,
   startMiradorTrace,
 } from "@/lib/mirador/webTrace"
-import { ProposalData } from "@/lib/proposals"
+import type { ProposalData } from "@/lib/proposals"
 import { truncateAddress } from "@/lib/utils/string"
 import {
   getAgoraProposalLink,
@@ -60,10 +60,7 @@ import {
   mapValueToVoteType,
   mapVoteTypeToValue,
 } from "@/lib/utils/voting"
-import {
-  detectWalletType,
-  type WalletType,
-} from "@/lib/utils/walletDetection"
+import { detectWalletType, type WalletType } from "@/lib/utils/walletDetection"
 import { useAnalytics } from "@/providers/AnalyticsProvider"
 import { useConfetti } from "@/providers/LayoutProvider"
 import { privyWagmiConfig } from "@/providers/PrivyAuthProvider"

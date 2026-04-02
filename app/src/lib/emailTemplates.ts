@@ -1,9 +1,13 @@
 import { KYCUser, User } from "@prisma/client"
 
-type KYCUserWithRelations = KYCUser & {
-  KYCUserTeams?: any[]
-  UserKYCUsers?: { user: User }[]
-}
+type KYCUserWithRelations = Partial<KYCUser> &
+  Pick<KYCUser, "id" | "email"> & {
+    KYCUserTeams?: any[]
+    UserKYCUsers?: Array<{
+      user?: Pick<User, "name"> | null
+      users?: Pick<User, "name"> | null
+    }>
+  }
 
 // Helper function to get display name with fallbacks
 function getDisplayName(kycUser: KYCUserWithRelations): string {
@@ -13,7 +17,8 @@ function getDisplayName(kycUser: KYCUserWithRelations): string {
 
   // Try to get name from linked User
   if (kycUser.UserKYCUsers && kycUser.UserKYCUsers.length > 0) {
-    const linkedUser = kycUser.UserKYCUsers[0].user
+    const linkedUser =
+      kycUser.UserKYCUsers[0].user ?? kycUser.UserKYCUsers[0].users
     if (linkedUser?.name) {
       return linkedUser.name
     }

@@ -1,18 +1,29 @@
-// This file is used to export constants that can be safely used in the client-side code
+// This file exports EAS constants safe for client-side usage.
 
-import { optimism, sepolia } from "viem/chains"
+import {
+  EAS_DEFAULT_CHAIN_IDS,
+  EAS_DEFAULT_CONTRACT_ADDRESSES,
+  EAS_DEFAULT_SCHEMA_IDS,
+  EAS_SCHEMA_STRINGS,
+  getEasEnvironmentProfile,
+} from "./schemaDefinitions"
+
+const easEnvironment = getEasEnvironmentProfile()
+const configuredVotesSchemaId =
+  process.env.NEXT_PUBLIC_EAS_SCHEMA_VOTES_ID?.trim()
+const configuredEasAddress =
+  process.env.NEXT_PUBLIC_EAS_CONTRACT_ADDRESS?.trim()
 
 export const OFFCHAIN_VOTE_SCHEMA_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xec3674d93b7007e918cf91ddd44bd14f28d138a4e7f3a79214dc35da2aed794e" // Sepolia L1
-    : "0xc113116804c90320b3d059ff8eed8b7171e3475f404f65828bbbe260dce15a99" // Optimism Mainnet
+  (configuredVotesSchemaId && configuredVotesSchemaId.length > 0
+    ? configuredVotesSchemaId
+    : undefined) ?? EAS_DEFAULT_SCHEMA_IDS[easEnvironment].votes
 
 export const EAS_CONTRACT_ADDRESS =
-  process.env.NEXT_PUBLIC_ENV === "dev"
-    ? "0xC2679fBD37d54388Ce493F1DB75320D236e1815e" // Sepolia L1
-    : "0x4200000000000000000000000000000000000021" // Optimism Mainnet
+  (configuredEasAddress && configuredEasAddress.length > 0
+    ? configuredEasAddress
+    : undefined) ?? EAS_DEFAULT_CONTRACT_ADDRESSES[easEnvironment]
 
-export const EAS_VOTE_SCHEMA = "uint256 proposalId,string params"
+export const EAS_VOTE_SCHEMA = EAS_SCHEMA_STRINGS.votes
 
-export const CHAIN_ID =
-  process.env.NEXT_PUBLIC_ENV === "dev" ? sepolia.id : optimism.id
+export const CHAIN_ID = EAS_DEFAULT_CHAIN_IDS[easEnvironment]

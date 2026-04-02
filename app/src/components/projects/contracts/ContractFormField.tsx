@@ -15,9 +15,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { onCopy } from "@/components/ui/utils/copy"
-import { addProjectContract } from "@/db/projects"
 import { useProjectFromPath } from "@/hooks/useProjectFromPath"
-import { removeContract } from "@/lib/actions/contracts"
+import { addContract, removeContract } from "@/lib/actions/contracts"
 
 import { DeployersSchema } from "./ContractFormSchema"
 
@@ -54,7 +53,7 @@ export function ContractFormField({
     if (excluded) {
       try {
         toast.info(`Adding contract...`)
-        await addProjectContract({
+        await addContract({
           projectId,
           contract: {
             contractAddress: address,

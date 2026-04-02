@@ -4,13 +4,16 @@ import { useEffect, useRef, useState } from "react"
 import { isAddress } from "viem"
 
 import { getAllBadgeholders, getBadgeholder } from "./api/eas/badgeholder"
-import {
-  OrganizationWithDetails,
-  ProjectTeam,
-  UserWithAddresses,
-} from "./types"
+import { OrganizationWithDetails, UserWithAddresses } from "./types"
 
-export function useIsAdmin(team: ProjectTeam) {
+type TeamMemberWithRole = {
+  role?: string | null
+  user?: {
+    id: string
+  } | null
+}[]
+
+export function useIsAdmin(team: TeamMemberWithRole) {
   const { data: session } = useSession()
   const viewerId =
     session?.impersonation?.isActive && session?.impersonation?.targetUserId
@@ -21,7 +24,7 @@ export function useIsAdmin(team: ProjectTeam) {
     team &&
     session &&
     team.find(
-      (member) => member.user.id === viewerId && member.role === "admin",
+      (member) => member.user?.id === viewerId && member.role === "admin",
     )
   )
 }

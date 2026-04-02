@@ -30,7 +30,9 @@ export const POST = async (
     : undefined
 
   if (!authResponse.authenticated) {
-    return new Response(authResponse.failReason, { status: 401 })
+    return new Response(authResponse.failReason, {
+      status: authResponse.status ?? 401,
+    })
   }
 
   try {
@@ -118,7 +120,9 @@ export const GET = async (
   const authResponse = await authenticateApiUser(req)
 
   if (!authResponse.authenticated) {
-    return new Response(authResponse.failReason, { status: 401 })
+    return new Response(authResponse.failReason, {
+      status: authResponse.status ?? 401,
+    })
   }
 
   try {

@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { reverse } from "ramda"
 import { memo, useMemo } from "react"
 
@@ -12,12 +11,9 @@ import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { useProjectContracts } from "@/hooks/db/useProjectContracts"
 import { useProjectDetails } from "@/hooks/db/useProjectDetails"
 import { CITIZEN_TYPES } from "@/lib/constants"
+import type { ProjectActionDTO } from "@/lib/dto"
 import { useIsAdmin } from "@/lib/hooks"
-import {
-  ApplicationWithDetails,
-  ProjectTeam,
-  ProjectWithDetails,
-} from "@/lib/types"
+import { ApplicationWithDetails } from "@/lib/types"
 import { cn, getProjectStatus, projectHasUnpublishedChanges } from "@/lib/utils"
 
 import { CitizenshipBadge } from "../common/CitizenshipBadge"
@@ -34,13 +30,13 @@ const UserProjectCard = ({
   applications,
 }: {
   className?: string
-  project: ProjectWithDetails
+  project: ProjectActionDTO
   applications: ApplicationWithDetails[]
 }) => {
   const team = [
     ...project.team,
     ...(project.organization?.organization?.team ?? []),
-  ] as ProjectTeam
+  ]
 
   const isAdmin = useIsAdmin(team)
 
@@ -54,6 +50,9 @@ const UserProjectCard = ({
     project.lastMetadataUpdate,
   )
   const hasBeenPublished = project ? project?.snapshots.length > 0 : false
+  const projectHref = hasBeenPublished
+    ? `/project/${project.id}`
+    : `/projects/${project.id}/details`
 
   const { data: contracts } = useProjectContracts(project.id)
   const { data: projectDetails } = useProjectDetails(project.id)
@@ -81,8 +80,6 @@ const UserProjectCard = ({
       }, [])
   }, [applications, project.id])
 
-  const router = useRouter()
-
   return (
     <div
       className={cn(
@@ -90,7 +87,7 @@ const UserProjectCard = ({
         className,
       )}
     >
-      <Link href={`/project/${project.id}`} className="flex gap-x-6 pt-8 px-8">
+      <Link href={projectHref} className="flex gap-x-6 pt-8 px-8">
         <div className="flex items-center justify-center border overflow-hidden rounded-lg bg-secondary h-32 w-32 shrink-0">
           {project.thumbnailUrl ? (
             <Image
@@ -182,11 +179,16 @@ const UserProjectCard = ({
             ) : null} */}
 
             <div className="h-full flex flex-row-reverse items-center w-fit ml-1.5">
-              {reverse(project.team).map(({ user }) => (
-                <Avatar key={user.id} className="w-6 h-6 -ml-1.5 bg-background">
-                  <AvatarImage src={user?.imageUrl ?? ""} />
-                </Avatar>
-              ))}
+              {reverse(project.team).map(({ user }) =>
+                user ? (
+                  <Avatar
+                    key={user.id}
+                    className="w-6 h-6 -ml-1.5 bg-background"
+                  >
+                    <AvatarImage src={user.imageUrl ?? ""} />
+                  </Avatar>
+                ) : null,
+              )}
             </div>
 
             {projectHasChanges && hasBeenPublished && (

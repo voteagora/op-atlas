@@ -47,7 +47,6 @@ const ProposalsPage = async ({
           total_returned: standardProposals.pagination?.total_returned ?? 0,
           next_offset: standardProposals.pagination?.next_offset ?? 0,
         }}
-        userId={userId}
         securityRoles={securityRoles}
       />
     </div>

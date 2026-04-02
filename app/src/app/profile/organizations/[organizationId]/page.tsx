@@ -6,6 +6,7 @@ import MakeOrganizationForm from "@/components/organizations/MakeOrganizationFor
 import MakeOrganizationFormHeader from "@/components/organizations/MakeOrganizationFormHeader"
 import { getOrganizationWithClient } from "@/db/organizations"
 import { getUserById } from "@/db/users"
+import { getUserOrganizationRole } from "@/lib/actions/utils"
 import { updateInteractions } from "@/lib/actions/users"
 import { getImpersonationContext } from "@/lib/db/sessionContext"
 
@@ -14,7 +15,9 @@ export async function generateMetadata({
 }: {
   params: { organizationId: string }
 }): Promise<Metadata> {
-  const organization = await getOrganizationWithClient({ id: params.organizationId })
+  const organization = await getOrganizationWithClient({
+    id: params.organizationId,
+  })
   const title = `Profile Organizations: ${organization?.name ?? ""} - OP Atlas`
   const description = organization?.description ?? ""
   return {
@@ -41,12 +44,21 @@ export default async function Page({
     redirect("/")
   }
 
-  const [user, organization] = await Promise.all([
+  const [user, userRole] = await Promise.all([
     getUserById(userId, db, session),
-    getOrganizationWithClient({ id: params.organizationId }, db),
+    getUserOrganizationRole(params.organizationId, userId, db),
   ])
 
-  if (!organization || !user) {
+  if (!user || userRole === null) {
+    redirect("/")
+  }
+
+  const organization = await getOrganizationWithClient(
+    { id: params.organizationId },
+    db,
+  )
+
+  if (!organization) {
     redirect("/dashboard")
   }
 

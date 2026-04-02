@@ -4,10 +4,10 @@ import OutboundArrowLink from "@/components/common/OutboundArrowLink"
 import CheckIconRed from "@/components/icons/checkIconRed"
 import { ArrowDownS } from "@/components/icons/remix"
 import useAttestations from "@/hooks/api/useAttestations"
-import { UserWithAddresses } from "@/lib/types"
+import type { UserProfilePublicDTO } from "@/lib/dto"
 import { cn } from "@/lib/utils"
 
-function ProfileRoles({ user }: { user: UserWithAddresses }) {
+function ProfileRoles({ user }: { user: UserProfilePublicDTO }) {
   const [showAll, setShowAll] = useState(false)
   const { raw: attestations } = useAttestations(
     user?.addresses?.map((a) => a.address),

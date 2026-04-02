@@ -13,15 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import type { ProjectActionDTO } from "@/lib/dto"
 import { unclaimedRewards } from "@/lib/rewards"
-import { ProjectWithDetails } from "@/lib/types"
 import { formatNumber } from "@/lib/utils"
 
 function UnclaimedRewardsDialog({
   open,
   onOpenChange,
   projects,
-}: DialogProps<{ projects: ProjectWithDetails[] }>) {
+}: DialogProps<{ projects: ProjectActionDTO[] }>) {
   const projectsWithUnclaimedRewards = useMemo(() => {
     return projects.filter((project) => unclaimedRewards(project).length > 0)
   }, [projects])
@@ -65,8 +65,8 @@ function UnclaimedRewardsDialog({
 
 export default memo(UnclaimedRewardsDialog)
 
-export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
-  const rewardRound = project.rewards[0].roundId
+export function ProjectRewardRow({ project }: { project: ProjectActionDTO }) {
+  const rewardRound = project.rewards[0].roundId ?? "0"
 
   return (
     <div className="border border-border bg-background rounded-xl p-8 flex items-center gap-4 max-w-full">
@@ -90,7 +90,6 @@ export function ProjectRewardRow({ project }: { project: ProjectWithDetails }) {
           alt="Optimism"
         />
         <div className="font-normal">
-          {/* @ts-expect-error Next converts Decimal to number bc Server Components suck */}
           {formatNumber(project.rewards[0].amount)}
         </div>
       </div>

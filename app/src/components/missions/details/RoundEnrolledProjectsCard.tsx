@@ -2,7 +2,6 @@
 
 import { useMissionFromPath } from "@/hooks/db/useMissionFromPath"
 import { useRoundApplications } from "@/hooks/db/useRoundApplications"
-import { FundingRoundData } from "@/lib/MissionsAndRoundData"
 
 import { IconList } from "./EnrolledProjectsCard"
 
@@ -14,8 +13,8 @@ export const RoundEnrolledProjectsCard = () => {
   )
 
   const icons: (string | null)[] =
-    roundApplicationsForMission?.map((application) => {
-      return application.project.thumbnailUrl
+    roundApplicationsForMission?.map((project) => {
+      return project.thumbnailUrl
     }) || []
 
   return (

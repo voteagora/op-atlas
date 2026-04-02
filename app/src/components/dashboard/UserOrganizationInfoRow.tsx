@@ -5,7 +5,8 @@ import React from "react"
 import { useCitizen } from "@/hooks/citizen/useCitizen"
 import { updateInteractions } from "@/lib/actions/users"
 import { CITIZEN_TYPES } from "@/lib/constants"
-import { UserOrganizationsWithDetails, UserWithAddresses } from "@/lib/types"
+import type { UserOrganizationActionDTO } from "@/lib/dto"
+import { UserWithAddresses } from "@/lib/types"
 import { isOrganizationSetupComplete } from "@/lib/utils"
 
 import { CitizenshipBadge } from "../common/CitizenshipBadge"
@@ -17,7 +18,7 @@ const UserOrganizationInfoRow = ({
   organization,
   user,
 }: {
-  organization: UserOrganizationsWithDetails
+  organization: UserOrganizationActionDTO
   user: UserWithAddresses
 }) => {
   const { data: citizen } = useCitizen({
@@ -66,12 +67,19 @@ const UserOrganizationInfoRow = ({
           alt="arrow"
         />
       </Link>
-      <Link href={`/projects/new?orgId=${organization.organizationId}`}>
-        <Button className="flex items-center gap-2" variant="secondary">
-          <Image src="/assets/icons/plus.svg" width={9} height={9} alt="Plus" />
-          Add project
-        </Button>
-      </Link>
+      {organization.role === "admin" && (
+        <Link href={`/projects/new?orgId=${organization.organizationId}`}>
+          <Button className="flex items-center gap-2" variant="secondary">
+            <Image
+              src="/assets/icons/plus.svg"
+              width={9}
+              height={9}
+              alt="Plus"
+            />
+            Add project
+          </Button>
+        </Link>
+      )}
     </div>
   )
 }

@@ -14,12 +14,12 @@ import {
   GrantEligibilityFormStatus,
 } from "@/lib/utils/grantEligibilityFormStatus"
 
-import {
-  sendKYBStartedEmail,
-  sendKYCStartedEmail,
-} from "./emails"
+import { sendKYBStartedEmail, sendKYCStartedEmail } from "@/lib/email/send"
 import { verifyAdminStatus, verifyOrganizationAdmin } from "./utils"
-import { getExistingLegalEntities, getAvailableLegalEntitiesForOrganization } from "./kyc"
+import {
+  getExistingLegalEntities,
+  getAvailableLegalEntitiesForOrganization,
+} from "./kyc"
 
 export interface CreateGrantEligibilityFormParams {
   projectId?: string
@@ -417,15 +417,14 @@ export async function submitGrantEligibilityForm(params: {
                       .findMany({
                         where: { email: { in: signerEmails } },
                       })
-                      .then((emails) => new Map(emails.map((e) => [e.email, e])))
+                      .then(
+                        (emails) => new Map(emails.map((e) => [e.email, e])),
+                      )
                   : new Map()
 
               for (const signer of signers) {
                 if (!signer.email || !signer.firstName || !signer.lastName) {
-                  console.warn(
-                    "Skipping signer with incomplete data:",
-                    signer,
-                  )
+                  console.warn("Skipping signer with incomplete data:", signer)
                   continue
                 }
 
@@ -433,7 +432,10 @@ export async function submitGrantEligibilityForm(params: {
                 let kycUser = kycUsersByEmail.get(email)
                 let isNewUser = false
 
-                if (!kycUser || (kycUser.expiry && kycUser.expiry < new Date())) {
+                if (
+                  !kycUser ||
+                  (kycUser.expiry && kycUser.expiry < new Date())
+                ) {
                   kycUser = await tx.kYCUser.create({
                     data: {
                       email,
@@ -499,10 +501,7 @@ export async function submitGrantEligibilityForm(params: {
                   !entity.controllerLastName ||
                   !entity.company
                 ) {
-                  console.warn(
-                    "Skipping entity with incomplete data:",
-                    entity,
-                  )
+                  console.warn("Skipping entity with incomplete data:", entity)
                   continue
                 }
 
@@ -951,25 +950,19 @@ export async function getExistingLegalEntitiesForForm(formId: string) {
             form.organizationId,
             db,
           )
-          console.debug(
-            "getExistingLegalEntitiesForForm:itemsFetchedByOrg",
-            {
-              organizationId: form.organizationId,
-              count: Array.isArray(items) ? items.length : null,
-            },
-          )
+          console.debug("getExistingLegalEntitiesForForm:itemsFetchedByOrg", {
+            organizationId: form.organizationId,
+            count: Array.isArray(items) ? items.length : null,
+          })
           return { items }
         }
 
         if (form.kycTeamId) {
           const items = await getExistingLegalEntities(form.kycTeamId, db)
-          console.debug(
-            "getExistingLegalEntitiesForForm:itemsFetchedByTeam",
-            {
-              kycTeamId: form.kycTeamId,
-              count: Array.isArray(items) ? items.length : null,
-            },
-          )
+          console.debug("getExistingLegalEntitiesForForm:itemsFetchedByTeam", {
+            kycTeamId: form.kycTeamId,
+            count: Array.isArray(items) ? items.length : null,
+          })
           return { items }
         }
 
@@ -985,8 +978,6 @@ export async function getExistingLegalEntitiesForForm(formId: string) {
     { requireUser: true },
   )
 }
-
-
 
 export async function getSelectedExistingLegalEntitiesForForm(formId: string) {
   return withImpersonation(
@@ -1076,10 +1067,9 @@ export async function getSelectedExistingLegalEntitiesForForm(formId: string) {
           expiresAt: e.expiry ?? null,
         }))
 
-        console.debug(
-          "getSelectedExistingLegalEntitiesForForm:itemsPrepared",
-          { count: items.length },
-        )
+        console.debug("getSelectedExistingLegalEntitiesForForm:itemsPrepared", {
+          count: items.length,
+        })
 
         return { items }
       } catch (error) {

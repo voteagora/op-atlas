@@ -22,6 +22,12 @@ import {
 } from "@/db/organizations"
 import { getUserById } from "@/db/users"
 import { withImpersonation } from "@/lib/db/sessionContext"
+import {
+  getKycAudienceForOrganization,
+  getOrganizationAudience,
+  toOrganizationDTO,
+  toOrganizationKycTeamsDTO,
+} from "@/lib/dto"
 import { extractFailedEasTxContext } from "@/lib/eas/txContext"
 import { getMiradorChainNameFromChainId } from "@/lib/mirador/chains"
 
@@ -36,10 +42,33 @@ import { createOrganizationSnapshot } from "./snapshots"
 import { verifyOrganizationAdmin, verifyOrganizationMembership } from "./utils"
 
 export const getUserOrganizations = async (userId: string) =>
-  withImpersonation(async ({ db }) => {
-    const user = await getUserOrganizationsWithDetailsWithClient(userId, db)
-    return user?.organizations
-  })
+  withImpersonation(
+    async ({ db, userId: sessionUserId }) => {
+      if (!sessionUserId || sessionUserId !== userId) {
+        return []
+      }
+
+      const user = await getUserOrganizationsWithDetailsWithClient(userId, db)
+
+      return Promise.all(
+        (user?.organizations ?? []).map(async (organization) => {
+          const audience = await getOrganizationAudience(
+            db,
+            organization.organization.id,
+            sessionUserId,
+          )
+          return {
+            ...organization,
+            organization: toOrganizationDTO(
+              organization.organization,
+              audience,
+            ),
+          }
+        }),
+      )
+    },
+    { requireUser: true },
+  )
 
 export const createNewOrganization = async ({
   organization,
@@ -175,6 +204,11 @@ export const updateOrganizationDetails = async ({
         return {
           error: "Unauthorized",
         }
+      }
+
+      const isInvalid = await verifyOrganizationAdmin(id, userId, db)
+      if (isInvalid?.error) {
+        return isInvalid
       }
 
       const organizationData = await updateOrganization(
@@ -471,7 +505,17 @@ export const getOrganizationKycTeamsAction = async ({
         throw new Error(isInvalid.error)
       }
 
-      return getOrganizationKYCTeams({ organizationId }, db)
+      const audience = await getKycAudienceForOrganization(
+        db,
+        organizationId,
+        userId,
+      )
+      if (!audience) {
+        throw new Error("Unauthorized")
+      }
+
+      const teams = await getOrganizationKYCTeams({ organizationId }, db)
+      return toOrganizationKycTeamsDTO(teams, audience)
     },
     { requireUser: true },
   )

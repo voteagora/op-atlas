@@ -6,47 +6,33 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { isAdminUser, isImpersonationEnabled } from "@/lib/auth/adminConfig"
 import { prisma } from "@/db/client"
+import { requireAdminSession } from "@/lib/auth/adminSession"
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
 /**
  * GET - List blacklisted projects with pagination
  */
 export async function GET(request: NextRequest) {
   try {
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin features not enabled' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      noSessionMessage: "Unauthorized: No active session",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized: No active session" },
-        { status: 401 },
-      )
-    }
-
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { adminUserId } = adminSession
 
     // Parse pagination params
     const { searchParams } = new URL(request.url)
-    const pageParam = searchParams.get('page')
-    const pageSizeParam = searchParams.get('pageSize')
+    const pageParam = searchParams.get("page")
+    const pageSizeParam = searchParams.get("pageSize")
     const page = pageParam ? Math.max(0, parseInt(pageParam, 10)) : 0
-    const pageSize = pageSizeParam ? Math.min(100, Math.max(1, parseInt(pageSizeParam, 10))) : 20
+    const pageSize = pageSizeParam
+      ? Math.min(100, Math.max(1, parseInt(pageSizeParam, 10)))
+      : 20
 
     // Get total count
     const totalCount = await prisma.projectBlacklist.count()
@@ -66,13 +52,13 @@ export async function GET(request: NextRequest) {
                 organization: {
                   select: {
                     name: true,
-                  }
-                }
-              }
+                  },
+                },
+              },
             },
             team: {
               where: {
-                role: 'admin',
+                role: "admin",
                 deletedAt: null,
               },
               select: {
@@ -82,16 +68,16 @@ export async function GET(request: NextRequest) {
                     name: true,
                     username: true,
                     imageUrl: true,
-                  }
-                }
+                  },
+                },
               },
               take: 1,
-            }
-          }
-        }
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: "desc",
       },
       skip: page * pageSize,
       take: pageSize,
@@ -99,7 +85,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      blacklist: blacklistedProjects.map(item => {
+      blacklist: blacklistedProjects.map((item) => {
         const admin = item.project.team[0]?.user || null
         return {
           id: item.id,
@@ -113,14 +99,17 @@ export async function GET(request: NextRequest) {
             description: item.project.description,
             thumbnailUrl: item.project.thumbnailUrl,
             createdAt: item.project.createdAt,
-            organizationName: item.project.organization?.organization?.name || null,
-            admin: admin ? {
-              id: admin.id,
-              name: admin.name,
-              username: admin.username,
-              imageUrl: admin.imageUrl,
-            } : null,
-          }
+            organizationName:
+              item.project.organization?.organization?.name || null,
+            admin: admin
+              ? {
+                  id: admin.id,
+                  name: admin.name,
+                  username: admin.username,
+                  imageUrl: admin.imageUrl,
+                }
+              : null,
+          },
         }
       }),
       count: blacklistedProjects.length,
@@ -131,13 +120,14 @@ export async function GET(request: NextRequest) {
       viewerId: adminUserId,
     })
   } catch (error) {
-    console.error('Blacklist GET Error:', error)
+    console.error("Blacklist GET Error:", error)
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : 'Failed to fetch blacklist',
-        details: 'Check server logs for details.'
+        error:
+          error instanceof Error ? error.message : "Failed to fetch blacklist",
+        details: "Check server logs for details.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -147,62 +137,44 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin features not enabled' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      noSessionMessage: "Unauthorized: No active session",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized: No active session" },
-        { status: 401 },
-      )
-    }
-
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { adminUserId } = adminSession
 
     const body = await request.json()
     const { projectId, reason } = body
 
     if (!projectId) {
       return NextResponse.json(
-        { error: 'projectId is required' },
-        { status: 400 }
+        { error: "projectId is required" },
+        { status: 400 },
       )
     }
 
     // Check if project exists
     const project = await prisma.project.findUnique({
       where: { id: projectId },
-      select: { id: true, name: true }
+      select: { id: true, name: true },
     })
 
     if (!project) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
     // Check if already blacklisted
     const existing = await prisma.projectBlacklist.findUnique({
-      where: { projectId }
+      where: { projectId },
     })
 
     if (existing) {
       return NextResponse.json(
-        { error: 'Project is already blacklisted' },
-        { status: 409 }
+        { error: "Project is already blacklisted" },
+        { status: 409 },
       )
     }
 
@@ -211,7 +183,7 @@ export async function POST(request: NextRequest) {
       data: {
         projectId,
         reason: reason || null,
-      }
+      },
     })
 
     return NextResponse.json({
@@ -226,13 +198,14 @@ export async function POST(request: NextRequest) {
       viewerId: adminUserId,
     })
   } catch (error) {
-    console.error('Blacklist POST Error:', error)
+    console.error("Blacklist POST Error:", error)
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : 'Failed to add to blacklist',
-        details: 'Check server logs for details.'
+        error:
+          error instanceof Error ? error.message : "Failed to add to blacklist",
+        details: "Check server logs for details.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
@@ -242,37 +215,22 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    if (!isImpersonationEnabled()) {
-      return NextResponse.json(
-        { error: 'Admin features not enabled' },
-        { status: 503 }
-      )
+    const adminSession = await requireAdminSession({
+      noSessionMessage: "Unauthorized: No active session",
+    })
+    if (!adminSession.ok) {
+      return adminSession.response
     }
 
-    const session = await auth()
-    const adminUserId = session?.user?.id
-    if (!adminUserId) {
-      return NextResponse.json(
-        { error: "Unauthorized: No active session" },
-        { status: 401 },
-      )
-    }
-
-    const isAdmin = await isAdminUser(adminUserId)
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: "Forbidden: Admin access required" },
-        { status: 403 },
-      )
-    }
+    const { adminUserId } = adminSession
 
     const body = await request.json()
     const { projectId } = body
 
     if (!projectId) {
       return NextResponse.json(
-        { error: 'projectId is required' },
-        { status: 400 }
+        { error: "projectId is required" },
+        { status: 400 },
       )
     }
 
@@ -281,21 +239,21 @@ export async function DELETE(request: NextRequest) {
       where: { projectId },
       include: {
         project: {
-          select: { name: true }
-        }
-      }
+          select: { name: true },
+        },
+      },
     })
 
     if (!existing) {
       return NextResponse.json(
-        { error: 'Project is not blacklisted' },
-        { status: 404 }
+        { error: "Project is not blacklisted" },
+        { status: 404 },
       )
     }
 
     // Remove from blacklist
     await prisma.projectBlacklist.delete({
-      where: { projectId }
+      where: { projectId },
     })
 
     return NextResponse.json({
@@ -305,13 +263,16 @@ export async function DELETE(request: NextRequest) {
       viewerId: adminUserId,
     })
   } catch (error) {
-    console.error('Blacklist DELETE Error:', error)
+    console.error("Blacklist DELETE Error:", error)
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : 'Failed to remove from blacklist',
-        details: 'Check server logs for details.'
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to remove from blacklist",
+        details: "Check server logs for details.",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
