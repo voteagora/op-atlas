@@ -29,14 +29,13 @@ export const useUsername = (user?: {
   const username = useMemo<string | null>(() => {
     if (!user) return null
     if (user.name) return user.name
+    if (user.username) {
+      return user.username
+    }
     if (validAddress) {
       return (
         ensName ?? `0x${validAddress.slice(2, 5)}...${validAddress.slice(-3)}`
       )
-    }
-
-    if (user.username) {
-      return user.username
     }
 
     return null

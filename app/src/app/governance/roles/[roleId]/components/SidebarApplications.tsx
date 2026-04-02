@@ -137,8 +137,8 @@ export default function SidebarApplications({
               {displayedApplications.length > 1 ? "s" : ""}
             </div>
             {displayedApplications?.map((application) =>
-              application.userId ? (
-                <UserCandidate
+              application.organizationId ? (
+                <OrgCandidate
                   key={application.id}
                   application={application}
                   showApprove={!loadingTop && isTop100 && withinWindow}
@@ -152,7 +152,7 @@ export default function SidebarApplications({
                   })()}
                 />
               ) : (
-                <OrgCandidate
+                <UserCandidate
                   key={application.id}
                   application={application}
                   showApprove={!loadingTop && isTop100 && withinWindow}

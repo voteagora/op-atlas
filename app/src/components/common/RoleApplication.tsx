@@ -1,9 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
+import { useQuery } from "@tanstack/react-query"
 
 import { Button } from "@/components/common/Button"
 import { ArrowDownS, ArrowUpS, Information } from "@/components/icons/remix"
@@ -12,6 +13,7 @@ import { Optimism } from "@/components/icons/socials"
 import { Avatar, AvatarBadge } from "@/components/ui/avatar"
 import { useProject } from "@/hooks/db/useProject"
 import { useAllRoleApplications } from "@/hooks/role/useAllUserAppications"
+import { getUserOrganizations } from "@/lib/actions/organizations"
 import { useRole } from "@/hooks/role/useRole"
 import type {
   PublicOrganizationProfileDTO,
@@ -49,8 +51,22 @@ export default function RoleApplication({
   const viewerUserId = session?.impersonation?.targetUserId ?? session?.user?.id
   const requestedUserId =
     user?.id && viewerUserId === user.id ? user.id : undefined
+  const { data: viewerOrganizations = [] } = useQuery({
+    queryKey: ["viewerOrganizations", viewerUserId],
+    queryFn: () => getUserOrganizations(viewerUserId!),
+    enabled: Boolean(viewerUserId && organization?.id),
+    staleTime: 1000 * 60 * 5,
+  })
+  const canViewOrganizationApplications = Boolean(
+    organization?.id &&
+      viewerOrganizations.some(
+        (viewerOrganization) =>
+          viewerOrganization.organizationId === organization.id,
+      ),
+  )
   const queryEnabled = Boolean(
-    viewerUserId && (requestedUserId || organization?.id),
+    viewerUserId &&
+      (requestedUserId || (organization?.id && canViewOrganizationApplications)),
   )
 
   const { data: activeApplications, isLoading } = useAllRoleApplications({

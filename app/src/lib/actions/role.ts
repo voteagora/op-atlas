@@ -74,9 +74,7 @@ export async function applyForRole(
           sessionUserId,
           applicationParams.userId,
         )
-        const resolvedUserId = applicationParams.organizationId
-          ? undefined
-          : resolution.userId
+        const resolvedUserId = resolution.userId
 
         if (
           (!applicationParams.organizationId &&

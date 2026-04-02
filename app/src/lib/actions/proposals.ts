@@ -4,14 +4,11 @@ import { getEnrichedProposalData } from "@/lib/proposals"
 import { withImpersonation } from "@/lib/db/sessionContext"
 
 // Server action to fetch more proposals
-export async function fetchMoreProposals(
-  userId: string | undefined,
-  offset: number,
-) {
-  return withImpersonation(async ({ db }) => {
+export async function fetchMoreProposals(offset: number) {
+  return withImpersonation(async ({ db, userId }) => {
     const result = await getEnrichedProposalData(
       {
-        userId: userId,
+        userId: userId ?? undefined,
         offset: offset,
       },
       { db },

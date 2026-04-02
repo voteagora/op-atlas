@@ -42,7 +42,7 @@ export default async function Page({ params }: PageProps) {
     notFound()
   }
 
-  const isUser = !!application?.userId
+  const isUser = !application?.organizationId
   let user = null
   let org = null
 

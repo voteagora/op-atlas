@@ -130,6 +130,30 @@ describe("role action auth boundaries", () => {
     expect(mockGetActiveUserRoleApplications).not.toHaveBeenCalled()
   })
 
+  it("stores the submitting user alongside organization applications", async () => {
+    mockGetRoleById.mockResolvedValue({
+      id: 1,
+      startAt: new Date(Date.now() - 1_000),
+      endAt: new Date(Date.now() + 1_000),
+    } as any)
+    mockUpsertRoleApplication.mockResolvedValue({ id: 99 } as any)
+
+    await applyForRole(1, {
+      organizationId: "org-1",
+      application: "{}",
+    })
+
+    expect(mockUpsertRoleApplication).toHaveBeenCalledWith(
+      1,
+      {
+        organizationId: "org-1",
+        userId: "session-user",
+        application: "{}",
+      },
+      mockDb,
+    )
+  })
+
   it("reads organization-scoped applications without forcing a user filter", async () => {
     const applications = [{ id: 42 }] as any
     mockGetUserRoleApplications.mockResolvedValue(applications)
