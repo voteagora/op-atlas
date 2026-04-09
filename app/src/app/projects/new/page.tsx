@@ -45,7 +45,6 @@ export default async function Page() {
         <ProjectStatusSidebar
           project={null}
           team={[]}
-          contracts={null}
           switcherProjects={switcherProjects}
           switcherOrganizations={switcherOrganizations}
         />
