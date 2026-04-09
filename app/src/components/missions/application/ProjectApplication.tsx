@@ -34,7 +34,6 @@ const sectionsTitles = {
   Details: "Project details",
   Contributors: "Contributors",
   Repos: "Repos & Links",
-  Contracts: "Contracts",
   Publish: "Publish metadata onchain",
 }
 
@@ -42,7 +41,6 @@ const sectionsCriteria: ProjectSection[] = [
   ProjectSection.Details,
   ProjectSection.Contributors,
   ProjectSection.Repos,
-  ProjectSection.Contracts,
   ProjectSection.Publish,
 ]
 
