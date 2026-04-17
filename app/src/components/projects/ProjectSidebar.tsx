@@ -1,6 +1,5 @@
 import {
   getConsolidatedProjectTeamWithClient,
-  getProjectContractsWithClient,
   getProjectWithClient,
 } from "@/db/projects"
 import { getProjectRecurringRewards } from "@/db/rewards"
@@ -99,11 +98,10 @@ export async function ProjectSidebar({ projectId }: { projectId: string }) {
         })
       : Promise.resolve({ projects: [], organizations: [] })
 
-    const [project, team, contracts, recurringRewards, switcherData] =
+    const [project, team, recurringRewards, switcherData] =
       await Promise.all([
         getProjectWithClient({ id: projectId }, db),
         getConsolidatedProjectTeamWithClient({ projectId }, db),
-        getProjectContractsWithClient({ projectId }, db),
         getProjectRecurringRewards(projectId, db),
         switcherDataPromise,
       ])
@@ -112,7 +110,6 @@ export async function ProjectSidebar({ projectId }: { projectId: string }) {
       <ProjectStatusSidebar
         project={project}
         team={team}
-        contracts={contracts}
         recurringRewards={formatRecurringRewards(recurringRewards)}
         switcherProjects={switcherData.projects}
         switcherOrganizations={switcherData.organizations}

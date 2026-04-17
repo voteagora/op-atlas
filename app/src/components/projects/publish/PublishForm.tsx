@@ -77,11 +77,10 @@ export const PublishForm = ({
           ProjectSection.Details,
           ProjectSection.Contributors,
           ProjectSection.Repos,
-          ProjectSection.Contracts,
           ProjectSection.Grants,
         ],
         completedSections,
-      ).length === 5
+      ).length === 4
     )
   }, [project, contracts])
 
