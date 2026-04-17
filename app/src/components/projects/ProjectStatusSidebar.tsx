@@ -25,7 +25,6 @@ import { deleteUserProject } from "@/lib/actions/projects"
 import { REWARD_CLAIM_STATUS } from "@/lib/constants"
 import { useIsAdmin } from "@/lib/hooks"
 import {
-  ProjectContracts,
   ProjectTeam,
   ProjectWithFullDetails,
 } from "@/lib/types"
@@ -55,14 +54,12 @@ const getDisplayName = (option: string) => {
 export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
   project,
   team,
-  contracts,
   recurringRewards,
   switcherProjects = [],
   switcherOrganizations = [],
 }: {
   project: ProjectWithFullDetails | null
   team: ProjectTeam
-  contracts: ProjectContracts | null
   recurringRewards?: RecurringRewardsByRound[]
   switcherProjects?: { id: string; name: string }[]
   switcherOrganizations?: { id: string; name: string }[]
@@ -76,9 +73,9 @@ export const ProjectStatusSidebar = memo(function ProjectStatusSidebar({
 
   const { progressPercent, completedSections } = useMemo(() => {
     return project
-      ? getProjectStatus(project, contracts)
+      ? getProjectStatus(project)
       : { progressPercent: 0, completedSections: [] }
-  }, [project, contracts])
+  }, [project])
 
   const [dashboardLoading, setDashboardLoading] = useState(false)
 

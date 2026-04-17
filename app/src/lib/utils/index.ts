@@ -108,7 +108,6 @@ export enum ProjectSection {
   Details = "Details",
   Contributors = "Contributors",
   Repos = "Repos",
-  Contracts = "Contracts",
   Grants = "Grants",
   Publish = "Publish",
 }
@@ -138,7 +137,7 @@ type ProjectStatusProject = {
 
 export function getProjectStatus(
   project: ProjectStatusProject | null,
-  contracts: ProjectContracts | null,
+  contracts?: ProjectContracts | null,
 ): ProjectStatus {
   const completedSections: ProjectSection[] = []
 
@@ -161,14 +160,6 @@ export function getProjectStatus(
     completedSections.push(ProjectSection.Repos)
   }
 
-  const hasContracts =
-    (contracts && contracts?.contracts.length > 0) ||
-    !!project.openSourceObserverSlug ||
-    project.isOnChainContract === false
-  if (hasContracts) {
-    completedSections.push(ProjectSection.Contracts)
-  }
-
   const hasFunding =
     (project.funding.length > 0 || project.addedFunding) && project.pricingModel
   if (hasFunding) {
@@ -183,12 +174,11 @@ export function getProjectStatus(
     completedSections.push(ProjectSection.Publish)
   }
 
-  let progress = hasDetails ? 16.67 : 0
-  progress += hasTeam ? 16.67 : 0
-  progress += hasRepos ? 16.67 : 0
-  progress += hasContracts ? 16.67 : 0
-  progress += hasFunding ? 16.67 : 0
-  progress += !hasUnpublishedChanges ? 16.67 : 0
+  let progress = hasDetails ? 20 : 0
+  progress += hasTeam ? 20 : 0
+  progress += hasRepos ? 20 : 0
+  progress += hasFunding ? 20 : 0
+  progress += !hasUnpublishedChanges ? 20 : 0
 
   return { completedSections, progressPercent: Math.round(progress) }
 }
