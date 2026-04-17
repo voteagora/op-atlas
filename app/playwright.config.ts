@@ -27,7 +27,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm graphql:generate && npx prisma generate && next dev",
+    command: "npx prisma generate && next dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 240000 : 120000, // 4 minutes for CI, 2 for local
