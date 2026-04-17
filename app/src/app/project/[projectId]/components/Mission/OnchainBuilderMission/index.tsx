@@ -292,7 +292,7 @@ export default function OnchainBuilderMission({
                     For TVL rewards,{" "}
                     <TrackedLink
                       className="underline"
-                      href={`/projects/${projectId ?? ""}/contracts`}
+                      href={`/projects/${projectId ?? ""}/details`}
                       eventName="Link Click"
                       eventData={{
                         projectId: projectId ?? "",
