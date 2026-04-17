@@ -688,22 +688,50 @@ model RecurringReward {
 }
 
 model SuperfluidStream {
-  id               String        @id
-  sender           String
-  receiver         String
-  flowRate         String
-  deposit          String
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @default(now())
-  deletedAt        DateTime?
-  internalStreamId String?
-  rewardStream     RewardStream? @relation(fields: [internalStreamId], references: [id])
-  kycTeam          KYCTeam       @relation(fields: [receiver], references: [walletAddress])
+  id                String        @id
+  sender            String
+  receiver          String
+  flowRate          String
+  deposit           String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @default(now())
+  deletedAt         DateTime?
+  internalStreamId  String?
+  startDate         BigInt?
+  endDate           BigInt?
+  endExecutedAt     BigInt?
+  settledAmount     String?
+  remainderAmount   String?
+  failedAt          BigInt?
+  cliffAmount       String?
+  superToken        String?
+  contractVersion   String?
+  subgraphDeletedAt BigInt?
+  rewardStream      RewardStream? @relation(fields: [internalStreamId], references: [id])
+  kycTeam           KYCTeam       @relation(fields: [receiver], references: [walletAddress])
 
   @@unique([sender, receiver])
   @@index([sender])
   @@index([receiver])
   @@index([internalStreamId])
+  @@index([superToken])
+}
+
+model SuperfluidTransfer {
+  id              String   @id
+  kind            String
+  receiver        String
+  superToken      String
+  sender          String?
+  amount          String
+  timestamp       BigInt
+  transactionHash String?
+  blockNumber     BigInt?
+  createdAt       DateTime @default(now())
+
+  @@index([receiver, superToken, timestamp])
+  @@index([timestamp])
+  @@index([kind])
 }
 
 model RewardStream {
