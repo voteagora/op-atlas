@@ -708,7 +708,7 @@ model SuperfluidStream {
   contractVersion   String?
   subgraphDeletedAt BigInt?
   rewardStream      RewardStream? @relation(fields: [internalStreamId], references: [id])
-  kycTeam           KYCTeam       @relation(fields: [receiver], references: [walletAddress])
+  kycTeam           KYCTeam?      @relation(fields: [receiver], references: [walletAddress])
 
   @@unique([sender, receiver])
   @@index([sender])
