@@ -47,6 +47,7 @@ export default function SidebarApplications({
   const withinWindow =
     isEndorsementPhase ||
     (SC_ALLOW_APPROVAL_DURING_NOMINATION && isNominationPhase)
+
   // Always fetch counts to show the badge and hovercard
   const { data: counts } = useEndorsementCounts(role.id, `role-${role.id}`, {
     enabled: true,
