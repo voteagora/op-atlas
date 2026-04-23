@@ -84,6 +84,7 @@ export const SecurityCouncilForm = ({
       (_, index) => securityCouncilTermsChecked[index],
     ) &&
     externalRequirementsSatisfied &&
+    personalStatement.trim().length > 0 &&
     (noConflictsChecked || conflictsOfInterest.trim().length > 0)
 
   const handleSecurityCouncilTermsChange = (index: number) => {
@@ -183,8 +184,9 @@ export const SecurityCouncilForm = ({
           <div className="relative">
             <Textarea
               className="w-full min-h-[120px] pb-8 border-tertiary text-foreground text-sm resize-none focus-visible:ring-0"
-              placeholder="Add a personal statement (optional)"
+              placeholder="Add a personal statement (required)"
               maxLength={280}
+              required
               value={personalStatement}
               onChange={(e) => setPersonalStatement(e.target.value)}
             />
