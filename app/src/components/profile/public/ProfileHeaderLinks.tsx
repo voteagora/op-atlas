@@ -1,13 +1,17 @@
+import { CheckboxCircleFIll } from "@/components/icons/remix"
 import {
   Agora,
   Discord,
   Farcaster,
   Github,
   Optimism,
+  World,
+  XOptimism,
 } from "@/components/icons/socials"
 import useDelegateData from "@/hooks/api/useDelegateData"
 import { useFarcasterUserData } from "@/hooks/api/useFarcasterUserData"
 import { useGithubUserData } from "@/hooks/api/useGithubUserData"
+import { useUserWorldIdVerified } from "@/hooks/db/useUserWorldId"
 import type { UserProfilePublicDTO } from "@/lib/dto"
 import { formatNumber } from "@/lib/utils"
 import { truncateAddress } from "@/lib/utils/string"
@@ -25,6 +29,10 @@ export default function ProfileHeaderLinks({
     !!user?.farcasterId,
   )
   const { user: githubUserData } = useGithubUserData(user.github || "")
+  const { data: worldId } = useUserWorldIdVerified({
+    id: user.id,
+    enabled: !!user.id,
+  })
 
   return (
     <div className="flex flex-col">
@@ -93,6 +101,21 @@ export default function ProfileHeaderLinks({
         />
       )}
 
+      {/* X */}
+      {user.twitter && (
+        <ProfileSidebarLink
+          href={`https://x.com/${user.twitter}`}
+          icon={<XOptimism className="w-[16px] h-[16px]" />}
+          text={
+            <div className="flex gap-2">
+              <span className="text-sm text-black group-hover:underline">
+                @{user.twitter}
+              </span>
+            </div>
+          }
+        />
+      )}
+
       {/* Agora */}
       {delegate && Number(delegate.votingPower.total) > 0 && (
         <ProfileSidebarLink
@@ -125,6 +148,16 @@ export default function ProfileHeaderLinks({
             </span>
           }
         />
+      )}
+      {/* WorldID */}
+      {worldId?.verified && (
+        <div className="flex flex-row gap-2 items-center pl-[12px] h-8">
+          <World className="w-[16px] h-[16px]" />
+          <div className="flex items-center gap-1 text-sm text-secondary-foreground">
+            <span className="text-black">WorldID</span>
+            <CheckboxCircleFIll className="w-4 h-4" fill="#1DBA6A" />
+          </div>
+        </div>
       )}
     </div>
   )

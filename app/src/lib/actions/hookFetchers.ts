@@ -294,6 +294,18 @@ export async function fetchUserWorldId(userId: string) {
   )
 }
 
+export async function fetchUserWorldIdVerified(
+  userId: string,
+): Promise<{ verified: boolean }> {
+  return withImpersonation(async ({ db }) => {
+    if (!userId) {
+      return { verified: false }
+    }
+    const record = await getUserWorldId(userId, db)
+    return { verified: Boolean(record?.verified) }
+  })
+}
+
 export async function fetchUserAdminProjects(userId: string, roundId?: string) {
   return withImpersonation(
     async ({ db, userId: sessionUserId }) => {
