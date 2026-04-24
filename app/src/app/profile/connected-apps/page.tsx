@@ -135,7 +135,9 @@ export default async function Page() {
           <div className="flex-1 flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
               <World className="w-5 h-5" />
-              <h3 className="font-medium text-foreground text-base">WorldID</h3>
+              <h3 className="font-medium text-foreground text-base">
+                World ID
+              </h3>
             </div>
             <div className="text-secondary-foreground text-base">
               Add your proof of personhood.
