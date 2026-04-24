@@ -47,7 +47,7 @@ export function VerificationActions({
         />
         <VerificationOptionRow
           icon={<World className="h-4 w-4 text-foreground" />}
-          label="Connect your WorldID"
+          label="Connect your World ID"
           verified={verificationStatus.world}
           action={
             canUseWorldId ? (
