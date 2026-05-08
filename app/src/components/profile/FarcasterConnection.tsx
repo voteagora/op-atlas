@@ -15,16 +15,22 @@ type Props = {
   userId: string
   children: React.ReactNode
   readOnly?: boolean
+  allowRefresh?: boolean
 }
 
 export const FarcasterConnection = ({
   userId,
   children,
+  allowRefresh = false,
   readOnly = false,
 }: Props) => {
   if (readOnly) {
     return (
-      <FarcasterConnectionReadOnly userId={userId} disabledLabel={children} />
+      <FarcasterConnectionReadOnly
+        userId={userId}
+        allowRefresh={allowRefresh}
+        disabledLabel={children}
+      />
     )
   }
 
@@ -37,9 +43,11 @@ export const FarcasterConnection = ({
 
 const FarcasterConnectionReadOnly = ({
   userId,
+  allowRefresh,
   disabledLabel,
 }: {
   userId: string
+  allowRefresh: boolean
   disabledLabel?: React.ReactNode
 }) => {
   const { user } = useUser({ id: userId, enabled: true })
@@ -60,9 +68,13 @@ const FarcasterConnectionReadOnly = ({
           </p>
         )}
       </div>
-      <Button variant="secondary" disabled className="whitespace-nowrap">
-        {disabledLabel ?? "Editing disabled"}
-      </Button>
+      {username && allowRefresh ? (
+        <RefreshFarcasterProfileButton userId={userId} iconOnly />
+      ) : (
+        <Button variant="secondary" disabled className="whitespace-nowrap">
+          {disabledLabel ?? "Editing disabled"}
+        </Button>
+      )}
     </div>
   )
 }
