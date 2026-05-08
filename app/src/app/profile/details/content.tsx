@@ -6,6 +6,7 @@ import ExtendedLink from "@/components/common/ExtendedLink"
 import { UserFill } from "@/components/icons/remix"
 import { Farcaster } from "@/components/icons/socials"
 import { FarcasterConnection } from "@/components/profile/FarcasterConnection"
+import { RefreshFarcasterProfileButton } from "@/components/profile/RefreshFarcasterProfileButton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -43,7 +44,9 @@ export const ProfileDetailsContent = ({
       <div className="border border-border rounded-xl p-6">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <div className="text-secondary-foreground font-normal text-sm">Photo</div>
+            <div className="text-secondary-foreground font-normal text-sm">
+              Photo
+            </div>
             <Avatar className="!w-20 !h-20">
               <AvatarImage src={imageUrl || ""} alt="avatar" />
               <AvatarFallback
@@ -56,7 +59,9 @@ export const ProfileDetailsContent = ({
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-secondary-foreground font-normal text-sm">Name</div>
+            <div className="text-secondary-foreground font-normal text-sm">
+              Name
+            </div>
             <Input
               value={displayName}
               placeholder="Your name"
@@ -66,7 +71,9 @@ export const ProfileDetailsContent = ({
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-secondary-foreground font-normal text-sm">Username</div>
+            <div className="text-secondary-foreground font-normal text-sm">
+              Username
+            </div>
             <Input
               value={displayUsername ? `@${displayUsername}` : ""}
               placeholder="Your username"
@@ -76,7 +83,9 @@ export const ProfileDetailsContent = ({
           </div>
 
           <div className="flex flex-col gap-2">
-            <div className="text-secondary-foreground font-normal text-sm">Bio</div>
+            <div className="text-secondary-foreground font-normal text-sm">
+              Bio
+            </div>
             <Textarea
               value={bio}
               placeholder="Your bio"
@@ -87,7 +96,7 @@ export const ProfileDetailsContent = ({
         </div>
       </div>
 
-      {!user?.farcasterId && (
+      {!hasFarcaster && (
         <div className="mt-2">
           <FarcasterConnection userId={userId}>
             <Farcaster className="w-[20px] h-[20px]" />
@@ -96,12 +105,24 @@ export const ProfileDetailsContent = ({
         </div>
       )}
 
-      {user?.farcasterId && (
+      {hasFarcaster && !isImpersonating && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          <RefreshFarcasterProfileButton userId={userId} />
+          <ExtendedLink
+            as="button"
+            href="https://warpcast.com/"
+            text="Edit on Warpcast"
+          />
+        </div>
+      )}
+
+      {hasFarcaster && isImpersonating && (
         <div className="mt-2">
           <ExtendedLink
             as="button"
             href="https://warpcast.com/"
             text="Edit on Warpcast"
+            disabled
           />
         </div>
       )}
