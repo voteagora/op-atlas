@@ -9,6 +9,7 @@ import { usePrivyFarcaster } from "@/hooks/privy/usePrivyFarcaster"
 import { cn } from "@/lib/utils"
 
 import { Button } from "../common/Button"
+import { RefreshFarcasterProfileButton } from "./RefreshFarcasterProfileButton"
 
 type Props = {
   userId: string
@@ -23,10 +24,7 @@ export const FarcasterConnection = ({
 }: Props) => {
   if (readOnly) {
     return (
-      <FarcasterConnectionReadOnly
-        userId={userId}
-        disabledLabel={children}
-      />
+      <FarcasterConnectionReadOnly userId={userId} disabledLabel={children} />
     )
   }
 
@@ -69,10 +67,7 @@ const FarcasterConnectionReadOnly = ({
   )
 }
 
-const FarcasterConnectionInteractive = ({
-  userId,
-  children,
-}: Props) => {
+const FarcasterConnectionInteractive = ({ userId, children }: Props) => {
   const { user } = useUser({
     id: userId,
     enabled: true,
@@ -106,15 +101,24 @@ const FarcasterConnectionInteractive = ({
       )}
 
       {username ? (
-        <Button
-          variant="secondary"
-          size="icon"
-          aria-label="Disconnect Farcaster"
-          onClick={unlinkFarcaster}
-          className={cn("w-10 h-10", isIntermediateState && "opacity-50")}
-        >
-          <X className="w-4 h-4" />
-        </Button>
+        <>
+          {user?.farcasterId && (
+            <RefreshFarcasterProfileButton
+              userId={userId}
+              iconOnly
+              className={cn(isIntermediateState && "opacity-50")}
+            />
+          )}
+          <Button
+            variant="secondary"
+            size="icon"
+            aria-label="Disconnect Farcaster"
+            onClick={unlinkFarcaster}
+            className={cn("w-10 h-10", isIntermediateState && "opacity-50")}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </>
       ) : (
         <Button
           variant="secondary"
