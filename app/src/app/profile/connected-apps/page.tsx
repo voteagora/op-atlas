@@ -58,7 +58,11 @@ export default async function Page() {
             </div>
           </div>
           <div className="flex-shrink-0 self-center">
-            <FarcasterConnection userId={userId} readOnly={isImpersonating}>
+            <FarcasterConnection
+              userId={userId}
+              allowRefresh={isImpersonating}
+              readOnly={isImpersonating}
+            >
               Connect
             </FarcasterConnection>
           </div>
@@ -90,9 +94,7 @@ export default async function Page() {
             <div className="text-secondary-foreground text-base">
               Connect your GitHub account to show your code contributions.
             </div>
-            {!isImpersonating && (
-              <GithubNotDeveloperToggle userId={userId} />
-            )}
+            {!isImpersonating && <GithubNotDeveloperToggle userId={userId} />}
           </div>
           <div className="flex-shrink-0 self-center">
             <GithubConnection
@@ -144,7 +146,11 @@ export default async function Page() {
             </div>
           </div>
           <div className="flex-shrink-0 self-center">
-            <WorldConnection userId={userId} variant="button" readOnly={isImpersonating}>
+            <WorldConnection
+              userId={userId}
+              variant="button"
+              readOnly={isImpersonating}
+            >
               Connect
             </WorldConnection>
           </div>

@@ -29,13 +29,9 @@ export async function syncCurrentPrivyUser(privyUser: PrivyUser) {
 
 export async function refreshCurrentUserFarcasterProfile() {
   return withImpersonation(
-    async ({ db, impersonating, session, userId }) => {
+    async ({ db, session, userId }) => {
       if (!userId) {
         throw new Error("Unauthorized")
-      }
-
-      if (impersonating) {
-        throw new Error("Unavailable while impersonating")
       }
 
       const currentUser = await getUserById(userId, db, session)

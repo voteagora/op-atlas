@@ -105,24 +105,14 @@ export const ProfileDetailsContent = ({
         </div>
       )}
 
-      {hasFarcaster && !isImpersonating && (
+      {hasFarcaster && (
         <div className="mt-2 flex flex-wrap gap-2">
           <RefreshFarcasterProfileButton userId={userId} />
           <ExtendedLink
             as="button"
             href="https://warpcast.com/"
             text="Edit on Warpcast"
-          />
-        </div>
-      )}
-
-      {hasFarcaster && isImpersonating && (
-        <div className="mt-2">
-          <ExtendedLink
-            as="button"
-            href="https://warpcast.com/"
-            text="Edit on Warpcast"
-            disabled
+            disabled={isImpersonating}
           />
         </div>
       )}

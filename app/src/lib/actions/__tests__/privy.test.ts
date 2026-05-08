@@ -66,15 +66,6 @@ describe("refreshCurrentUserFarcasterProfile", () => {
     expect(mockGetUserById).not.toHaveBeenCalled()
   })
 
-  it("does not refresh while impersonating", async () => {
-    mockSessionContext.impersonating = true
-
-    await expect(refreshCurrentUserFarcasterProfile()).rejects.toThrow(
-      "Unavailable while impersonating",
-    )
-    expect(mockGetUserById).not.toHaveBeenCalled()
-  })
-
   it("requires a connected Farcaster account", async () => {
     mockGetUserById.mockResolvedValue({
       id: "user-1",
@@ -132,6 +123,62 @@ describe("refreshCurrentUserFarcasterProfile", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/profile/details")
     expect(mockRevalidatePath).toHaveBeenCalledWith("/oldhandle")
     expect(mockRevalidatePath).toHaveBeenCalledWith("/newhandle")
+  })
+
+  it("updates the effective user while impersonating", async () => {
+    mockSessionContext = {
+      db: mockDb,
+      impersonating: true,
+      session: mockSession,
+      userId: "target-user",
+    }
+    mockGetUserById.mockResolvedValue({
+      id: "target-user",
+      farcasterId: "456",
+      username: "targetold",
+    } as any)
+    mockGetFarcasterProfile.mockResolvedValue({
+      name: "Target Name",
+      username: "targetnew",
+      imageUrl: "https://example.com/target.png",
+      bio: "Target bio",
+    })
+    mockUpdateUser.mockResolvedValue({
+      id: "target-user",
+      name: "Target Name",
+      username: "targetnew",
+      imageUrl: "https://example.com/target.png",
+      bio: "Target bio",
+    } as any)
+
+    await expect(refreshCurrentUserFarcasterProfile()).resolves.toEqual({
+      user: {
+        id: "target-user",
+        name: "Target Name",
+        username: "targetnew",
+        imageUrl: "https://example.com/target.png",
+        bio: "Target bio",
+      },
+    })
+
+    expect(mockGetUserById).toHaveBeenCalledWith(
+      "target-user",
+      mockDb,
+      mockSession,
+    )
+    expect(mockGetFarcasterProfile).toHaveBeenCalledWith("456")
+    expect(mockUpdateUser).toHaveBeenCalledWith(
+      {
+        id: "target-user",
+        name: "Target Name",
+        username: "targetnew",
+        imageUrl: "https://example.com/target.png",
+        bio: "Target bio",
+      },
+      mockDb,
+    )
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/targetold")
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/targetnew")
   })
 
   it("fails when Neynar cannot find the profile", async () => {
