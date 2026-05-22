@@ -10,7 +10,6 @@ import {
 import type { PrismaClient } from "@prisma/client"
 import type { Session } from "next-auth"
 import { isSignedImpersonationSessionValid } from "@/lib/auth/impersonationSession"
-import { AggregatedType } from "eas-indexer/src/types"
 import { getAddress, isAddress } from "viem"
 
 import { auth } from "@/auth"
@@ -23,6 +22,7 @@ import {
   UserAddressSource,
   UserWithAddresses,
 } from "@/lib/types"
+import { AggregatedType } from "@/lib/eas/types"
 import { generateTemporaryUsername } from "@/lib/utils/username"
 
 import { prisma } from "./client"
@@ -621,7 +621,7 @@ export async function getAllS7GovContributors(
   db: PrismaClient = prisma,
 ) {
   const round7Addresses = records.filter(
-    (record) => record.metadata.round === 7,
+    (record) => record.metadata.season === "7",
   )
 
   return db.userAddress.findMany({
@@ -654,7 +654,7 @@ export async function getAllRFVoters(
   db: PrismaClient = prisma,
 ) {
   const guestVoters = records.filter(
-    (record) => record.metadata.voter_type === "Guest",
+    (record) => record.metadata.voterType === "Guest",
   )
 
   return db.userAddress.findMany({

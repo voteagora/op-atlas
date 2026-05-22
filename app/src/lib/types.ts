@@ -1,7 +1,7 @@
 import { Prisma, Role, User } from "@prisma/client"
-import { AggregatedType } from "eas-indexer/src/types"
 
 import { CITIZEN_TYPES } from "@/lib/constants"
+import { AggregatedType } from "@/lib/eas/types"
 
 export type TeamRole = "member" | "admin"
 
@@ -419,6 +419,7 @@ export interface ProjectContractsByDeployer {
 export type ExtendedAggregatedType = AggregatedType & {
   contributors: { address: string; email?: string }[]
   github_repo_builders: { address: string; email?: string }[]
+  onchain_builders: { address: string; email?: string }[]
 }
 
 export interface PassportScore {

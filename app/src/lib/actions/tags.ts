@@ -1,7 +1,5 @@
 import "server-only"
 
-import { AggregatedType } from "eas-indexer/src/types"
-
 import {
   getAllCitizens,
   getAllContributors,
@@ -11,6 +9,7 @@ import {
   getAllS7GovContributors,
 } from "@/db/users"
 import { withImpersonation } from "@/lib/db/sessionContext"
+import { AggregatedType } from "@/lib/eas/types"
 
 export async function getAggregatedRecords(records: AggregatedType) {
   return withImpersonation(async ({ db }) => {

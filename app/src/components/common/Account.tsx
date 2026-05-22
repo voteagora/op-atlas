@@ -258,7 +258,7 @@ const AccountContent = () => {
 
   const prevAuthStatus = usePrevious(authStatus)
 
-  const { isBadgeholder } = useIsBadgeholder()
+  const { isBadgeholder } = useIsBadgeholder(user ?? undefined)
   const router = useRouter()
 
   const { setOpenDialog } = useAppDialogs()
@@ -548,7 +548,7 @@ const TestModeAccount = () => {
 
   const prevAuthStatus = usePrevious(authStatus)
 
-  const { isBadgeholder } = useIsBadgeholder()
+  const { isBadgeholder } = useIsBadgeholder(user ?? undefined)
   const router = useRouter()
 
   const { setOpenDialog } = useAppDialogs()
