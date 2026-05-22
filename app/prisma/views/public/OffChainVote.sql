@@ -7,7 +7,8 @@ SELECT
   c.id AS "citizenId",
   (upper(c.type)) :: "citizenCategory" AS "citizenCategory",
   to_timestamp((v.created_at) :: double precision) AS "createdAt",
-  to_timestamp((v.created_at) :: double precision) AS "updatedAt"
+  to_timestamp((v.created_at) :: double precision) AS "updatedAt",
+  (v.block_number) :: integer AS "blockNumber"
 FROM
   (
     eas.votes v
