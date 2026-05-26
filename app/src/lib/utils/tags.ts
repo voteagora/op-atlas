@@ -1,6 +1,5 @@
 import { EntityRecords } from "@/db/users"
-import { getAggregatedRecords } from "@/lib/actions/tags"
-import { getAggregatedData } from "@/lib/api/eas/aggregated"
+import { getTagEligibleRecords } from "@/lib/eas/repository"
 
 export const mergeResultsByEmail = (
   lists: { id?: string; email: string; tags: string[] }[][],
@@ -30,8 +29,5 @@ export const mergeResultsByEmail = (
 }
 
 export const fetchRecords = async (): Promise<EntityRecords> => {
-  const records = await getAggregatedData()
-  const result = await getAggregatedRecords(records)
-
-  return result
+  return getTagEligibleRecords()
 }

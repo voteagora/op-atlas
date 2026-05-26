@@ -1112,6 +1112,7 @@ view OffChainVote {
   citizenCategory citizenCategory
   createdAt       DateTime        @db.Timestamptz(6)
   updatedAt       DateTime?       @db.Timestamptz(6)
+  blockNumber     Int?
 
   @@unique([proposalId, citizenId])
 }

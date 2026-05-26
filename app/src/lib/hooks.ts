@@ -3,7 +3,6 @@ import { useSession } from "next-auth/react"
 import { useEffect, useRef, useState } from "react"
 import { isAddress } from "viem"
 
-import { getAllBadgeholders, getBadgeholder } from "./api/eas/badgeholder"
 import { OrganizationWithDetails, UserWithAddresses } from "./types"
 
 type TeamMemberWithRole = {
@@ -65,30 +64,51 @@ export function useBadgeholderAddress(address: string) {
     queryKey: ["badgeholder", address],
     queryFn: async () => {
       if (!isAddress(address)) return false
-      return Boolean(await getBadgeholder(address))
+      const response = await fetch(
+        `/api/eas/badgeholder/${encodeURIComponent(address)}`,
+        {
+          cache: "no-store",
+        },
+      )
+
+      if (!response.ok) return false
+
+      const data = (await response.json()) as { isBadgeholder?: boolean }
+
+      return Boolean(data.isBadgeholder)
     },
     enabled: Boolean(address),
+    initialData: false,
   })
 
   return { isBadgeholderAddress }
 }
 
 export function useIsBadgeholder(user?: Partial<UserWithAddresses>) {
+  const addresses = user?.addresses?.map(({ address }) => address) ?? []
+
   const { data: isBadgeholder } = useQuery({
-    queryKey: ["badgeholders", user],
+    queryKey: ["badgeholder-check", addresses],
     queryFn: async () => {
-      if (!user?.addresses?.length) return false
+      if (!addresses.length) return false
 
-      const allBadgeholders = await getAllBadgeholders()
-      const allBadgeholderAddresses = new Set(
-        allBadgeholders.map((badgeholder) => badgeholder.address),
-      )
+      const response = await fetch("/api/eas/badgeholder/check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ addresses }),
+        cache: "no-store",
+      })
 
-      return user.addresses.some((address) =>
-        allBadgeholderAddresses.has(address.address),
-      )
+      if (!response.ok) return false
+
+      const data = (await response.json()) as { isBadgeholder?: boolean }
+
+      return Boolean(data.isBadgeholder)
     },
-    enabled: Boolean(user?.addresses?.length),
+    enabled: addresses.length > 0,
+    initialData: false,
   })
 
   return { isBadgeholder }

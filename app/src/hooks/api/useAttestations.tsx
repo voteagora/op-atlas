@@ -1,21 +1,38 @@
 import { useQuery } from "@tanstack/react-query"
-import { OP_FOUNDATION_ADDRESSES } from "eas-indexer/schemas.config"
-import { Attestation } from "eas-indexer/src/types"
 
-import { getAttestations } from "@/lib/api/eas/attestations"
+import { OP_FOUNDATION_ADDRESSES } from "@/lib/eas/constants"
+import { Attestation } from "@/lib/eas/types"
 
-function useAttestations(addresses: string[]) {
+type AttestationWithFoundation = Attestation & {
+  isFoundationAttestation: boolean
+}
+
+function useAttestations(addresses?: string[]) {
+  const queryAddresses = addresses?.filter(Boolean) ?? []
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["attestations", addresses],
+    queryKey: ["attestations", queryAddresses],
     queryFn: async () => {
-      const results = await Promise.all(
-        addresses.map((address) => getAttestations(address)),
-      )
-      return results.flat().map((attestation) => ({
+      const response = await fetch("/api/eas/attestations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ addresses: queryAddresses }),
+        cache: "no-store",
+      })
+
+      if (!response.ok) return []
+
+      const attestations = (await response.json()) as Attestation[]
+
+      return attestations.map((attestation) => ({
         ...attestation,
         isFoundationAttestation: isFoundationAttestation(attestation),
       }))
     },
+    enabled: queryAddresses.length > 0,
+    initialData: [] as AttestationWithFoundation[],
   })
 
   return { raw: data, isLoading, error }
@@ -23,7 +40,7 @@ function useAttestations(addresses: string[]) {
 
 function isFoundationAttestation(attestation: Attestation) {
   return OP_FOUNDATION_ADDRESSES.map((a) => a.toLowerCase()).includes(
-    attestation.attester as `0x${string}`,
+    attestation.attester.toLowerCase(),
   )
 }
 
