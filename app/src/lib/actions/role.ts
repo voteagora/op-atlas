@@ -141,30 +141,7 @@ export async function getAllUserRoleApplications(
   userId?: string,
   organizationId?: string,
 ): Promise<RoleApplication[]> {
-  return withImpersonation(
-    async ({ db, userId: sessionUserId }) => {
-      await authorizeRoleApplicationOrganization(
-        organizationId,
-        sessionUserId,
-        db,
-      )
-
-      const resolution = resolveSessionUserId(sessionUserId, userId)
-      const resolvedUserId = organizationId
-        ? userId
-          ? resolution.userId
-          : undefined
-        : resolution.userId
-
-      if (
-        (userId && (resolution.error || !resolution.userId)) ||
-        (!resolvedUserId && !organizationId)
-      ) {
-        throw new Error("Unauthorized")
-      }
-
-      return getUserRoleApplications(resolvedUserId, organizationId, db)
-    },
-    { requireUser: true },
+  return withImpersonation(({ db }) =>
+    getUserRoleApplications(userId, organizationId, db),
   )
 }
