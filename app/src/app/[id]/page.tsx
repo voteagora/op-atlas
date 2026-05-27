@@ -14,8 +14,10 @@ export default async function PublicProfile({
 }: {
   params: { id: string }
 }) {
-  if (params.id.startsWith("0x") && params.id.length === 66) {
-    const organization = await getPublicOrganizationPageData(params.id)
+  const id = decodeURIComponent(params.id)
+
+  if (id.startsWith("0x") && id.length === 66) {
+    const organization = await getPublicOrganizationPageData(id)
 
     if (!organization) {
       notFound()
@@ -24,10 +26,10 @@ export default async function PublicProfile({
     return <PublicOrganizationProfile organization={organization} />
   }
 
-  const publicUserPage = await getPublicUserPageData(params.id)
+  const publicUserPage = await getPublicUserPageData(id)
 
   if (!publicUserPage) {
-    return <ProfileNotFound params={params} />
+    return <ProfileNotFound params={{ id }} />
   }
 
   return (
