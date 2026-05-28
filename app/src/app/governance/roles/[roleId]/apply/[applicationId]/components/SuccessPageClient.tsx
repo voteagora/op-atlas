@@ -67,7 +67,7 @@ export const SuccessPageClient = ({
           {sharedIntro}
 
           <div className="text-base text-center text-foreground leading-6">
-            8 approvals from Top 100 Delegates are required to move on to the
+            1 approval from Top 100 Delegates is required to move on to the
             vote. Voting happens {formatMMMd(new Date(role.voteStartAt!))} -
             {formatMMMd(new Date(role.voteEndAt!))}.
           </div>
