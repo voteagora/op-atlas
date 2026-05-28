@@ -63,11 +63,12 @@ export default function SidebarApplications({
     (counts || []).map((c) => [c.nomineeApplicationId, c.count]),
   )
 
-  // For Security Role after endorsements, only show candidates with >= 8 approvals
+  // For Security Role after endorsements, only show candidates with >= 1 approval
+  // chaging from 8 to 1 for S9
   const displayedApplications =
     isSecurityRole && isPostEndorsementPhase && applications
       ? applications.filter(
-          (app) => (countByApplicationId.get(app.id) || 0) >= 8,
+          (app) => (countByApplicationId.get(app.id) || 0) >= 1,
         )
       : applications
 
@@ -78,7 +79,7 @@ export default function SidebarApplications({
   const renderHeader = () => {
     if (isSecurityRole) {
       let primaryText =
-        "8 approvals from Top 100 Delegates are required to move on to the vote"
+        "1 approval from Top 100 Delegates is required to move on to the vote"
       let secondaryText = `Top 100 Delegates may provide approval ${
         endorsementEndAt ? "until " + formatMMMd(endorsementEndAt) : ""
       }.`

@@ -38,7 +38,7 @@ export default function RolesPage({ roles }: { roles: Role[] }) {
         </h4>
         {hasASecurityRole && (
           <p className="text-secondary-foreground">
-            Candidates must receive 8 approvals from Top 100 Delegates to move
+            Candidates must receive 1 approval from Top 100 Delegates to move
             on to the vote.
           </p>
         )}
