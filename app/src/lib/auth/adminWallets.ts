@@ -18,4 +18,5 @@ export const ADMIN_WALLETS = [
   '0x4a6894Dd556fab996f8D50b521f900CAEedC168e', // Jonas's test EOA
   '0xbb8DBD9CC7ADA9f4E31D4BD8C7A0410f2333c81a', // Sudheer's Dev Wallet
   '0xcC0B26236AFa80673b0859312a7eC16d2b72C1ea', // Pedro's Dev Wallet
+  '0xB191d26746913b3b085ff046B74d4D08ff19Db89', // OP May
 ].map(addr => addr.toLowerCase())
