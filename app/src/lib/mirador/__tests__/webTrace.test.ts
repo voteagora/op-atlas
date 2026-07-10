@@ -3,6 +3,7 @@ jest.mock("@/lib/mirador/webClient", () => ({
 }))
 
 import {
+  addMiradorEvent,
   addMiradorSafeMsgHint,
   addMiradorSafeTxHint,
   addMiradorTxInputData,
@@ -40,9 +41,7 @@ describe("webTrace", () => {
       getTraceId: jest.fn(() => "trace-id"),
       close: jest.fn().mockRejectedValue(new Error("close failed")),
     }
-    const consoleSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {})
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {})
 
     await closeMiradorTrace(trace as any, "done")
 
@@ -99,5 +98,31 @@ describe("webTrace", () => {
       "optimism",
       "Safe multisig proposal",
     )
+  })
+
+  it("records explicit Privy wallet-link cancellation as info", () => {
+    const trace = { info: jest.fn(), error: jest.fn() }
+
+    addMiradorEvent(trace as any, "wallet_link_failed", {
+      errorCode: "exited_link_flow",
+    })
+
+    expect(trace.info).toHaveBeenCalledWith("wallet_link_failed", {
+      errorCode: "exited_link_flow",
+    })
+    expect(trace.error).not.toHaveBeenCalled()
+  })
+
+  it("keeps actual Privy wallet-link failures as errors", () => {
+    const trace = { info: jest.fn(), error: jest.fn() }
+
+    addMiradorEvent(trace as any, "wallet_link_failed", {
+      errorCode: "failed_to_link_account",
+    })
+
+    expect(trace.error).toHaveBeenCalledWith("wallet_link_failed", {
+      errorCode: "failed_to_link_account",
+    })
+    expect(trace.info).not.toHaveBeenCalled()
   })
 })
