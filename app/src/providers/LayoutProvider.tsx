@@ -7,6 +7,7 @@ import ReactCanvasConfetti from "react-canvas-confetti"
 import { useWindowSize } from "usehooks-ts"
 
 import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner"
+import { Banner } from "@/components/common/Banner"
 import { MobileViewportWarning } from "@/components/common/MobileViewportWarning"
 import Navbar from "@/components/common/Navbar"
 import { SeasonNineBannerClient } from "@/app/citizenship/components/s9/SeasonNineBannerClient"
@@ -155,6 +156,7 @@ export const LayoutWrapper = ({
       <ConfettiContext.Provider value={setShowConfetti}>
         <div className="bg-background flex flex-col flex-1 min-h-screen w-full">
           <ImpersonationBanner />
+          {!hideNavbar && <Banner />}
           {!hideNavbar && topBanner}
           {!hideNavbar && defaultBanner ? (
             <SeasonNineBannerClient
