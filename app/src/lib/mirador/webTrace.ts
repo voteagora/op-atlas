@@ -109,7 +109,20 @@ export function startMiradorTrace(
 
 type EventSeverity = "info" | "warn" | "error"
 
-function inferEventSeverity(eventName: string): EventSeverity {
+function inferEventSeverity(
+  eventName: string,
+  details?: Record<string, unknown> | string,
+): EventSeverity {
+  if (
+    eventName === "wallet_link_failed" &&
+    typeof details === "object" &&
+    details !== null &&
+    (details.errorCode === "exited_link_flow" ||
+      details.errorCode === "exited_update_flow")
+  ) {
+    return "info"
+  }
+
   if (eventName.endsWith("_failed") || eventName.endsWith("_error")) {
     return "error"
   }
@@ -133,7 +146,7 @@ export function addMiradorEvent(
   }
 
   try {
-    const severity = inferEventSeverity(eventName)
+    const severity = inferEventSeverity(eventName, details)
     trace[severity](eventName, details)
   } catch (error) {
     console.error("Failed to add Mirador event", { eventName, error })
